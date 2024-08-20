@@ -41,6 +41,7 @@ dependencies:
   connectivity_plus: ^6.0.3
   intl:
   smooth_page_indicator:
+  gradient_like_css:
 
 dev_dependencies:
   flutter_test:

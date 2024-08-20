@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shef_erp/screen/onboarding/auth_flow/login_screen.dart';
+import 'package:shef_erp/screen/auth_flow/login_screen.dart';
+
 
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';

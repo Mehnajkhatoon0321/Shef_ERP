@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shef_erp/screen/onboarding/auth_flow/forgot_password.dart';
-import 'package:shef_erp/screen/onboarding/auth_flow/navigation.dart';
+import 'package:shef_erp/screen/auth_flow/forgot_password.dart';
+import 'package:shef_erp/screen/auth_flow/navigation.dart';
+
 
 
 import 'package:shef_erp/utils/colours.dart';
@@ -170,7 +171,7 @@ class _LogScreenState extends State<LogScreen> {
               left: 0,
               right: 0,
               child: Container(
-                height: MediaQuery.of(context).size.height * 0.5,
+                height: MediaQuery.of(context).size.height * 0.4,
                 color: AppColors.primaryColour,
                 child:  Align(alignment: Alignment.topLeft, child:
                   Padding(

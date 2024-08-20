@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shef_erp/screen/requisition/edit_requisition.dart';
+import 'package:shef_erp/screen/requisition/view_details.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
@@ -12,7 +14,12 @@ class RequisitionScreen extends StatefulWidget {
 
 class _RequisitionScreenState extends State<RequisitionScreen> {
   List<Map<String, dynamic>> listData = [
-    { "requisitionNo": "12000","product_description": "10 CV NVR","brand": "Toshiba","model": "TC-R3110","warranty": "3 YEARS	",},
+    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi"},
+    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi"},
+    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi"},
+    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Pending","purchase":"Pending","delivery":"Success","vender":"Mahi"},
+    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Pending","purchase":"Pending","delivery":"Success","vender":"Mahi"},
+    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Pending","purchase":"Pending","delivery":"Success","vender":"Mahi"},
 
   ];
 
@@ -116,7 +123,26 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.dividerColor,
-
+      appBar: AppBar(
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+        title: Text('Requisition', style: FTextStyle.HeadingTxtWhiteStyle,
+          textAlign: TextAlign.center,),
+        backgroundColor: AppColors.primaryColour,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 15),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Icon(
+              Icons.arrow_back_ios,
+              size: 25,
+              color: Colors.white,
+            ),
+          ),
+        ),// You can set this to any color you prefer
+      ),
 
       body: Column(
         children: [
@@ -147,11 +173,11 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                   hintStyle: FTextStyle.formhintTxtStyle,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
+                    borderSide: const BorderSide(color: AppColors.primaryColour, width: 1.0),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
+                    borderSide: const BorderSide(color: AppColors.primaryColour, width: 1.0),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(23.0),
@@ -159,9 +185,9 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                   ),
                   contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
                   suffixIcon: _isTextEmpty
-                      ? const Icon(Icons.search, color: AppColors.formFieldHintColour)
+                      ? const Icon(Icons.search, color: AppColors.primaryColour)
                       : IconButton(
-                    icon: const Icon(Icons.clear, color: AppColors.formFieldHintColour),
+                    icon: const Icon(Icons.clear, color: AppColors.primaryColour),
                     onPressed: _clearText,
                   ),
                   fillColor: Colors.grey[100],
@@ -181,77 +207,127 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
               itemCount: listData.length,
               itemBuilder: (BuildContext context, int index) {
                 final item = listData[index];
-                return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05, vertical: 5),
-                  child: Container(
-                    margin: const EdgeInsets.all(10.0),
-                    padding: const EdgeInsets.all(10.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: AppColors.formFieldBackColour,
-                          spreadRadius: 9,
-                          blurRadius: 1,
-                          offset: Offset(0, 9),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Text("Requisition No: ", style: FTextStyle.listTitle),
-                            Text("${item["requisitionNo"]}", style: FTextStyle.listTitleSub),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                        Row(
-                          children: [
-                            const Text("Product Description: ", style: FTextStyle.listTitle),
-                            Expanded(child: Text("${item["product_description"]}", style: FTextStyle.listTitleSub)),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                        Row(
-                          children: [
-                            const Text("Brand: ", style: FTextStyle.listTitle),
-                            Text("${item["brand"]}", style: FTextStyle.listTitleSub),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                        Row(
-                          children: [
-                            const Text("Model: ", style: FTextStyle.listTitle),
-                            Text("${item["model"]}", style: FTextStyle.listTitleSub),
-                          ],
-                        ),
-                        const SizedBox(height: 5),
-                        Row(
-                          children: [
-                            const Text("Warranty: ", style: FTextStyle.listTitle),
-                            Text("${item["warranty"]}", style: FTextStyle.listTitleSub),
-                          ],
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.black),
-                              onPressed: () {
+                return GestureDetector(
+                  onTap: (){
 
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => _showDeleteDialog(index),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ViewDetails(
+                        requisition:item["requisitionNo"],
+                        poNumber:item["poNumber"],
+                    requestDate:item["requestDate"],
+                    unit:item["unit"],
+                    product:item["product"],
+                specification:item["specification"],
+                      quantity:item["quantity"],
+                unitHead:item["unitHead"],
+                purchase:item["purchase"],
+                delivery:item["delivery"],
+                vender:item["vender"],
+
+
+
+
+
+
+                    )));
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
+                    child: Container(
+                      margin: const EdgeInsets.all(10.0),
+                      padding: const EdgeInsets.all(10.0),
+                      decoration: BoxDecoration(
+                        color:  index % 2 == 0 ? Colors.white : Colors.white!,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow:  [
+                          BoxShadow(
+                            color:  index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour!,
+                            spreadRadius: 10,
+                            blurRadius: 1,
+                            offset: Offset(0, 9),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                            children: [
+
+                              Container(
+                                  height:MediaQuery.of(context).size.height/ 007,width: MediaQuery.of(context).size.height/007,
+                                  // color: Colors.yellow,
+
+                                  child: Image.asset("assets/images/onboarding2.png",fit: BoxFit.cover, )).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                              SizedBox(width: 10,),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        const Text("Requisition No: ", style: FTextStyle.listTitle),
+                                        Text("${item["requisitionNo"]}", style: FTextStyle.listTitleSub),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Row(
+                                      children: [
+                                        const Text("PO No. : ", style: FTextStyle.listTitle),
+                                        Expanded(child: Text("${item["poNumber"]}", style: FTextStyle.listTitleSub)),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Row(
+                                      children: [
+                                        const Text("Request Date: ", style: FTextStyle.listTitle),
+                                        Text("${item["requestDate"]}", style: FTextStyle.listTitleSub),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Row(
+                                      children: [
+                                        const Text("Unit: ", style: FTextStyle.listTitle),
+                                        Text("${item["unit"]}", style: FTextStyle.listTitleSub),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5),
+                                    Row(
+                                      children: [
+                                        const Text("Product/Service: ", style: FTextStyle.listTitle),
+                                        Text("${item["product"]}", style: FTextStyle.listTitleSub),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 5),
+
+
+
+
+
+                                  ],
+                                ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit, color: Colors.black),
+                                onPressed: () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context)=>EditRequisition()));
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => _showDeleteDialog(index),
+                              ),
+                            ],
+                          ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                        ],
+                      ),
+                    ),
                   ),
                 );
               },

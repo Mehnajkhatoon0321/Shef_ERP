@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shef_erp/screen/onboarding/auth_flow/login_screen.dart';
+import 'package:shef_erp/screen/auth_flow/login_screen.dart';
 
 import 'package:shef_erp/screen/onboarding/onboarding.dart';
 import 'package:shef_erp/utils/colours.dart';
@@ -100,97 +100,109 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
-    var displayType = valueType
-        .toString()
-        .split('.')
-        .last;
+    var displayType = valueType.toString().split('.').last;
 
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(
-          textScaler: const TextScaler.linear(1)),
+        textScaler: const TextScaler.linear(1),
+      ),
       child: Scaffold(
         backgroundColor: AppColors.primaryColour,
-        // backgroundColor: Colors.white,
-        body: Padding(
-          padding: const EdgeInsets.all(25.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                height: MediaQuery.of(context).size.height/3,
-              ),
-              Image.asset("assets/images/logowhite.png",   width: (displayType == 'desktop' || displayType == 'tablet')
-                  ? 250.w
-                  : 220,
-                height: (displayType == 'desktop' || displayType == 'tablet')
-                    ? 140.h
-                    : 140,),
-              const SizedBox(height:20),
-              Text(
-                "Welcome To",
-                style: FTextStyle.HeadingTxtStyle.copyWith(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w900,
-                  color: Colors.white
-                )).animateOnPageLoad(animationsMap[
-              'imageOnPageLoadAnimation2']!),
-              const SizedBox(height:5),
-              Text(
-                "Login an account and access thousand of cool stuffs",
-                style: FTextStyle.formSubheadingTxtStyle.copyWith(color: Colors.white,fontSize: 18),
-                textAlign: TextAlign.center, // Aligning text to center
-              ).animateOnPageLoad(animationsMap[
-              'imageOnPageLoadAnimation2']!),
-               SizedBox(height:MediaQuery.of(context).size.height/9,),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8,  // 80% of the screen width
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const OnboardingScreen()));
-                  },
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(28),
-                    ),
-                    backgroundColor: Colors.white,
-                  ),
-                  child: Text(
-                    "Get Started",
-                    style: FTextStyle.loginBtnStyle.copyWith(color: AppColors.primaryColour),
-                  ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(25.0.w), // Use ScreenUtil for padding
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.3, // 30% of screen height
                 ),
-              ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-
-              const SizedBox(height:20),
-              GestureDetector(
-                onTap: () {         Navigator.push(context, MaterialPageRoute(builder: (context)=> const LogScreen()));
-
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Do you have an account ?",
-                      style: FTextStyle.formLabelTxtStyle.copyWith(
-                        color: Colors.white,
-                        fontSize: 16
+                Image.asset(
+                  "assets/images/logowhite.png",
+                  width: (displayType == 'desktop' || displayType == 'tablet')
+                      ? 250.w // Use ScreenUtil for width
+                      : 220.w, // Adjust width based on screen size
+                  height: (displayType == 'desktop' || displayType == 'tablet')
+                      ? 140.h // Use ScreenUtil for height
+                      : 140.h, // Adjust height based on screen size
+                ),
+                SizedBox(height: 20.h), // Use ScreenUtil for spacing
+                Text(
+                  "Welcome To",
+                  style: FTextStyle.HeadingTxtStyle.copyWith(
+                    fontSize: 30.sp, // Use ScreenUtil for font size
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
+                ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                SizedBox(height: 5.h), // Use ScreenUtil for spacing
+                Text(
+                  "Login an account and access thousand of cool stuffs",
+                  style: FTextStyle.formSubheadingTxtStyle.copyWith(
+                    color: Colors.white,
+                    fontSize: 18.sp, // Use ScreenUtil for font size
+                  ),
+                  textAlign: TextAlign.center, // Aligning text to center
+                ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.1), // 10% of screen height
+                SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.8, // 80% of the screen width
+                  height: 50.h, // Use ScreenUtil for height
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28.r), // Use ScreenUtil for radius
+                      ),
+                      backgroundColor: Colors.white,
+                    ),
+                    child: Text(
+                      "Get Started",
+                      style: FTextStyle.loginBtnStyle.copyWith(
+                        color: AppColors.primaryColour,
                       ),
                     ),
-                    Text(
-                      Constants.signintoAccountTxt,
-                      style: FTextStyle.authlogin_signupTxtStyle.copyWith(color: Colors.white),
-                    ),
-                  ],
+                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
                 ),
-              ),
-              const SizedBox(height: 50,)
-            ],
+                SizedBox(height: 20.h), // Use ScreenUtil for spacing
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LogScreen()),
+                    );
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Do you have an account ?",
+                        style: FTextStyle.formLabelTxtStyle.copyWith(
+                          color: Colors.white,
+                          fontSize: 16.sp, // Use ScreenUtil for font size
+                        ),
+                      ),
+                      Text(
+                        Constants.signintoAccountTxt,
+                        style: FTextStyle.authlogin_signupTxtStyle.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 50.h), // Use ScreenUtil for spacing
+              ],
+            ),
           ),
         ),
       ),
+    );}
 
-    );
-  }
 }

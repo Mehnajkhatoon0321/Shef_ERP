@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 class AppColors extends MaterialColor {
   const AppColors(super.primary, super.swatch);
   static const Color primaryColour = Color(0xFF20247c);
+  static const Color primaryColourDark = Color(0xFF021f63);
 
   static const Color boarderColourThem = Color(0xFFbbccd3);
   static const Color disableButtonColor =
@@ -19,6 +20,8 @@ class AppColors extends MaterialColor {
   //Guest User Colors
   static const Color drawerTextColor = Color(0xFF080515);
   static const Color dividerColor = Color(0xFFCECDD0);
+  static const Color greyLight = Color(0xFFefefef);
+  static const Color primeRed = Color(0xFFe50a09);
 
   static const Color bottomNavTextColor = Color(0xFF83828A);
   static const Color aboutUsHeadingColor = Color(0xFF080515);
@@ -35,30 +38,14 @@ class AppColors extends MaterialColor {
   Color.fromARGB(102, 104, 30, 102);
   static const appBlue = Color(0xFF3D94D1);
   static const primaryPinkColor = Color(0xFFF58CA9);
-  //Guest User Colors
 
-  static const Color productDetailsColor = Color.fromARGB(153, 8, 5, 21);
 
-  static const Color patientDividerTextColor = Color(0xFFE6E6E8);
-  static const Color patientApplyTextButton = Color(0xFFFFFFFF);
-
-  static const Color patientHealthRecordButtonText = Color(0xFFEA3A3A);
-  static const Color patientLoutSubText = Color(0xFF393744);
-  static const Color patientCartAlertBoxButton = Color(0xFFF0E8F0);
-  static const Color patientLabScreenDownloadTextColor = Color(0xFFE1D2E0);
-  static const Color doctorButtonColor = Color(0xFFE6EE8);
-  static const Color doctorPatientTextColor = Color(0xFF9C9BA1);
-  static const Color doctorPatientAlertButton = Color(0xFFD93737);
 
 
   static const Color productBorderColor = Color(0xFFD9D9D9);
   static const Color switchInactiveColor = Color(0xFFCECDD0);
-  static const Color gray_1 = Color(0xFFF2F2F2);
-  static const Color gray_2 = Color(0xFFE5E5E5);
-  static const Color gray_3 = Color(0xFFBCBCBC);
-  static const Color gray_4 = Color(0xFFA4A4A4);
-  static const Color gray_5 = Color(0xFF727272);
-  static const Color gray_6 = Color(0xFF40413B);
-  static const Color primaryColor_alpha_15 = Color(0x26155bcd);
-  static const Color primaryColor_alpha_55 = Color(0x8c155bcd);
+
+
+
+
 }

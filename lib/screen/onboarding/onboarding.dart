@@ -2,8 +2,9 @@
 import 'package:flutter/material.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shef_erp/screen/auth_flow/login_screen.dart';
 
-import 'package:shef_erp/screen/onboarding/auth_flow/login_screen.dart';
+
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
