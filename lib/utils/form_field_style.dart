@@ -105,7 +105,35 @@ class FormFieldStyle {
     filled: true,
     fillColor: AppColors.formFieldBackColour,
   );
-
+  static InputDecoration defaultDropdownInputDecoration = InputDecoration(
+      enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(5),
+          ),
+          borderSide: BorderSide(
+            color: AppColors.formFieldBorderColour,
+          )),
+      disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(5),
+          ),
+          borderSide: BorderSide(
+            color: AppColors.formFieldBorderColour,
+          )),
+      focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(5),
+          ),
+          borderSide: BorderSide(
+            color: AppColors.formFieldBorderColour,
+          )),
+      filled: true,
+      errorStyle: FTextStyle.formErrorTxtStyle,
+      fillColor: AppColors.formFieldBackColour,
+      hintText: Constants.dobHint,
+      hintStyle: FTextStyle.formhintTxtStyle,
+      contentPadding: EdgeInsets.symmetric(vertical: 18,horizontal: 12)
+  );
 
 
   static InputDecoration defaultAddressInputDecoration = InputDecoration(

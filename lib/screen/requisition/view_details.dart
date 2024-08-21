@@ -153,43 +153,43 @@ class _ViewDetailsState extends State<ViewDetails> {
               children: [
                 Row(
                   children: [
-                    const Text("Requisition No: ", style: FTextStyle.listTitle),
-                    Text("${widget.requisition}", style: FTextStyle.listTitleSub),
+                    const Text("Requisition No: ", style: FTextStyle.listTitleBig),
+                    Text("${widget.requisition}", style: FTextStyle.listTitleSubBig),
                   ],
                 ),
                 const SizedBox(height: 5),
                 Row(
                   children: [
-                    const Text("PO No. : ", style: FTextStyle.listTitle),
-                    Expanded(child: Text("${widget.poNumber}", style: FTextStyle.listTitleSub)),
+                    const Text("PO No. : ", style: FTextStyle.listTitleBig),
+                    Expanded(child: Text("${widget.poNumber}", style: FTextStyle.listTitleSubBig)),
                   ],
                 ),
                 const SizedBox(height: 5),
                 Row(
                   children: [
-                    const Text("Request Date: ", style: FTextStyle.listTitle),
-                    Text("${widget.requestDate}", style: FTextStyle.listTitleSub),
+                    const Text("Request Date: ", style: FTextStyle.listTitleBig),
+                    Text("${widget.requestDate}", style: FTextStyle.listTitleSubBig),
                   ],
                 ),
                 const SizedBox(height: 5),
                 Row(
                   children: [
-                    const Text("Unit: ", style: FTextStyle.listTitle),
-                    Text("${widget.unit}", style: FTextStyle.listTitleSub),
+                    const Text("Unit: ", style: FTextStyle.listTitleBig),
+                    Text("${widget.unit}", style: FTextStyle.listTitleSubBig),
                   ],
                 ),
                 const SizedBox(height: 5),
                 Row(
                   children: [
-                    const Text("Product/Service: ", style: FTextStyle.listTitle),
-                    Text("${widget.product}", style: FTextStyle.listTitleSub),
+                    const Text("Product/Service: ", style: FTextStyle.listTitleBig),
+                    Text("${widget.product}", style: FTextStyle.listTitleSubBig),
                   ],
                 ),
                 const SizedBox(height: 5),
                 Row(
                   children: [
-                    const Text("Specification: ", style: FTextStyle.listTitle),
-                    Text("${widget.specification}", style: FTextStyle.listTitleSub),
+                    const Text("Specification: ", style: FTextStyle.listTitleBig),
+                    Text("${widget.specification}", style: FTextStyle.listTitleSubBig),
                   ],
                 ),
 
@@ -197,43 +197,43 @@ class _ViewDetailsState extends State<ViewDetails> {
 
                     Row(
                       children: [
-                        const Text("Quantity: ", style: FTextStyle.listTitle),
-                        Text("${widget.quantity}", style: FTextStyle.listTitleSub),
+                        const Text("Quantity: ", style: FTextStyle.listTitleBig),
+                        Text("${widget.quantity}", style: FTextStyle.listTitleSubBig),
                       ],
                     ),
                     const SizedBox(height: 5),
                     Row(
                       children: [
-                        const Text("Unit Head Status: ", style: FTextStyle.listTitle),
+                        const Text("Unit Head Status: ", style: FTextStyle.listTitleBig),
                         Text("${widget.unitHead}", style:  widget.unitHead == 'Pending'
-                            ? FTextStyle.listTitleSub.copyWith(color: Colors.red)
-                            : FTextStyle.listTitleSub.copyWith(color: Colors.green),),
+                            ? FTextStyle.listTitleSubBig.copyWith(color: Colors.red)
+                            : FTextStyle.listTitleSubBig.copyWith(color: Colors.green),),
                       ],
                     ),
                     const SizedBox(height: 5),
                     Row(
                       children: [
-                        const Text("Purchase Manager Status: ", style: FTextStyle.listTitle),
+                        const Text("Purchase Manager Status: ", style: FTextStyle.listTitleBig),
                         Text("${widget.purchase}", style: widget.purchase == 'Pending'
-                            ? FTextStyle.listTitleSub.copyWith(color: Colors.red)
-                            : FTextStyle.listTitleSub.copyWith(color: Colors.green),),
+                            ? FTextStyle.listTitleSubBig.copyWith(color: Colors.red)
+                            : FTextStyle.listTitleSubBig.copyWith(color: Colors.green),),
                       ],
                     ),
 
                     const SizedBox(height: 5),
                     Row(
                       children: [
-                        const Text("Delivery Status: ", style: FTextStyle.listTitle),
+                        const Text("Delivery Status: ", style: FTextStyle.listTitleBig),
                         Text("${widget.delivery}", style:  widget.delivery == 'Pending'
-                            ? FTextStyle.listTitleSub.copyWith(color: Colors.red)
-                            : FTextStyle.listTitleSub.copyWith(color: Colors.green),),
+                            ? FTextStyle.listTitleSubBig.copyWith(color: Colors.red)
+                            : FTextStyle.listTitleSubBig.copyWith(color: Colors.green),),
                       ],
                     ),
                     const SizedBox(height: 5),
                     Row(
                       children: [
-                        const Text("Vendor Name: ", style: FTextStyle.listTitle),
-                        Text("${widget.vender}", style: FTextStyle.listTitleSub),
+                        const Text("Vendor Name: ", style: FTextStyle.listTitleBig),
+                        Text("${widget.vender}", style: FTextStyle.listTitleSubBig),
                       ],
                     )
 

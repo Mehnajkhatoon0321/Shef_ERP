@@ -154,7 +154,7 @@ class _NavigationState extends State<Navigation> {
                 gradient: linearGradient(250, ['#1c217d', '#f6f6f6']),
                 image: const DecorationImage(
                   image: AssetImage('assets/images/background.png'),
-                  fit: BoxFit.cover,
+                  fit: BoxFit.fill,
                 ),
               ),
               child: Column(
@@ -195,8 +195,9 @@ class _NavigationState extends State<Navigation> {
                                   "Welcome To !",
                                   style: TextStyle(
                                     fontSize: screenWidth * 0.07,
-                                    fontWeight: FontWeight.w800,
+                                    // fontWeight: FontWeight.w800,
                                     color: Colors.white,
+                                    fontFamily: 'Outfit-SemiBold',
                                   ),
                                 ),
                                 Text(

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shef_erp/screen/requisition/add_requisition.dart';
 import 'package:shef_erp/screen/requisition/edit_requisition.dart';
 import 'package:shef_erp/screen/requisition/view_details.dart';
 import 'package:shef_erp/utils/colours.dart';
+import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 class RequisitionScreen extends StatefulWidget {
@@ -22,6 +25,8 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
     { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Pending","purchase":"Pending","delivery":"Success","vender":"Mahi"},
 
   ];
+
+
 
   TextEditingController _editController = TextEditingController();
   final TextEditingController _controller = TextEditingController();
@@ -115,12 +120,14 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
     });
     _editController = TextEditingController();
   }
+  Set<int> selectedIndices = {};
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
+    var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
+    var displayType = valueType.toString().split('.').last;
     return Scaffold(
       backgroundColor: AppColors.dividerColor,
       appBar: AppBar(
@@ -129,6 +136,51 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
         title: Text('Requisition', style: FTextStyle.HeadingTxtWhiteStyle,
           textAlign: TextAlign.center,),
         backgroundColor: AppColors.primaryColour,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              height:
+              (displayType == 'desktop' || displayType == 'tablet')
+                  ? 70
+                  : 43,
+              child: ElevatedButton(
+                  onPressed: () async {
+                    // setState(() {
+                    //   isLoading = true;
+                    // });
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>  AddRequisition(),
+                      ),
+                    );
+
+                    // );
+                  },
+
+                  style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(26),
+                      ),
+                      backgroundColor:Colors.white
+
+                  ),
+                  child:
+                  Text(
+                    "Add +",
+                    style: FTextStyle.loginBtnStyle.copyWith(color:AppColors.primaryColour),
+                  )
+
+                // isLoading? CircularProgressIndicator(color: Colors.white,):Text(
+                //   Constants.loginBtnTxt,
+                //   style: FTextStyle.loginBtnStyle,
+                // )
+              ),
+            ),
+          )
+        ],
         leading: Padding(
           padding: const EdgeInsets.only(left: 15),
           child: GestureDetector(
@@ -146,11 +198,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
 
       body: Column(
         children: [
-          Row(children: [
 
-
-
-          ],),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05, vertical: 10),
             child: Container(
@@ -201,7 +249,98 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
               ),
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
 
+              children: [
+
+
+              SizedBox(
+                height:
+                (displayType == 'desktop' || displayType == 'tablet')
+                    ? 70
+                    : 38,
+                child: ElevatedButton(
+                    onPressed: () async {
+                      // setState(() {
+                      //   isLoading = true;
+                      // });
+
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) =>  Navigation(),
+                      //   ),
+                      // );
+
+                      // );
+                    },
+
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(26),
+                      ),
+                      backgroundColor: Colors.green
+
+                    ),
+                    child:
+                    Text(
+                      "Accepted",
+                      style: FTextStyle.loginBtnStyle,
+                    )
+
+                  // isLoading? CircularProgressIndicator(color: Colors.white,):Text(
+                  //   Constants.loginBtnTxt,
+                  //   style: FTextStyle.loginBtnStyle,
+                  // )
+                ),
+              ),
+              SizedBox(width: 10,),
+              SizedBox(
+                height:
+                (displayType == 'desktop' || displayType == 'tablet')
+                    ? 70
+                    : 38,
+                child: ElevatedButton(
+                    onPressed: () async {
+                      // setState(() {
+                      //   isLoading = true;
+                      // });
+
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) =>  Navigation(),
+                      //   ),
+                      // );
+
+                      // );
+                    },
+
+                    style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(26),
+                        ),
+                        backgroundColor: AppColors.errorColor
+
+                    ),
+                    child:
+                    Text(
+                      "Rejected",
+                      style: FTextStyle.loginBtnStyle,
+                    )
+
+                  // isLoading? CircularProgressIndicator(color: Colors.white,):Text(
+                  //   Constants.loginBtnTxt,
+                  //   style: FTextStyle.loginBtnStyle,
+                  // )
+                ),
+              ),
+
+            ],),
+          ),
           Expanded(
             child: ListView.builder(
               itemCount: listData.length,
@@ -233,36 +372,46 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                   },
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
-                    child: Container(
-                      margin: const EdgeInsets.all(10.0),
-                      padding: const EdgeInsets.all(10.0),
-                      decoration: BoxDecoration(
-                        color:  index % 2 == 0 ? Colors.white : Colors.white!,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow:  [
-                          BoxShadow(
-                            color:  index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour!,
-                            spreadRadius: 10,
-                            blurRadius: 1,
-                            offset: Offset(0, 9),
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(top: 10.h),
+                          child: Transform.scale(
+                            scale: 1.3,
+                            child: Checkbox(
+                              value: selectedIndices.contains(index),
+                              activeColor:index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour!,
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  if (value == true) {
+                                    selectedIndices.add(index);
+                                  } else {
+                                    selectedIndices.remove(index);
+                                  }
+                                });
+                              },
+                            ),
                           ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-                            children: [
-
-                              Container(
-                                  height:MediaQuery.of(context).size.height/ 007,width: MediaQuery.of(context).size.height/007,
-                                  // color: Colors.yellow,
-
-                                  child: Image.asset("assets/images/onboarding2.png",fit: BoxFit.cover, )).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                              SizedBox(width: 10,),
-                              Expanded(
-                                child: Column(
+                        ),
+                        Expanded(
+                          child: Container(
+                            margin: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(7),
+                            decoration: BoxDecoration(
+                              color: index % 2 == 0 ? Colors.white : Colors.white!,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour!,
+                                  spreadRadius:4,
+                                  blurRadius: 0.5,
+                                  offset: Offset(0,1)
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
@@ -286,49 +435,46 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                       ],
                                     ),
                                     const SizedBox(height: 5),
-                                    Row(
+                                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                           crossAxisAlignment: CrossAxisAlignment.start,
+
                                       children: [
-                                        const Text("Unit: ", style: FTextStyle.listTitle),
-                                        Text("${item["unit"]}", style: FTextStyle.listTitleSub),
-                                      ],
+                                        Row(
+                                          children: [
+                                            const Text("Unit: ", style: FTextStyle.listTitle),
+                                            Text("${item["unit"]}", style: FTextStyle.listTitleSub),
+                                          ],
+                                        ),
+                                        Row(
+
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.edit, color: Colors.black),
+                                              onPressed: () {
+                                                Navigator.push(context, MaterialPageRoute(builder: (context) => EditRequisition()));
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.delete, color: Colors.red),
+                                              onPressed: () => _showDeleteDialog(index),
+                                            ),
+                                          ],
+                                        ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),                                      ],
                                     ),
-                                    const SizedBox(height: 5),
-                                    Row(
-                                      children: [
-                                        const Text("Product/Service: ", style: FTextStyle.listTitle),
-                                        Text("${item["product"]}", style: FTextStyle.listTitleSub),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 5),
+                                    // const SizedBox(height: 5),
 
-
-
-
-
+                                    // const SizedBox(height: 5),
                                   ],
                                 ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                              ),
-                            ],
+
+                              ],
+                            ),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.black),
-                                onPressed: () {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context)=>EditRequisition()));
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => _showDeleteDialog(index),
-                              ),
-                            ],
-                          ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ),
+                  )
+
                 );
               },
             ),

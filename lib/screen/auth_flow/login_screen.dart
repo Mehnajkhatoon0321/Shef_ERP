@@ -222,7 +222,7 @@ class _LogScreenState extends State<LogScreen> {
                         Constants.welcomeTxt,
                         style: FTextStyle.HeadingTxtStyle.copyWith(
                           fontSize: 30,
-                          fontWeight: FontWeight.w900
+                          // fontWeight: FontWeight.w900
                         ),
                       ).animateOnPageLoad(
                           animationsMap['imageOnPageLoadAnimation2']!),

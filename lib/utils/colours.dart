@@ -40,8 +40,8 @@ class AppColors extends MaterialColor {
   static const primaryPinkColor = Color(0xFFF58CA9);
 
 
-
-
+  static const Color gray_4 = Color(0xFFA4A4A4);
+  static const Color gray_2 = Color(0xFFE5E5E5);
   static const Color productBorderColor = Color(0xFFD9D9D9);
   static const Color switchInactiveColor = Color(0xFFCECDD0);
 

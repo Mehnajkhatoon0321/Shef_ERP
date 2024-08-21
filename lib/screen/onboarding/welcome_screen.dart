@@ -132,7 +132,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   "Welcome To",
                   style: FTextStyle.HeadingTxtStyle.copyWith(
                     fontSize: 30.sp, // Use ScreenUtil for font size
-                    fontWeight: FontWeight.w900,
+                    // fontWeight: FontWeight.w900,
                     color: Colors.white,
                   ),
                 ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
