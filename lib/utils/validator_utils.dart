@@ -75,6 +75,34 @@ class ValidatorUtils {
 
     return null;
   }
+  static String? uploadValidator(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Upload file is required';
+    }
+    return null;
+  }
+
+
+  static String? specificationValidator(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Specification is required';
+    }
+    return null;
+  }
+
+  static String? quantityValidator(String? value) {
+    if (value == null || value.isEmpty || int.tryParse(value) == null) {
+      return 'Valid quantity is required';
+    }
+    return null;
+  }
+
+  static String? remarkValidator(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Remark is required';
+    }
+    return null;
+  }
 
 
   static String? nameValidator(String? value) {

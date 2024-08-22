@@ -37,11 +37,12 @@ dependencies:
   cupertino_icons: ^1.0.6
   flutter_screenutil:
   flutter_animate:
-  shared_preferences: ^2.2.3
-  connectivity_plus: ^6.0.3
+  shared_preferences:
+  connectivity_plus:
   intl:
   smooth_page_indicator:
-  gradient_like_css:
+  image_picker:
+  file_picker:
 
 dev_dependencies:
   flutter_test:

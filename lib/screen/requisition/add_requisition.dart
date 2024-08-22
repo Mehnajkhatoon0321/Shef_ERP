@@ -1,7 +1,10 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
-import 'package:shef_erp/screen/requisition/add_part.dart';
+
 import 'package:shef_erp/screen/requisition/requisition.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
@@ -17,7 +20,21 @@ class AddRequisition extends StatefulWidget {
   State<AddRequisition> createState() => _AddRequisitionState();
 }
 
-class _AddRequisitionState extends State<AddRequisition> {  late final TextEditingController dateFrom = TextEditingController();
+class _AddRequisitionState extends State<AddRequisition> {
+  //Add Requisition
+  bool isLoading = false;
+  bool addVisibility =false;
+  bool goneVisibility =true;
+  String gender = "";
+  bool isButtonEnabled = false;
+  bool isEditMode = false;
+  bool isImageUploaded = false;
+  String? fileName1;
+  File? imagesId;
+  late final FocusNode _dateAppNode = FocusNode();
+
+  late final TextEditingController dateFrom = TextEditingController();
+  List<Map<String, String>> itemList = [];
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
       trigger: AnimationTrigger.onPageLoad,
@@ -98,11 +115,35 @@ class _AddRequisitionState extends State<AddRequisition> {  late final TextEditi
   };
   late final GlobalKey<FormFieldState<String>> dateKey =
   GlobalKey<FormFieldState<String>>();
-bool isButtonEnabled = false;
-bool isLoading = false;
-bool addVisibility =false;
-String gender = "";
-late final FocusNode _dateAppNode = FocusNode();
+  late final GlobalKey<FormFieldState<String>> _productNameKey =
+  GlobalKey<FormFieldState<String>>();
+  late final GlobalKey<FormFieldState<String>> _specificationNameKey =
+  GlobalKey<FormFieldState<String>>();
+  late final GlobalKey<FormFieldState<String>> _quantityNameKey =
+  GlobalKey<FormFieldState<String>>();
+  late final GlobalKey<FormFieldState<String>> _remarkNameKey =
+  GlobalKey<FormFieldState<String>>();
+  late final GlobalKey<FormFieldState<String>> _uploadNameKey =
+  GlobalKey<FormFieldState<String>>();
+  late final TextEditingController productName = TextEditingController();
+  late final TextEditingController specificationName = TextEditingController();
+  late final TextEditingController quantityName = TextEditingController();
+  late final TextEditingController remarkName = TextEditingController();
+  late final TextEditingController uploadName = TextEditingController();
+  late final FocusNode _specificationNameNode = FocusNode();
+  late final FocusNode _productNameNode = FocusNode();
+  late final FocusNode _quantityNameNode = FocusNode();
+  late final FocusNode _remarkNameNode = FocusNode();
+  late final FocusNode _uploadNameNode = FocusNode();
+  Map<String, String>? selectedItemForEditing;
+bool isButtonPartEnabled = false;
+bool isSpecificationFieldFocused = false;
+bool isProductFieldFocused = false;
+bool isQuantityFocused = false;
+bool isRemarkFocused = false;
+bool isUploadFocused = false;
+
+
   void _selectDate(BuildContext context) async {
     DateTime currentDate = DateTime.now();
     DateTime? selectedDate = await showDatePicker(
@@ -121,6 +162,8 @@ late final FocusNode _dateAppNode = FocusNode();
       });
     }
   }
+
+
 List<dynamic> list = ['Female', 'data', 'items'];
 String? selectedItem; // Variable to keep track of selected item
   @override
@@ -149,261 +192,510 @@ String? selectedItem; // Variable to keep track of selected item
           ),
         ),// You can set this to any color you prefer
       ),
-body: Form(
-  child: Padding(
-    padding: const EdgeInsets.all(18.0),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "Date",
-          style: FTextStyle.formLabelTxtStyle,
-        ).animateOnPageLoad(
-          animationsMap['imageOnPageLoadAnimation2']!,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10.0),
-          child: TextFormField(
-            key: dateKey,
-            focusNode: _dateAppNode,
-            keyboardType: TextInputType.text,
-            decoration: FormFieldStyle.defaultAddressInputDecoration.copyWith(
-              hintText: "dd-mm-yyyy",
-              suffixIcon: IconButton(
-                icon: const Icon(
-                  Icons.calendar_today, // Calendar icon
-                  color: AppColors.primaryColour, // Adjust color as needed
-                ),
-                onPressed: () {
-                  // Show date picker when the icon is pressed
-                  _selectDate(context);
-                },
-              ),
-            ),
-            inputFormatters: [NoSpaceFormatter()],
-            controller: dateFrom,
-            validator: ValidatorUtils.dateValidator,
-            onTap: () {
-              setState(() {
-                // isProductCategoryFieldFocused = false;
-              });
-            },
+body: SingleChildScrollView(
+  child: Form(
+    onChanged: () {
+      // Update button enable state based on field validity
+      setState(() {
+        isButtonEnabled = itemList != null &&
+            itemList!.isNotEmpty &&
+            ValidatorUtils.isValidDate(dateFrom.text);
+
+      });
+    },
+
+
+    child: Padding(
+      padding: const EdgeInsets.all(18.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Date",
+            style: FTextStyle.formLabelTxtStyle,
           ).animateOnPageLoad(
             animationsMap['imageOnPageLoadAnimation2']!,
           ),
-        ),
-        const SizedBox(height: 5),
-        Text(
-          "Add Requisition Product",
-          style: FTextStyle.formLabelTxtStyle,
-        ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-        const SizedBox(height: 10,),
-        GestureDetector(
-          onTap: (){
-            setState(() {
-              addVisibility = !addVisibility; // Toggle the visibility
-            });
-          },
-          child: Container(
-            width: double.infinity,
-            decoration: const BoxDecoration(
-              color:AppColors.gray_2,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(12),top:Radius.circular(12) ),
-            ),
-            child: Column(
-              children: [
-
-                const SizedBox(height: 30,),
-                const Icon(Icons.add_box_rounded,color:AppColors.primaryColour,size: 50, ),
-                const SizedBox(height: 10,),
-                Text("Add Requisition",style :FTextStyle.formLabelTxtStyle),
-                const SizedBox(height: 30,),
-              ],
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10.0),
+            child: TextFormField(
+              key: dateKey,
+              focusNode: _dateAppNode,
+              keyboardType: TextInputType.text,
+              decoration: FormFieldStyle.defaultAddressInputDecoration.copyWith(
+                hintText: "dd-mm-yyyy",
+                suffixIcon: IconButton(
+                  icon: const Icon(
+                    Icons.calendar_today,
+                    color: AppColors.primaryColour,
+                  ),
+                  onPressed: () {
+                    _selectDate(context);
+                  },
+                ),
+              ),
+              inputFormatters: [NoSpaceFormatter()],
+              controller: dateFrom,
+              validator: ValidatorUtils.dateValidator,
+              onTap: () {
+                setState(() {});
+              },
+            ).animateOnPageLoad(
+              animationsMap['imageOnPageLoadAnimation2']!,
             ),
           ),
-        ),
-        Visibility(
-          visible: addVisibility,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 18.0),
-            child: Container(
-           width: MediaQuery.of(context).size.width,
-     height: MediaQuery.of(context).size.height/4,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: AppColors.formFieldBackColour,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
+          const SizedBox(height: 5),
+
+          Text(
+            "Add Requisition Product",
+            style: FTextStyle.formLabelTxtStyle,
+          ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+          const SizedBox(height: 10),
+
+          Visibility(
+            visible: !addVisibility,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  addVisibility = !addVisibility;
+                });
+              },
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: AppColors.gray_2,
+                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(12), top: Radius.circular(12)),
+                ),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Product/Service",
-                      style: FTextStyle.formLabelTxtStyle,
-                    ).animateOnPageLoad(
-                      animationsMap['imageOnPageLoadAnimation2']!,
-                    ),
-
-                    Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Container(
-        width: MediaQuery.of(context).size.width,
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      decoration: BoxDecoration(
-      borderRadius: BorderRadius.circular(28.0),
-      border: Border.all(color: Colors.blueGrey),
-      color: Colors.white,
-      ),
-      child: DropdownButtonHideUnderline(
-      child: DropdownButton<String>(
-      value: selectedItem,
-      hint:const Text( "Select Product/Service ",style: FTextStyle.formhintTxtStyle,),
-      onChanged: (String? newValue) {
-      setState(() {
-      selectedItem = newValue;
-      });
-      },
-
-      items: list.map<DropdownMenuItem<String>>((dynamic value) {
-      return DropdownMenuItem<String>(
-
-      value: value,
-      child: Text(value.toString()),
-      );
-      }).toList(),
-      ),
-      ),
-      ),
-    ),
-
-                    Text(
-                      "Specification",
-                      style: FTextStyle.formLabelTxtStyle,
-                    ).animateOnPageLoad(
-                      animationsMap['imageOnPageLoadAnimation2']!,
-                    ),
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(18.0),
-                        child: SizedBox(
-                          height:
-                          (displayType == 'desktop' || displayType == 'tablet')
-                              ? 40
-                              : 38,
-                          child: ElevatedButton(
-                              onPressed: isButtonEnabled
-                                  ? () async {
-                                setState(() {
-                                  isLoading = true;
-                                });
-
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>  const RequisitionScreen(),
-                                  ),
-                                );
-                                // BlocProvider.of<AuthenticationBloc>(context).add(
-                                //   LoginEventHandler(
-                                //     email: _email.text.toString(),
-                                //     password: _password.text.toString(),
-                                //   ),
-                                // );
-                              }
-                                  : null,
-                              style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(26),
-                                ),
-                                backgroundColor: isButtonEnabled
-                                    ? AppColors.primaryColour
-                                    : AppColors.disableButtonColor,
-                              ),
-                              child:
-                              Text(
-                                "Add",
-                                style: FTextStyle.loginBtnStyle,
-                              )
-
-                            // isLoading? CircularProgressIndicator(color: Colors.white,):Text(
-                            //   Constants.loginBtnTxt,
-                            //   style: FTextStyle.loginBtnStyle,
-                            // )
-                          ),
-                        ).animateOnPageLoad(
-                            animationsMap['imageOnPageLoadAnimation2']!),
-                      ),
-                    ),
-
+                    const SizedBox(height: 30),
+                    const Icon(Icons.add_box_rounded, color: AppColors.primaryColour, size: 50),
+                    const SizedBox(height: 10),
+                    Text("Add Requisition", style: FTextStyle.formLabelTxtStyle),
+                    const SizedBox(height: 30),
                   ],
                 ),
               ),
             ),
           ),
-        ),
 
 
 
-        Center(
-          child: Padding(
-            padding: const EdgeInsets.all(18.0),
+          Visibility(
+            visible: addVisibility,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 18.0),
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: AppColors.formFieldBackColour,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Form(
+                    onChanged: () {
+                      // Update button enable state based on field validity
+                      setState(() {
+                        isButtonPartEnabled = selectedItem != null &&
+                            selectedItem!.isNotEmpty &&
+                            ValidatorUtils.isValidCommon(specificationName.text);
+                        if (isProductFieldFocused) {
+                          _productNameKey.currentState?.validate();
+                        }
+                        if (isSpecificationFieldFocused) {
+                          _specificationNameKey.currentState?.validate();
+                        }
+                      });
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                          children: [
+                            Text(
+                              "Product/Service",
+                              style: FTextStyle.formLabelTxtStyle,
+                            ).animateOnPageLoad(
+                              animationsMap['imageOnPageLoadAnimation2']!,
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.clear, color: AppColors.primaryColour),
+                              onPressed: () {
+                                setState(() {
+                                  addVisibility = false;
+                                  isEditMode = false; // Reset edit mode
+                                  selectedItem = null;
+                                  specificationName.clear();
+                                  quantityName.clear();
+                                  remarkName.clear();
+                                  uploadName.clear();
+                                  isButtonPartEnabled = false; // Ensure button is disabled
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width,
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(28.0),
+                              border: Border.all(color: AppColors.primaryColour),
+                              color: Colors.white,
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                key: _productNameKey,
+                                focusNode: _productNameNode,
+                                value: selectedItem,
+                                hint: const Text("Select Product/Service", style: FTextStyle.formhintTxtStyle),
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    selectedItem = newValue;
+                                    // Update button enable state
+                                    isButtonPartEnabled = newValue != null && newValue.isNotEmpty && ValidatorUtils.isValidCommon(specificationName.text);
+                                  });
+                                },
+                                items: list.map<DropdownMenuItem<String>>((dynamic value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value.toString()),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          "Specification",
+                          style: FTextStyle.formLabelTxtStyle,
+                        ).animateOnPageLoad(
+                          animationsMap['imageOnPageLoadAnimation2']!,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: TextFormField(
+                            focusNode: _specificationNameNode,
+                            key: _specificationNameKey,
+                            keyboardType: TextInputType.text,
+                            decoration: FormFieldStyle.defaultInputDecoration.copyWith(
+                              hintText: "Enter Specification",
+                              fillColor: Colors.white,
+                            ),
+                            inputFormatters: [NoSpaceFormatter()],
+                            controller: specificationName,
+                            validator: ValidatorUtils.model,
+                          ).animateOnPageLoad(
+                            animationsMap['imageOnPageLoadAnimation2']!,
+                          ),
+                        ),
+                        Text(
+                          "Quantity Demanded",
+                          style: FTextStyle.formLabelTxtStyle,
+                        ).animateOnPageLoad(
+                          animationsMap['imageOnPageLoadAnimation2']!,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: TextFormField(
+                            focusNode: _quantityNameNode,
+                            key: _quantityNameKey,
+                            keyboardType: TextInputType.text,
+                            decoration: FormFieldStyle.defaultInputDecoration.copyWith(
+                              hintText: "Enter Quantity",
+                              fillColor: Colors.white,
+                            ),
+                            inputFormatters: [NoSpaceFormatter()],
+                            controller: quantityName,
+                            validator: ValidatorUtils.model,
+                          ).animateOnPageLoad(
+                            animationsMap['imageOnPageLoadAnimation2']!,
+                          ),
+                        ),
+
+                        Text(
+                          "Remark",
+                          style: FTextStyle.formLabelTxtStyle,
+                        ).animateOnPageLoad(
+                          animationsMap['imageOnPageLoadAnimation2']!,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: TextFormField(
+                            focusNode: _remarkNameNode,
+                            key: _remarkNameKey,
+                            keyboardType: TextInputType.text,
+                            decoration: FormFieldStyle.defaultInputDecoration.copyWith(
+                              hintText: "Enter Remark",
+                              fillColor: Colors.white,
+                            ),
+                            inputFormatters: [NoSpaceFormatter()],
+                            controller: remarkName,
+                            validator: ValidatorUtils.model,
+                          ).animateOnPageLoad(
+                            animationsMap['imageOnPageLoadAnimation2']!,
+                          ),
+                        ),
+
+                        Text(
+                          "Upload",
+                          style: FTextStyle.formLabelTxtStyle,
+                        ).animateOnPageLoad(
+                          animationsMap['imageOnPageLoadAnimation2']!,
+                        ),
+                        const SizedBox(height: 10),
+                                      TextFormField(
+                                        readOnly: true,
+                                        key: _uploadNameKey,
+                                        focusNode: _uploadNameNode,
+                                        decoration: FormFieldStyle.defaultInputDecoration.copyWith(
+                                          fillColor: Colors.white,
+                                          hintText: "Upload File",
+                                          suffixIcon: IconButton(
+                                            icon: const Icon(Icons.attach_file),
+                                            onPressed: () async {
+                                              final result = await FilePicker.platform.pickFiles();
+                                              if (result != null && result.files.isNotEmpty) {
+                                                setState(() {
+                                                  fileName1 = result.files.single.name;
+                                                  imagesId = File(result.files.single.path!);
+                                                  isImageUploaded = true;
+                                                  uploadName.text = fileName1!;
+                                                });
+                                              }
+                                            },
+                                          ),
+                                        ),
+                                        controller: uploadName,
+                                        validator: ValidatorUtils.uploadValidator,
+                                        onChanged: (text) {
+                                          setState(() {
+                                            isButtonPartEnabled = selectedItem != null &&
+                                                selectedItem!.isNotEmpty &&
+                                                ValidatorUtils.isValidCommon(text);
+                                          });
+                                        },
+                                        onTap: () {
+                                          setState(() {
+                                            isUploadFocused = true;
+                                          });
+                                        },
+                                        onEditingComplete: () {
+                                          setState(() {
+                                            isUploadFocused = false;
+                                          });
+                                        },
+                                      ).animateOnPageLoad(
+                                        animationsMap['imageOnPageLoadAnimation2']!,
+                                      ),
+                        // _buildFileUploadContainer(1, isImageUploaded,
+                        //     fileName1), // Doctor ID Upload
+                        const SizedBox(
+                          height: 15,
+                        ),
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(18.0),
+                            child: SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              height: (displayType == 'desktop' || displayType == 'tablet') ? 40 : 48,
+                              child: ElevatedButton(
+                                onPressed: isButtonPartEnabled
+                                    ? () {
+                                  setState(() {
+                                    if (isEditMode) {
+                                      if (selectedItemForEditing != null) {
+                                        final index = itemList.indexOf(selectedItemForEditing!);
+                                        itemList[index] = {
+                                          "model": selectedItem!,
+                                          "product": selectedItem!,
+                                          "specialisation": specificationName.text,
+                                          'remark':remarkName.text,
+                                          'quantity':quantityName.text,
+                                          'remarkName': remarkName.text,
+                                                                      'uploadName': uploadName.text,
+                                        };
+                                      }
+                                    } else {
+                                      itemList.add({
+                                        "model": selectedItem!,
+                                        "product": selectedItem!,
+                                        "specialisation": specificationName.text,
+                                        'remark':remarkName.text,
+                                        'quantity':quantityName.text,
+                                        'uploadName': uploadName.text,
+                                      });
+                                    }
+
+                                    // Reset state
+                                    addVisibility = false;
+                                    isEditMode = false;
+                                    selectedItem = null;
+                                    specificationName.clear();
+                                    remarkName.clear();
+                                    quantityName.clear();
+                                    uploadName.clear();
+                                    isButtonPartEnabled = false;
+                                    selectedItemForEditing = null; // Clear the editing item
+                                  });
+                                }
+                                    : null,
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(26),
+                                  ),
+                                  backgroundColor: isButtonPartEnabled
+                                      ? AppColors.primaryColour
+                                      : AppColors.disableButtonColor,
+                                ),
+                                child: Text(
+                                  isEditMode ? "Update" : "Add",
+                                  style: FTextStyle.loginBtnStyle,
+                                ),
+                              ),
+                            ).animateOnPageLoad(
+                              animationsMap['imageOnPageLoadAnimation2']!,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+
+
+
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.4,
+            child: ListView.builder(
+              itemCount: itemList.length,
+              itemBuilder: (context, index) {
+                final item = itemList[index];
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.yellow[50],
+                    border: Border.all(color: AppColors.yellow),
+                  ),
+                  padding: const EdgeInsets.all(7),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Text(item["model"] ?? "", style: const TextStyle(fontWeight: FontWeight.bold)),
+                      // const SizedBox(height: 7),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                text: "Product/Services: ",
+                                style: FTextStyle.listTitleSub,
+                                children: [
+                                  TextSpan(text: item["product"] ?? "", style: FTextStyle.listTitle),
+                                  const TextSpan(text: "\nSpecialization: ", style: FTextStyle.listTitleSub),
+                                  TextSpan(text: item["specialisation"] ?? "", style: FTextStyle.listTitle),
+                                  const TextSpan(text: "\nQuantity: ", style: FTextStyle.listTitleSub),
+                                  TextSpan(text: item["quantity"] ?? "", style: FTextStyle.listTitle),
+                                  const TextSpan(text: "\nRemark: ", style: FTextStyle.listTitleSub),
+                                  TextSpan(text: item["remark"] ?? "", style: FTextStyle.listTitle),
+                                  const TextSpan(text: "\n", style: FTextStyle.listTitleSub),
+                                  TextSpan(text:item['uploadName'] ?? "", style: FTextStyle.listTitle),
+                                ],
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: AppColors.primaryColour),
+                            onPressed: () {
+                              setState(() {
+                                selectedItemForEditing = item;
+                                selectedItem = item["model"];
+                                specificationName.text = item["specialisation"] ?? "";
+                                quantityName.text=item["quantity"]??"";
+                                remarkName.text=item["remark"]??"";
+                                uploadName.text = item['uploadName']!;
+                                addVisibility = true;
+                                isEditMode = true;
+                              });
+                            },
+                          ),
+                          const SizedBox(width: 5),
+                          IconButton(
+                            icon: const Icon(Icons.delete_forever, color: Colors.red),
+                            onPressed: () {
+                              setState(() {
+                                itemList.removeAt(index);
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+
+          Padding(
+            padding:  EdgeInsets.all(8.0),
             child: SizedBox(
+              width: MediaQuery.of(context).size.width,
               height:
               (displayType == 'desktop' || displayType == 'tablet')
                   ? 70
                   : 45,
               child: ElevatedButton(
-                  onPressed: isButtonEnabled
-                      ? () async {
-                    setState(() {
-                      isLoading = true;
-                    });
+                onPressed: isButtonEnabled
+                    ? () async {
+                  setState(() {
+                    isLoading = true;
+                  });
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>  const RequisitionScreen(),
-                      ),
-                    );
-                    // BlocProvider.of<AuthenticationBloc>(context).add(
-                    //   LoginEventHandler(
-                    //     email: _email.text.toString(),
-                    //     password: _password.text.toString(),
-                    //   ),
-                    // );
-                  }
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(26),
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>  const RequisitionScreen(),
                     ),
-                    backgroundColor: isButtonEnabled
-                        ? AppColors.primaryColour
-                        : AppColors.disableButtonColor,
+                  );
+                }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(26),
                   ),
-                  child:
-                  Text(
-                   "Submit",
-                    style: FTextStyle.loginBtnStyle,
-                  )
-
-                // isLoading? CircularProgressIndicator(color: Colors.white,):Text(
-                //   Constants.loginBtnTxt,
-                //   style: FTextStyle.loginBtnStyle,
-                // )
+                  backgroundColor: isButtonEnabled
+                      ? AppColors.primaryColour
+                      : AppColors.disableButtonColor,
+                ),
+                child: Text(
+                  "Submit",
+                  style: FTextStyle.loginBtnStyle,
+                ),
               ),
             ).animateOnPageLoad(
-                animationsMap['imageOnPageLoadAnimation2']!),
+              animationsMap['imageOnPageLoadAnimation2']!,
+            ),
           ),
-        ),
-
-      ],
+        ],
+      ),
     ),
   ),
 ),
+
     );
   }
+
+
 }

@@ -136,7 +136,8 @@ class FormFieldStyle {
   );
 
 
-  static InputDecoration defaultAddressInputDecoration = InputDecoration(
+  static InputDecoration defaultAddressInputDecoration =
+  InputDecoration(
     enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(28),
@@ -181,7 +182,49 @@ class FormFieldStyle {
 
 
 
-
+  static InputDecoration defaultInputDecoration =
+  InputDecoration(
+    enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(28),
+        ),
+        borderSide: BorderSide(
+          color: AppColors.primaryColour,
+        )),
+    disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(28),
+        ),
+        borderSide: BorderSide(
+          color: AppColors.primaryColour,
+        )),
+    focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(28),
+        ),
+        borderSide: BorderSide(
+          color: AppColors.primaryColour,
+        )),
+    errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(28),
+        ),
+        borderSide: BorderSide(
+          color: AppColors.primaryColour,
+        )),
+    focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(28),
+        ),
+        borderSide: BorderSide(
+          color: AppColors.primaryColour,
+        )),
+    hintText: Constants.addressHint,
+    hintStyle: FTextStyle.formhintTxtStyle,
+    filled: true,
+    fillColor: AppColors.formFieldBackColour,
+    contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+  );
 
 
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:gradient_like_css/gradient_like_css.dart';
+
 import 'package:shef_erp/screen/dashboard/dashboard.dart';
 import 'package:shef_erp/screen/requisition/requisition.dart';
 import 'package:shef_erp/utils/colours.dart';
@@ -151,7 +151,7 @@ class _NavigationState extends State<Navigation> {
             child: Container(
               height: containerHeight,
               decoration: BoxDecoration(
-                gradient: linearGradient(250, ['#1c217d', '#f6f6f6']),
+                // gradient: linearGradient(250, ['#1c217d', '#f6f6f6']),
                 image: const DecorationImage(
                   image: AssetImage('assets/images/background.png'),
                   fit: BoxFit.fill,

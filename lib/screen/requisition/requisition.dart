@@ -17,12 +17,11 @@ class RequisitionScreen extends StatefulWidget {
 
 class _RequisitionScreenState extends State<RequisitionScreen> {
   List<Map<String, dynamic>> listData = [
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Pending","purchase":"Pending","delivery":"Success","vender":"Mahi"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Pending","purchase":"Pending","delivery":"Success","vender":"Mahi"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Pending","purchase":"Pending","delivery":"Success","vender":"Mahi"},
+    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
+    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
+    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
+    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
+    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
 
   ];
 
@@ -451,7 +450,19 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                             IconButton(
                                               icon: const Icon(Icons.edit, color: Colors.black),
                                               onPressed: () {
-                                                Navigator.push(context, MaterialPageRoute(builder: (context) => EditRequisition()));
+                                                Navigator.push(context, MaterialPageRoute(builder: (context) => EditRequisition(
+
+                                                  product:item["product"],
+                                                  specification:item["specification"],
+                                                  quantity:item["quantity"],
+                                                  remark:item["unitHead"],
+                                                  upload:item["image"],
+
+
+
+
+
+                                                )));
                                               },
                                             ),
                                             IconButton(
