@@ -142,6 +142,7 @@ bool isProductFieldFocused = false;
 bool isQuantityFocused = false;
 bool isRemarkFocused = false;
 bool isUploadFocused = false;
+bool isDateFocused = false;
 
 
   void _selectDate(BuildContext context) async {
@@ -194,15 +195,27 @@ String? selectedItem; // Variable to keep track of selected item
       ),
 body: SingleChildScrollView(
   child: Form(
-    onChanged: () {
-      // Update button enable state based on field validity
-      setState(() {
-        isButtonEnabled = itemList != null &&
-            itemList!.isNotEmpty &&
-            ValidatorUtils.isValidDate(dateFrom.text);
 
-      });
+    onChanged: () {
+      if (isButtonEnabled =ValidatorUtils.isValidDate(dateFrom.text) && itemList != null &&
+          itemList!.isNotEmpty
+
+
+      ) {
+        setState(() {
+          isButtonEnabled = true;
+        });
+      } else {
+        setState(() {
+          isButtonEnabled = false;
+        });
+      }
+      if (isDateFocused == true) {
+        dateKey.currentState!.validate();
+      }
+
     },
+
 
 
     child: Padding(
@@ -239,7 +252,10 @@ body: SingleChildScrollView(
               controller: dateFrom,
               validator: ValidatorUtils.dateValidator,
               onTap: () {
-                setState(() {});
+                setState(() {
+
+                  isDateFocused=true;
+                });
               },
             ).animateOnPageLoad(
               animationsMap['imageOnPageLoadAnimation2']!,
@@ -300,7 +316,7 @@ body: SingleChildScrollView(
                       setState(() {
                         isButtonPartEnabled = selectedItem != null &&
                             selectedItem!.isNotEmpty &&
-                            ValidatorUtils.isValidCommon(specificationName.text);
+                            ValidatorUtils.isValidCommon(specificationName.text)&&  ValidatorUtils.isValidCommon(quantityName.text)&&  ValidatorUtils.isValidCommon(remarkName.text);
                         if (isProductFieldFocused) {
                           _productNameKey.currentState?.validate();
                         }

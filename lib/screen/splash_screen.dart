@@ -1,11 +1,6 @@
-
-
 import 'dart:async';
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import 'package:shef_erp/screen/onboarding/welcome_screen.dart';
 import 'package:shef_erp/utils/common_function.dart';
 class SplashScreen extends StatefulWidget {
@@ -36,20 +31,16 @@ class _SplashScreenState extends State<SplashScreen> {
       child:  Scaffold(
         backgroundColor:Colors.white,
         body: Padding(
-          padding: EdgeInsets.all(35.0),
+          padding: const EdgeInsets.all(35.0),
           child: Center(
-            child: Container(
-              // alignment: Alignment.topCenter,
-
-              child: Image.asset(
-                'assets/images/applogo.png',
-                width: (displayType == 'desktop' || displayType == 'tablet')
-                    ? 250.w
-                    : 250,
-                height: (displayType == 'desktop' || displayType == 'tablet')
-                    ? 100.h
-                    : 170,
-              ),
+            child: Image.asset(
+              'assets/images/applogo.png',
+              width: (displayType == 'desktop' || displayType == 'tablet')
+                  ? 250.w
+                  : 250,
+              height: (displayType == 'desktop' || displayType == 'tablet')
+                  ? 100.h
+                  : 170,
             ),
           ),
         ),

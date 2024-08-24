@@ -43,6 +43,8 @@ dependencies:
   smooth_page_indicator:
   image_picker:
   file_picker:
+  flutter_bloc:
+  http:
 
 dev_dependencies:
   flutter_test:
