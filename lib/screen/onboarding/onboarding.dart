@@ -1,13 +1,15 @@
-
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shef_erp/screen/all_bloc/authflow/auth_flow_bloc.dart';
 import 'package:shef_erp/screen/auth_flow/login_screen.dart';
 
 
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -50,8 +52,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) =>LogScreen()
-           ),
+        MaterialPageRoute(builder: (context) =>
+            BlocProvider(
+              create: (context) => AuthFlowBloc(),
+              child: LogScreen(),
+            )
+        ),
       );
     }
   }
@@ -70,8 +76,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-    final mediaQuery = MediaQuery.of(context).size;
+    final mediaQuery = MediaQuery
+        .of(context)
+        .size;
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
@@ -204,7 +211,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           context,
                           MaterialPageRoute(builder: (context) => LogScreen()
 
-                        ),);
+                          ),);
                       }
                     },
                     child: Container(

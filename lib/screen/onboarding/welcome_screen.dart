@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shef_erp/screen/all_bloc/authflow/auth_flow_bloc.dart';
 import 'package:shef_erp/screen/auth_flow/login_screen.dart';
 
 import 'package:shef_erp/screen/onboarding/onboarding.dart';
@@ -175,7 +177,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const LogScreen()),
+                      MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AuthFlowBloc(),
+  child: LogScreen(),
+)),
                     );
                   },
                   child: Row(

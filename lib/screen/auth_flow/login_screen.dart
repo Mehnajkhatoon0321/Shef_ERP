@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shef_erp/screen/all_bloc/authflow/auth_flow_bloc.dart';
 import 'package:shef_erp/screen/auth_flow/forgot_password.dart';
 import 'package:shef_erp/screen/auth_flow/navigation.dart';
 
@@ -8,6 +10,7 @@ import 'package:shef_erp/screen/auth_flow/navigation.dart';
 
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
+import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/constant.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
@@ -55,13 +58,14 @@ class _LogScreenState extends State<LogScreen> {
 
   bool isLoading = false;
   bool rememberMe = false;
-
+  String? userRole;
   @override
   void initState() {
     super.initState();
     String password = PrefUtils.getUserPassword();
     String email = PrefUtils.getUserEmailLogin();
     rememberMe = PrefUtils.getRememberMe();
+
     if (password.isNotEmpty) {
       _password.text = password;
     }
@@ -164,7 +168,75 @@ class _LogScreenState extends State<LogScreen> {
     return  MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: Scaffold(
-        body: Stack(
+        body: BlocConsumer<AuthFlowBloc, AuthFlowState>(
+
+
+  listener: (context, state) {
+
+    if (state is AuthFlowLoading) {
+    setState(() {
+    isLoading = true;
+    });
+
+    }
+    else if (state is LogSuccess) {
+    setState(() {
+    isLoading = false;
+    });
+
+    Map<String, dynamic> data = state.logResponse;
+    if (data.containsKey('token') && data.containsKey('user')) {
+    String bearerToken = data['token'];
+    Map<String, dynamic> user = data['user'];
+
+    if (user.containsKey('role')) {
+    String roleUser = user['role'];
+
+    // Save token and role
+    PrefUtils.setToken(bearerToken);
+    PrefUtils.setRole(roleUser);
+    print("UserRole: $roleUser");
+
+
+    _navigateBasedOnRole(roleUser);
+
+
+    // Navigator.push(
+    // context,
+    // MaterialPageRoute(
+    // builder: (context) => Navigation(),
+    // ),
+    // );
+
+
+    }
+    }
+    } else if (state is LogFailure) {
+    setState(() {
+    isLoading = false;
+    });
+
+    CommonPopups.showCustomPopup(context, state.failureMessage);
+
+    }
+
+
+    else if (state is CheckNetworkConnection){
+
+    CommonPopups.showCustomPopup(
+    context,
+    'Internet is not connected.',
+
+    );
+
+
+    }
+
+
+    // TODO: implement listener
+  },
+  builder: (context, state) {
+    return Stack(
           children: [
             Positioned(
               top: 0,
@@ -402,18 +474,18 @@ class _LogScreenState extends State<LogScreen> {
                               isLoading = true;
                             });
 
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>  Navigation(),
-                              ),
-                            );
-                            // BlocProvider.of<AuthenticationBloc>(context).add(
-                            //   LoginEventHandler(
-                            //     email: _email.text.toString(),
-                            //     password: _password.text.toString(),
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) =>  Navigation(),
                             //   ),
                             // );
+                            BlocProvider.of<AuthFlowBloc>(context).add(
+                              LogEventHandler(
+                                email: _email.text.toString(),
+                                password: _password.text.toString(),
+                              ),
+                            );
                           }
                               : null,
                           style: ElevatedButton.styleFrom(
@@ -425,15 +497,15 @@ class _LogScreenState extends State<LogScreen> {
                                 : AppColors.disableButtonColor,
                           ),
                           child:
-                          Text(
-                            Constants.loginBtnTxt,
-                            style: FTextStyle.loginBtnStyle,
-                          )
+                          // Text(
+                          //   Constants.loginBtnTxt,
+                          //   style: FTextStyle.loginBtnStyle,
+                          // )
 
-                        // isLoading? CircularProgressIndicator(color: Colors.white,):Text(
-                        //   Constants.loginBtnTxt,
-                        //   style: FTextStyle.loginBtnStyle,
-                        // )
+                        isLoading? CircularProgressIndicator(color: Colors.white,):Text(
+                          Constants.loginBtnTxt,
+                          style: FTextStyle.loginBtnStyle,
+                        )
                       ),
                     ).animateOnPageLoad(
                         animationsMap['imageOnPageLoadAnimation2']!),
@@ -443,8 +515,46 @@ class _LogScreenState extends State<LogScreen> {
               ),
             ),
           ],
-        ),
+        );
+  },
+),
       ),
+    );
+  }
+  void _navigateBasedOnRole(String role) {
+    Widget nextPage;
+
+
+      switch (role) {
+        case 'Unit Head':
+          nextPage = Navigation(); // Replace with your Admin screen widget
+          break;
+        case 'super-admin':
+          nextPage = Navigation(); // Replace with your Admin screen widget
+          break;
+        case 'Purchase Manager':
+          nextPage = Navigation(); // Replace with your User screen widget
+          break;
+
+        case 'Program Director':
+          nextPage = Navigation(); // Replace with your User screen widget
+          break;
+        case 'Vendor':
+          nextPage = Navigation(); // Replace with your User screen widget
+          break;
+        case 'Requester':
+          nextPage = Navigation(); // Replace with your User screen widget
+          break;
+        default:
+        // Handle cases where the role is unknown
+          print("Role not recognized: $role");
+          return; // No navigation occurs if the role is not recognized
+      }
+
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => nextPage),
     );
   }
 }

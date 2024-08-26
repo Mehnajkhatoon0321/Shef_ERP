@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shef_erp/screen/all_bloc/authflow/auth_flow_bloc.dart';
 import 'package:shef_erp/screen/auth_flow/login_screen.dart';
 
 
@@ -233,7 +235,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       height: 55,
                       child: ElevatedButton(
                         onPressed: () {
-                          // BlocProvider.of<AuthenticationBloc>(context).add(ForgotPasswordPatientEventHandler(email: _email.text.toString()
+                          // BlocProvider.of<AuthFlowBloc>(context).add(ForgotPasswordPatientEventHandler(email: _email.text.toString()
                           // ));
                         },
                         style: ElevatedButton.styleFrom(
@@ -251,7 +253,12 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     const SizedBox(height:20),
                     GestureDetector(
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=> const LogScreen()));
+
+
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>  BlocProvider(
+  create: (context) => AuthFlowBloc(),
+  child: LogScreen(),
+)));
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

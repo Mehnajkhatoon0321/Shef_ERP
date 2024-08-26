@@ -15,7 +15,14 @@ class PrefUtils {
     return value ?? '';
   }
 
+  static void setRole(String value) {
+    Prefs.prefs?.setString(SharedPrefsKeys.role, value);
+  }
 
+  static String getRole() {
+    final String? value = Prefs.prefs?.getString(SharedPrefsKeys.role);
+    return value ?? '';
+  }
 
   static void setRememberMe(bool value) {
     Prefs.prefs?.setBool(SharedPrefsKeys.rememberMe, value);
@@ -51,6 +58,7 @@ class PrefUtils {
 class SharedPrefsKeys {
 
   static const token = 'token';
+  static const role = 'role';
   static const rememberMe = 'rememberMe';
   static const userPassword = 'userPassword';
   static const userEmailLogin = 'userEmailLogin';

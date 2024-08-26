@@ -3,11 +3,15 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:shef_erp/screen/dashboard/dashboard.dart';
+import 'package:shef_erp/screen/reports/reports.dart';
 import 'package:shef_erp/screen/requisition/requisition.dart';
+import 'package:shef_erp/screen/requisition/vendor_requisition.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+
+import '../../utils/pref_utils.dart';
 
 
 class Navigation extends StatefulWidget {
@@ -26,6 +30,10 @@ class _NavigationState extends State<Navigation> {
     {
       "image": "assets/images/requisition.png",
       "title": 'Requisition',
+    },
+    {
+      "image": "assets/images/requisition.png",
+      "title": 'Reports',
     },
   ];
   final animationsMap = {
@@ -106,6 +114,13 @@ class _NavigationState extends State<Navigation> {
       ],
     ),
   };
+  String? userRole;
+  @override
+  void initState() {
+    userRole =  PrefUtils.getRole();
+    // TODO: implement initState
+    super.initState();
+  }
   void _onTap(BuildContext context, int index) {
     switch (index) {
       case 0:
@@ -115,9 +130,23 @@ class _NavigationState extends State<Navigation> {
         );
         break;
       case 1:
+        userRole == 'Unit Head'?
+    Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const VenderRequisition()),
+    ):
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const RequisitionScreen()),
+        );
+
+
+        break;
+
+      case 2:
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ReportScreen()),
         );
         break;
     }
@@ -255,7 +284,7 @@ class _NavigationState extends State<Navigation> {
                       child: GridView.builder(
                         padding: EdgeInsets.all(screenWidth * 0.02),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
+                          crossAxisCount: userRole == 'Unit Head'?3:2,
                           crossAxisSpacing: screenWidth * 0.02,
                           mainAxisSpacing: screenHeight * 0.02,
                         ),
@@ -314,184 +343,6 @@ class _NavigationState extends State<Navigation> {
     );
   }
 
-// Widget build(BuildContext context) {
-  //   var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
-  //   var displayType = valueType.toString().split('.').last;
-  //
-  //   return Scaffold(
-  //     resizeToAvoidBottomInset: true,
-  //     backgroundColor: Colors.white,
-  //     body: Stack(
-  //       children: [
-  //         Positioned(
-  //           top: 0,
-  //           left: 0,
-  //           right: 0,
-  //           bottom: 0,
-  //           child: Container(
-  //             height: MediaQuery.of(context).size.height * 0.4,
-  //             decoration:  BoxDecoration(
-  //               gradient: linearGradient(250, ['#1c217d', '#f6f6f6']),
-  //               image: const DecorationImage(
-  //                 image: AssetImage('assets/images/background.png'),
-  //                 fit: BoxFit.cover, // Adjust as needed
-  //               ),
-  //             ),
-  //             child: Column(
-  //
-  //               children: [
-  //
-  //                 Align(
-  //                   alignment: Alignment.bottomCenter,
-  //                   child: Column(
-  //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //                     crossAxisAlignment: CrossAxisAlignment.end,
-  //                     children: [
-  //                      const SizedBox(height: 40,),
-  //                       Padding(
-  //                         padding: const EdgeInsets.only(left: 38.0,top: 40,right: 40),
-  //                         child: Align(
-  //                           alignment: Alignment.bottomRight,
-  //                           child: ClipRRect(
-  //                             borderRadius: BorderRadius.circular(122.0),
-  //                             child: Container(
-  //                               width: (displayType == 'desktop' || displayType == 'tablet') ? 200 : 120,
-  //                               height: (displayType == 'desktop' || displayType == 'tablet') ? 100 : 120,
-  //                               color: AppColors.primaryColour,
-  //                               child: Image.asset(
-  //                                 'assets/images/profile.png',
-  //                                 fit: BoxFit.cover,
-  //                               ),
-  //                             ),
-  //                           ),
-  //                         ),
-  //                       ),
-  //                       // const SizedBox(height: 18),
-  //                       const Align(
-  //                         alignment: Alignment.topLeft,
-  //                         child: Padding(
-  //                           padding: EdgeInsets.only(left: 28.0,top: 12),
-  //                           child: Column(
-  //                             crossAxisAlignment: CrossAxisAlignment.start,
-  //                             children: [
-  //                               Text(
-  //                                 "Welcome To !",
-  //                                 style: TextStyle(
-  //                                   fontSize: 28,
-  //                                   fontWeight: FontWeight.w800,
-  //                                   color: Colors.white,
-  //                                 ),
-  //                               ),
-  //                               // SizedBox(height: 5),
-  //                               Text(
-  //                                 "Mehnaj Khatoon",
-  //                                 style: TextStyle(
-  //                                   fontSize: 18,
-  //                                   fontWeight: FontWeight.w800,
-  //                                   color: Colors.white,
-  //                                 ),
-  //                                 textAlign: TextAlign.justify,
-  //                               ),
-  //                             ],
-  //                           ),
-  //                         ),
-  //                       ),
-  //                     ],
-  //                   ),
-  //                 ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation3']!),
-  //               ],
-  //             ),
-  //           ),
-  //         ),
-  //         Positioned(
-  //           top: MediaQuery.of(context).size.height * 0.33,
-  //           left: 0,
-  //           right: 0,
-  //           child: Container(
-  //             decoration: const BoxDecoration(
-  //               color:AppColors.primaryColourDark,
-  //               borderRadius: BorderRadius.only(
-  //                 // topLeft: Radius.circular(45.0),
-  //                 // topRight: Radius.circular(45.0),
-  //               ),
-  //             ),
-  //             child: Column(
-  //               mainAxisAlignment: MainAxisAlignment.start,
-  //               crossAxisAlignment: CrossAxisAlignment.start,
-  //               children: [
-  //
-  //                 Padding(
-  //                   padding: const EdgeInsets.only(left: 28.0, top: 28),
-  //                   child: Text(
-  //                     "Services",
-  //                     style: FTextStyle.HeadingTxtStyle.copyWith(
-  //                       fontSize: 20,
-  //                       fontWeight: FontWeight.w800,
-  //                       color: Colors.white,
-  //                     ),
-  //                     textAlign: TextAlign.center,
-  //                   ),
-  //                 ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation3']!),
-  //                 Padding(
-  //                   padding: const EdgeInsets.symmetric(horizontal: 18.0),
-  //                   child: Container(
-  //                     height: MediaQuery.of(context).size.height / 1,
-  //                     child: GridView.builder(
-  //                       padding: const EdgeInsets.all(5.0),
-  //                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-  //                         crossAxisCount: 3,
-  //                         crossAxisSpacing: 12,
-  //                       ),
-  //                       itemCount: listItem.length,
-  //                       itemBuilder: (context, index) {
-  //                         return GestureDetector(
-  //                           onTap: () => _onTap(context, index),
-  //                           child: Container(
-  //                             decoration: const BoxDecoration(
-  //                               color: AppColors.formFieldBorderColour,
-  //                               borderRadius: BorderRadius.all(Radius.circular(13)),
-  //                             ),
-  //                             child: Column(
-  //                               crossAxisAlignment: CrossAxisAlignment.center,
-  //                               mainAxisAlignment: MainAxisAlignment.center,
-  //                               children: [
-  //                                 ClipRRect(
-  //                                   borderRadius: BorderRadius.circular(57.0),
-  //                                   child: Container(
-  //                                     width: 70,
-  //                                     height: 70,
-  //                                     color: Colors.grey,
-  //                                     child: Image.asset(
-  //                                       listItem[index]["image"],
-  //                                       fit: BoxFit.fill,
-  //                                     ),
-  //                                   ),
-  //                                 ),
-  //                                 const SizedBox(height: 8.0),
-  //                                 Text(
-  //                                   listItem[index]["title"],
-  //                                   style: FTextStyle.HeadingTxtStyle.copyWith(
-  //                                     fontSize: 14,
-  //                                     fontWeight: FontWeight.w600,
-  //                                     color: Colors.black,
-  //                                   ),
-  //                                   textAlign: TextAlign.center,
-  //                                 ),
-  //                               ],
-  //                             ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-  //                           ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation3']!),
-  //                         );
-  //                       },
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+
 }
 
