@@ -3,6 +3,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:shef_erp/screen/dashboard/dashboard.dart';
+import 'package:shef_erp/screen/dashboard/vender_dashboard.dart';
+import 'package:shef_erp/screen/master/master.dart';
 import 'package:shef_erp/screen/reports/reports.dart';
 import 'package:shef_erp/screen/requisition/requisition.dart';
 import 'package:shef_erp/screen/requisition/vendor_requisition.dart';
@@ -22,20 +24,7 @@ class Navigation extends StatefulWidget {
 }
 
 class _NavigationState extends State<Navigation> {
-  final List<Map<String, dynamic>> listItem = [
-    {
-      "image": "assets/images/dashboard.png",
-      "title": 'Dashboard',
-    },
-    {
-      "image": "assets/images/requisition.png",
-      "title": 'Requisition',
-    },
-    {
-      "image": "assets/images/requisition.png",
-      "title": 'Reports',
-    },
-  ];
+
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
       trigger: AnimationTrigger.onPageLoad,
@@ -121,36 +110,72 @@ class _NavigationState extends State<Navigation> {
     // TODO: implement initState
     super.initState();
   }
-  void _onTap(BuildContext context, int index) {
-    switch (index) {
-      case 0:
+
+  void _onTap(BuildContext context, int index, String userRole) {
+    // Get the filtered items based on user role
+    final filteredItems = getFilteredItems(userRole);
+
+    // Make sure the index is within the range of the filtered list
+    if (index < 0 || index >= filteredItems.length) {
+      return; // Or handle out-of-range errors as needed
+    }
+
+    // Get the title of the selected item
+    final selectedItemTitle = filteredItems[index]["title"];
+
+    switch (selectedItemTitle) {
+      case 'Dashboard':
+        if (userRole == 'Vendor' ) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const VenderDashboard()),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const Dashboard()),
+          );
+        }
+        break;
+
+      case 'Requisition':
+        if (userRole == 'Unit Head') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const RequisitionScreen()),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const VenderRequisition()),
+          );
+        }
+        break;
+
+      case 'Reports':
+        if (userRole == 'Product Purchase Manager') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ReportScreen()),
+          );
+        }
+        // Handle cases for other roles if necessary
+        break;
+
+      case 'Master':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const Dashboard()),
+          MaterialPageRoute(builder: (context) => const MasterScreen()), // Adjust with your actual MasterPage widget
         );
         break;
-      case 1:
-        userRole == 'Unit Head'?
-    Navigator.push(
-    context,
-    MaterialPageRoute(builder: (context) => const VenderRequisition()),
-    ):
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const RequisitionScreen()),
-        );
 
-
-        break;
-
-      case 2:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const ReportScreen()),
-        );
+      default:
+      // Handle default or error case
         break;
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +190,7 @@ class _NavigationState extends State<Navigation> {
     double profileImageWidth = (displayType == 'desktop' || displayType == 'tablet') ? screenWidth * 0.4 : screenWidth * 0.4;
     double profileImageHeight = (displayType == 'desktop' || displayType == 'tablet') ? screenHeight * 0.14 : screenHeight * 0.14;
     double containerHeight =(displayType == 'desktop' || displayType == 'tablet') ? screenHeight * 0.55:screenHeight * 0.5;
-    double servicesContainerHeight = (displayType == 'desktop' || displayType == 'tablet') ?screenHeight * 0.6:screenHeight * 0.65; // Remaining height for services section
+    double servicesContainerHeight = (displayType == 'desktop' || displayType == 'tablet') ?screenHeight * 0.6:screenHeight * 0.75; // Remaining height for services section
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -250,7 +275,7 @@ class _NavigationState extends State<Navigation> {
             ),
           ),
           Positioned(
-            top: containerHeight * 0.75, // Adjust based on the container height
+            top: containerHeight * 0.72, // Adjust based on the container height
             left: 0,
             right: 0,
             child: Container(
@@ -277,6 +302,63 @@ class _NavigationState extends State<Navigation> {
                       textAlign: TextAlign.center,
                     ),
                   ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation3']!),
+                  // Padding(
+                  //   padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
+                  //   child: Container(
+                  //     height: servicesContainerHeight,
+                  //     child: GridView.builder(
+                  //       padding: EdgeInsets.all(screenWidth * 0.02),
+                  //       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  //         crossAxisCount: userRole == 'Unit Head'? 3:2,
+                  //         crossAxisSpacing: screenWidth * 0.02,
+                  //         mainAxisSpacing: screenHeight * 0.02,
+                  //       ),
+                  //       itemCount: listItem.length,
+                  //       itemBuilder: (context, index) {
+                  //         return GestureDetector(
+                  //           onTap: () => _onTap(context, index),
+                  //           child: Container(
+                  //             decoration: BoxDecoration(
+                  //               color: AppColors.formFieldBorderColour,
+                  //               borderRadius: BorderRadius.all(Radius.circular(screenWidth * 0.03)),
+                  //             ),
+                  //             child: Column(
+                  //               crossAxisAlignment: CrossAxisAlignment.center,
+                  //               mainAxisAlignment: MainAxisAlignment.center,
+                  //               children: [
+                  //                 Padding(
+                  //                   padding: const EdgeInsets.all(8.0),
+                  //                   child: ClipRRect(
+                  //                     borderRadius: BorderRadius.circular(screenWidth * 0.1),
+                  //                     child: Container(
+                  //                       width:(displayType == 'desktop' || displayType == 'tablet') ? screenWidth * 0.15 :screenWidth * 0.15,
+                  //                       height: (displayType == 'desktop' || displayType == 'tablet') ?screenWidth * 0.15:screenWidth * 0.15,
+                  //                       color: Colors.grey,
+                  //                       child: Image.asset(
+                  //                         listItem[index]["image"],
+                  //                         fit: BoxFit.fill,
+                  //                       ),
+                  //                     ),
+                  //                   ),
+                  //                 ),
+                  //                 // SizedBox(height: screenHeight * 0.01),
+                  //                 Text(
+                  //                   listItem[index]["title"],
+                  //                   style: FTextStyle.HeadingTxtStyle.copyWith(
+                  //                     fontSize: screenWidth * 0.04,
+                  //                     fontWeight: FontWeight.w600,
+                  //                     color: Colors.black,
+                  //                   ),
+                  //                   textAlign: TextAlign.center,
+                  //                 ),
+                  //               ],
+                  //             ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                  //           ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation3']!),
+                  //         );
+                  //       },
+                  //     ),
+                  //   ),
+                  // ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03),
                     child: Container(
@@ -284,14 +366,15 @@ class _NavigationState extends State<Navigation> {
                       child: GridView.builder(
                         padding: EdgeInsets.all(screenWidth * 0.02),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: userRole == 'Unit Head'?3:2,
+                          crossAxisCount:  3,
                           crossAxisSpacing: screenWidth * 0.02,
                           mainAxisSpacing: screenHeight * 0.02,
                         ),
-                        itemCount: listItem.length,
+                        itemCount: getFilteredItems(userRole!).length,
                         itemBuilder: (context, index) {
+                          final item = getFilteredItems(userRole!)[index];
                           return GestureDetector(
-                            onTap: () => _onTap(context, index),
+                            onTap: () => _onTap(context, index,userRole!),
                             child: Container(
                               decoration: BoxDecoration(
                                 color: AppColors.formFieldBorderColour,
@@ -306,11 +389,11 @@ class _NavigationState extends State<Navigation> {
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(screenWidth * 0.1),
                                       child: Container(
-                                        width:(displayType == 'desktop' || displayType == 'tablet') ? screenWidth * 0.15 :screenWidth * 0.15,
-                                        height: (displayType == 'desktop' || displayType == 'tablet') ?screenWidth * 0.15:screenWidth * 0.15,
+                                        width: (displayType == 'desktop' || displayType == 'tablet') ? screenWidth * 0.15 : screenWidth * 0.15,
+                                        height: (displayType == 'desktop' || displayType == 'tablet') ? screenWidth * 0.15 : screenWidth * 0.15,
                                         color: Colors.grey,
                                         child: Image.asset(
-                                          listItem[index]["image"],
+                                          item["image"],
                                           fit: BoxFit.fill,
                                         ),
                                       ),
@@ -318,7 +401,7 @@ class _NavigationState extends State<Navigation> {
                                   ),
                                   // SizedBox(height: screenHeight * 0.01),
                                   Text(
-                                    listItem[index]["title"],
+                                    item["title"],
                                     style: FTextStyle.HeadingTxtStyle.copyWith(
                                       fontSize: screenWidth * 0.04,
                                       fontWeight: FontWeight.w600,
@@ -333,7 +416,7 @@ class _NavigationState extends State<Navigation> {
                         },
                       ),
                     ),
-                  ),
+                  )
                 ],
               ),
             ),
@@ -342,6 +425,49 @@ class _NavigationState extends State<Navigation> {
       ),
     );
   }
+  List<Map<String, dynamic>> getFilteredItems(String userRole) {
+    final List<Map<String, dynamic>> allItems = [
+      {
+        "image": "assets/images/dashboard.png",
+        "title": 'Dashboard',
+      },
+      {
+        "image": "assets/images/requisition.png",
+        "title": 'Requisition',
+      },
+      {
+        "image": "assets/images/report.png",
+        "title": 'Reports',
+      },
+      {
+        "image": "assets/images/master.png",
+        "title": 'Master',
+      },
+    ];
+
+    if (userRole == 'Vendor') {
+      // Show only Dashboard and Requisition
+      return allItems.where((item) =>
+      item["title"] == 'Dashboard' || item["title"] == 'Requisition').toList();
+    }
+    else if (userRole == 'Unit Head') {
+      // Show Dashboard, Requisition, and Reports
+      return allItems.where((item) =>
+      item["title"] == 'Dashboard' || item["title"] == 'Requisition' ).toList();
+    } else if (userRole == 'Requester') {
+      // Show Dashboard, Requisition, and Reports
+      return allItems.where((item) =>
+      item["title"] == 'Dashboard' || item["title"] == 'Requisition' ).toList();
+    }
+    else if (userRole == 'Purchase Manager') {
+      // Show all items
+      return allItems;
+    } else {
+      // Default case if role does not match any of the known roles
+      return [];
+    }
+  }
+
 
 
 }

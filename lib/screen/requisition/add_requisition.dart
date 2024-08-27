@@ -389,6 +389,13 @@ body: SingleChildScrollView(
                             ),
                           ),
                         ),
+
+                        Text(
+                          "Product/Service",
+                          style: FTextStyle.formLabelTxtStyle,
+                        ).animateOnPageLoad(
+                          animationsMap['imageOnPageLoadAnimation2']!,
+                        ),
                         Text(
                           "Specification",
                           style: FTextStyle.formLabelTxtStyle,
