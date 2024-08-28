@@ -14,7 +14,8 @@ import 'package:shef_erp/utils/form_field_style.dart';
 import 'package:shef_erp/utils/no_space_input_formatter_class.dart';
 import 'package:shef_erp/utils/validator_utils.dart';
 class AddRequisition extends StatefulWidget {
-  const AddRequisition({super.key});
+  String flag;
+   AddRequisition({ required this.flag,super.key});
 
   @override
   State<AddRequisition> createState() => _AddRequisitionState();
@@ -117,6 +118,12 @@ class _AddRequisitionState extends State<AddRequisition> {
   GlobalKey<FormFieldState<String>>();
   late final GlobalKey<FormFieldState<String>> _productNameKey =
   GlobalKey<FormFieldState<String>>();
+  late final GlobalKey<FormFieldState<String>> _unitNameKey =
+  GlobalKey<FormFieldState<String>>();
+  late final GlobalKey<FormFieldState<String>> _categoryNameKey =
+  GlobalKey<FormFieldState<String>>();
+  late final GlobalKey<FormFieldState<String>> _eventNameKey =
+  GlobalKey<FormFieldState<String>>();
   late final GlobalKey<FormFieldState<String>> _specificationNameKey =
   GlobalKey<FormFieldState<String>>();
   late final GlobalKey<FormFieldState<String>> _quantityNameKey =
@@ -125,12 +132,18 @@ class _AddRequisitionState extends State<AddRequisition> {
   GlobalKey<FormFieldState<String>>();
   late final GlobalKey<FormFieldState<String>> _uploadNameKey =
   GlobalKey<FormFieldState<String>>();
+  late final TextEditingController categoryProductName = TextEditingController();
+  late final TextEditingController unitName = TextEditingController();
+  late final TextEditingController eventName = TextEditingController();
   late final TextEditingController productName = TextEditingController();
   late final TextEditingController specificationName = TextEditingController();
   late final TextEditingController quantityName = TextEditingController();
   late final TextEditingController remarkName = TextEditingController();
   late final TextEditingController uploadName = TextEditingController();
   late final FocusNode _specificationNameNode = FocusNode();
+  late final FocusNode _categoryNameNode = FocusNode();
+  late final FocusNode _unitNameNode = FocusNode();
+  late final FocusNode _eventNameNode = FocusNode();
   late final FocusNode _productNameNode = FocusNode();
   late final FocusNode _quantityNameNode = FocusNode();
   late final FocusNode _remarkNameNode = FocusNode();
@@ -139,7 +152,10 @@ class _AddRequisitionState extends State<AddRequisition> {
 bool isButtonPartEnabled = false;
 bool isSpecificationFieldFocused = false;
 bool isProductFieldFocused = false;
+bool isEventFieldFocused = false;
+bool isCategoryFieldFocused = false;
 bool isQuantityFocused = false;
+bool isUnitFocused = false;
 bool isRemarkFocused = false;
 bool isUploadFocused = false;
 bool isDateFocused = false;
@@ -166,7 +182,13 @@ bool isDateFocused = false;
 
 
 List<dynamic> list = ['Female', 'data', 'items'];
+List<dynamic> categoryList = ['categoryList', 'categoryList', 'categoryList'];
+List<dynamic> eventList = ['eventList', 'eventList', 'eventList'];
+List<dynamic> unitList = ['unitList', 'unitList', 'unitList'];
 String? selectedItem; // Variable to keep track of selected item
+String? selectedCategoryItem; // Variable to keep track of selected item
+String? selectedEventItem; // Variable to keep track of selected item
+String? selectedUnitItem; // Variable to keep track of selected item
   @override
   Widget build(BuildContext context) {
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
@@ -262,7 +284,56 @@ body: SingleChildScrollView(
             ),
           ),
           const SizedBox(height: 5),
+          Visibility(
+            visible: widget.flag.isNotEmpty,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Unit Name",
+                  style: FTextStyle.formLabelTxtStyle,
+                ).animateOnPageLoad(
+                  animationsMap['imageOnPageLoadAnimation2']!,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(28.0),
+                      border: Border.all(color: AppColors.formFieldBorderColour),
+                      color: Colors.grey[100],
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        key: _unitNameKey,
+                        focusNode: _unitNameNode,
+                        value: selectedUnitItem,
+                        hint: const Text("Unit Name", style: FTextStyle.formhintTxtStyle),
+                        onChanged: (String? value) {
+                          setState(() {
+                            selectedUnitItem = value;
+                            // Update button enable state
+                            isButtonPartEnabled = value != null && value.isNotEmpty && ValidatorUtils.isValidCommon(specificationName.text);
+                          });
+                        },
+                        items: unitList.map<DropdownMenuItem<String>>((dynamic value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value.toString()),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
 
+          const SizedBox(height: 5),
           Text(
             "Add Requisition Product",
             style: FTextStyle.formLabelTxtStyle,
@@ -330,15 +401,11 @@ body: SingleChildScrollView(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.end,
 
                           children: [
-                            Text(
-                              "Product/Service",
-                              style: FTextStyle.formLabelTxtStyle,
-                            ).animateOnPageLoad(
-                              animationsMap['imageOnPageLoadAnimation2']!,
-                            ),
+
+
                             IconButton(
                               icon: const Icon(Icons.clear, color: AppColors.primaryColour),
                               onPressed: () {
@@ -355,6 +422,64 @@ body: SingleChildScrollView(
                               },
                             ),
                           ],
+                        ),
+
+
+                        Visibility(
+                          visible: widget.flag.isNotEmpty,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+
+                            children: [
+                              Text(
+                                "Product/Category",
+                                style: FTextStyle.formLabelTxtStyle,
+                              ).animateOnPageLoad(
+                                animationsMap['imageOnPageLoadAnimation2']!,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(28.0),
+                                    border: Border.all(color: AppColors.primaryColour),
+                                    color: Colors.white,
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      key: _categoryNameKey,
+                                      focusNode: _categoryNameNode,
+                                      value: selectedCategoryItem,
+                                      hint: const Text("Select Product/Category", style: FTextStyle.formhintTxtStyle),
+                                      onChanged: (String? categoryValue) {
+                                        setState(() {
+                                          selectedCategoryItem = categoryValue;
+                                          // Update button enable state
+                                          isButtonPartEnabled = categoryValue != null && categoryValue.isNotEmpty && ValidatorUtils.isValidCommon(specificationName.text);
+                                        });
+                                      },
+                                      items: categoryList.map<DropdownMenuItem<String>>((dynamic value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value.toString()),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                            ],
+                          ),
+                        ),
+                        Text(
+                          "Product/Service",
+                          style: FTextStyle.formLabelTxtStyle,
+                        ).animateOnPageLoad(
+                          animationsMap['imageOnPageLoadAnimation2']!,
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -390,12 +515,7 @@ body: SingleChildScrollView(
                           ),
                         ),
 
-                        Text(
-                          "Product/Service",
-                          style: FTextStyle.formLabelTxtStyle,
-                        ).animateOnPageLoad(
-                          animationsMap['imageOnPageLoadAnimation2']!,
-                        ),
+
                         Text(
                           "Specification",
                           style: FTextStyle.formLabelTxtStyle,
@@ -466,7 +586,56 @@ body: SingleChildScrollView(
                             animationsMap['imageOnPageLoadAnimation2']!,
                           ),
                         ),
+                        Visibility(
+                          visible: widget.flag.isNotEmpty,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
 
+                            children: [
+                              Text(
+                                "Event",
+                                style: FTextStyle.formLabelTxtStyle,
+                              ).animateOnPageLoad(
+                                animationsMap['imageOnPageLoadAnimation2']!,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Container(
+                                  width: MediaQuery.of(context).size.width,
+                                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(28.0),
+                                    border: Border.all(color: AppColors.primaryColour),
+                                    color: Colors.white,
+                                  ),
+                                  child: DropdownButtonHideUnderline(
+                                    child: DropdownButton<String>(
+                                      key: _eventNameKey,
+                                      focusNode: _eventNameNode,
+                                      value: selectedEventItem,
+                                      hint: const Text("Select Event", style: FTextStyle.formhintTxtStyle),
+                                      onChanged: (String? eventValue) {
+                                        setState(() {
+                                          selectedEventItem = eventValue;
+                                          // Update button enable state
+                                          isButtonPartEnabled = eventValue != null && eventValue.isNotEmpty && ValidatorUtils.isValidCommon(specificationName.text);
+                                        });
+                                      },
+                                      items: eventList.map<DropdownMenuItem<String>>((dynamic value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value.toString()),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                            ],
+                          ),
+                        ),
                         Text(
                           "Upload",
                           style: FTextStyle.formLabelTxtStyle,
@@ -600,7 +769,7 @@ body: SingleChildScrollView(
 
 
           SizedBox(
-            height: MediaQuery.of(context).size.height * 0.4,
+            height: MediaQuery.of(context).size.height * 0.3,
             child: ListView.builder(
               itemCount: itemList.length,
               itemBuilder: (context, index) {

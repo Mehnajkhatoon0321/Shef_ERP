@@ -35,10 +35,12 @@ class _AdminRequisitionState extends State<AdminRequisition> {
   late final TextEditingController vendorName = TextEditingController();
   late final TextEditingController billingName = TextEditingController();
   late final FocusNode _vendorNameNode = FocusNode();
+  late final FocusNode _billingNameNode = FocusNode();
   TextEditingController _editController = TextEditingController();
   final TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
   String? selectedItem;
+  String? selectedBilling;
   bool isButtonPartEnabled = false;
   List<dynamic> list = ['Female', 'data', 'items'];
   List<dynamic> listBilling = ['Demo', 'data', 'items'];
@@ -163,7 +165,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>  AddRequisition(),
+                        builder: (context) =>   AddRequisition( flag: "unit",),
                       ),
                     );
 
@@ -296,7 +298,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                     // )
                   ),
                 ),
-                SizedBox(width: 10,),
+                const SizedBox(width: 10,),
                 SizedBox(
                   height:
                   (displayType == 'desktop' || displayType == 'tablet')
@@ -304,18 +306,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                       : 38,
                   child: ElevatedButton(
                       onPressed: () async {
-                        // setState(() {
-                        //   isLoading = true;
-                        // });
+                        _showRejectDialog(-1);
 
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) =>  Navigation(),
-                        //   ),
-                        // );
-
-                        // );
                       },
 
                       style: ElevatedButton.styleFrom(
@@ -331,10 +323,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                         style: FTextStyle.loginBtnStyle,
                       )
 
-                    // isLoading? CircularProgressIndicator(color: Colors.white,):Text(
-                    //   Constants.loginBtnTxt,
-                    //   style: FTextStyle.loginBtnStyle,
-                    // )
+
                   ),
                 ),
 
@@ -379,7 +368,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                               scale: 1.3,
                               child: Checkbox(
                                 value: selectedIndices.contains(index),
-                                activeColor:index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour!,
+                                activeColor:index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour,
                                 onChanged: (bool? value) {
                                   setState(() {
                                     if (value == true) {
@@ -397,14 +386,14 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                               margin: const EdgeInsets.all(8),
                               padding: const EdgeInsets.all(7),
                               decoration: BoxDecoration(
-                                color: index % 2 == 0 ? Colors.white : Colors.white!,
+                                color: index % 2 == 0 ? Colors.white : Colors.white,
                                 borderRadius: BorderRadius.circular(10),
                                 boxShadow: [
                                   BoxShadow(
-                                      color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour!,
+                                      color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour,
                                       spreadRadius:4,
                                       blurRadius: 0.5,
-                                      offset: Offset(0,1)
+                                      offset: const Offset(0,1)
                                   ),
                                 ],
                               ),
@@ -507,145 +496,267 @@ class _AdminRequisitionState extends State<AdminRequisition> {
   void _showBrandDialog(int index) {
     final _formKey = GlobalKey<FormState>();
     final TextEditingController _editController = TextEditingController();
+    String? selectedItem; // Initialize with null
+    String? selectedBilling; // Initialize with null
+    bool isButtonPartEnabled = false; // Initialize button state
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(32.0),
-          ),
-          title: Text(
-            "Vendor Assign",
-            style: FTextStyle.preHeading16BoldStyle,
-          ),
-          content: Container(
-            width: MediaQuery.of(context).size.width * 0.7, // Increase width here
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "Select Vendor",
-                    style: FTextStyle.preHeadingStyle,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(28.0),
-                        border: Border.all(color: AppColors.primaryColour),
-                        color: Colors.white,
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            // Helper function to check if the button should be enabled
+            void _updateButtonState() {
+              setState(() {
+                isButtonPartEnabled = (selectedItem != null && selectedItem!.isNotEmpty) &&
+                    (selectedBilling != null && selectedBilling!.isNotEmpty);
+              });
+            }
+
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(32.0),
+              ),
+              title: Text(
+                "Vendor Assign",
+                style: FTextStyle.preHeading16BoldStyle,
+              ),
+              content: Container(
+                width: MediaQuery.of(context).size.width * 0.7,
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "Select Vendor",
+                        style: FTextStyle.preHeadingStyle,
                       ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          key: _vendorNameKey,
-                          
-                          focusNode: _vendorNameNode,
-                          value: selectedItem,
-                          hint: const Text("Select Vendor", style: FTextStyle.formhintTxtStyle),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              selectedItem = newValue;
-                              // Update button enable state
-                              isButtonPartEnabled = newValue != null && newValue.isNotEmpty ;
-                            });
-                          },
-                          items: list.map<DropdownMenuItem<String>>((dynamic value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value.toString()),
-                            );
-                          }).toList(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(28.0),
+                            border: Border.all(color: AppColors.primaryColour),
+                            color: Colors.white,
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: selectedItem,
+                              hint: const Text("Select Vendor", style: FTextStyle.formhintTxtStyle),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  selectedItem = newValue;
+                                  _updateButtonState(); // Update button state
+                                });
+                              },
+                              items: list.map<DropdownMenuItem<String>>((dynamic value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value.toString()),
+                                );
+                              }).toList(),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
 
-                  Text(
-                    "Select Billing Name",
-                    style: FTextStyle.preHeadingStyle,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(28.0),
-                        border: Border.all(color: AppColors.primaryColour),
-                        color: Colors.white,
+                      Text(
+                        "Select Billing Name",
+                        style: FTextStyle.preHeadingStyle,
                       ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          key: _vendorNameKey,
-
-                          focusNode: _vendorNameNode,
-                          value: selectedItem,
-                          hint: const Text("Select Billing Name", style: FTextStyle.formhintTxtStyle),
-                          onChanged: (String? newValue) {
-                            setState(() {
-                              selectedItem = newValue;
-                              // Update button enable state
-                              isButtonPartEnabled = newValue != null && newValue.isNotEmpty ;
-                            });
-                          },
-                          items: list.map<DropdownMenuItem<String>>((dynamic value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value.toString()),
-                            );
-                          }).toList(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width,
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(28.0),
+                            border: Border.all(color: AppColors.primaryColour),
+                            color: Colors.white,
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              value: selectedBilling,
+                              hint: const Text("Select Billing Name", style: FTextStyle.formhintTxtStyle),
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  selectedBilling = newValue;
+                                  _updateButtonState(); // Update button state
+                                });
+                              },
+                              items: listBilling.map<DropdownMenuItem<String>>((dynamic value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value.toString()),
+                                );
+                              }).toList(),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
-          actions: [
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.formFieldBackColour,
-                borderRadius: BorderRadius.circular(25.0),
-              ),
-              child: TextButton(
-                child: const Text("Cancel", style: TextStyle(color: Colors.black)),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-            ),
-            const SizedBox(width: 10),
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.primaryColour,
-                borderRadius: BorderRadius.circular(25.0),
-              ),
-              child: TextButton(
-                child: const Text("OK", style: TextStyle(color: Colors.white)),
-                onPressed: () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    if (_editController.text.isNotEmpty) {
-                      // Handle the product addition/update here
+              actions: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.formFieldBackColour,
+                    borderRadius: BorderRadius.circular(25.0),
+                  ),
+                  child: TextButton(
+                    child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+                    onPressed: () {
                       Navigator.of(context).pop();
-                    }
-                  }
-                },
-              ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-            ),
-          ],
-        ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation1']!);
+                    },
+                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    color: isButtonPartEnabled ? AppColors.primaryColour : AppColors.dividerColor,
+                    borderRadius: BorderRadius.circular(25.0),
+                  ),
+                  child: TextButton(
+                    child: const Text("OK", style: TextStyle(color: Colors.white)),
+                    onPressed: isButtonPartEnabled ? () {
+
+                          Navigator.of(context).pop();
+
+
+                    } : null,
+                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                ),
+              ],
+            ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation1']!);
+          },
+        );
       },
     );
   }
+
+
+
+
+
+
+  void _showRejectDialog(int index) {
+    final _formKey = GlobalKey<FormState>();
+    final TextEditingController _editController = TextEditingController();
+    bool isButtonEnabled = false; // Initialize button state
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            // Add listener to the TextEditingController to monitor text changes
+            _editController.addListener(() {
+              setState(() {
+                isButtonEnabled = _editController.text.isNotEmpty;
+              });
+            });
+
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(32.0),
+              ),
+              title: Text(
+                "Reject",
+                style: FTextStyle.preHeading16BoldStyle,
+              ),
+              content: Container(
+                width: MediaQuery.of(context).size.width * 0.7,
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "Purchase Manager Remark",
+                        style: FTextStyle.preHeadingStyle,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          controller: _editController,
+                          decoration: InputDecoration(
+                            hintText: "Enter Purchase Manager Remark",
+                            hintStyle: FTextStyle.formhintTxtStyle,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(23.0),
+                              borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(23.0),
+                              borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(23.0),
+                              borderSide: const BorderSide(color: AppColors.primaryColour, width: 1.0),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
+                            fillColor: Colors.grey[100],
+                            filled: true,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a remark';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.formFieldBackColour,
+                    borderRadius: BorderRadius.circular(25.0),
+                  ),
+                  child: TextButton(
+                    child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    color: isButtonEnabled ? AppColors.primaryColour : AppColors.formFieldBorderColour,
+                    borderRadius: BorderRadius.circular(25.0),
+                  ),
+                  child: TextButton(
+                    child:  Text("Reject", style: TextStyle(color:isButtonEnabled ? Colors.white:Colors.white)),
+                    onPressed: isButtonEnabled ? () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        // Handle the reject action here
+                        Navigator.of(context).pop();
+                      }
+                    } : null,
+                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                ),
+              ],
+            ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation1']!);
+          },
+        );
+      },
+    );
+  }
+
 
 
   void _showDeleteDialog(int index) {

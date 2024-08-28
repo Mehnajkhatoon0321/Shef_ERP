@@ -152,7 +152,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>  AddRequisition(),
+                        builder: (context) =>  AddRequisition(flag: "",),
                       ),
                     );
 
