@@ -6,6 +6,7 @@ import 'package:shef_erp/screen/dashboard/dashboard.dart';
 import 'package:shef_erp/screen/dashboard/vender_dashboard.dart';
 import 'package:shef_erp/screen/master/master.dart';
 import 'package:shef_erp/screen/reports/reports.dart';
+import 'package:shef_erp/screen/requisition/admin_requisition.dart';
 import 'package:shef_erp/screen/requisition/requisition.dart';
 import 'package:shef_erp/screen/requisition/vendor_requisition.dart';
 import 'package:shef_erp/utils/colours.dart';
@@ -144,6 +145,11 @@ class _NavigationState extends State<Navigation> {
             context,
             MaterialPageRoute(builder: (context) => const RequisitionScreen()),
           );
+        }else if (userRole == 'Purchase Manager') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AdminRequisition()),
+          );
         } else {
           Navigator.push(
             context,
@@ -153,7 +159,7 @@ class _NavigationState extends State<Navigation> {
         break;
 
       case 'Reports':
-        if (userRole == 'Product Purchase Manager') {
+        if (userRole == 'Purchase Manager') {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const ReportScreen()),
@@ -385,7 +391,7 @@ class _NavigationState extends State<Navigation> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsets.all(8.0),
+                                      padding: const EdgeInsets.all(8.0),
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(screenWidth * 0.1),
                                       child: Container(

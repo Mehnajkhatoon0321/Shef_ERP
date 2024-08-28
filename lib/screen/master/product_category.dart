@@ -288,14 +288,14 @@ class _ProductCategoryState extends State<ProductCategory> {
                                           Text("${index+1}", style: FTextStyle.listTitleSub),
                                         ],
                                       ),
-                                      const SizedBox(height: 5),
+
                                       Row(
                                         children: [
                                           const Text("Category: ", style: FTextStyle.listTitle),
                                           Expanded(child: Text("${item["category"]}", style: FTextStyle.listTitleSub)),
                                         ],
                                       ),
-                                      const SizedBox(height: 5),
+
                                       Row(
                                         children: [
                                           const Text("Name: ", style: FTextStyle.listTitle),
@@ -308,7 +308,7 @@ class _ProductCategoryState extends State<ProductCategory> {
                                           Text("${item["specification"]}", style: FTextStyle.listTitleSub),
                                         ],
                                       ),
-                                      const SizedBox(height: 5),
+
                                       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         crossAxisAlignment: CrossAxisAlignment.start,
 
