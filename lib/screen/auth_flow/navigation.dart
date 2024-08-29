@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shef_erp/screen/dashboard/admin_dashboard.dart';
 
 import 'package:shef_erp/screen/dashboard/dashboard.dart';
+import 'package:shef_erp/screen/dashboard/requester_dashboard.dart';
 import 'package:shef_erp/screen/dashboard/vender_dashboard.dart';
 import 'package:shef_erp/screen/master/master.dart';
 import 'package:shef_erp/screen/reports/reports.dart';
-import 'package:shef_erp/screen/requisition/admin_requisition.dart';
-import 'package:shef_erp/screen/requisition/requisition.dart';
-import 'package:shef_erp/screen/requisition/vendor_requisition.dart';
+import 'package:shef_erp/screen/requisition/admin/admin_requisition.dart';
+import 'package:shef_erp/screen/requisition/requester/requisition_requester.dart';
+import 'package:shef_erp/screen/requisition/unit_head/requisition.dart';
+import 'package:shef_erp/screen/requisition/vender/vendor_requisition.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
@@ -129,9 +132,27 @@ class _NavigationState extends State<Navigation> {
         if (userRole == 'Vendor' ) {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const VenderDashboard()),
+            MaterialPageRoute(builder: (context) => const VendorDashboard()),
           );
-        } else {
+        }else if (userRole == 'Purchase Manager') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AdminDashboard()),
+          );
+        }
+        else if (userRole == 'Requester') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const RequesterDashboard()),
+          );
+        }
+        else if (userRole == 'Program Director') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AdminDashboard()),
+          );
+        }
+        else {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const Dashboard()),
@@ -149,6 +170,11 @@ class _NavigationState extends State<Navigation> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AdminRequisition()),
+          );
+        }else if (userRole == 'Requester') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const RequisitionRequester()),
           );
         } else {
           Navigator.push(

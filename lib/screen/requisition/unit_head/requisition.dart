@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shef_erp/screen/requisition/add_requisition.dart';
-import 'package:shef_erp/screen/requisition/edit_requisition.dart';
-import 'package:shef_erp/screen/requisition/view_details.dart';
+import 'package:shef_erp/screen/requisition/unit_head/add_requisition.dart';
+import 'package:shef_erp/screen/requisition/unit_head/edit_requisition.dart';
+import 'package:shef_erp/screen/requisition/unit_head/view_details.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
@@ -27,7 +27,6 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
 
 
 
-  TextEditingController _editController = TextEditingController();
   final TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
 
@@ -117,14 +116,13 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
         _isTextEmpty = _controller.text.isEmpty;
       });
     });
-    _editController = TextEditingController();
   }
   Set<int> selectedIndices = {};
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
     var displayType = valueType.toString().split('.').last;
     return Scaffold(
@@ -172,10 +170,6 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                     style: FTextStyle.loginBtnStyle.copyWith(color:AppColors.primaryColour),
                   )
 
-                // isLoading? CircularProgressIndicator(color: Colors.white,):Text(
-                //   Constants.loginBtnTxt,
-                //   style: FTextStyle.loginBtnStyle,
-                // )
               ),
             ),
           )
@@ -285,7 +279,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                   // )
                 ),
               ),
-              SizedBox(width: 10,),
+              const SizedBox(width: 10,),
               SizedBox(
                 height:
                 (displayType == 'desktop' || displayType == 'tablet')
@@ -368,7 +362,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                             scale: 1.3,
                             child: Checkbox(
                               value: selectedIndices.contains(index),
-                              activeColor:index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour!,
+                              activeColor:index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour,
                               onChanged: (bool? value) {
                                 setState(() {
                                   if (value == true) {
@@ -386,14 +380,14 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                             margin: const EdgeInsets.all(8),
                             padding: const EdgeInsets.all(7),
                             decoration: BoxDecoration(
-                              color: index % 2 == 0 ? Colors.white : Colors.white!,
+                              color: index % 2 == 0 ? Colors.white : Colors.white,
                               borderRadius: BorderRadius.circular(10),
                               boxShadow: [
                                 BoxShadow(
-                                  color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour!,
+                                  color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour,
                                   spreadRadius:4,
                                   blurRadius: 0.5,
-                                  offset: Offset(0,1)
+                                  offset: const Offset(0,1)
                                 ),
                               ],
                             ),

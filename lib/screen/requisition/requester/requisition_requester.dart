@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:shef_erp/screen/requisition/vendor_details.dart';
+import 'package:shef_erp/screen/requisition/requester/detailsRequisition.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
-class VenderRequisition extends StatefulWidget {
-  const VenderRequisition({super.key});
+class RequisitionRequester extends StatefulWidget {
+  const RequisitionRequester({super.key});
 
   @override
-  State<VenderRequisition> createState() => _VenderRequisitionState();
+  State<RequisitionRequester> createState() => _RequisitionRequesterState();
 }
 
-class _VenderRequisitionState extends State<VenderRequisition> {
+class _RequisitionRequesterState extends State<RequisitionRequester> {
   List<Map<String, dynamic>> listData = [
     { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
     { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
@@ -245,7 +245,7 @@ class _VenderRequisitionState extends State<VenderRequisition> {
                 final item = listData[index];
                 return GestureDetector(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>VendorDetails(
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>RequesterDetails(
                       requestDate:item["requestDate"],
                       product:item["product"],
                       specification:item["specification"],

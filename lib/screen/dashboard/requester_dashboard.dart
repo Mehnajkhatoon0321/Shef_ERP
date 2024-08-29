@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shef_erp/all_bloc/authflow/auth_flow_bloc.dart';
+
 import 'package:shef_erp/screen/auth_flow/login_screen.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
-
-
-
-class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
+class RequesterDashboard extends StatefulWidget {
+  const RequesterDashboard({super.key});
 
   @override
-  State<Dashboard> createState() => _DashboardState();
+  State<RequesterDashboard> createState() => _RequesterDashboardState();
 }
 
-class _DashboardState extends State<Dashboard> {
+class _RequesterDashboardState extends State<RequesterDashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<dynamic> _items = [
     {"title": "All Requisitions","total": "21", "image": "https://via.placeholder.com/150"},
     {"title": "Today,s Requisitions","total": "12", "image": "https://via.placeholder.com/150"},
-
+    {"title": "Pending Requisitions","total": "33", "image": "https://via.placeholder.com/150"},
+    {"title": "Delivered Requisition","total": "4", "image": "https://via.placeholder.com/150"}
   ];
 
   @override
@@ -119,7 +118,7 @@ class _DashboardState extends State<Dashboard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text("Welcome to Unit Head ",style: FTextStyle.HeadingTxtStyle.copyWith(
+              Text("Welcome to Requester ",style: FTextStyle.HeadingTxtStyle.copyWith(
                   fontSize: 28,
                   color: Colors.black
                 // fontWeight: FontWeight.w900

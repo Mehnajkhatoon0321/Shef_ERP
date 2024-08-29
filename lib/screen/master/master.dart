@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shef_erp/screen/master/product_category.dart';
-import 'package:shef_erp/screen/master/product_service.dart';
+import 'package:shef_erp/screen/master/master_list/events.dart';
+import 'package:shef_erp/screen/master/master_list/product_category.dart';
+import 'package:shef_erp/screen/master/master_list/product_service.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 class MasterScreen extends StatefulWidget {
@@ -13,14 +14,17 @@ class MasterScreen extends StatefulWidget {
 class _MasterScreenState extends State<MasterScreen> {
   final List<Map<String, dynamic>> listItem = [
     {
-      "image": "assets/images/dashboard.png",
+      "image": "assets/images/productServices.png",
       "title": 'Product/Services',
     },
     {
-      "image": "assets/images/requisition.png",
+      "image": "assets/images/productCategory.png",
       "title": 'Product/Category',
     },
-
+    {
+      "image": "assets/images/event.png",
+      "title": 'Events',
+    },
   ];
 
   @override
@@ -61,15 +65,29 @@ class _MasterScreenState extends State<MasterScreen> {
             child: Container(
               margin: const EdgeInsets.symmetric(vertical: 8.0),
               decoration: BoxDecoration(
-                color: AppColors.formFieldBorderColour,
+                color:
+                Colors.white,
+
+                boxShadow: [
+                  BoxShadow(
+                    color: index % 2 == 0 ? Colors.blue.shade700 : Colors.yellow.shade700,
+                    spreadRadius: 2,
+                    blurRadius: 1,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+
+
+
                 borderRadius: BorderRadius.circular(12),
               ),
               child: ListTile(
-                contentPadding: const EdgeInsets.all(16.0),
+                contentPadding: const EdgeInsets.all(12.0),
                 leading: Image.asset(
                   item["image"],
-                  width: 50,
+                  width: 55,
                   height: 50,
+                  fit: BoxFit.fill,
                 ),
                 title: Text(
                   item["title"],
@@ -101,6 +119,12 @@ class _MasterScreenState extends State<MasterScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => ProductService()),
+        );
+        break;
+        case 'Events':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => EventScreen()),
         );
         break;
       default:

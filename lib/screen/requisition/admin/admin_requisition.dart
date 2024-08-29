@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shef_erp/screen/requisition/add_requisition.dart';
-import 'package:shef_erp/screen/requisition/edit_requisition.dart';
-import 'package:shef_erp/screen/requisition/view_details.dart';
+import 'package:shef_erp/screen/requisition/unit_head/add_requisition.dart';
+import 'package:shef_erp/screen/requisition/unit_head/edit_requisition.dart';
+import 'package:shef_erp/screen/requisition/unit_head/view_details.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 
-import '../../utils/validator_utils.dart';
+import '../../../utils/validator_utils.dart';
 class AdminRequisition extends StatefulWidget {
   const AdminRequisition({super.key});
 
