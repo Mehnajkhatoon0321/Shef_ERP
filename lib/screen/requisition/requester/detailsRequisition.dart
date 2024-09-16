@@ -1,104 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shef_erp/utils/colour_status.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+
+
+import 'package:flutter/material.dart';
+
 class RequesterDetails extends StatefulWidget {
-  String requestDate;
-  String product;
-  String specification;
-  String quantity;
-  String delivery;
-  String image;
-  RequesterDetails({super.key, required this.requestDate, required this.product, required this.specification, required this.quantity, required this.image, required this.delivery});
+  final String requestDate;
+  final String product;
+  final String specification;
+  final String quantity;
+  final String delivery;
+  final String unit;
+  final String image;
 
-
-
+  const RequesterDetails({
+    super.key,
+    required this.requestDate,
+    required this.product,
+    required this.specification,
+    required this.quantity,
+    required this.image,
+    required this.unit,
+    required this.delivery,
+  });
 
   @override
   State<RequesterDetails> createState() => _RequesterDetailsState();
 }
 
 class _RequesterDetailsState extends State<RequesterDetails> {
-
-  final animationsMap = {
-    'columnOnPageLoadAnimation1': AnimationInfo(
-      trigger: AnimationTrigger.onPageLoad,
-      effects: [
-        FadeEffect(
-          curve: Curves.easeInOut,
-          delay: 0.ms,
-          duration: 600.ms,
-          begin: 0.0,
-          end: 1.0,
-        ),
-        MoveEffect(
-          curve: Curves.easeInOut,
-          delay: 0.ms,
-          duration: 600.ms,
-          begin: const Offset(0.0, 20.0),
-          end: const Offset(0.0, 0.0),
-        ),
-      ],
-    ),
-    'columnOnPageLoadAnimation2': AnimationInfo(
-      trigger: AnimationTrigger.onPageLoad,
-      effects: [
-        FadeEffect(
-          curve: Curves.easeInOut,
-          delay: 200.ms,
-          duration: 600.ms,
-          begin: 0.0,
-          end: 1.0,
-        ),
-        MoveEffect(
-          curve: Curves.easeInOut,
-          delay: 200.ms,
-          duration: 600.ms,
-          begin: const Offset(0.0, 20.0),
-          end: const Offset(0.0, 0.0),
-        ),
-      ],
-    ),
-    'columnOnPageLoadAnimation3': AnimationInfo(
-      trigger: AnimationTrigger.onPageLoad,
-      effects: [
-        FadeEffect(
-          curve: Curves.easeInOut,
-          delay: 400.ms,
-          duration: 600.ms,
-          begin: 0.0,
-          end: 1.0,
-        ),
-        MoveEffect(
-          curve: Curves.easeInOut,
-          delay: 400.ms,
-          duration: 600.ms,
-          begin: const Offset(0.0, 20.0),
-          end: const Offset(0.0, 0.0),
-        ),
-      ],
-    ),
-    'imageOnPageLoadAnimation2': AnimationInfo(
-      trigger: AnimationTrigger.onPageLoad,
-      effects: [
-        MoveEffect(
-          curve: Curves.easeInOut,
-          delay: 0.ms,
-          duration: 600.ms,
-          begin: const Offset(40.0, 0.0),
-          end: const Offset(0.0, 0.0),
-        ),
-        FadeEffect(
-          curve: Curves.easeInOut,
-          delay: 0.ms,
-          duration: 600.ms,
-          begin: 0.0,
-          end: 1.0,
-        ),
-      ],
-    ),
-  };
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,8 +40,11 @@ class _RequesterDetailsState extends State<RequesterDetails> {
       appBar: AppBar(
         centerTitle: true,
         automaticallyImplyLeading: false,
-        title: Text('Requisition View', style: FTextStyle.HeadingTxtWhiteStyle,
-          textAlign: TextAlign.center,),
+        title: Text(
+          'Requisition View',
+          style: FTextStyle.HeadingTxtWhiteStyle,
+          textAlign: TextAlign.center,
+        ),
         backgroundColor: AppColors.primaryColour,
         leading: Padding(
           padding: const EdgeInsets.only(left: 15),
@@ -122,85 +59,134 @@ class _RequesterDetailsState extends State<RequesterDetails> {
             ),
           ),
         ),
-        // You can set this to any color you prefer
       ),
       body: Column(
         children: [
-          widget.image != null && widget.image!.isNotEmpty
-              ? SizedBox(
-            height: MediaQuery.of(context).size.height / 3,
-            width: MediaQuery.of(context).size.width,
-            child:Image.asset("${widget.image}",fit: BoxFit.cover, ),
-          )
-              : Container(),
-          // SizedBox(
-          //     height:MediaQuery.of(context).size.height/ 3,width: MediaQuery.of(context).size.width,
-          //     // color: Colors.yellow,
-          //
-          //     child: Image.asset("${widget.image}",fit: BoxFit.cover, )).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+          // Using a Stack widget to overlay the text over the image
+          Stack(
+            children: [
+              widget.image.isNotEmpty
+                  ? SizedBox(
+                height: MediaQuery.of(context).size.height / 3,
+                width: MediaQuery.of(context).size.width,
+                child: Image.network(
+                  widget.image,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    // Provide a fallback for when the image fails to load
+                    return Center(
+                      child: Text(
+                        'Failed to load image',
+                        style: TextStyle(color: Colors.red, fontSize: 16),
+                      ),
+                    );
+                  },
+                ),
+              )
+                  : Container(
+                height: MediaQuery.of(context).size.height / 3,
+                width: MediaQuery.of(context).size.width,
+                color: Colors.grey[200], // Light grey background for no image
+                child: Center(
+                  child: Text(
+                    'No Image Available',
+                    style: TextStyle(color: Colors.black, fontSize: 16),
+                  ),
+                ),
+              ),
+              if (widget.image.isEmpty)
+                Positioned.fill(
+                  child: Center(
+                    child: Text(
+                      'No Image Available',
+                      style: TextStyle(color: Colors.black, fontSize: 16),
+                    ),
+                  ),
+                ),
+            ],
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 const SizedBox(height: 5),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Request Date: ", style: FTextStyle.listTitleBig),
+                    const Text(
+                      "Request Date: ",
+                      style: FTextStyle.listTitleBig,
+                    ),
                     Text(widget.requestDate, style: FTextStyle.listTitleSubBig),
                   ],
                 ),
                 const SizedBox(height: 5),
-
-
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Product/Service: ", style: FTextStyle.listTitleBig),
+                    const Text(
+                      "Product/Service: ",
+                      style: FTextStyle.listTitleBig,
+                    ),
                     Text(widget.product, style: FTextStyle.listTitleSubBig),
                   ],
                 ),
                 const SizedBox(height: 5),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Specification: ", style: FTextStyle.listTitleBig),
-                    Text(widget.specification, style: FTextStyle.listTitleSubBig),
-                  ],
-                ),
-
-                const SizedBox(height: 5),
-
-                Row(
-                  children: [
-                    const Text("Quantity: ", style: FTextStyle.listTitleBig),
+                    const Text(
+                      "Quantity: ",
+                      style: FTextStyle.listTitleBig,
+                    ),
                     Text(widget.quantity, style: FTextStyle.listTitleSubBig),
                   ],
                 ),
                 const SizedBox(height: 5),
-
-
-                const SizedBox(height: 5),
                 Row(
                   children: [
-                    const Text("Delivery Status: ", style: FTextStyle.listTitleBig),
-                    Text(widget.delivery, style:  widget.delivery == 'Pending'
-                        ? FTextStyle.listTitleSubBig.copyWith(color: Colors.red)
-                        : FTextStyle.listTitleSubBig.copyWith(color: Colors.green),),
+                    Expanded(
+                      child: DeliveryStatus(dlStatus: widget.delivery), // Pass int to DeliveryStatus
+                    ),
+                    const SizedBox(height: 5),
                   ],
                 ),
                 const SizedBox(height: 5),
-
-
-
-
-
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Unit: ", style: FTextStyle.listTitle),
+                    Expanded(
+                      child: Text(
+                        "${widget.unit}",
+                        style: FTextStyle.listTitleSub,
+                        maxLines: 2,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Specification: ", style: FTextStyle.listTitle),
+                    Expanded(
+                      child: Text(widget.specification, style: FTextStyle.listTitleSubBig),
+                    ),
+                  ],
+                ),
               ],
-            ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-          )
-
-
+            ),
+          ),
         ],
       ),
     );
   }
 }
+

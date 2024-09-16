@@ -192,10 +192,12 @@ class _LogScreenState extends State<LogScreen> {
 
     if (user.containsKey('role')) {
     String roleUser = user['role'];
+    int roleId = user['id'];
 
     // Save token and role
     PrefUtils.setToken(bearerToken);
     PrefUtils.setRole(roleUser);
+    PrefUtils.setUserId(roleId);
     print("UserRole: $roleUser");
 
 
@@ -430,7 +432,7 @@ class _LogScreenState extends State<LogScreen> {
                                 child: IconTheme(
                                   data: const IconThemeData(
                                     color: AppColors.primaryColour,
-                                    size: 18,
+                                    size: 20,
                                   ),
                                   child: Icon(
                                     checkboxChecked

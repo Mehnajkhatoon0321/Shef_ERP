@@ -8,7 +8,6 @@ import 'package:shef_erp/all_bloc/authflow/auth_flow_bloc.dart';
 
 import 'package:shef_erp/screen/auth_flow/login_screen.dart';
 
-import 'package:shef_erp/screen/onboarding/onboarding.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/constant.dart';
@@ -156,7 +155,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const OnboardingScreen()),
+                        MaterialPageRoute(builder: (context) =>  BlocProvider(
+                          create: (context) => AuthFlowBloc(),
+                          child: LogScreen(),
+                        )),
                       );
                     },
                     style: ElevatedButton.styleFrom(
