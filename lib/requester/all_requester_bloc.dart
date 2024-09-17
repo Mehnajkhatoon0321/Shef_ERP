@@ -51,5 +51,126 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
         emit(AddCartFailure(const {'error': 'Network error'}));
       }
     });
+    //RequesterList
+    on<RequesterHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(ViewAddListLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.requesterListAdd}$userId");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(ViewAddListSuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(AddCartFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(AddCartFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(AddCartFailure(const {'error': 'Network error'}));
+      }
+    });
+
+// ProductList
+    on<ProductListHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(ProductListLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.getProduct}");
+          final requestBody = jsonEncode({
+            'cat_id': event.categoryID,
+            'user_id': userId,
+          });
+
+          var response = await http.post(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+            },
+            body: requestBody,
+          );
+
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(ProductListSuccess(responseData));
+          } else {
+            final responseError = jsonDecode(response.body);
+            emit(AddCartFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(AddCartFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(AddCartFailure(const {'error': 'Network error'}));
+      }
+    });
+
+    //Specification
+
+    on<SepListHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(SpecificationListLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.getSpecification}");
+          final requestBody = jsonEncode({
+            'pid': event.productID,
+            'user_id': userId,
+          });
+
+          var response = await http.post(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+            },
+            body: requestBody,
+          );
+
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(SpecificationListSuccess(responseData));
+          } else {
+            final responseError = jsonDecode(response.body);
+            emit(AddCartFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(AddCartFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(AddCartFailure(const {'error': 'Network error'}));
+      }
+    });
+
+
   }
 }

@@ -130,7 +130,7 @@ class _ProductServiceState extends State<ProductService> {
         automaticallyImplyLeading: false,
         title: Text('Services', style: FTextStyle.HeadingTxtWhiteStyle,
           textAlign: TextAlign.center,),
-        backgroundColor: AppColors.primaryColour,
+        backgroundColor: AppColors.primaryColourDark,
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -166,7 +166,7 @@ class _ProductServiceState extends State<ProductService> {
                   child:
                   Text(
                     "Add +",
-                    style: FTextStyle.loginBtnStyle.copyWith(color:AppColors.primaryColour),
+                    style: FTextStyle.loginBtnStyle.copyWith(color:AppColors.primaryColourDark),
                   )
 
                 // isLoading? CircularProgressIndicator(color: Colors.white,):Text(
@@ -217,21 +217,21 @@ class _ProductServiceState extends State<ProductService> {
                   hintStyle: FTextStyle.formhintTxtStyle,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.primaryColour, width: 1.0),
+                    borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.primaryColour, width: 1.0),
+                    borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.primaryColour, width: 1.0),
+                    borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
                   ),
                   contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
                   suffixIcon: _isTextEmpty
-                      ? const Icon(Icons.search, color: AppColors.primaryColour)
+                      ? const Icon(Icons.search, color: AppColors.primaryColourDark)
                       : IconButton(
-                    icon: const Icon(Icons.clear, color: AppColors.primaryColour),
+                    icon: const Icon(Icons.clear, color: AppColors.primaryColourDark),
                     onPressed: _clearText,
                   ),
                   fillColor: Colors.grey[100],
@@ -271,7 +271,7 @@ class _ProductServiceState extends State<ProductService> {
                                 borderRadius: BorderRadius.circular(10),
                                 boxShadow: [
                                   BoxShadow(
-                                      color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour!,
+                                      color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark!,
                                       spreadRadius:4,
                                       blurRadius: 0.5,
                                       offset: const Offset(0,1)
@@ -431,7 +431,7 @@ class _ProductServiceState extends State<ProductService> {
                             padding: const EdgeInsets.symmetric(horizontal: 16.0),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(28.0),
-                              border: Border.all(color: AppColors.primaryColour),
+                              border: Border.all(color: AppColors.primaryColourDark),
                               color: Colors.grey[100],
                             ),
                             child: DropdownButtonHideUnderline(
@@ -470,15 +470,15 @@ class _ProductServiceState extends State<ProductService> {
                               hintStyle: FTextStyle.formhintTxtStyle,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(23.0),
-                                borderSide: BorderSide(color: AppColors.primaryColour, width: 1.0),
+                                borderSide: BorderSide(color: AppColors.primaryColourDark, width: 1.0),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(23.0),
-                                borderSide: BorderSide(color: AppColors.primaryColour, width: 1.0),
+                                borderSide: BorderSide(color: AppColors.primaryColourDark, width: 1.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(23.0),
-                                borderSide: BorderSide(color: AppColors.primaryColour, width: 1.0),
+                                borderSide: BorderSide(color: AppColors.primaryColourDark, width: 1.0),
                               ),
                               contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
                               fillColor: Colors.grey[100],
@@ -508,15 +508,15 @@ class _ProductServiceState extends State<ProductService> {
                               hintStyle: FTextStyle.formhintTxtStyle,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(23.0),
-                                borderSide: BorderSide(color: AppColors.primaryColour, width: 1.0),
+                                borderSide: BorderSide(color: AppColors.primaryColourDark, width: 1.0),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(23.0),
-                                borderSide: BorderSide(color: AppColors.primaryColour, width: 1.0),
+                                borderSide: BorderSide(color: AppColors.primaryColourDark, width: 1.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(23.0),
-                                borderSide: BorderSide(color: AppColors.primaryColour, width: 1.0),
+                                borderSide: BorderSide(color: AppColors.primaryColourDark, width: 1.0),
                               ),
                               contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
                               fillColor: Colors.grey[100],
@@ -554,7 +554,7 @@ class _ProductServiceState extends State<ProductService> {
                 const SizedBox(width: 10),
                 Container(
                   decoration: BoxDecoration(
-                    color: isButtonEnabled ? AppColors.primaryColour : AppColors.formFieldBorderColour,
+                    color: isButtonEnabled ? AppColors.primaryColourDark : AppColors.formFieldBorderColour,
                     borderRadius: BorderRadius.circular(25.0),
                   ),
                   child: TextButton(
@@ -621,7 +621,7 @@ class _ProductServiceState extends State<ProductService> {
             ),
             Container(
               decoration: BoxDecoration(
-                color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour!,
+                color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark!,
                 borderRadius: BorderRadius.circular(25.0),
               ),
               child: TextButton(

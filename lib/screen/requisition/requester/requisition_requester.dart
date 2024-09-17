@@ -77,7 +77,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
           style: FTextStyle.HeadingTxtWhiteStyle,
           textAlign: TextAlign.center,
         ),
-        backgroundColor: AppColors.primaryColour,
+        backgroundColor: AppColors.primaryColourDark,
         leading: Padding(
           padding: const EdgeInsets.only(left: 15),
           child: GestureDetector(
@@ -108,7 +108,10 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>  AddRequisition(flag: "",),
+                        builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: AddRequisition(flag: "Requester",),
+),
                       ),
                     );
 
@@ -125,7 +128,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                   child:
                   Text(
                     "Add +",
-                    style: FTextStyle.loginBtnStyle.copyWith(color:AppColors.primaryColour),
+                    style: FTextStyle.loginBtnStyle.copyWith(color:AppColors.primaryColourDark),
                   )
 
               ),
@@ -188,21 +191,21 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                     hintStyle: FTextStyle.formhintTxtStyle,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(color: AppColors.primaryColour, width: 1.0),
+                      borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(color: AppColors.primaryColour, width: 1.0),
+                      borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(color: AppColors.primaryColour, width: 1.0),
+                      borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
                     ),
                     contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
                     suffixIcon: _isTextEmpty
-                        ? const Icon(Icons.search, color: AppColors.primaryColour)
+                        ? const Icon(Icons.search, color: AppColors.primaryColourDark)
                         : IconButton(
-                      icon: const Icon(Icons.clear, color: AppColors.primaryColour),
+                      icon: const Icon(Icons.clear, color: AppColors.primaryColourDark),
                       onPressed: _clearText,
                     ),
                     fillColor: Colors.grey[100],
@@ -306,7 +309,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                             borderRadius: BorderRadius.circular(10),
                             boxShadow: [
                               BoxShadow(
-                                color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour!,
+                                color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark!,
                                 spreadRadius: 4,
                                 blurRadius: 0.5,
                                 offset: const Offset(0, 1),
@@ -370,7 +373,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                     return Center(
                       child: isLoading
                           ? CircularProgressIndicator()
-                          : Text("No more data.", style: FTextStyle.listTitle),
+                          : Center(child: Text("No more data.", style: FTextStyle.listTitle)),
                     );
                   }
                 },

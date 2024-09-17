@@ -36,7 +36,7 @@ class _MasterScreenState extends State<MasterScreen> {
         automaticallyImplyLeading: false,
         title: Text('Master', style: FTextStyle.HeadingTxtWhiteStyle,
           textAlign: TextAlign.center,),
-        backgroundColor: AppColors.primaryColour,
+        backgroundColor: AppColors.primaryColourDark,
         leading: Padding(
           padding: const EdgeInsets.only(left: 15),
           child: GestureDetector(

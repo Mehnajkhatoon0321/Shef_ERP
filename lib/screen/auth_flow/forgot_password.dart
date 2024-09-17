@@ -124,7 +124,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               right: 0,
               child: Container(
                 height: MediaQuery.of(context).size.height * 0.5,
-                color: AppColors.primaryColour,
+                color: AppColors.primaryColourDark,
                 child:  Align(alignment: Alignment.topLeft, child:
                 Padding(
                   padding: const EdgeInsets.all(18.0),
@@ -145,7 +145,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               ),
             ),
             // Container(
-            //   color: AppColors.primaryColour,
+            //   color: AppColors.primaryColourDark,
             // ),
             Center(
               child: Container(
@@ -242,7 +242,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(26)),
-                          backgroundColor: AppColors.primaryColour,
+                          backgroundColor: AppColors.primaryColourDark,
                         ),
                         child:isLoading? const CircularProgressIndicator(color: Colors.white,):Text(
                             Constants.continueBtnTxt,

@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shef_erp/all_bloc/authflow/auth_flow_bloc.dart';
 import 'package:shef_erp/requester/all_requester_bloc.dart';
 import 'package:shef_erp/screen/auth_flow/login_screen.dart';
+import 'package:shef_erp/screen/auth_flow/profile_details.dart';
 import 'package:shef_erp/screen/dashboard/admin_dashboard.dart';
 
 import 'package:shef_erp/screen/dashboard/dashboard.dart';
@@ -32,6 +33,12 @@ class Navigation extends StatefulWidget {
 }
 
 class _NavigationState extends State<Navigation> {
+  List<Map<String, dynamic>> listItem = [
+
+    {'subtitle': 'My Profile', 'icon': Icons.person},
+
+    {'subtitle': 'Logout', 'icon': Icons.logout},
+  ];
 
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
@@ -249,7 +256,7 @@ class _NavigationState extends State<Navigation> {
             padding: const EdgeInsets.only(right: 15),
             child: GestureDetector(
               onTap: () {
-                _scaffoldKey.currentState!.openEndDrawer(); // Open the end drawer
+                _scaffoldKey.currentState!.openDrawer(); // Open the end drawer
               },
               child: const Icon(
                 Icons.menu,
@@ -271,32 +278,43 @@ class _NavigationState extends State<Navigation> {
                 accountName: Text("Mehnaj Khan", style: FTextStyle.nameProfile),
                 accountEmail: Text("mehnaj@example.com", style: FTextStyle.emailProfile),
                 decoration: const BoxDecoration(
-                  color: AppColors.primaryColour,
+                  color: AppColors.primaryColourDark,
                 ),
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.person, color: AppColors.primaryColour),
-              title: const Text('Profile'),
-              onTap: () {
-                Navigator.pushNamed(context, '/profile'); // Define your route
-              },
-            ),
-            const Divider(color: AppColors.primaryColour,),
-            ListTile(
-              leading: const Icon(Icons.lock, color: AppColors.primaryColour),
-              title: const Text('Change Password'),
-              onTap: () {
-                Navigator.pushNamed(context, '/change-password'); // Define your route
-              },
-            ),          const Divider(color: AppColors.primaryColour,),
-            ListTile(
-              leading: const Icon(Icons.logout, color: AppColors.primaryColour),
-              title: const Text('Logout'),
-              onTap: () {
-                _showDeleteDialog(); // Define your logout function
-              },
-            ),
+
+            ...listItem.map((item) {
+              return Column(
+                children: [
+                  ListTile(
+                    leading: Icon(item['icon']),
+                    title: Text(item['subtitle'], style: FTextStyle.FaqsTxtStyle),
+                    onTap: () {
+                      Navigator.pop(context); // Close the drawer
+
+                      switch (item['subtitle']) {
+
+
+                        case 'My Profile':
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ProfileDetails()),
+                          );
+                          break;
+
+                        case 'Logout':
+                          _showLogDialog();
+                          break;
+                        default:
+                        // Handle default case if needed
+                          break;
+                      }
+                    },
+                  ),
+                  const Divider(height: 1,color: AppColors.primaryColourDark,thickness: 1,), // Add a divider after each ListTile
+                ],
+              );
+            }),
           ],
         ),
       ),
@@ -362,7 +380,7 @@ class _NavigationState extends State<Navigation> {
 
                                 child: Image.asset(
                                   'assets/images/timer.png',
-                                  // color: AppColors.primaryColourDark,
+                                  // color: AppColors.primaryColourDarkDark,
                                   width: (displayType == 'desktop' || displayType == 'tablet')
                                       ? 150.w
                                       : 200,
@@ -500,7 +518,7 @@ class _NavigationState extends State<Navigation> {
     }
   }
 
-  void _showDeleteDialog() {
+  void _showLogDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -532,7 +550,7 @@ class _NavigationState extends State<Navigation> {
                     const SizedBox(width: 8),
                     TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: AppColors.primaryColour,
+                        backgroundColor: AppColors.primaryColourDark,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25.0),
                         ),

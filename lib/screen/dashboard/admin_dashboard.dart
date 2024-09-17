@@ -42,22 +42,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
             style: FTextStyle.HeadingTxtWhiteStyle,
             textAlign: TextAlign.center,
           ),
-          backgroundColor: AppColors.primaryColour,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 15),
-              child: GestureDetector(
-                onTap: () {
-                  _scaffoldKey.currentState!.openEndDrawer(); // Open the end drawer
-                },
-                child: const Icon(
-                  Icons.menu,
-                  size: 35,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ],
+          backgroundColor: AppColors.primaryColourDark,
+
           leading: Padding(
             padding: const EdgeInsets.only(left: 15),
             child: GestureDetector(
@@ -72,46 +58,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             ),
           ),
         ),
-        endDrawer: Drawer(
-          backgroundColor: Colors.white,
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              SizedBox(
-                height:MediaQuery.of(context).size.height/5,
-                child: UserAccountsDrawerHeader(
-                  accountName: Text("Mehnaj Khan", style: FTextStyle.nameProfile),
-                  accountEmail: Text("mehnaj@example.com", style: FTextStyle.emailProfile),
-                  decoration: const BoxDecoration(
-                    color: AppColors.primaryColour,
-                  ),
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.person, color: AppColors.primaryColour),
-                title: const Text('Profile'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/profile'); // Define your route
-                },
-              ),
-              const Divider(color: AppColors.primaryColour,),
-              ListTile(
-                leading: const Icon(Icons.lock, color: AppColors.primaryColour),
-                title: const Text('Change Password'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/change-password'); // Define your route
-                },
-              ),          const Divider(color: AppColors.primaryColour,),
-              ListTile(
-                leading: const Icon(Icons.logout, color: AppColors.primaryColour),
-                title: const Text('Logout'),
-                onTap: () {
-                  _showDeleteDialog(); // Define your logout function
-                },
-              ),
-            ],
-          ),
-        ),
+
         body:  Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18.0,vertical: 10),
           child: Column(
@@ -226,7 +173,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     const SizedBox(width: 8),
                     TextButton(
                       style: TextButton.styleFrom(
-                        backgroundColor: AppColors.primaryColour,
+                        backgroundColor: AppColors.primaryColourDark,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25.0),
                         ),

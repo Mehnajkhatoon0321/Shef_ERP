@@ -109,7 +109,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         textScaler: const TextScaler.linear(1),
       ),
       child: Scaffold(
-        backgroundColor: AppColors.primaryColour,
+        backgroundColor: AppColors.primaryColourDark,
         body: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.all(25.0.w), // Use ScreenUtil for padding
@@ -170,7 +170,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     child: Text(
                       "Get Started",
                       style: FTextStyle.loginBtnStyle.copyWith(
-                        color: AppColors.primaryColour,
+                        color: AppColors.primaryColourDark,
                       ),
                     ),
                   ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),

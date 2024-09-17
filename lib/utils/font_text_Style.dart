@@ -34,7 +34,7 @@ class FTextStyle {
 
   static TextStyle SplashHeadingTab = TextStyle(
       fontSize: 38.sp,
-      color: AppColors.primaryColour,
+      color: AppColors.primaryColourDark,
 
 
       fontFamily: 'Outfit-SemiBold',
@@ -95,14 +95,14 @@ class FTextStyle {
     //fontSize: 10.sp,
 
     fontSize: 14.sp,
-    color: AppColors.primaryColour,
+    color: AppColors.primaryColourDark,
     fontWeight: FontWeight.w400,
   );
 
   static  TextStyle SeeAllTextStyle = TextStyle(
     fontFamily: 'Outfit-Regular',
     fontSize: 16,
-    color: AppColors.primaryColour,
+    color: AppColors.primaryColourDark,
     fontWeight: FontWeight.bold,
   );
 
@@ -122,7 +122,7 @@ class FTextStyle {
     //fontSize: 10.sp,
 
       fontSize: 14.sp,
-      color: AppColors.primaryColour,
+      color: AppColors.primaryColourDark,
       fontFamily: 'Outfit-Regular',
       fontWeight: FontWeight.w400);
 

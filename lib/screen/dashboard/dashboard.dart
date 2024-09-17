@@ -43,22 +43,8 @@ class _DashboardState extends State<Dashboard> {
             style: FTextStyle.HeadingTxtWhiteStyle,
             textAlign: TextAlign.center,
           ),
-          backgroundColor: AppColors.primaryColour,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 15),
-              child: GestureDetector(
-                onTap: () {
-                  _scaffoldKey.currentState!.openEndDrawer(); // Open the end drawer
-                },
-                child: const Icon(
-                  Icons.menu,
-                  size: 35,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ],
+          backgroundColor: AppColors.primaryColourDark,
+
           leading: Padding(
             padding: const EdgeInsets.only(left: 15),
             child: GestureDetector(
@@ -73,46 +59,7 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
         ),
-        endDrawer: Drawer(
-          backgroundColor: Colors.white,
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              SizedBox(
-                height:MediaQuery.of(context).size.height/5,
-                child: UserAccountsDrawerHeader(
-                  accountName: Text("Mehnaj Khan", style: FTextStyle.nameProfile),
-                  accountEmail: Text("mehnaj@example.com", style: FTextStyle.emailProfile),
-                  decoration: const BoxDecoration(
-                    color: AppColors.primaryColour,
-                  ),
-                ),
-              ),
-              ListTile(
-                leading: const Icon(Icons.person, color: AppColors.primaryColour),
-                title: const Text('Profile'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/profile'); // Define your route
-                },
-              ),
-              const Divider(color: AppColors.primaryColour,),
-              ListTile(
-                leading: const Icon(Icons.lock, color: AppColors.primaryColour),
-                title: const Text('Change Password'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/change-password'); // Define your route
-                },
-              ),          const Divider(color: AppColors.primaryColour,),
-              ListTile(
-                leading: const Icon(Icons.logout, color: AppColors.primaryColour),
-                title: const Text('Logout'),
-                onTap: () {
-                  _showDeleteDialog(); // Define your logout function
-                },
-              ),
-            ],
-          ),
-        ),
+
         body:  Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18.0,vertical: 10),
           child: Column(
@@ -195,63 +142,5 @@ class _DashboardState extends State<Dashboard> {
 
 
 
-  void _showDeleteDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text("Are you sure you want to logout?",
-                    style: FTextStyle.preHeadingStyle),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: AppColors.formFieldBackColour,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
-                      ),
-                      child: const Text("Cancel",
-                          style: TextStyle(color: Colors.black)),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                    const SizedBox(width: 8),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: AppColors.primaryColour,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
-                      ),
-                      child: const Text("OK",
-                          style: TextStyle(color: Colors.white)),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => BlocProvider(
-                                create: (context) => AuthFlowBloc(),
-                                child: const LogScreen(),
-                              )),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
+
 }

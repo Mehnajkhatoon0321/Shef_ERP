@@ -247,7 +247,7 @@ class _LogScreenState extends State<LogScreen> {
               right: 0,
               child: Container(
                 height: MediaQuery.of(context).size.height * 0.4,
-                color: AppColors.primaryColour,
+                color: AppColors.primaryColourDark,
                 child:  Align(alignment: Alignment.topLeft, child:
                   Padding(
                     padding: const EdgeInsets.all(18.0),
@@ -431,7 +431,7 @@ class _LogScreenState extends State<LogScreen> {
                                 padding: const EdgeInsets.only(right: 5),
                                 child: IconTheme(
                                   data: const IconThemeData(
-                                    color: AppColors.primaryColour,
+                                    color: AppColors.primaryColourDark,
                                     size: 20,
                                   ),
                                   child: Icon(
@@ -496,7 +496,7 @@ class _LogScreenState extends State<LogScreen> {
                               borderRadius: BorderRadius.circular(26),
                             ),
                             backgroundColor: isButtonEnabled
-                                ? AppColors.primaryColour
+                                ? AppColors.primaryColourDark
                                 : AppColors.disableButtonColor,
                           ),
                           child:

@@ -45,7 +45,7 @@ class _RequesterDetailsState extends State<RequesterDetails> {
           style: FTextStyle.HeadingTxtWhiteStyle,
           textAlign: TextAlign.center,
         ),
-        backgroundColor: AppColors.primaryColour,
+        backgroundColor: AppColors.primaryColourDark,
         leading: Padding(
           padding: const EdgeInsets.only(left: 15),
           child: GestureDetector(

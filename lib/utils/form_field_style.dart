@@ -189,35 +189,35 @@ class FormFieldStyle {
           Radius.circular(28),
         ),
         borderSide: BorderSide(
-          color: AppColors.primaryColour,
+          color: AppColors.primaryColourDark,
         )),
     disabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(28),
         ),
         borderSide: BorderSide(
-          color: AppColors.primaryColour,
+          color: AppColors.primaryColourDark,
         )),
     focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(28),
         ),
         borderSide: BorderSide(
-          color: AppColors.primaryColour,
+          color: AppColors.primaryColourDark,
         )),
     errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(28),
         ),
         borderSide: BorderSide(
-          color: AppColors.primaryColour,
+          color: AppColors.primaryColourDark,
         )),
     focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(28),
         ),
         borderSide: BorderSide(
-          color: AppColors.primaryColour,
+          color: AppColors.primaryColourDark,
         )),
     hintText: Constants.addressHint,
     hintStyle: FTextStyle.formhintTxtStyle,
@@ -237,7 +237,7 @@ class FormFieldStyle {
       borderRadius: BorderRadius.circular(28),
     ),
     focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: AppColors.primaryColour),
+      borderSide: BorderSide(color: AppColors.primaryColourDark),
       borderRadius: BorderRadius.circular(28),
     ),
     errorBorder: OutlineInputBorder(

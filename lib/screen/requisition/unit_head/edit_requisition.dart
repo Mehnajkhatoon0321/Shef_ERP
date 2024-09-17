@@ -167,7 +167,7 @@ class _EditRequisitionState extends State<EditRequisition> {
           style: FTextStyle.HeadingTxtWhiteStyle,
           textAlign: TextAlign.center,
         ),
-        backgroundColor: AppColors.primaryColour,
+        backgroundColor: AppColors.primaryColourDark,
         leading: Padding(
           padding: const EdgeInsets.only(left: 15),
           child: GestureDetector(
@@ -215,7 +215,7 @@ class _EditRequisitionState extends State<EditRequisition> {
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(28.0),
-                    border: Border.all(color: AppColors.primaryColour),
+                    border: Border.all(color: AppColors.primaryColourDark),
                     color: Colors.white,
                   ),
                   child: DropdownButtonHideUnderline(
@@ -384,7 +384,7 @@ class _EditRequisitionState extends State<EditRequisition> {
                           borderRadius: BorderRadius.circular(26),
                         ),
                         backgroundColor: isButtonPartEnabled
-                            ? AppColors.primaryColour
+                            ? AppColors.primaryColourDark
                             : AppColors.disableButtonColor,
                       ),
                       child: Text(

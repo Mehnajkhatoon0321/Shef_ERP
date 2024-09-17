@@ -112,7 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: FTextStyle.HeadingTxtWhiteStyle,
               textAlign: TextAlign.center,
             ),
-            backgroundColor: AppColors.primaryColour,
+            backgroundColor: AppColors.primaryColourDark,
 
             leading: Padding(
               padding: const EdgeInsets.only(left: 15),

@@ -59,7 +59,28 @@ class ValidatorUtils {
 
     return null;
   }
+  static String? validateQuantity(String? value) {
+    // Check if value is null or empty
+    if (value == null || value.isEmpty) {
+      return 'Please fill the field.';
+    }
 
+    // Check if value is a valid number
+    final intValue = int.tryParse(value);
+    if (intValue == null) {
+      return 'Please enter a valid number.';
+    }
+
+    // Check if value is within the desired range
+    if (intValue <= 0) {
+      return 'Please enter a number greater than 0.';
+    } else if (intValue > 1000) {
+      return 'Please enter a number less than or equal to 1000.';
+    }
+
+    // Input is valid
+    return null;
+  }
   static String? dateValidator(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter a date.';
@@ -365,7 +386,24 @@ static  bool isValidAddress(String value) {
     return true;
   }
 
+  static bool isValidQuantity(String value) {
+    if (value.isEmpty) {
+      return false;
+    }
 
+    // Attempt to parse the value as an integer
+    final intValue = int.tryParse(value);
+    if (intValue == null) {
+      return false; // Not a valid number
+    }
+
+    // Check if the number is within the range 1 to 1000
+    if (intValue < 1 || intValue > 1000) {
+      return false;
+    }
+
+    return true; // The number is valid
+  }
   static bool isValidDate(String value) {
     if (value.isEmpty) {
       return false; // Date field should not be empty

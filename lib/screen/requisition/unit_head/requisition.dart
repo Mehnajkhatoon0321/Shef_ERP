@@ -132,7 +132,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
         automaticallyImplyLeading: false,
         title: Text('Requisition', style: FTextStyle.HeadingTxtWhiteStyle,
           textAlign: TextAlign.center,),
-        backgroundColor: AppColors.primaryColour,
+        backgroundColor: AppColors.primaryColourDark,
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -167,7 +167,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                   child:
                   Text(
                     "Add +",
-                    style: FTextStyle.loginBtnStyle.copyWith(color:AppColors.primaryColour),
+                    style: FTextStyle.loginBtnStyle.copyWith(color:AppColors.primaryColourDark),
                   )
 
               ),
@@ -214,21 +214,21 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                   hintStyle: FTextStyle.formhintTxtStyle,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.primaryColour, width: 1.0),
+                    borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.primaryColour, width: 1.0),
+                    borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.primaryColour, width: 1.0),
+                    borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
                   ),
                   contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
                   suffixIcon: _isTextEmpty
-                      ? const Icon(Icons.search, color: AppColors.primaryColour)
+                      ? const Icon(Icons.search, color: AppColors.primaryColourDark)
                       : IconButton(
-                    icon: const Icon(Icons.clear, color: AppColors.primaryColour),
+                    icon: const Icon(Icons.clear, color: AppColors.primaryColourDark),
                     onPressed: _clearText,
                   ),
                   fillColor: Colors.grey[100],
@@ -362,7 +362,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                             scale: 1.3,
                             child: Checkbox(
                               value: selectedIndices.contains(index),
-                              activeColor:index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour,
+                              activeColor:index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
                               onChanged: (bool? value) {
                                 setState(() {
                                   if (value == true) {
@@ -384,7 +384,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                               borderRadius: BorderRadius.circular(10),
                               boxShadow: [
                                 BoxShadow(
-                                  color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColour,
+                                  color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
                                   spreadRadius:4,
                                   blurRadius: 0.5,
                                   offset: const Offset(0,1)
@@ -511,7 +511,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
             ),
             Container(
               decoration: BoxDecoration(
-                color: AppColors.primaryColour,
+                color: AppColors.primaryColourDark,
                 borderRadius: BorderRadius.circular(25.0),
               ),
               child: TextButton(

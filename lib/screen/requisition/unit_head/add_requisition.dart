@@ -1,9 +1,13 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:shef_erp/requester/all_requester_bloc.dart';
 import 'package:shef_erp/screen/requisition/admin/admin_requisition.dart';
 
 import 'package:shef_erp/screen/requisition/unit_head/requisition.dart';
@@ -44,6 +48,13 @@ class _AddRequisitionState extends State<AddRequisition> {
   @override
   void initState() {
     super.initState();
+
+
+
+      BlocProvider.of<AllRequesterBloc>(context).add(RequesterHandler());
+
+
+
     // Initialize the date controller with the current date formatted as dd-MM-yyyy
     dateFrom.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
   }
@@ -172,7 +183,10 @@ class _AddRequisitionState extends State<AddRequisition> {
   bool isRemarkFocused = false;
   bool isUploadFocused = false;
   bool isDateFocused = false;
-
+  Map<String,dynamic> responseData={};
+ List<dynamic>   ProductList=[];
+  int? selectedCategoryId;
+  int? selectedProductId;
   void _selectDate(BuildContext context) async {
     DateTime currentDate = DateTime.now();
     DateTime? selectedDate = await showDatePicker(
@@ -193,17 +207,22 @@ class _AddRequisitionState extends State<AddRequisition> {
   }
 
   List<dynamic> list = ['Female', 'data', 'items'];
-  List<dynamic> categoryList = [
-    'categoryList1',
-    'categoryList2',
-    'categoryList3'
-  ];
-  List<dynamic> eventList = ['eventList1', 'eventList2', 'eventList4'];
+
+  List<String> categoryNames = [];
+  List<String> productNames = [];
+  Map<String, int> categoryMap={};
+  Map<String, int> productMap={};
+  List<String> eventNames = [];
+
   List<dynamic> unitList = ['unitList1', 'unitList2', 'unitList3'];
   String? selectedItem; // Variable to keep track of selected item
   String? selectedCategoryItem; // Variable to keep track of selected item
+  String? selectedProductItem; // Variable to keep track of selected item
   String? selectedEventItem; // Variable to keep track of selected item
   String? selectedUnitItem; // Variable to keep track of selected item
+
+
+
   @override
   Widget build(BuildContext context) {
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
@@ -218,7 +237,7 @@ class _AddRequisitionState extends State<AddRequisition> {
           style: FTextStyle.HeadingTxtWhiteStyle,
           textAlign: TextAlign.center,
         ),
-        backgroundColor: AppColors.primaryColour,
+        backgroundColor: AppColors.primaryColourDark,
         leading: Padding(
           padding: const EdgeInsets.only(left: 15),
           child: GestureDetector(
@@ -233,7 +252,76 @@ class _AddRequisitionState extends State<AddRequisition> {
           ),
         ), // You can set this to any color you prefer
       ),
-      body: SingleChildScrollView(
+      body: BlocListener<AllRequesterBloc, AllRequesterState>(
+  listener: (context, state) {
+    if (state is ViewAddListLoading) {
+      setState(() {
+        isLoading = true;
+      });
+    } else if (state is ViewAddListSuccess) {
+      setState(() {
+
+        var eventList = state.viewAddList['list']['events'];
+        responseData = state.viewAddList['list'];
+        var categoryList = state.viewAddList['list']['category'];
+
+
+         categoryNames = categoryList.map<String>((item) => item['cate_name'] as String).toList();
+
+         categoryMap = {
+          for (var item in categoryList) item['cate_name'] as String: item['id'] as int
+        };
+
+         eventNames = eventList.map<String>((item) => item['name'] as String).toList();
+
+
+
+
+      });
+    } else if (state is AddCartFailure) {
+      setState(() {
+        isLoading = false;
+      });
+      print("error>> ${state.addCartDetailFailure}");
+    }if (state is ProductListLoading) {
+      setState(() {
+        isLoading = true;
+      });
+    } else if (state is ProductListSuccess) {
+      setState(() {
+        ProductList = state.productList['product_list'];
+        print("ALLProductDat>>>>>>>>>>>>>>>>>a$ProductList");
+        productNames = ProductList.map<String>((item) => item['name'] as String).toList();
+
+        productMap = {
+          for (var item in ProductList) item['name'] as String: item['id'] as int
+        };
+      });
+    }
+
+    if (state is SpecificationListLoading) {
+      setState(() {
+        isLoading = true;
+      });
+    } else if (state is SpecificationListSuccess) {
+      setState(() {
+        var specDescription = state.specList['spec'];
+
+        // Provide a default value if specDescription is null
+        var displayText = specDescription ?? '';
+
+        print(">>>>$displayText");
+        specificationName.text = displayText;
+      });
+    }
+
+
+
+
+
+    // TODO: implement listener
+  },
+  child: SingleChildScrollView(
         child: Form(
           onChanged: () {
             if (isButtonEnabled = ValidatorUtils.isValidDate(dateFrom.text) &&
@@ -256,46 +344,57 @@ class _AddRequisitionState extends State<AddRequisition> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  "Date",
-                  style: FTextStyle.formLabelTxtStyle,
-                ).animateOnPageLoad(
-                  animationsMap['imageOnPageLoadAnimation2']!,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: TextFormField(
-                    key: dateKey,
-                    focusNode: _dateAppNode,
-                    keyboardType: TextInputType.text,
-                    decoration:
-                        FormFieldStyle.defaultAddressInputDecoration.copyWith(
-                      hintText: "dd-mm-yyyy",
-                      suffixIcon: IconButton(
-                        icon: const Icon(
-                          Icons.calendar_today,
-                          color: AppColors.primaryColour,
-                        ),
-                        onPressed: () {
-                          _selectDate(context);
-                        },
+                Visibility(
+                  visible:responseData['roles']=='Requester' ,
+
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Date",
+                        style: FTextStyle.formLabelTxtStyle,
+                      ).animateOnPageLoad(
+                        animationsMap['imageOnPageLoadAnimation2']!,
                       ),
-                    ),
-                    inputFormatters: [NoSpaceFormatter()],
-                    controller: dateFrom,
-                    validator: ValidatorUtils.dateValidator,
-                    onTap: () {
-                      setState(() {
-                        isDateFocused = true;
-                      });
-                    },
-                  ).animateOnPageLoad(
-                    animationsMap['imageOnPageLoadAnimation2']!,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0),
+                        child: TextFormField(
+                          key: dateKey,
+                          focusNode: _dateAppNode,
+                          keyboardType: TextInputType.text,
+                          decoration:
+                          FormFieldStyle.defaultAddressInputDecoration.copyWith(
+                            hintText: "dd-mm-yyyy",
+                            suffixIcon: IconButton(
+                              icon: const Icon(
+                                Icons.calendar_today,
+                                color: AppColors.primaryColourDark,
+                              ),
+                              onPressed: () {
+                                _selectDate(context);
+                              },
+                            ),
+                          ),
+                          inputFormatters: [NoSpaceFormatter()],
+                          controller: dateFrom,
+                          validator: ValidatorUtils.dateValidator,
+                          onTap: () {
+                            setState(() {
+                              isDateFocused = true;
+                            });
+                          },
+                        ).animateOnPageLoad(
+                          animationsMap['imageOnPageLoadAnimation2']!,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+
                 const SizedBox(height: 5),
                 Visibility(
-                  visible: widget.flag.isNotEmpty,
+                  visible: widget.flag.isNotEmpty && responseData['roles']=='Requester',
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -375,7 +474,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                         children: [
                           const SizedBox(height: 30),
                           const Icon(Icons.add_box_rounded,
-                              color: AppColors.primaryColour, size: 50),
+                              color: AppColors.primaryColourDark, size: 50),
                           const SizedBox(height: 10),
                           Text("Add Requisition",
                               style: FTextStyle.formLabelTxtStyle),
@@ -424,7 +523,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                                 children: [
                                   IconButton(
                                     icon: const Icon(Icons.clear,
-                                        color: AppColors.primaryColour),
+                                        color: AppColors.primaryColourDark),
                                     onPressed: () {
                                       setState(() {
                                         addVisibility = false;
@@ -449,63 +548,61 @@ class _AddRequisitionState extends State<AddRequisition> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "Product/Category",
+                                      "Product Category",
                                       style: FTextStyle.formLabelTxtStyle,
                                     ).animateOnPageLoad(
                                       animationsMap[
                                           'imageOnPageLoadAnimation2']!,
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 8.0),
+                                      padding: const EdgeInsets.symmetric(vertical: 8.0),
                                       child: Container(
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16.0),
+                                        width: MediaQuery.of(context).size.width,
+                                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
                                         decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(28.0),
-                                          border: Border.all(
-                                              color: AppColors.primaryColour),
+                                          borderRadius: BorderRadius.circular(28.0),
+                                          border: Border.all(color: AppColors.primaryColourDark),
                                           color: Colors.white,
                                         ),
                                         child: DropdownButtonHideUnderline(
-                                          child: DropdownButton<String>(
+                                          child: DropdownButton<String?>(
                                             key: _categoryNameKey,
                                             focusNode: _categoryNameNode,
                                             value: selectedCategoryItem,
                                             hint: const Text(
-                                                "Select Product/Category",
-                                                style: FTextStyle
-                                                    .formhintTxtStyle),
+                                              "Select Product Category",
+                                              style: FTextStyle.formhintTxtStyle,
+                                            ),
                                             onChanged: (String? categoryValue) {
-                                              setState(() {
-                                                selectedCategoryItem =
-                                                    categoryValue;
-                                                // Update button enable state
-                                                isButtonPartEnabled =
-                                                    categoryValue != null &&
-                                                        categoryValue
-                                                            .isNotEmpty &&
-                                                        ValidatorUtils
-                                                            .isValidCommon(
-                                                                specificationName
-                                                                    .text);
-                                              });
+                                              if (categoryValue != null) {
+                                                setState(() {
+                                                  selectedCategoryItem = categoryValue;
+                                                  selectedCategoryId = categoryMap[categoryValue]; // This can be null
+                                                  selectedItem = null;
+                                                  isButtonPartEnabled = categoryValue.isNotEmpty &&
+                                                      ValidatorUtils.isValidCommon(specificationName.text);
+
+                                                  if (selectedCategoryId != null) {
+                                                    BlocProvider.of<AllRequesterBloc>(context).add(ProductListHandler(selectedCategoryId.toString()));
+                                                  }
+                                                });
+                                              } else {
+
+                                              }
                                             },
-                                            items: categoryList
-                                                .map<DropdownMenuItem<String>>(
-                                                    (dynamic value) {
-                                              return DropdownMenuItem<String>(
+                                            items: categoryNames.map<DropdownMenuItem<String?>>((String value) {
+                                              return DropdownMenuItem<String?>(
                                                 value: value,
-                                                child: Text(value.toString()),
+                                                child: Text(value),
                                               );
                                             }).toList(),
                                           ),
                                         ),
                                       ),
-                                    ),
+                                    )
+
+
+
                                   ],
                                 ),
                               ),
@@ -525,17 +622,32 @@ class _AddRequisitionState extends State<AddRequisition> {
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(28.0),
                                     border: Border.all(
-                                        color: AppColors.primaryColour),
+                                        color: AppColors.primaryColourDark),
                                     color: Colors.white,
                                   ),
                                   child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String>(
+                                    child: DropdownButton<String?>(
                                       key: _productNameKey,
                                       focusNode: _productNameNode,
                                       value: selectedItem,
                                       hint: const Text("Select Product/Service",
                                           style: FTextStyle.formhintTxtStyle),
                                       onChanged: (String? newValue) {
+                                        if (newValue != null) {
+                                          setState(() {
+                                            selectedItem = newValue;
+                                            selectedProductId = productMap[newValue]; // This can be null
+
+                                            isButtonPartEnabled = newValue.isNotEmpty &&
+                                                ValidatorUtils.isValidCommon(specificationName.text);
+
+                                            if (selectedProductId != null) {
+                                              BlocProvider.of<AllRequesterBloc>(context).add(SepListHandler(selectedProductId.toString()));
+                                            }
+                                          });
+                                        } else {
+
+                                        }
                                         setState(() {
                                           selectedItem = newValue;
                                           // Update button enable state
@@ -546,11 +658,10 @@ class _AddRequisitionState extends State<AddRequisition> {
                                                       specificationName.text);
                                         });
                                       },
-                                      items: list.map<DropdownMenuItem<String>>(
-                                          (dynamic value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Text(value.toString()),
+                                      items: productNames.map<DropdownMenuItem<String?>>((String data) {
+                                        return DropdownMenuItem<String?>(
+                                          value: data,
+                                          child: Text(data),
                                         );
                                       }).toList(),
                                     ),
@@ -577,7 +688,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                                     hintText: "Enter Specification",
                                     fillColor: Colors.white,
                                   ),
-                                  inputFormatters: [NoSpaceFormatter()],
+
                                   controller: specificationName,
                                   validator: ValidatorUtils.model,
                                 ).animateOnPageLoad(
@@ -596,7 +707,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                                 child: TextFormField(
                                   focusNode: _quantityNameNode,
                                   key: _quantityNameKey,
-                                  keyboardType: TextInputType.text,
+                                  keyboardType: TextInputType.number,
                                   decoration: FormFieldStyle
                                       .defaultInputDecoration
                                       .copyWith(
@@ -623,14 +734,14 @@ class _AddRequisitionState extends State<AddRequisition> {
                                 child: TextFormField(
                                   focusNode: _remarkNameNode,
                                   key: _remarkNameKey,
-                                  keyboardType: TextInputType.text,
+                                  keyboardType: TextInputType.name,
                                   decoration: FormFieldStyle
                                       .defaultInputDecoration
                                       .copyWith(
                                     hintText: "Enter Remark",
                                     fillColor: Colors.white,
                                   ),
-                                  inputFormatters: [NoSpaceFormatter()],
+
                                   controller: remarkName,
                                   validator: ValidatorUtils.model,
                                 ).animateOnPageLoad(
@@ -649,55 +760,47 @@ class _AddRequisitionState extends State<AddRequisition> {
                                     ).animateOnPageLoad(
                                       animationsMap[
                                           'imageOnPageLoadAnimation2']!,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 8.0),
+                                    ),Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 8.0),
                                       child: Container(
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16.0),
+                                        // Ensure the container width is constrained properly
+                                        width: double.infinity, // Expand to full width of parent container
+                                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
                                         decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(28.0),
-                                          border: Border.all(
-                                              color: AppColors.primaryColour),
+                                          borderRadius: BorderRadius.circular(28.0),
+                                          border: Border.all(color: AppColors.primaryColourDark),
                                           color: Colors.white,
                                         ),
                                         child: DropdownButtonHideUnderline(
                                           child: DropdownButton<String>(
                                             key: _eventNameKey,
                                             focusNode: _eventNameNode,
+                                            isExpanded: true, // Make the DropdownButton expand to fill the width of the container
                                             value: selectedEventItem,
-                                            hint: const Text("Select Event",
-                                                style: FTextStyle
-                                                    .formhintTxtStyle),
+                                            hint: const Text(
+                                              "Select Event",
+                                              style: FTextStyle.formhintTxtStyle,
+                                            ),
                                             onChanged: (String? eventValue) {
                                               setState(() {
                                                 selectedEventItem = eventValue;
                                                 // Update button enable state
-                                                isButtonPartEnabled =
-                                                    eventValue != null &&
-                                                        eventValue.isNotEmpty &&
-                                                        ValidatorUtils
-                                                            .isValidCommon(
-                                                                specificationName
-                                                                    .text);
+                                                isButtonPartEnabled = eventValue != null &&
+                                                    eventValue.isNotEmpty &&
+                                                    ValidatorUtils.isValidCommon(specificationName.text);
                                               });
                                             },
-                                            items: eventList
-                                                .map<DropdownMenuItem<String>>(
-                                                    (dynamic value) {
+                                            items: eventNames.map<DropdownMenuItem<String>>((String value) {
                                               return DropdownMenuItem<String>(
                                                 value: value,
-                                                child: Text(value.toString()),
+                                                child: Text(value),
                                               );
                                             }).toList(),
                                           ),
                                         ),
                                       ),
-                                    ),
+                                    )
+
                                   ],
                                 ),
                               ),
@@ -830,7 +933,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                                               BorderRadius.circular(26),
                                         ),
                                         backgroundColor: isButtonPartEnabled
-                                            ? AppColors.primaryColour
+                                            ? AppColors.primaryColourDark
                                             : AppColors.disableButtonColor,
                                       ),
                                       child: Text(
@@ -911,7 +1014,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.edit,
-                                      color: AppColors.primaryColour),
+                                      color: AppColors.primaryColourDark),
                                   onPressed: () {
                                     setState(() {
                                       selectedItemForEditing = item;
@@ -983,7 +1086,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                           borderRadius: BorderRadius.circular(26),
                         ),
                         backgroundColor: isButtonEnabled
-                            ? AppColors.primaryColour
+                            ? AppColors.primaryColourDark
                             : AppColors.disableButtonColor,
                       ),
                       child: Text(
@@ -1000,6 +1103,7 @@ class _AddRequisitionState extends State<AddRequisition> {
           ),
         ),
       ),
+),
     );
   }
 }

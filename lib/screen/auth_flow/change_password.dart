@@ -113,7 +113,7 @@ class _ChangePasswordState extends State<ChangePassword> {
               style: FTextStyle.HeadingTxtWhiteStyle,
               textAlign: TextAlign.center,
             ),
-            backgroundColor: AppColors.primaryColour,
+            backgroundColor: AppColors.primaryColourDark,
 
             leading: Padding(
               padding: const EdgeInsets.only(left: 15),
