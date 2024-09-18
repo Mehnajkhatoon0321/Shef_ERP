@@ -505,7 +505,7 @@ class _LogScreenState extends State<LogScreen> {
                           //   style: FTextStyle.loginBtnStyle,
                           // )
 
-                        isLoading? CircularProgressIndicator(color: Colors.white,):Text(
+                        isLoading? const CircularProgressIndicator(color: Colors.white,):Text(
                           Constants.loginBtnTxt,
                           style: FTextStyle.loginBtnStyle,
                         )
@@ -530,23 +530,23 @@ class _LogScreenState extends State<LogScreen> {
 
       switch (role) {
         case 'Unit Head':
-          nextPage = Navigation(); // Replace with your Admin screen widget
+          nextPage = const Navigation(); // Replace with your Admin screen widget
           break;
         case 'super-admin':
-          nextPage = Navigation(); // Replace with your Admin screen widget
+          nextPage = const Navigation(); // Replace with your Admin screen widget
           break;
         case 'Purchase Manager':
-          nextPage = Navigation(); // Replace with your User screen widget
+          nextPage = const Navigation(); // Replace with your User screen widget
           break;
 
         case 'Program Director':
-          nextPage = Navigation(); // Replace with your User screen widget
+          nextPage = const Navigation(); // Replace with your User screen widget
           break;
         case 'Vendor':
-          nextPage = Navigation(); // Replace with your User screen widget
+          nextPage = const Navigation(); // Replace with your User screen widget
           break;
         case 'Requester':
-          nextPage = Navigation(); // Replace with your User screen widget
+          nextPage = const Navigation(); // Replace with your User screen widget
           break;
         default:
         // Handle cases where the role is unknown

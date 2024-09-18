@@ -33,15 +33,26 @@ final class ProductListSuccess extends AllRequesterState {
   final Map<String, dynamic> productList;
 
   ProductListSuccess(this.productList);
-//
+
 
 
 }
+//Specification List
 final class SpecificationListLoading extends AllRequesterState{}
 final class SpecificationListSuccess extends AllRequesterState{
   final Map<String, dynamic> specList;
   SpecificationListSuccess(this.specList);
-//
+// Add Requisition
+
+
+}
+
+// AllRequesterState
+final class AddRequisitionLoading extends AllRequesterState{}
+final class AddRequisitionSuccess extends AllRequesterState{
+  final Map<String, dynamic> addRequisition;
+  AddRequisitionSuccess(this.addRequisition);
+// Add Requisition
 
 
 }

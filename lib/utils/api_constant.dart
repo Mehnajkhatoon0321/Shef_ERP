@@ -7,5 +7,6 @@ class  APIEndPoints{
   static const String requesterListAdd = '${baseUrl}req/create/';
   static const String getProduct = '${baseUrl}getproduct';
   static const String getSpecification = '${baseUrl}getspec';
+  static const String postRequisition= '${baseUrl}req/store';
 
 }

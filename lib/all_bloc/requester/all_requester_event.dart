@@ -25,3 +25,21 @@ class SepListHandler extends AllRequesterEvent {
 
   SepListHandler(this.productID);
 }
+
+class AddRequisitionHandler extends AllRequesterEvent {
+  final String date;
+  final String unit;
+  final String nextDate;
+  final String time;
+  final String user_id;
+  final List<Map<String, dynamic>> requisition_list;
+
+  AddRequisitionHandler({
+    required this.date,
+    required this.nextDate,
+    required this.unit,
+    required this.time,
+    required this.user_id,
+    required this.requisition_list,
+  });
+}

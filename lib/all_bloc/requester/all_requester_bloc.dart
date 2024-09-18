@@ -171,6 +171,56 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
       }
     });
 
+    on<AddRequisitionHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(AddRequisitionLoading());
+        try {
+          // Fetch token and user ID
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+
+          // Define the API endpoint
+          final APIEndpoint = Uri.parse("${APIEndPoints.postRequisition}");
+
+          // Prepare the request body
+          final requestBody = jsonEncode({
+            'date': event.date,
+            'unit': event.unit,
+            'time': event.time,
+            'user_id': userId,
+            'delivery_date': event.nextDate,
+            'requisition_list': event.requisition_list,
+          });
+
+          // Make the HTTP POST request
+          final response = await http.post(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+            },
+            body: requestBody,
+          );
+
+          developer.log("URL: $APIEndpoint");
+          developer.log("Request Body: $requestBody"); // Log the request body for debugging
+
+          if (response.statusCode == 200) {
+            final responseData = jsonDecode(response.body);
+            emit(AddRequisitionSuccess(responseData));
+          } else {
+            final responseError = jsonDecode(response.body);
+            emit(AddCartFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(AddCartFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(AddCartFailure({'error': 'Network error'}));
+      }
+    });
 
   }
 }

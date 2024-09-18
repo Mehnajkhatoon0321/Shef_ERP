@@ -7,8 +7,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:shef_erp/requester/all_requester_bloc.dart';
+import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
+
 import 'package:shef_erp/screen/requisition/admin/admin_requisition.dart';
+import 'package:shef_erp/screen/requisition/requester/requisition_requester.dart';
 
 import 'package:shef_erp/screen/requisition/unit_head/requisition.dart';
 import 'package:shef_erp/utils/colours.dart';
@@ -29,12 +31,12 @@ class AddRequisition extends StatefulWidget {
 }
 
 class _AddRequisitionState extends State<AddRequisition> {
-  //Add Requisition
   bool isLoading = false;
+  bool isAddLoading = false;
   bool addVisibility = false;
   bool goneVisibility = true;
   String gender = "";
-  bool isButtonEnabled = false;
+  bool isButtonEnabled = true;
   bool isEditMode = false;
   bool isImageUploaded = false;
   String? fileName1;
@@ -221,7 +223,9 @@ class _AddRequisitionState extends State<AddRequisition> {
   String? selectedEventItem; // Variable to keep track of selected item
   String? selectedUnitItem; // Variable to keep track of selected item
 
-
+String? unitFromList;
+String? timeFromList;
+String? nextFromList;
 
   @override
   Widget build(BuildContext context) {
@@ -263,6 +267,11 @@ class _AddRequisitionState extends State<AddRequisition> {
 
         var eventList = state.viewAddList['list']['events'];
         responseData = state.viewAddList['list'];
+         timeFromList = state.viewAddList['list']['time'];
+         unitFromList = state.viewAddList['list']['unit'];
+         nextFromList = state.viewAddList['list']['nextDate'];
+
+        print("AllData>>>>${responseData}");
         var categoryList = state.viewAddList['list']['category'];
 
 
@@ -314,6 +323,45 @@ class _AddRequisitionState extends State<AddRequisition> {
         specificationName.text = displayText;
       });
     }
+    if (state is AddRequisitionLoading) {
+      setState(() {
+        isAddLoading = true;
+      });
+    } else if (state is AddRequisitionSuccess) {
+
+      isAddLoading = false;
+      setState(() {
+        var Add = state.addRequisition;
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+             BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: RequisitionRequester(),
+),
+          ),
+        );
+        print(">>>>>AddSucess$Add");
+        // if (widget.flag=="unit") {
+        //   Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //       builder: (context) =>
+        //       const AdminRequisition(),
+        //     ),
+        //   );
+        // } else {
+        //   Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //       builder: (context) =>
+        //       const RequisitionScreen(),
+        //     ),
+        //   );
+        // }
+      });
+    }
 
 
 
@@ -323,21 +371,8 @@ class _AddRequisitionState extends State<AddRequisition> {
   },
   child: SingleChildScrollView(
         child: Form(
-          onChanged: () {
-            if (isButtonEnabled = ValidatorUtils.isValidDate(dateFrom.text) &&
-                itemList.isNotEmpty) {
-              setState(() {
-                isButtonEnabled = true;
-              });
-            } else {
-              setState(() {
-                isButtonEnabled = false;
-              });
-            }
-            if (isDateFocused == true) {
-              dateKey.currentState!.validate();
-            }
-          },
+
+
           child: Padding(
             padding: const EdgeInsets.all(18.0),
             child: Column(
@@ -871,66 +906,54 @@ class _AddRequisitionState extends State<AddRequisition> {
                                   padding: const EdgeInsets.all(18.0),
                                   child: SizedBox(
                                     width: MediaQuery.of(context).size.width,
-                                    height: (displayType == 'desktop' ||
-                                            displayType == 'tablet')
-                                        ? 40
-                                        : 48,
+                                    height: (displayType == 'desktop' || displayType == 'tablet') ? 40 : 48,
                                     child: ElevatedButton(
                                       onPressed: isButtonPartEnabled
                                           ? () {
-                                              setState(() {
-                                                if (isEditMode) {
-                                                  if (selectedItemForEditing !=
-                                                      null) {
-                                                    final index = itemList.indexOf(
-                                                        selectedItemForEditing!);
-                                                    itemList[index] = {
-                                                      "model": selectedItem!,
-                                                      "product": selectedItem!,
-                                                      "specialisation":
-                                                          specificationName
-                                                              .text,
-                                                      'remark': remarkName.text,
-                                                      'quantity':
-                                                          quantityName.text,
-                                                      'remarkName':
-                                                          remarkName.text,
-                                                      'uploadName':
-                                                          uploadName.text,
-                                                    };
-                                                  }
-                                                } else {
-                                                  itemList.add({
-                                                    "model": selectedItem!,
-                                                    "product": selectedItem!,
-                                                    "specialisation":
-                                                        specificationName.text,
-                                                    'remark': remarkName.text,
-                                                    'quantity':
-                                                        quantityName.text,
-                                                    'uploadName':
-                                                        uploadName.text,
-                                                  });
-                                                }
-
-                                                // Reset state
-                                                addVisibility = false;
-                                                isEditMode = false;
-                                                selectedItem = null;
-                                                specificationName.clear();
-                                                remarkName.clear();
-                                                quantityName.clear();
-                                                uploadName.clear();
-                                                isButtonPartEnabled = false;
-                                                selectedItemForEditing =
-                                                    null; // Clear the editing item
-                                              });
+                                        setState(() {
+                                          if (isEditMode) {
+                                            // Updating an existing item
+                                            if (selectedItemForEditing != null) {
+                                              final index = itemList.indexOf(selectedItemForEditing!);
+                                              itemList[index] = {
+                                                "model": selectedItem!,
+                                                "product": selectedItem!,
+                                                "specialisation": specificationName.text,
+                                                'remark': remarkName.text,
+                                                'quantity': quantityName.text,
+                                                'uploadName': uploadName.text,
+                                              };
                                             }
+                                          } else {
+                                            // Adding a new item
+                                            itemList.add({
+                                              "model": selectedItem!,
+                                              "product": selectedItem!,
+                                              "specialisation": specificationName.text,
+                                              'remark': remarkName.text,
+                                              'quantity': quantityName.text,
+                                              'uploadName': uploadName.text,
+                                            });
+                                          }
+
+                                          // Reset state after add/update
+                                          addVisibility = false;
+                                          isEditMode = false;
+                                          selectedItem = null;
+                                          specificationName.clear();
+                                          remarkName.clear();
+                                          quantityName.clear();
+                                          uploadName.clear();
+
+                                          // Enable the button for further actions if required
+                                          isButtonPartEnabled = false; // Adjust this as needed
+                                          selectedItemForEditing = null; // Clear the editing item
+                                        });
+                                      }
                                           : null,
                                       style: ElevatedButton.styleFrom(
                                         shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(26),
+                                          borderRadius: BorderRadius.circular(26),
                                         ),
                                         backgroundColor: isButtonPartEnabled
                                             ? AppColors.primaryColourDark
@@ -940,12 +963,13 @@ class _AddRequisitionState extends State<AddRequisition> {
                                         isEditMode ? "Update" : "Add",
                                         style: FTextStyle.loginBtnStyle,
                                       ),
+                                    ).animateOnPageLoad(
+                                      animationsMap['imageOnPageLoadAnimation2']!,
                                     ),
-                                  ).animateOnPageLoad(
-                                    animationsMap['imageOnPageLoadAnimation2']!,
                                   ),
                                 ),
                               ),
+
                             ],
                           ),
                         ),
@@ -953,13 +977,15 @@ class _AddRequisitionState extends State<AddRequisition> {
                     ),
                   ),
                 ),
-
+SizedBox(height: 20,),
 
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.3,
+                  height: MediaQuery.of(context).size.height * 0.5,
                   child: ListView.builder(
                     itemCount: itemList.length,
+
                     itemBuilder: (context, index) {
+                      print(">>>ALLDATAITEMLOCAL$itemList");
                       final item = itemList[index];
                       return Container(
                         margin: const EdgeInsets.only(bottom: 4),
@@ -971,8 +997,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Text(item["model"] ?? "", style: const TextStyle(fontWeight: FontWeight.bold)),
-                            // const SizedBox(height: 7),
+
                             Row(
                               children: [
                                 Expanded(
@@ -1049,7 +1074,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding:  EdgeInsets.all(8.0),
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width,
                     height:
@@ -1059,26 +1084,21 @@ class _AddRequisitionState extends State<AddRequisition> {
                     child: ElevatedButton(
                       onPressed: isButtonEnabled
                           ? () async {
-                              setState(() {
-                                isLoading = true;
+                        BlocProvider.of<AllRequesterBloc>(context).add(
+                          AddRequisitionHandler(
+                            date: dateFrom.text.toString(),
+                            unit: "$unitFromList",  // Add your value here
+                            nextDate: "$nextFromList",
+                            time: "$timeFromList",  // Add your value here
+                            user_id: "",  // Add your value here
+                            requisition_list: itemList,
+                          ),
+                        );
+
+                        setState(() {
+                                isAddLoading = true;
                               });
-                              if (widget.flag.isNotEmpty) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const AdminRequisition(),
-                                  ),
-                                );
-                              } else {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const RequisitionScreen(),
-                                  ),
-                                );
-                              }
+
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
@@ -1089,10 +1109,10 @@ class _AddRequisitionState extends State<AddRequisition> {
                             ? AppColors.primaryColourDark
                             : AppColors.disableButtonColor,
                       ),
-                      child: Text(
+                      child:isAddLoading?CircularProgressIndicator(color: Colors.white,): Text(
                         "Submit",
                         style: FTextStyle.loginBtnStyle,
-                      ),
+                      )
                     ),
                   ).animateOnPageLoad(
                     animationsMap['imageOnPageLoadAnimation2']!,

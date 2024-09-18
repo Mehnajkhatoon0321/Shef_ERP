@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shef_erp/requester/all_requester_bloc.dart';
+import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
+
 import 'package:shef_erp/screen/requisition/unit_head/add_requisition.dart';
 import 'package:shef_erp/screen/requisition/unit_head/edit_requisition.dart';
 import 'package:shef_erp/screen/requisition/unit_head/view_details.dart';
