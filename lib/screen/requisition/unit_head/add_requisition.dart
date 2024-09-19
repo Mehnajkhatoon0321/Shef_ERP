@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,16 +7,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 
-import 'package:shef_erp/screen/requisition/admin/admin_requisition.dart';
 import 'package:shef_erp/screen/requisition/requester/requisition_requester.dart';
 
-import 'package:shef_erp/screen/requisition/unit_head/requisition.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 import 'package:shef_erp/utils/form_field_style.dart';
 import 'package:shef_erp/utils/no_space_input_formatter_class.dart';
+import 'package:shef_erp/utils/pref_utils.dart';
 import 'package:shef_erp/utils/validator_utils.dart';
 
 class AddRequisition extends StatefulWidget {
@@ -60,7 +57,7 @@ class _AddRequisitionState extends State<AddRequisition> {
     // Initialize the date controller with the current date formatted as dd-MM-yyyy
     dateFrom.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
   }
-
+  int userId = PrefUtils.getUserId();
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
       trigger: AnimationTrigger.onPageLoad,
@@ -565,6 +562,7 @@ String? nextFromList;
                                         isEditMode = false; // Reset edit mode
                                         selectedItem = null;
                                         specificationName.clear();
+                                        selectedEventItem=null;
                                         quantityName.clear();
                                         remarkName.clear();
                                         uploadName.clear();
@@ -916,23 +914,25 @@ String? nextFromList;
                                             if (selectedItemForEditing != null) {
                                               final index = itemList.indexOf(selectedItemForEditing!);
                                               itemList[index] = {
-                                                "model": selectedItem!,
                                                 "product": selectedItem!,
-                                                "specialisation": specificationName.text,
-                                                'remark': remarkName.text,
-                                                'quantity': quantityName.text,
-                                                'uploadName': uploadName.text,
+                                                "event": selectedEventItem!,
+                                                "specification": specificationName.text,
+                                                "quantity": quantityName.text,
+                                                "image": uploadName.text,
+                                                "additional": remarkName.text, // Add your additional field here
+                                                "user_id": userId.toString(), // Replace with actual user_id if needed
                                               };
                                             }
                                           } else {
                                             // Adding a new item
                                             itemList.add({
-                                              "model": selectedItem!,
                                               "product": selectedItem!,
-                                              "specialisation": specificationName.text,
-                                              'remark': remarkName.text,
-                                              'quantity': quantityName.text,
-                                              'uploadName': uploadName.text,
+                                              "event": selectedEventItem!,
+                                              "specification": specificationName.text,
+                                              "quantity": quantityName.text,
+                                              "image": uploadName.text,
+                                              "additional": remarkName.text, // Add your additional field here
+                                              "user_id": userId.toString(), // Replace with actual user_id if needed
                                             });
                                           }
 
@@ -968,7 +968,8 @@ String? nextFromList;
                                     ),
                                   ),
                                 ),
-                              ),
+                              )
+
 
                             ],
                           ),
@@ -1028,6 +1029,12 @@ SizedBox(height: 20,),
                                             text: item["remark"] ?? "--",
                                             style: FTextStyle.listTitle),
                                         const TextSpan(
+                                            text: "\nEvent: ",
+                                            style: FTextStyle.listTitleSub),
+                                        TextSpan(
+                                            text: item["event"] ?? "--",
+                                            style: FTextStyle.listTitle),
+                                        const TextSpan(
                                             text: "\n",
                                             style: FTextStyle.listTitleSub),
                                         TextSpan(
@@ -1043,7 +1050,7 @@ SizedBox(height: 20,),
                                   onPressed: () {
                                     setState(() {
                                       selectedItemForEditing = item;
-                                      selectedItem = item["model"];
+                                      selectedItem = item["product"];
                                       specificationName.text =
                                           item["specialisation"] ?? "--";
                                       quantityName.text =
@@ -1087,11 +1094,11 @@ SizedBox(height: 20,),
                         BlocProvider.of<AllRequesterBloc>(context).add(
                           AddRequisitionHandler(
                             date: dateFrom.text.toString(),
-                            unit: "$unitFromList",  // Add your value here
-                            nextDate: "$nextFromList",
-                            time: "$timeFromList",  // Add your value here
-                            user_id: "",  // Add your value here
-                            requisition_list: itemList,
+                            unit: unitFromList.toString(),  // Add your value here
+                            nextDate: nextFromList.toString(),
+                            time: timeFromList.toString(),  // Add your value here
+                            userId:userId.toString(),  // Add your value here
+                            requisitionList: itemList,
                           ),
                         );
 

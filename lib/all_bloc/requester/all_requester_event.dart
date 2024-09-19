@@ -31,15 +31,15 @@ class AddRequisitionHandler extends AllRequesterEvent {
   final String unit;
   final String nextDate;
   final String time;
-  final String user_id;
-  final List<Map<String, dynamic>> requisition_list;
+  final String userId; // Keep this as a string for now
+  final List<Map<String, dynamic>> requisitionList;
 
   AddRequisitionHandler({
     required this.date,
-    required this.nextDate,
     required this.unit,
+    required this.nextDate,
     required this.time,
-    required this.user_id,
-    required this.requisition_list,
+    required this.userId,
+    required this.requisitionList,
   });
 }

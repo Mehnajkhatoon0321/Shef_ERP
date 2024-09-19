@@ -189,8 +189,9 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
             'time': event.time,
             'user_id': userId,
             'delivery_date': event.nextDate,
-            'requisition_list': event.requisition_list,
+            'requisition_list': event.requisitionList,
           });
+
 
           // Make the HTTP POST request
           final response = await http.post(
@@ -207,6 +208,7 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
 
           if (response.statusCode == 200) {
             final responseData = jsonDecode(response.body);
+            print("ResponseData>>>>$responseData");
             emit(AddRequisitionSuccess(responseData));
           } else {
             final responseError = jsonDecode(response.body);
