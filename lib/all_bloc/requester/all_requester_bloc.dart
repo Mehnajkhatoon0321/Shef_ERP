@@ -1,12 +1,17 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:bloc/bloc.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart';
 import 'package:shef_erp/utils/api_constant.dart';
 import 'package:shef_erp/utils/connectivity_service.dart';
 import 'package:shef_erp/utils/pref_utils.dart';
 import 'package:http/http.dart' as http;
 import 'dart:developer' as developer;
+import 'package:path/path.dart' as path;
 part 'all_requester_event.dart';
 part 'all_requester_state.dart';
 
@@ -171,58 +176,140 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
       }
     });
 
+//     on<AddRequisitionHandler>((event, emit) async {
+//       if (await ConnectivityService.isConnected()) {
+//         emit(AddRequisitionLoading());
+//         try {
+//           Dio dio = Dio();
+//           String authToken = PrefUtils.getToken();
+//           dio.options.headers["Authorization"] = 'Bearer $authToken';
+//
+//           // Prepare the list of files
+//           List<MultipartFile> files = [];
+//           for (var item in event.requisitionList) {
+//             String filePath = item['image']!.path;
+//             String fileName = basename(filePath);
+//             files.add(await MultipartFile.fromFile(filePath, filename: fileName));
+//           }
+//
+//           // Prepare FormData
+//           Map<String, dynamic> formDataMap = {
+//             'files': files,
+//             'date': event.date,
+//             'unit': event.unit,
+//             'time': event.time,
+//             'user_id': PrefUtils.getUserId(),
+//           };
+//
+//           // Add requisition list items to formDataMap
+//           for (int i = 0; i < event.requisitionList.length; i++) {
+//             formDataMap['requisition_list[$i][product]'] = event.requisitionList[i]['product'];
+//             formDataMap['requisition_list[$i][specification]'] = event.requisitionList[i]['specification'];
+//             formDataMap['requisition_list[$i][event]'] = event.requisitionList[i]['event'];
+//             formDataMap['requisition_list[$i][additional]'] = event.requisitionList[i]['additional'];
+//             formDataMap['requisition_list[$i][quantity]'] = event.requisitionList[i]['quantity'];
+//             formDataMap['requisition_list[$i][user_id]'] = event.requisitionList[i]['user_id'];
+//           }
+//
+//           FormData requestbody = FormData.fromMap(formDataMap);
+//           var response = await dio.post(APIEndPoints.postRequisition, data: requestbody);
+//
+//           if (response.statusCode == 200) {
+//             emit(AddRequisitionSuccess(response.data));
+// print(">>>>>ALl${response.data}");
+//           } else {
+//             emit(AddCartFailure(const {'error': 'Exception occurred:'}));
+//           }
+//         } on DioException catch (e) {
+//           if (e.response != null) {
+//             emit(AddCartFailure(const {'error': 'Exception occurred:'}));
+//           } else {
+//             emit(AddCartFailure(const {'error': 'Exception occurred:'}));
+//           }
+//           if (kDebugMode) {
+//             developer.log(e.toString());
+//           }
+//         } catch (e) {
+//           if (kDebugMode) {
+//             developer.log(e.toString());
+//           }
+//         }
+//       } else {
+//         emit(AddCartFailure(const {'error': 'Exception occurred:'}));
+//       }
+//     });
     on<AddRequisitionHandler>((event, emit) async {
       if (await ConnectivityService.isConnected()) {
         emit(AddRequisitionLoading());
         try {
-          // Fetch token and user ID
+          Dio dio = Dio();
           String authToken = PrefUtils.getToken();
-          int userId = PrefUtils.getUserId();
+          dio.options.headers["Authorization"] = 'Bearer $authToken';
 
-          // Define the API endpoint
-          final APIEndpoint = Uri.parse("${APIEndPoints.postRequisition}");
-
-          // Prepare the request body
-          final requestBody = jsonEncode({
+// Prepare FormData with proper field names
+          FormData formData = FormData.fromMap({
             'date': event.date,
             'unit': event.unit,
             'time': event.time,
-            'user_id': userId,
-            'delivery_date': event.nextDate,
-            'requisition_list': event.requisitionList,
+            'user_id': PrefUtils.getUserId(),
           });
 
+// Prepare requisition list and attach files
+          for (int i = 0; i < event.requisitionList.length; i++) {
+            var item = event.requisitionList[i];
+            String filePath = item['image']?.path ?? '';
 
-          // Make the HTTP POST request
-          final response = await http.post(
-            APIEndpoint,
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $authToken',
-            },
-            body: requestBody,
-          );
+            // Add each requisition field to FormData
+            formData.fields.addAll([
+              MapEntry('requisition_list[$i][product]', item['product'] ?? ''),
+              MapEntry('requisition_list[$i][specification]', item['specification'] ?? ''),
+              MapEntry('requisition_list[$i][event]', item['event'] ?? ''),
+              MapEntry('requisition_list[$i][additional]', item['additional'] ?? ''),
+              MapEntry('requisition_list[$i][quantity]', item['quantity']?.toString() ?? ''),
+              MapEntry('requisition_list[$i][user_id]', item['user_id']?.toString() ?? ''),
+            ]);
 
-          developer.log("URL: $APIEndpoint");
-          developer.log("Request Body: $requestBody"); // Log the request body for debugging
+            // Attach image file if present
+            if (filePath.isNotEmpty) {
+              File file = File(filePath);
+              if (await file.exists()) {
+                String fileName = basename(filePath);
+                formData.files.add(MapEntry(
+                  'requisition_list[$i][images]', // This field name should match your backend
+                  await MultipartFile.fromFile(filePath, filename: fileName),
+                ));
+              } else {
+                emit(AddCartFailure({'error': 'File not found: $filePath'}));
+                return;
+              }
+            } else {
+              emit(AddCartFailure({'error': 'Invalid file path'}));
+              return;
+            }
+          }
+              print(">>>>>Imaage");
+// Send the request
+          var response = await dio.post(APIEndPoints.postRequisition, data: formData);
 
           if (response.statusCode == 200) {
-            final responseData = jsonDecode(response.body);
-            print("ResponseData>>>>$responseData");
-            emit(AddRequisitionSuccess(responseData));
+            emit(AddRequisitionSuccess(response.data));
+            print(">>>>> Response: ${response.data}");
           } else {
-            final responseError = jsonDecode(response.body);
-            emit(AddCartFailure(responseError));
-          }
+            emit(AddCartFailure({'error': 'Failed to upload requisition'}));
+          } // Print request details
+
         } catch (e) {
-          print('Exception: $e');
-          emit(AddCartFailure({'error': 'Exception occurred: $e'}));
+          if (kDebugMode) {
+            developer.log(e.toString());
+          }
+          emit(AddCartFailure({'error': 'Exception occurred: ${e.toString()}'}));
         }
       } else {
-        print('Network error');
-        emit(AddCartFailure({'error': 'Network error'}));
+        emit(AddCartFailure({'error': 'No internet connection'}));
       }
     });
+
+
 
   }
 }

@@ -41,7 +41,7 @@ class _AddRequisitionState extends State<AddRequisition> {
   late final FocusNode _dateAppNode = FocusNode();
 
   late final TextEditingController dateFrom = TextEditingController();
-  List<Map<String, String>> itemList = [];
+  List<Map<String, dynamic>> itemList = [];
 
 
   @override
@@ -171,7 +171,7 @@ class _AddRequisitionState extends State<AddRequisition> {
   late final FocusNode _quantityNameNode = FocusNode();
   late final FocusNode _remarkNameNode = FocusNode();
   late final FocusNode _uploadNameNode = FocusNode();
-  Map<String, String>? selectedItemForEditing;
+  Map<String, dynamic>? selectedItemForEditing;
   bool isButtonPartEnabled = false;
   bool isSpecificationFieldFocused = false;
   bool isProductFieldFocused = false;
@@ -918,7 +918,7 @@ String? nextFromList;
                                                 "event": selectedEventItem!,
                                                 "specification": specificationName.text,
                                                 "quantity": quantityName.text,
-                                                "image": uploadName.text,
+                                                "image": imagesId,
                                                 "additional": remarkName.text, // Add your additional field here
                                                 "user_id": userId.toString(), // Replace with actual user_id if needed
                                               };
@@ -930,7 +930,7 @@ String? nextFromList;
                                               "event": selectedEventItem!,
                                               "specification": specificationName.text,
                                               "quantity": quantityName.text,
-                                              "image": uploadName.text,
+                                              "image": imagesId,
                                               "additional": remarkName.text, // Add your additional field here
                                               "user_id": userId.toString(), // Replace with actual user_id if needed
                                             });
@@ -1037,8 +1037,9 @@ SizedBox(height: 20,),
                                         const TextSpan(
                                             text: "\n",
                                             style: FTextStyle.listTitleSub),
-                                        TextSpan(
-                                            text: item['uploadName'] ?? "--",
+                                        const TextSpan(
+                                            text: "documentimage" ?? "--",
+                                            // text: basename(item['image']!.path) ?? "--",
                                             style: FTextStyle.listTitle),
                                       ],
                                     ),
@@ -1056,7 +1057,7 @@ SizedBox(height: 20,),
                                       quantityName.text =
                                           item["quantity"] ?? "--";
                                       remarkName.text = item["remark"] ?? "--";
-                                      uploadName.text = item['uploadName']!;
+                                      uploadName.text = item['image']!;
                                       addVisibility = true;
                                       isEditMode = true;
                                     });
