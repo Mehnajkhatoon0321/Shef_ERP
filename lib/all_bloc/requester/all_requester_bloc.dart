@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
@@ -84,11 +85,15 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
             emit(AddCartFailure(responseError));
           }
         } catch (e) {
-          print('Exception: $e');
+          if (kDebugMode) {
+            print('Exception: $e');
+          }
           emit(AddCartFailure({'error': 'Exception occurred: $e'}));
         }
       } else {
-        print('Network error');
+        if (kDebugMode) {
+          print('Network error');
+        }
         emit(AddCartFailure(const {'error': 'Network error'}));
       }
     });
@@ -251,6 +256,7 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
             'date': event.date,
             'unit': event.unit,
             'time': event.time,
+            'delivery_date':event.nextDate,
             'user_id': PrefUtils.getUserId(),
           });
 
@@ -275,7 +281,7 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
               if (await file.exists()) {
                 String fileName = basename(filePath);
                 formData.files.add(MapEntry(
-                  'requisition_list[$i][images]', // This field name should match your backend
+                  'requisition_list[$i][image]',
                   await MultipartFile.fromFile(filePath, filename: fileName),
                 ));
               } else {
@@ -308,6 +314,81 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
         emit(AddCartFailure({'error': 'No internet connection'}));
       }
     });
+    //Delete Requisition
+
+    on<DeleteHandlers>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(DeleteLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.requesterList}${event.ID}/$userId");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $response");
+
+          if (response.statusCode == 200) {
+            emit(DeleteSuccess('Product deleted successfully from the cart.'));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(DeleteFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(DeleteFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(DeleteFailure( {'error': 'Network error'}));
+      }
+    });
+
+    //Edit Requisition Details
+
+    on<EditDetailHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(AddCartLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.postReqEdit}${event.id}$userId");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(AddCartSuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(AddCartFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(AddCartFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(AddCartFailure(const {'error': 'Network error'}));
+      }
+    });
+
 
 
 

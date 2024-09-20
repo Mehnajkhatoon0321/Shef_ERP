@@ -56,3 +56,19 @@ final class AddRequisitionSuccess extends AllRequesterState{
 
 
 }
+
+//Delete Requisition
+
+final class DeleteLoading extends AllRequesterState{}
+final class DeleteSuccess extends AllRequesterState{
+  final String messageSuccess;
+  DeleteSuccess(this.messageSuccess);
+
+}
+
+
+final class DeleteFailure extends AllRequesterState{
+  final Map<String, dynamic> deleteAddressFailure;
+  DeleteFailure(this.deleteAddressFailure);
+
+}

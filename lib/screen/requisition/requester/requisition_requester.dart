@@ -5,12 +5,14 @@ import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 
 import 'package:shef_erp/screen/requisition/requester/detailsRequisition.dart';
 import 'package:shef_erp/screen/requisition/unit_head/add_requisition.dart';
+import 'package:shef_erp/screen/requisition/unit_head/edit_requisition.dart';
 import 'package:shef_erp/utils/asign_vector.dart';
 import 'package:shef_erp/utils/colour_status.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
+import 'package:shef_erp/utils/common_popups.dart';
+import 'package:shef_erp/utils/deletePopupManager.dart';
 
-import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 import 'package:shef_erp/utils/unit_head_status.dart';
 import 'dart:developer' as developer;
@@ -146,6 +148,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
           } else if (state is AddCartSuccess) {
             setState(() {
               var responseData = state.addCartDetails['list']['requisitions'];
+              print(">>>>>>>>>>>ALLDATA$responseData");
               totalPages = responseData["total"];
 
               if (pageNo == 1) {
@@ -166,6 +169,23 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
               isLoading = false;
             });
             print("error>> ${state.addCartDetailFailure}");
+          } else if (state is DeleteLoading) {
+            DeletePopupManager.playLoader();
+          } else if (state is DeleteSuccess) {
+            DeletePopupManager.stopLoader();
+
+
+            BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.messageSuccess),
+                backgroundColor: AppColors.primaryColour,
+              ),
+            );
+
+            Future.delayed(const Duration(milliseconds: 500), () {
+              Navigator.pop(context);
+            });
           }
         },
         child: Column(
@@ -320,6 +340,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+
                               Row(
                                 children: [
                                   const Text("Requisition No: ", style: FTextStyle.listTitle),
@@ -338,18 +359,9 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                                   Expanded(child: Text("${item["product_name"]}", style: FTextStyle.listTitleSub)),
                                 ],
                               ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
-                                    children: [
-                                      const Text("Request Date: ", style: FTextStyle.listTitle),
-                                      Text("${item["req_date"]}", style: FTextStyle.listTitleSub),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 5),
-                                ],
-                              ),
+
+
+
                               Row(
                                 children: [
                                   Expanded(child: DeliveryStatus(dlStatus: item["dl_status"].toString())),
@@ -364,6 +376,68 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                                 children: [
                                   Expanded(child: PurchaseManager(pmStatus: item["pm_status"].toString())),
                                 ],
+                              ),
+                              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          const Text("Request Date: ", style: FTextStyle.listTitle),
+                                          Text("${item["req_date"]}", style: FTextStyle.listTitleSub),
+                                        ],
+                                      ),
+
+                                    ],
+                                  ),
+                                  Visibility(
+                                    // visible: ( item['roles'] == 'Requester' &&  item["uh_status"] == 0),
+                                    child: Row(
+
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.edit, color: Colors.black),
+                                          onPressed: () {
+                                            Navigator.push(context, MaterialPageRoute(builder: (context) => EditRequisition(
+                                              product: item["product_name"] is String ? item["product_name"] : "",
+                                              specification: item["specification"] is String ? item["specification"] : "",
+                                              quantity: item["quantity"].toString(),
+                                              remark: item["staff_remarks"] is String ? item["staff_remarks"] : "",
+                                              upload: item["image"],
+
+
+                                            )));
+                                          },
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.delete, color: Colors.red),
+                                          onPressed: () =>
+                                          {
+
+                                          CommonPopups
+                                              .showDeleteCustomPopup(
+                                          context,
+                                          "Are you sure you want to delete?",
+                                          () {
+                                          BlocProvider.of<
+                                          AllRequesterBloc>(
+                                          context)
+                                              .add(
+                                          DeleteHandlers(
+                                      data[index]['id'],
+                                          ),
+                                          );
+                                          },
+                                          )
+                                            // _showDeleteDialog(index)
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),                                      ],
                               ),
                             ],
                           ),
@@ -386,6 +460,46 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
     );
   }
 
+  void _showDeleteDialog(int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          content: Text("Are you sure you want to delete?", style: FTextStyle.preHeadingStyle),
+          actions: [
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.formFieldBackColour,
+                borderRadius: BorderRadius.circular(25.0),
+              ),
+              child: TextButton(
+                child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: AppColors.primaryColourDark,
+                borderRadius: BorderRadius.circular(25.0),
+              ),
+              child: TextButton(
+                child: const Text("OK", style: TextStyle(color: Colors.white)),
+                onPressed: () {
+                  setState(() {
+
+                  });
+                  Navigator.of(context).pop();
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
   void _clearText() {
     _controller.clear();
     setState(() {

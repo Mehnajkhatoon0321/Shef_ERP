@@ -25,6 +25,12 @@ class SepListHandler extends AllRequesterEvent {
 
   SepListHandler(this.productID);
 }
+class DeleteHandlers extends AllRequesterEvent {
+  int ID;
+
+
+  DeleteHandlers(this.ID);
+}
 
 class AddRequisitionHandler extends AllRequesterEvent {
   final String date;
@@ -42,4 +48,11 @@ class AddRequisitionHandler extends AllRequesterEvent {
     required this.userId,
     required this.requisitionList,
   });
+}
+
+//Edit
+
+class EditDetailHandler extends AllRequesterEvent {
+  int id;
+  EditDetailHandler(this.id);
 }
