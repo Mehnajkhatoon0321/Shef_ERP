@@ -44,20 +44,16 @@ class _AddRequisitionState extends State<AddRequisition> {
   late final TextEditingController dateFrom = TextEditingController();
   List<Map<String, dynamic>> itemList = [];
 
-
   @override
   void initState() {
     super.initState();
 
-
-
-      BlocProvider.of<AllRequesterBloc>(context).add(RequesterHandler());
-
-
+    BlocProvider.of<AllRequesterBloc>(context).add(RequesterHandler());
 
     // Initialize the date controller with the current date formatted as dd-MM-yyyy
     dateFrom.text = DateFormat('dd-MM-yyyy').format(DateTime.now());
   }
+
   int userId = PrefUtils.getUserId();
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
@@ -183,10 +179,11 @@ class _AddRequisitionState extends State<AddRequisition> {
   bool isRemarkFocused = false;
   bool isUploadFocused = false;
   bool isDateFocused = false;
-  Map<String,dynamic> responseData={};
- List<dynamic>   ProductList=[];
+  Map<String, dynamic> responseData = {};
+  List<dynamic> ProductList = [];
   int? selectedCategoryId;
   int? selectedProductId;
+
   void _selectDate(BuildContext context) async {
     DateTime currentDate = DateTime.now();
     DateTime? selectedDate = await showDatePicker(
@@ -210,8 +207,8 @@ class _AddRequisitionState extends State<AddRequisition> {
 
   List<String> categoryNames = [];
   List<String> productNames = [];
-  Map<String, int> categoryMap={};
-  Map<String, int> productMap={};
+  Map<String, int> categoryMap = {};
+  Map<String, int> productMap = {};
   List<String> eventNames = [];
 
   List<dynamic> unitList = ['unitList1', 'unitList2', 'unitList3'];
@@ -221,9 +218,9 @@ class _AddRequisitionState extends State<AddRequisition> {
   String? selectedEventItem; // Variable to keep track of selected item
   String? selectedUnitItem; // Variable to keep track of selected item
 
-String? unitFromList;
-String? timeFromList;
-String? nextFromList;
+  String? unitFromList;
+  String? timeFromList;
+  String? nextFromList;
 
   @override
   Widget build(BuildContext context) {
@@ -255,884 +252,976 @@ String? nextFromList;
         ), // You can set this to any color you prefer
       ),
       body: BlocListener<AllRequesterBloc, AllRequesterState>(
-  listener: (context, state) {
-    if (state is ViewAddListLoading) {
-      setState(() {
-        isLoading = true;
-      });
-    } else if (state is ViewAddListSuccess) {
-      setState(() {
+        listener: (context, state) {
+          if (state is ViewAddListLoading) {
+            setState(() {
+              isLoading = true;
+            });
+          } else if (state is ViewAddListSuccess) {
+            setState(() {
+              var eventList = state.viewAddList['list']['events'];
+              responseData = state.viewAddList['list'];
+              timeFromList = state.viewAddList['list']['time'];
+              unitFromList = state.viewAddList['list']['unit'];
+              nextFromList = state.viewAddList['list']['nextDate'];
 
-        var eventList = state.viewAddList['list']['events'];
-        responseData = state.viewAddList['list'];
-         timeFromList = state.viewAddList['list']['time'];
-         unitFromList = state.viewAddList['list']['unit'];
-         nextFromList = state.viewAddList['list']['nextDate'];
+              print("AllData>>>>${responseData}");
+              var categoryList = state.viewAddList['list']['category'];
 
-        print("AllData>>>>${responseData}");
-        var categoryList = state.viewAddList['list']['category'];
+              categoryNames = categoryList
+                  .map<String>((item) => item['cate_name'] as String)
+                  .toList();
 
+              categoryMap = {
+                for (var item in categoryList)
+                  item['cate_name'] as String: item['id'] as int
+              };
 
-         categoryNames = categoryList.map<String>((item) => item['cate_name'] as String).toList();
+              eventNames = eventList
+                  .map<String>((item) => item['name'] as String)
+                  .toList();
+            });
+          } else if (state is AddCartFailure) {
+            setState(() {
+              isLoading = false;
+            });
+            print("error>> ${state.addCartDetailFailure}");
+          }
+          if (state is ProductListLoading) {
+            setState(() {
+              isLoading = true;
+            });
+          } else if (state is ProductListSuccess) {
+            setState(() {
+              ProductList = state.productList['product_list'];
+              print("ALLProductDat>>>>>>>>>>>>>>>>>a$ProductList");
+              productNames =
+                  ProductList.map<String>((item) => item['name'] as String)
+                      .toList();
 
-         categoryMap = {
-          for (var item in categoryList) item['cate_name'] as String: item['id'] as int
-        };
+              productMap = {
+                for (var item in ProductList)
+                  item['name'] as String: item['id'] as int
+              };
+            });
+          }
 
-         eventNames = eventList.map<String>((item) => item['name'] as String).toList();
+          if (state is SpecificationListLoading) {
+            setState(() {
+              isLoading = true;
+            });
+          } else if (state is SpecificationListSuccess) {
+            setState(() {
+              var specDescription = state.specList['spec'];
 
+              // Provide a default value if specDescription is null
+              var displayText = specDescription ?? '';
 
+              print(">>>>$displayText");
+              specificationName.text = displayText;
+            });
+          }
+          if (state is AddRequisitionLoading) {
+            setState(() {
+              isAddLoading = true;
+            });
+          } else if (state is AddRequisitionSuccess) {
+            isAddLoading = false;
+            setState(() {
+              var Add = state.addRequisition;
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider(
+                    create: (context) => AllRequesterBloc(),
+                    child: RequisitionRequester(),
+                  ),
+                ),
+              );
+              print(">>>>>AddSucess$Add");
+              // if (widget.flag=="unit") {
+              //   Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (context) =>
+              //       const AdminRequisition(),
+              //     ),
+              //   );
+              // } else {
+              //   Navigator.push(
+              //     context,
+              //     MaterialPageRoute(
+              //       builder: (context) =>
+              //       const RequisitionScreen(),
+              //     ),
+              //   );
+              // }
+            });
+          }
 
-
-      });
-    } else if (state is AddCartFailure) {
-      setState(() {
-        isLoading = false;
-      });
-      print("error>> ${state.addCartDetailFailure}");
-    }if (state is ProductListLoading) {
-      setState(() {
-        isLoading = true;
-      });
-    } else if (state is ProductListSuccess) {
-      setState(() {
-        ProductList = state.productList['product_list'];
-        print("ALLProductDat>>>>>>>>>>>>>>>>>a$ProductList");
-        productNames = ProductList.map<String>((item) => item['name'] as String).toList();
-
-        productMap = {
-          for (var item in ProductList) item['name'] as String: item['id'] as int
-        };
-      });
-    }
-
-    if (state is SpecificationListLoading) {
-      setState(() {
-        isLoading = true;
-      });
-    } else if (state is SpecificationListSuccess) {
-      setState(() {
-        var specDescription = state.specList['spec'];
-
-        // Provide a default value if specDescription is null
-        var displayText = specDescription ?? '';
-
-        print(">>>>$displayText");
-        specificationName.text = displayText;
-      });
-    }
-    if (state is AddRequisitionLoading) {
-      setState(() {
-        isAddLoading = true;
-      });
-    } else if (state is AddRequisitionSuccess) {
-
-      isAddLoading = false;
-      setState(() {
-        var Add = state.addRequisition;
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-             BlocProvider(
-  create: (context) => AllRequesterBloc(),
-  child: RequisitionRequester(),
-),
-          ),
-        );
-        print(">>>>>AddSucess$Add");
-        // if (widget.flag=="unit") {
-        //   Navigator.push(
-        //     context,
-        //     MaterialPageRoute(
-        //       builder: (context) =>
-        //       const AdminRequisition(),
-        //     ),
-        //   );
-        // } else {
-        //   Navigator.push(
-        //     context,
-        //     MaterialPageRoute(
-        //       builder: (context) =>
-        //       const RequisitionScreen(),
-        //     ),
-        //   );
-        // }
-      });
-    }
-
-
-
-
-
-    // TODO: implement listener
-  },
-  child: SingleChildScrollView(
-        child: Form(
-
-
-          child: Padding(
-            padding: const EdgeInsets.all(18.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Visibility(
-                  visible:responseData['roles']=='Requester' ,
-
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Date",
-                        style: FTextStyle.formLabelTxtStyle,
-                      ).animateOnPageLoad(
-                        animationsMap['imageOnPageLoadAnimation2']!,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0),
-                        child: TextFormField(
-                          key: dateKey,
-                          focusNode: _dateAppNode,
-                          keyboardType: TextInputType.text,
-                          decoration:
-                          FormFieldStyle.defaultAddressInputDecoration.copyWith(
-                            hintText: "dd-mm-yyyy",
-                            suffixIcon: IconButton(
-                              icon: const Icon(
-                                Icons.calendar_today,
-                                color: AppColors.primaryColourDark,
-                              ),
-                              onPressed: () {
-                                _selectDate(context);
-                              },
-                            ),
-                          ),
-                          inputFormatters: [NoSpaceFormatter()],
-                          controller: dateFrom,
-                          validator: ValidatorUtils.dateValidator,
-                          onTap: () {
-                            setState(() {
-                              isDateFocused = true;
-                            });
-                          },
+          // TODO: implement listener
+        },
+        child: SingleChildScrollView(
+          child: Form(
+            child: Padding(
+              padding: const EdgeInsets.all(18.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Visibility(
+                    visible: responseData['roles'] == 'Requester',
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Date",
+                          style: FTextStyle.formLabelTxtStyle,
                         ).animateOnPageLoad(
                           animationsMap['imageOnPageLoadAnimation2']!,
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 5),
-                Visibility(
-                  visible: widget.flag.isNotEmpty && responseData['roles']=='Requester',
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Unit Name",
-                        style: FTextStyle.formLabelTxtStyle,
-                      ).animateOnPageLoad(
-                        animationsMap['imageOnPageLoadAnimation2']!,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: Container(
-                          width: MediaQuery.of(context).size.width,
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(28.0),
-                            border: Border.all(
-                                color: AppColors.formFieldBorderColour),
-                            color: Colors.grey[100],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: TextFormField(
+                            key: dateKey,
+                            focusNode: _dateAppNode,
+                            keyboardType: TextInputType.text,
+                            decoration: FormFieldStyle
+                                .defaultAddressInputDecoration
+                                .copyWith(
+                              hintText: "dd-mm-yyyy",
+                              suffixIcon: IconButton(
+                                icon: const Icon(
+                                  Icons.calendar_today,
+                                  color: AppColors.primaryColourDark,
+                                ),
+                                onPressed: () {
+                                  _selectDate(context);
+                                },
+                              ),
+                            ),
+                            inputFormatters: [NoSpaceFormatter()],
+                            controller: dateFrom,
+                            validator: ValidatorUtils.dateValidator,
+                            onTap: () {
+                              setState(() {
+                                isDateFocused = true;
+                              });
+                            },
+                          ).animateOnPageLoad(
+                            animationsMap['imageOnPageLoadAnimation2']!,
                           ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              key: _unitNameKey,
-                              focusNode: _unitNameNode,
-                              value: selectedUnitItem,
-                              hint: const Text("Unit Name",
-                                  style: FTextStyle.formhintTxtStyle),
-                              onChanged: (String? value) {
-                                setState(() {
-                                  selectedUnitItem = value;
-                                  // Update button enable state
-                                  isButtonPartEnabled = value != null &&
-                                      value.isNotEmpty &&
-                                      ValidatorUtils.isValidCommon(
-                                          specificationName.text);
-                                });
-                              },
-                              items: unitList.map<DropdownMenuItem<String>>(
-                                  (dynamic value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value.toString()),
-                                );
-                              }).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Visibility(
+                    visible: widget.flag.isNotEmpty &&
+                        responseData['roles'] == 'Requester',
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Unit Name",
+                          style: FTextStyle.formLabelTxtStyle,
+                        ).animateOnPageLoad(
+                          animationsMap['imageOnPageLoadAnimation2']!,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width,
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(28.0),
+                              border: Border.all(
+                                  color: AppColors.formFieldBorderColour),
+                              color: Colors.grey[100],
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                key: _unitNameKey,
+                                focusNode: _unitNameNode,
+                                value: selectedUnitItem,
+                                hint: const Text("Unit Name",
+                                    style: FTextStyle.formhintTxtStyle),
+                                onChanged: (String? value) {
+                                  setState(() {
+                                    selectedUnitItem = value;
+                                    // Update button enable state
+                                    isButtonPartEnabled = value != null &&
+                                        value.isNotEmpty &&
+                                        ValidatorUtils.isValidCommon(
+                                            specificationName.text);
+                                  });
+                                },
+                                items: unitList.map<DropdownMenuItem<String>>(
+                                    (dynamic value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value.toString()),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    "Add Requisition Product",
+                    style: FTextStyle.formLabelTxtStyle,
+                  ).animateOnPageLoad(
+                      animationsMap['imageOnPageLoadAnimation2']!),
+                  const SizedBox(height: 10),
+                  Visibility(
+                    visible: !addVisibility,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          addVisibility = !addVisibility;
+                        });
+                      },
+                      child: Container(
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          color: AppColors.gray_2,
+                          borderRadius: BorderRadius.vertical(
+                              bottom: Radius.circular(12),
+                              top: Radius.circular(12)),
+                        ),
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 30),
+                            const Icon(Icons.add_box_rounded,
+                                color: AppColors.primaryColourDark, size: 50),
+                            const SizedBox(height: 10),
+                            Text("Add Requisition",
+                                style: FTextStyle.formLabelTxtStyle),
+                            const SizedBox(height: 30),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Visibility(
+                    visible: addVisibility,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 18.0),
+                      child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: AppColors.formFieldBackColour,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Form(
+                            onChanged: () {
+                              // Update button enable state based on field validity
+                              setState(() {
+                                isButtonPartEnabled = selectedItem != null &&
+                                    selectedItem!.isNotEmpty &&
+                                    selectedCategoryItem != null &&
+                                    selectedCategoryItem!.isNotEmpty &&
+                                    ValidatorUtils.isValidCommon(
+                                        quantityName.text);
+                                if (isProductFieldFocused) {
+                                  _productNameKey.currentState?.validate();
+                                }
+                                if (isSpecificationFieldFocused) {
+                                  _specificationNameKey.currentState
+                                      ?.validate();
+                                }
+                              });
+                            },
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.clear,
+                                          color: AppColors.primaryColourDark),
+                                      onPressed: () {
+                                        setState(() {
+                                          addVisibility = false;
+                                          isEditMode = false; // Reset edit mode
+                                          selectedItem = null;
+                                          specificationName.clear();
+                                          selectedEventItem = null;
+                                          quantityName.clear();
+                                          remarkName.clear();
+                                          uploadName.clear();
+                                          isButtonPartEnabled =
+                                              false; // Ensure button is disabled
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+
+                                Visibility(
+                                  visible: widget.flag.isNotEmpty,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Product Category",
+                                        style: FTextStyle.formLabelTxtStyle,
+                                      ).animateOnPageLoad(
+                                        animationsMap[
+                                            'imageOnPageLoadAnimation2']!,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8.0),
+                                        child: Container(
+                                          width:
+                                              MediaQuery.of(context).size.width,
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16.0),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(28.0),
+                                            border: Border.all(
+                                                color: AppColors
+                                                    .primaryColourDark),
+                                            color: Colors.white,
+                                          ),
+                                          child: DropdownButtonHideUnderline(
+                                            child: DropdownButton<String?>(
+                                              key: _categoryNameKey,
+                                              focusNode: _categoryNameNode,
+                                              value: selectedCategoryItem,
+                                              hint: const Text(
+                                                "Select Product Category",
+                                                style:
+                                                    FTextStyle.formhintTxtStyle,
+                                              ),
+                                              onChanged:
+                                                  (String? categoryValue) {
+                                                if (categoryValue != null) {
+                                                  setState(() {
+                                                    selectedCategoryItem =
+                                                        categoryValue;
+                                                    selectedCategoryId =
+                                                        categoryMap[
+                                                            categoryValue]; // This can be null
+                                                    selectedItem = null;
+                                                    isButtonPartEnabled =
+                                                        categoryValue
+                                                                .isNotEmpty &&
+                                                            ValidatorUtils
+                                                                .isValidCommon(
+                                                                    specificationName
+                                                                        .text);
+
+                                                    if (selectedCategoryId !=
+                                                        null) {
+                                                      BlocProvider.of<
+                                                                  AllRequesterBloc>(
+                                                              context)
+                                                          .add(ProductListHandler(
+                                                              selectedCategoryId
+                                                                  .toString()));
+                                                    }
+                                                  });
+                                                } else {}
+                                              },
+                                              items: categoryNames.map<
+                                                  DropdownMenuItem<
+                                                      String?>>((String value) {
+                                                return DropdownMenuItem<
+                                                    String?>(
+                                                  value: value,
+                                                  child: Text(value),
+                                                );
+                                              }).toList(),
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  "Product/Service",
+                                  style: FTextStyle.formLabelTxtStyle,
+                                ).animateOnPageLoad(
+                                  animationsMap['imageOnPageLoadAnimation2']!,
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width,
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16.0),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(28.0),
+                                      border: Border.all(
+                                          color: AppColors.primaryColourDark),
+                                      color: Colors.white,
+                                    ),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<String?>(
+                                        key: _productNameKey,
+                                        focusNode: _productNameNode,
+                                        value: selectedItem,
+                                        hint: const Text(
+                                            "Select Product/Service",
+                                            style: FTextStyle.formhintTxtStyle),
+                                        onChanged: (String? newValue) {
+                                          if (newValue != null) {
+                                            setState(() {
+                                              selectedItem = newValue;
+                                              selectedProductId = productMap[
+                                                  newValue]; // This can be null
+
+                                              isButtonPartEnabled = newValue
+                                                      .isNotEmpty &&
+                                                  ValidatorUtils.isValidCommon(
+                                                      specificationName.text);
+
+                                              if (selectedProductId != null) {
+                                                BlocProvider.of<
+                                                            AllRequesterBloc>(
+                                                        context)
+                                                    .add(SepListHandler(
+                                                        selectedProductId
+                                                            .toString()));
+                                              }
+                                            });
+                                          } else {}
+                                          setState(() {
+                                            selectedItem = newValue;
+                                            // Update button enable state
+                                            isButtonPartEnabled = newValue !=
+                                                    null &&
+                                                newValue.isNotEmpty &&
+                                                ValidatorUtils.isValidCommon(
+                                                    specificationName.text);
+                                          });
+                                        },
+                                        items: productNames
+                                            .map<DropdownMenuItem<String?>>(
+                                                (String data) {
+                                          return DropdownMenuItem<String?>(
+                                            value: data,
+                                            child: Text(data),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                Text(
+                                  "Specification",
+                                  style: FTextStyle.formLabelTxtStyle,
+                                ).animateOnPageLoad(
+                                  animationsMap['imageOnPageLoadAnimation2']!,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10.0),
+                                  child: TextFormField(
+                                    focusNode: _specificationNameNode,
+                                    key: _specificationNameKey,
+                                    keyboardType: TextInputType.text,
+                                    decoration: FormFieldStyle
+                                        .defaultInputDecoration
+                                        .copyWith(
+                                      hintText: "Enter Specification",
+                                      fillColor: Colors.white,
+                                    ),
+                                    controller: specificationName,
+                                    validator: ValidatorUtils.model,
+                                  ).animateOnPageLoad(
+                                    animationsMap['imageOnPageLoadAnimation2']!,
+                                  ),
+                                ),
+                                Text(
+                                  "Quantity Demanded",
+                                  style: FTextStyle.formLabelTxtStyle,
+                                ).animateOnPageLoad(
+                                  animationsMap['imageOnPageLoadAnimation2']!,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10.0),
+                                  child: TextFormField(
+                                    focusNode: _quantityNameNode,
+                                    key: _quantityNameKey,
+                                    keyboardType: TextInputType.number,
+                                    decoration: FormFieldStyle
+                                        .defaultInputDecoration
+                                        .copyWith(
+                                      hintText: "Enter Quantity",
+                                      fillColor: Colors.white,
+                                    ),
+                                    inputFormatters: [NoSpaceFormatter()],
+                                    controller: quantityName,
+                                    validator: ValidatorUtils.model,
+                                  ).animateOnPageLoad(
+                                    animationsMap['imageOnPageLoadAnimation2']!,
+                                  ),
+                                ),
+
+                                Text(
+                                  "Remark",
+                                  style: FTextStyle.formLabelTxtStyle,
+                                ).animateOnPageLoad(
+                                  animationsMap['imageOnPageLoadAnimation2']!,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10.0),
+                                  child: TextFormField(
+                                    focusNode: _remarkNameNode,
+                                    key: _remarkNameKey,
+                                    keyboardType: TextInputType.name,
+                                    decoration: FormFieldStyle
+                                        .defaultInputDecoration
+                                        .copyWith(
+                                      hintText: "Enter Remark",
+                                      fillColor: Colors.white,
+                                    ),
+                                    controller: remarkName,
+                                    validator: ValidatorUtils.model,
+                                  ).animateOnPageLoad(
+                                    animationsMap['imageOnPageLoadAnimation2']!,
+                                  ),
+                                ),
+                                Visibility(
+                                  visible: widget.flag.isNotEmpty,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Event",
+                                        style: FTextStyle.formLabelTxtStyle,
+                                      ).animateOnPageLoad(
+                                        animationsMap[
+                                            'imageOnPageLoadAnimation2']!,
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 8.0),
+                                        child: Container(
+                                          // Ensure the container width is constrained properly
+                                          width: double.infinity,
+                                          // Expand to full width of parent container
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16.0),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(28.0),
+                                            border: Border.all(
+                                                color: AppColors
+                                                    .primaryColourDark),
+                                            color: Colors.white,
+                                          ),
+                                          child: DropdownButtonHideUnderline(
+                                            child: DropdownButton<String>(
+                                              key: _eventNameKey,
+                                              focusNode: _eventNameNode,
+                                              isExpanded: true,
+                                              // Make the DropdownButton expand to fill the width of the container
+                                              value: selectedEventItem,
+                                              hint: const Text(
+                                                "Select Event",
+                                                style:
+                                                    FTextStyle.formhintTxtStyle,
+                                              ),
+                                              onChanged: (String? eventValue) {
+                                                setState(() {
+                                                  selectedEventItem =
+                                                      eventValue;
+                                                  // Update button enable state
+                                                  isButtonPartEnabled =
+                                                      eventValue != null &&
+                                                          eventValue
+                                                              .isNotEmpty &&
+                                                          ValidatorUtils
+                                                              .isValidCommon(
+                                                                  specificationName
+                                                                      .text);
+                                                });
+                                              },
+                                              items: eventNames.map<
+                                                      DropdownMenuItem<String>>(
+                                                  (String value) {
+                                                return DropdownMenuItem<String>(
+                                                  value: value,
+                                                  child: Text(value),
+                                                );
+                                              }).toList(),
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  "Upload",
+                                  style: FTextStyle.formLabelTxtStyle,
+                                ).animateOnPageLoad(
+                                  animationsMap['imageOnPageLoadAnimation2']!,
+                                ),
+                                const SizedBox(height: 10),
+                                TextFormField(
+                                  readOnly: true,
+                                  key: _uploadNameKey,
+                                  focusNode: _uploadNameNode,
+                                  decoration: FormFieldStyle
+                                      .defaultInputDecoration
+                                      .copyWith(
+                                    fillColor: Colors.white,
+                                    hintText: "Upload File",
+                                    suffixIcon: IconButton(
+                                      icon: const Icon(Icons.attach_file),
+                                      onPressed: () async {
+                                        final result = await FilePicker.platform
+                                            .pickFiles();
+                                        if (result != null &&
+                                            result.files.isNotEmpty) {
+                                          setState(() {
+                                            fileName1 =
+                                                result.files.single.name;
+                                            imagesId =
+                                                File(result.files.single.path!);
+                                            isImageUploaded = true;
+                                            uploadName.text = fileName1!;
+                                          });
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  controller: uploadName,
+                                  validator: ValidatorUtils.uploadValidator,
+                                  onChanged: (text) {
+                                    setState(() {
+                                      isButtonPartEnabled = selectedItem !=
+                                              null &&
+                                          selectedItem!.isNotEmpty &&
+                                          ValidatorUtils.isValidCommon(text);
+                                    });
+                                  },
+                                  onTap: () {
+                                    setState(() {
+                                      isUploadFocused = true;
+                                    });
+                                  },
+                                  onEditingComplete: () {
+                                    setState(() {
+                                      isUploadFocused = false;
+                                    });
+                                  },
+                                ).animateOnPageLoad(
+                                  animationsMap['imageOnPageLoadAnimation2']!,
+                                ),
+                                // _buildFileUploadContainer(1, isImageUploaded,
+                                //     fileName1), // Doctor ID Upload
+                                const SizedBox(
+                                  height: 15,
+                                ),
+                                Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(18.0),
+                                    child: SizedBox(
+                                      width: MediaQuery.of(context).size.width,
+                                      height: (displayType == 'desktop' ||
+                                              displayType == 'tablet')
+                                          ? 40
+                                          : 48,
+                                      child: ElevatedButton(
+                                        onPressed: isButtonPartEnabled
+                                            ? () {
+                                                setState(() {
+                                                  if (isEditMode) {
+                                                    // Updating an existing item
+                                                    if (selectedItemForEditing !=
+                                                        null) {
+                                                      final index =
+                                                          itemList.indexOf(
+                                                              selectedItemForEditing!);
+                                                      itemList[index] = {
+                                                        "product":
+                                                            selectedProductId
+                                                                .toString()!,
+                                                        "productName":
+                                                            selectedItem,
+                                                        "event":
+                                                            selectedEventItem!,
+                                                        "specification":
+                                                            specificationName
+                                                                .text,
+                                                        "quantity":
+                                                            quantityName.text,
+                                                        "image": imagesId,
+                                                        "imageName":
+                                                            uploadName.text,
+                                                        "additional":
+                                                            remarkName.text,
+                                                        // Add your additional field here
+                                                        "user_id":
+                                                            userId.toString(),
+                                                        // Replace with actual user_id if needed
+                                                      };
+                                                    }
+                                                  } else {
+                                                    // Adding a new item
+                                                    itemList.add({
+                                                      "product":
+                                                          selectedProductId
+                                                              .toString()!,
+                                                      "productName":
+                                                          selectedItem,
+                                                      "event":
+                                                          selectedEventItem,
+                                                      "specification":
+                                                          specificationName
+                                                              .text,
+                                                      "quantity":
+                                                          quantityName.text,
+                                                      "image": imagesId,
+                                                      "imageName":
+                                                          uploadName.text,
+                                                      "additional":
+                                                          remarkName.text,
+                                                      // Add your additional field here
+                                                      "user_id":
+                                                          userId.toString(),
+                                                      // Replace with actual user_id if needed
+                                                    });
+                                                  }
+
+                                                  // Reset state after add/update
+                                                  addVisibility = false;
+                                                  isEditMode = false;
+                                                  selectedItem = null;
+                                                  specificationName.clear();
+                                                  remarkName.clear();
+                                                  quantityName.clear();
+                                                  uploadName.clear();
+
+                                                  // Enable the button for further actions if required
+                                                  isButtonPartEnabled =
+                                                      false; // Adjust this as needed
+                                                  selectedItemForEditing =
+                                                      null; // Clear the editing item
+                                                });
+                                              }
+                                            : null,
+                                        style: ElevatedButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(26),
+                                          ),
+                                          backgroundColor: isButtonPartEnabled
+                                              ? AppColors.primaryColourDark
+                                              : AppColors.disableButtonColor,
+                                        ),
+                                        child: Text(
+                                          isEditMode ? "Update" : "Add",
+                                          style: FTextStyle.loginBtnStyle,
+                                        ),
+                                      ).animateOnPageLoad(
+                                        animationsMap[
+                                            'imageOnPageLoadAnimation2']!,
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              ],
                             ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  "Add Requisition Product",
-                  style: FTextStyle.formLabelTxtStyle,
-                ).animateOnPageLoad(
-                    animationsMap['imageOnPageLoadAnimation2']!),
-                const SizedBox(height: 10),
-                Visibility(
-                  visible: !addVisibility,
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        addVisibility = !addVisibility;
-                      });
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      decoration: const BoxDecoration(
-                        color: AppColors.gray_2,
-                        borderRadius: BorderRadius.vertical(
-                            bottom: Radius.circular(12),
-                            top: Radius.circular(12)),
-                      ),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 30),
-                          const Icon(Icons.add_box_rounded,
-                              color: AppColors.primaryColourDark, size: 50),
-                          const SizedBox(height: 10),
-                          Text("Add Requisition",
-                              style: FTextStyle.formLabelTxtStyle),
-                          const SizedBox(height: 30),
-                        ],
-                      ),
                     ),
                   ),
-                ),
-                Visibility(
-                  visible: addVisibility,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 18.0),
-                    child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: AppColors.formFieldBackColour,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Form(
-                          onChanged: () {
-                            // Update button enable state based on field validity
-                            setState(() {
-                              isButtonPartEnabled = selectedItem != null &&
-                                  selectedItem!.isNotEmpty &&
-                                  selectedCategoryItem != null &&
-                                  selectedCategoryItem!.isNotEmpty &&
-                                  ValidatorUtils.isValidCommon(
-                                      quantityName.text);
-                              if (isProductFieldFocused) {
-                                _productNameKey.currentState?.validate();
-                              }
-                              if (isSpecificationFieldFocused) {
-                                _specificationNameKey.currentState?.validate();
-                              }
-                            });
-                          },
+                  SizedBox(
+                    height: 20,
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.5,
+                    child: ListView.builder(
+                      itemCount: itemList.length,
+                      itemBuilder: (context, index) {
+                        print(">>>ALLDATAITEMLOCAL$itemList");
+                        final item = itemList[index];
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.yellow[50],
+                            border: Border.all(color: AppColors.yellow),
+                          ),
+                          padding: const EdgeInsets.all(7),
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
+                                  Expanded(
+                                    child: RichText(
+                                      text: TextSpan(
+                                        text: "Product/Services: ",
+                                        style: FTextStyle.listTitleSub,
+                                        children: [
+                                          TextSpan(
+                                              text: item["productName"] ?? "--",
+                                              style: FTextStyle.listTitle),
+                                          const TextSpan(
+                                              text: "\nSpecialization: ",
+                                              style: FTextStyle.listTitleSub),
+                                          TextSpan(
+                                              text:
+                                                  item["specification"] ?? "--",
+                                              style: FTextStyle.listTitle),
+                                          const TextSpan(
+                                              text: "\nQuantity: ",
+                                              style: FTextStyle.listTitleSub),
+                                          TextSpan(
+                                              text: item["quantity"] ?? "--",
+                                              style: FTextStyle.listTitle),
+                                          const TextSpan(
+                                              text: "\nRemark: ",
+                                              style: FTextStyle.listTitleSub),
+                                          TextSpan(
+                                              text: item["additional"] ?? "--",
+                                              style: FTextStyle.listTitle),
+                                          const TextSpan(
+                                              text: "\nEvent: ",
+                                              style: FTextStyle.listTitleSub),
+                                          TextSpan(
+                                              text: item["event"] ?? "--",
+                                              style: FTextStyle.listTitle),
+                                          const TextSpan(
+                                              text: "\n",
+                                              style: FTextStyle.listTitleSub),
+                                          TextSpan(
+                                              text: item["imageName"] ?? "--",
+                                              // text: basename(item['image']!.path) ?? "--",
+                                              style: FTextStyle.listTitle),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                   IconButton(
-                                    icon: const Icon(Icons.clear,
+                                    icon: const Icon(Icons.edit,
                                         color: AppColors.primaryColourDark),
                                     onPressed: () {
                                       setState(() {
-                                        addVisibility = false;
-                                        isEditMode = false; // Reset edit mode
-                                        selectedItem = null;
-                                        specificationName.clear();
-                                        selectedEventItem=null;
-                                        quantityName.clear();
-                                        remarkName.clear();
-                                        uploadName.clear();
-                                        isButtonPartEnabled =
-                                            false; // Ensure button is disabled
+                                        selectedItemForEditing = item;
+                                        // selectedProductId = item["product"];
+                                        specificationName.text =
+                                            item["specification"] ?? "--";
+
+                                        selectedEventItem=item["event"];
+                                        selectedItem =item["productName"]??"--";
+                                        quantityName.text =
+                                            item["quantity"] ?? "--";
+                                        remarkName.text =
+                                            item["additional"] ?? "--";
+                                        uploadName.text = item['imageName']!;
+                                        addVisibility = true;
+                                        isEditMode = true;
+                                      });
+                                    },
+                                  ),
+                                  const SizedBox(width: 5),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete_forever,
+                                        color: Colors.red),
+                                    onPressed: () {
+                                      setState(() {
+                                        itemList.removeAt(index);
                                       });
                                     },
                                   ),
                                 ],
                               ),
-
-                              Visibility(
-                                visible: widget.flag.isNotEmpty,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Product Category",
-                                      style: FTextStyle.formLabelTxtStyle,
-                                    ).animateOnPageLoad(
-                                      animationsMap[
-                                          'imageOnPageLoadAnimation2']!,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                      child: Container(
-                                        width: MediaQuery.of(context).size.width,
-                                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(28.0),
-                                          border: Border.all(color: AppColors.primaryColourDark),
-                                          color: Colors.white,
-                                        ),
-                                        child: DropdownButtonHideUnderline(
-                                          child: DropdownButton<String?>(
-                                            key: _categoryNameKey,
-                                            focusNode: _categoryNameNode,
-                                            value: selectedCategoryItem,
-                                            hint: const Text(
-                                              "Select Product Category",
-                                              style: FTextStyle.formhintTxtStyle,
-                                            ),
-                                            onChanged: (String? categoryValue) {
-                                              if (categoryValue != null) {
-                                                setState(() {
-                                                  selectedCategoryItem = categoryValue;
-                                                  selectedCategoryId = categoryMap[categoryValue]; // This can be null
-                                                  selectedItem = null;
-                                                  isButtonPartEnabled = categoryValue.isNotEmpty &&
-                                                      ValidatorUtils.isValidCommon(specificationName.text);
-
-                                                  if (selectedCategoryId != null) {
-                                                    BlocProvider.of<AllRequesterBloc>(context).add(ProductListHandler(selectedCategoryId.toString()));
-                                                  }
-                                                });
-                                              } else {
-
-                                              }
-                                            },
-                                            items: categoryNames.map<DropdownMenuItem<String?>>((String value) {
-                                              return DropdownMenuItem<String?>(
-                                                value: value,
-                                                child: Text(value),
-                                              );
-                                            }).toList(),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-
-
-
-                                  ],
-                                ),
-                              ),
-                              Text(
-                                "Product/Service",
-                                style: FTextStyle.formLabelTxtStyle,
-                              ).animateOnPageLoad(
-                                animationsMap['imageOnPageLoadAnimation2']!,
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 8.0),
-                                child: Container(
-                                  width: MediaQuery.of(context).size.width,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16.0),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(28.0),
-                                    border: Border.all(
-                                        color: AppColors.primaryColourDark),
-                                    color: Colors.white,
-                                  ),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String?>(
-                                      key: _productNameKey,
-                                      focusNode: _productNameNode,
-                                      value: selectedItem,
-                                      hint: const Text("Select Product/Service",
-                                          style: FTextStyle.formhintTxtStyle),
-                                      onChanged: (String? newValue) {
-                                        if (newValue != null) {
-                                          setState(() {
-                                            selectedItem = newValue;
-                                            selectedProductId = productMap[newValue]; // This can be null
-
-                                            isButtonPartEnabled = newValue.isNotEmpty &&
-                                                ValidatorUtils.isValidCommon(specificationName.text);
-
-                                            if (selectedProductId != null) {
-                                              BlocProvider.of<AllRequesterBloc>(context).add(SepListHandler(selectedProductId.toString()));
-                                            }
-                                          });
-                                        } else {
-
-                                        }
-                                        setState(() {
-                                          selectedItem = newValue;
-                                          // Update button enable state
-                                          isButtonPartEnabled =
-                                              newValue != null &&
-                                                  newValue.isNotEmpty &&
-                                                  ValidatorUtils.isValidCommon(
-                                                      specificationName.text);
-                                        });
-                                      },
-                                      items: productNames.map<DropdownMenuItem<String?>>((String data) {
-                                        return DropdownMenuItem<String?>(
-                                          value: data,
-                                          child: Text(data),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              Text(
-                                "Specification",
-                                style: FTextStyle.formLabelTxtStyle,
-                              ).animateOnPageLoad(
-                                animationsMap['imageOnPageLoadAnimation2']!,
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 10.0),
-                                child: TextFormField(
-                                  focusNode: _specificationNameNode,
-                                  key: _specificationNameKey,
-                                  keyboardType: TextInputType.text,
-                                  decoration: FormFieldStyle
-                                      .defaultInputDecoration
-                                      .copyWith(
-                                    hintText: "Enter Specification",
-                                    fillColor: Colors.white,
-                                  ),
-
-                                  controller: specificationName,
-                                  validator: ValidatorUtils.model,
-                                ).animateOnPageLoad(
-                                  animationsMap['imageOnPageLoadAnimation2']!,
-                                ),
-                              ),
-                              Text(
-                                "Quantity Demanded",
-                                style: FTextStyle.formLabelTxtStyle,
-                              ).animateOnPageLoad(
-                                animationsMap['imageOnPageLoadAnimation2']!,
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 10.0),
-                                child: TextFormField(
-                                  focusNode: _quantityNameNode,
-                                  key: _quantityNameKey,
-                                  keyboardType: TextInputType.number,
-                                  decoration: FormFieldStyle
-                                      .defaultInputDecoration
-                                      .copyWith(
-                                    hintText: "Enter Quantity",
-                                    fillColor: Colors.white,
-                                  ),
-                                  inputFormatters: [NoSpaceFormatter()],
-                                  controller: quantityName,
-                                  validator: ValidatorUtils.model,
-                                ).animateOnPageLoad(
-                                  animationsMap['imageOnPageLoadAnimation2']!,
-                                ),
-                              ),
-
-                              Text(
-                                "Remark",
-                                style: FTextStyle.formLabelTxtStyle,
-                              ).animateOnPageLoad(
-                                animationsMap['imageOnPageLoadAnimation2']!,
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 10.0),
-                                child: TextFormField(
-                                  focusNode: _remarkNameNode,
-                                  key: _remarkNameKey,
-                                  keyboardType: TextInputType.name,
-                                  decoration: FormFieldStyle
-                                      .defaultInputDecoration
-                                      .copyWith(
-                                    hintText: "Enter Remark",
-                                    fillColor: Colors.white,
-                                  ),
-
-                                  controller: remarkName,
-                                  validator: ValidatorUtils.model,
-                                ).animateOnPageLoad(
-                                  animationsMap['imageOnPageLoadAnimation2']!,
-                                ),
-                              ),
-                              Visibility(
-                                visible: widget.flag.isNotEmpty,
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Event",
-                                      style: FTextStyle.formLabelTxtStyle,
-                                    ).animateOnPageLoad(
-                                      animationsMap[
-                                          'imageOnPageLoadAnimation2']!,
-                                    ),Padding(
-                                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                      child: Container(
-                                        // Ensure the container width is constrained properly
-                                        width: double.infinity, // Expand to full width of parent container
-                                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(28.0),
-                                          border: Border.all(color: AppColors.primaryColourDark),
-                                          color: Colors.white,
-                                        ),
-                                        child: DropdownButtonHideUnderline(
-                                          child: DropdownButton<String>(
-                                            key: _eventNameKey,
-                                            focusNode: _eventNameNode,
-                                            isExpanded: true, // Make the DropdownButton expand to fill the width of the container
-                                            value: selectedEventItem,
-                                            hint: const Text(
-                                              "Select Event",
-                                              style: FTextStyle.formhintTxtStyle,
-                                            ),
-                                            onChanged: (String? eventValue) {
-                                              setState(() {
-                                                selectedEventItem = eventValue;
-                                                // Update button enable state
-                                                isButtonPartEnabled = eventValue != null &&
-                                                    eventValue.isNotEmpty &&
-                                                    ValidatorUtils.isValidCommon(specificationName.text);
-                                              });
-                                            },
-                                            items: eventNames.map<DropdownMenuItem<String>>((String value) {
-                                              return DropdownMenuItem<String>(
-                                                value: value,
-                                                child: Text(value),
-                                              );
-                                            }).toList(),
-                                          ),
-                                        ),
-                                      ),
-                                    )
-
-                                  ],
-                                ),
-                              ),
-                              Text(
-                                "Upload",
-                                style: FTextStyle.formLabelTxtStyle,
-                              ).animateOnPageLoad(
-                                animationsMap['imageOnPageLoadAnimation2']!,
-                              ),
-                              const SizedBox(height: 10),
-                              TextFormField(
-                                readOnly: true,
-                                key: _uploadNameKey,
-                                focusNode: _uploadNameNode,
-                                decoration: FormFieldStyle
-                                    .defaultInputDecoration
-                                    .copyWith(
-                                  fillColor: Colors.white,
-                                  hintText: "Upload File",
-                                  suffixIcon: IconButton(
-                                    icon: const Icon(Icons.attach_file),
-                                    onPressed: () async {
-                                      final result =
-                                          await FilePicker.platform.pickFiles();
-                                      if (result != null &&
-                                          result.files.isNotEmpty) {
-                                        setState(() {
-                                          fileName1 = result.files.single.name;
-                                          imagesId =
-                                              File(result.files.single.path!);
-                                          isImageUploaded = true;
-                                          uploadName.text = fileName1!;
-                                        });
-                                      }
-                                    },
-                                  ),
-                                ),
-                                controller: uploadName,
-                                validator: ValidatorUtils.uploadValidator,
-                                onChanged: (text) {
-                                  setState(() {
-                                    isButtonPartEnabled =
-                                        selectedItem != null &&
-                                            selectedItem!.isNotEmpty &&
-                                            ValidatorUtils.isValidCommon(text);
-                                  });
-                                },
-                                onTap: () {
-                                  setState(() {
-                                    isUploadFocused = true;
-                                  });
-                                },
-                                onEditingComplete: () {
-                                  setState(() {
-                                    isUploadFocused = false;
-                                  });
-                                },
-                              ).animateOnPageLoad(
-                                animationsMap['imageOnPageLoadAnimation2']!,
-                              ),
-                              // _buildFileUploadContainer(1, isImageUploaded,
-                              //     fileName1), // Doctor ID Upload
-                              const SizedBox(
-                                height: 15,
-                              ),
-                              Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(18.0),
-                                  child: SizedBox(
-                                    width: MediaQuery.of(context).size.width,
-                                    height: (displayType == 'desktop' || displayType == 'tablet') ? 40 : 48,
-                                    child: ElevatedButton(
-                                      onPressed: isButtonPartEnabled
-                                          ? () {
-                                        setState(() {
-                                          if (isEditMode) {
-                                            // Updating an existing item
-                                            if (selectedItemForEditing != null) {
-                                              final index = itemList.indexOf(selectedItemForEditing!);
-                                              itemList[index] = {
-                                                "product": selectedProductId.toString()!,
-                                                "event": selectedEventItem!,
-                                                "specification": specificationName.text,
-                                                "quantity": quantityName.text,
-                                                "image": imagesId,
-                                                "additional": remarkName.text, // Add your additional field here
-                                                "user_id": userId.toString(), // Replace with actual user_id if needed
-                                              };
-                                            }
-                                          } else {
-                                            // Adding a new item
-                                            itemList.add({
-                                              "product": selectedProductId.toString()!,
-                                              "event": selectedEventItem!,
-                                              "specification": specificationName.text,
-                                              "quantity": quantityName.text,
-                                              "image": imagesId,
-                                              "additional": remarkName.text, // Add your additional field here
-                                              "user_id": userId.toString(), // Replace with actual user_id if needed
-                                            });
-                                          }
-
-                                          // Reset state after add/update
-                                          addVisibility = false;
-                                          isEditMode = false;
-                                          selectedItem = null;
-                                          specificationName.clear();
-                                          remarkName.clear();
-                                          quantityName.clear();
-                                          uploadName.clear();
-
-                                          // Enable the button for further actions if required
-                                          isButtonPartEnabled = false; // Adjust this as needed
-                                          selectedItemForEditing = null; // Clear the editing item
-                                        });
-                                      }
-                                          : null,
-                                      style: ElevatedButton.styleFrom(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(26),
-                                        ),
-                                        backgroundColor: isButtonPartEnabled
-                                            ? AppColors.primaryColourDark
-                                            : AppColors.disableButtonColor,
-                                      ),
-                                      child: Text(
-                                        isEditMode ? "Update" : "Add",
-                                        style: FTextStyle.loginBtnStyle,
-                                      ),
-                                    ).animateOnPageLoad(
-                                      animationsMap['imageOnPageLoadAnimation2']!,
-                                    ),
-                                  ),
-                                ),
-                              )
-
-
                             ],
                           ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-SizedBox(height: 20,),
-
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.5,
-                  child: ListView.builder(
-                    itemCount: itemList.length,
-
-                    itemBuilder: (context, index) {
-                      print(">>>ALLDATAITEMLOCAL$itemList");
-                      final item = itemList[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.yellow[50],
-                          border: Border.all(color: AppColors.yellow),
-                        ),
-                        padding: const EdgeInsets.all(7),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: RichText(
-                                    text: TextSpan(
-                                      text: "Product/Services: ",
-                                      style: FTextStyle.listTitleSub,
-                                      children: [
-                                        // TextSpan(
-                                        //     text: item["product"] ?? "--",
-                                        //     style: FTextStyle.listTitle),
-                                        const TextSpan(
-                                            text: "\nSpecialization: ",
-                                            style: FTextStyle.listTitleSub),
-                                        TextSpan(
-                                            text: item["specialisation"] ?? "--",
-                                            style: FTextStyle.listTitle),
-                                        const TextSpan(
-                                            text: "\nQuantity: ",
-                                            style: FTextStyle.listTitleSub),
-                                        TextSpan(
-                                            text: item["quantity"] ?? "--",
-                                            style: FTextStyle.listTitle),
-                                        const TextSpan(
-                                            text: "\nRemark: ",
-                                            style: FTextStyle.listTitleSub),
-                                        TextSpan(
-                                            text: item["remark"] ?? "--",
-                                            style: FTextStyle.listTitle),
-                                        const TextSpan(
-                                            text: "\nEvent: ",
-                                            style: FTextStyle.listTitleSub),
-                                        TextSpan(
-                                            text: item["event"] ?? "--",
-                                            style: FTextStyle.listTitle),
-                                        const TextSpan(
-                                            text: "\n",
-                                            style: FTextStyle.listTitleSub),
-                                        const TextSpan(
-                                            text: "documentimage" ?? "--",
-                                            // text: basename(item['image']!.path) ?? "--",
-                                            style: FTextStyle.listTitle),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.edit,
-                                      color: AppColors.primaryColourDark),
-                                  onPressed: () {
-                                    setState(() {
-                                      selectedItemForEditing = item;
-                                      selectedProductId = item["product"];
-                                      specificationName.text =
-                                          item["specialisation"] ?? "--";
-                                      quantityName.text =
-                                          item["quantity"] ?? "--";
-                                      remarkName.text = item["remark"] ?? "--";
-                                      uploadName.text = item['image']!;
-                                      addVisibility = true;
-                                      isEditMode = true;
-                                    });
-                                  },
-                                ),
-                                const SizedBox(width: 5),
-                                IconButton(
-                                  icon: const Icon(Icons.delete_forever,
-                                      color: Colors.red),
-                                  onPressed: () {
-                                    setState(() {
-                                      itemList.removeAt(index);
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                Padding(
-                  padding:  EdgeInsets.all(8.0),
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width,
-                    height:
-                        (displayType == 'desktop' || displayType == 'tablet')
-                            ? 70
-                            : 45,
-                    child: ElevatedButton(
-                      onPressed: isButtonEnabled
-                          ? () async {
-                        BlocProvider.of<AllRequesterBloc>(context).add(
-                          AddRequisitionHandler(
-                            date: dateFrom.text.toString(),
-                            unit: unitFromList.toString(),  // Add your value here
-                            nextDate: nextFromList.toString(),
-                            time: timeFromList.toString(),  // Add your value here
-                            userId:userId.toString(),  // Add your value here
-                            requisitionList: itemList,
-                          ),
                         );
-
-                        setState(() {
-                                isAddLoading = true;
-                              });
-
-                            }
-                          : null,
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(26),
-                        ),
-                        backgroundColor: isButtonEnabled
-                            ? AppColors.primaryColourDark
-                            : AppColors.disableButtonColor,
-                      ),
-                      child:isAddLoading?CircularProgressIndicator(color: Colors.white,): Text(
-                        "Submit",
-                        style: FTextStyle.loginBtnStyle,
-                      )
+                      },
                     ),
-                  ).animateOnPageLoad(
-                    animationsMap['imageOnPageLoadAnimation2']!,
                   ),
-                ),
-              ],
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      height:
+                          (displayType == 'desktop' || displayType == 'tablet')
+                              ? 70
+                              : 45,
+                      child: ElevatedButton(
+                          onPressed: isButtonEnabled
+                              ? () async {
+                                  BlocProvider.of<AllRequesterBloc>(context)
+                                      .add(
+                                    AddRequisitionHandler(
+                                      date: dateFrom.text.toString(),
+                                      unit: unitFromList.toString(),
+                                      // Add your value here
+                                      nextDate: nextFromList.toString(),
+                                      time: timeFromList.toString(),
+                                      // Add your value here
+                                      userId: userId.toString(),
+                                      // Add your value here
+                                      requisitionList: itemList,
+                                    ),
+                                  );
+
+                                  setState(() {
+                                    isAddLoading = true;
+                                  });
+                                }
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(26),
+                            ),
+                            backgroundColor: isButtonEnabled
+                                ? AppColors.primaryColourDark
+                                : AppColors.disableButtonColor,
+                          ),
+                          child: isAddLoading
+                              ? CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                              : Text(
+                                  "Submit",
+                                  style: FTextStyle.loginBtnStyle,
+                                )),
+                    ).animateOnPageLoad(
+                      animationsMap['imageOnPageLoadAnimation2']!,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
-),
     );
   }
 }

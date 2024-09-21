@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
-import 'package:shef_erp/screen/requisition/unit_head/requisition.dart';
+import 'package:shef_erp/screen/requisition/requester/requisition_requester.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
@@ -198,13 +198,25 @@ class _EditRequisitionState extends State<EditRequisition> {
 
         if (RequisitionList.isNotEmpty) {
           var firstReq = RequisitionList[0];
-
           requisitionID = firstReq['id'];
           requisitionProductID = firstReq['product_id'];
+
+
           quantityName.text = firstReq['quantity'].toString();
           remarkName.text = firstReq['staff_remarks'] ?? ''; // Handle null case
           specificationName.text = firstReq['specification'];
           uploadName.text = firstReq['image'];
+
+          var matchedProduct = ProductList.firstWhere(
+                (item) => item['id'] == requisitionProductID,
+            orElse: () => null, // Return null if no match is found
+          );
+
+          if (matchedProduct != null) {
+
+            selectedItem = matchedProduct['name'];
+            selectedProductId = matchedProduct['id']; // Store the product ID if needed
+          }
         }
 
         print("ALLProductDat>>>>>>>>>>>>>>>>>a$ProductList");
@@ -214,19 +226,41 @@ class _EditRequisitionState extends State<EditRequisition> {
           for (var item in ProductList) item['name'] as String: item['id'] as int
         };
 
-        // Check if the requisition product ID matches any product ID in the ProductList
-        bool isMatchFound = ProductList.any((item) => item['id'] == requisitionProductID);
-
-        if (isMatchFound) {
-          print("Product ID matches the requisition product ID: $requisitionProductID");
-          // Perform any additional actions if needed
-        } else {
-          print("No matching product found for Requisition ID: $requisitionProductID");
-          // Handle the case when there is no match
-        }
+        // Additional logic can go here, if needed
       }
+
+
+
       );
-    } else if (state is AddCartFailure) {
+    }
+    else if (state is UpdateLoading) {
+      isLoading = true;
+    } else if (state is UpdateSuccess) {
+      isLoading = false;
+
+      var deleteMessage = state.updateList['message'];
+
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(deleteMessage),
+          backgroundColor: AppColors.primaryColour,
+        ),
+      );
+      Navigator.push(context, MaterialPageRoute(builder: (context) => BlocProvider(
+        create: (context) => AllRequesterBloc(),
+        child: RequisitionRequester(),
+      )));
+
+      Future.delayed(const Duration(milliseconds: 500), () {
+        Navigator.pop(context);
+      });
+    }
+
+
+
+
+    else if (state is AddCartFailure) {
       setState(() {
         isLoading = false;
       });
@@ -234,7 +268,9 @@ class _EditRequisitionState extends State<EditRequisition> {
     }
     // TODO: implement listener
   },
-  child: SingleChildScrollView(
+  child:
+
+  SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(18.0),
               child: Form(
@@ -261,96 +297,61 @@ class _EditRequisitionState extends State<EditRequisition> {
                     ).animateOnPageLoad(
                       animationsMap['imageOnPageLoadAnimation2']!,
                     ),
-                    // Padding(
-                    //   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    //   child: Container(
-                    //     width: MediaQuery.of(context).size.width,
-                    //     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    //     decoration: BoxDecoration(
-                    //       borderRadius: BorderRadius.circular(28.0),
-                    //       border: Border.all(color: AppColors.primaryColourDark),
-                    //       color: Colors.white,
-                    //     ),
-                    //     child: DropdownButtonHideUnderline(
-                    //       child: DropdownButton<String>(
-                    //         key: _productNameKey,
-                    //         focusNode: _productNameNode,
-                    //         value: selectedItem,
-                    //         hint: const Text("Select Product/Service", style: FTextStyle.formhintTxtStyle),
-                    //         onChanged: (String? newValue) {
-                    //           setState(() {
-                    //             selectedItem = newValue;
-                    //             // Update button enable state
-                    //             isButtonPartEnabled = newValue != null && newValue.isNotEmpty && ValidatorUtils.isValidCommon(specificationName.text);
-                    //           });
-                    //         },
-                    //         items: list.map<DropdownMenuItem<String>>((dynamic value) {
-                    //           return DropdownMenuItem<String>(
-                    //             value: value,
-                    //             child: Text(value.toString()),
-                    //           );
-                    //         }).toList(),
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ),
-                    Padding(
-                      padding:
-                      const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16.0),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(28.0),
-                          border: Border.all(
-                              color: AppColors.primaryColourDark),
-                          color: Colors.white,
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(28.0),
+                      border: Border.all(color: AppColors.primaryColourDark),
+                      color: Colors.white,
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String?>(
+                        key: _productNameKey,
+                        focusNode: _productNameNode,
+                        value: selectedItem,
+                        hint: const Text(
+                          "Select Product/Service",
+                          style: FTextStyle.formhintTxtStyle,
                         ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String?>(
-                            key: _productNameKey,
-                            focusNode: _productNameNode,
-                            value: selectedItem,
-                            hint: const Text("Select Product/Service",
-                                style: FTextStyle.formhintTxtStyle),
-                            onChanged: (String? newValue) {
-                              if (newValue != null) {
-                                setState(() {
-                                  selectedItem = newValue;
-                                  selectedProductId = productMap[newValue]; // This can be null
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedItem = newValue;
+                            selectedProductId = newValue != null ? productMap[newValue] : null;
 
-                                  isButtonPartEnabled = newValue.isNotEmpty &&
-                                      ValidatorUtils.isValidCommon(specificationName.text);
+                            isButtonPartEnabled = newValue != null &&
+                                newValue.isNotEmpty &&
+                                ValidatorUtils.isValidCommon(specificationName.text);
 
-                                  // if (selectedProductId != null) {
-                                  //   BlocProvider.of<AllRequesterBloc>(context).add(SepListHandler(selectedProductId.toString()));
-                                  // }
-                                });
-                              } else {
-
-                              }
-                              setState(() {
-                                selectedItem = newValue;
-                                // Update button enable state
-                                isButtonPartEnabled =
-                                    newValue != null &&
-                                        newValue.isNotEmpty &&
-                                        ValidatorUtils.isValidCommon(
-                                            specificationName.text);
-                              });
-                            },
-                            items: productNames.map<DropdownMenuItem<String?>>((String data) {
-                              return DropdownMenuItem<String?>(
-                                value: data,
-                                child: Text(data),
-                              );
-                            }).toList(),
+                            // Uncomment if you want to trigger an event when a product is selected
+                            // if (selectedProductId != null) {
+                            //   BlocProvider.of<AllRequesterBloc>(context)
+                            //       .add(SepListHandler(selectedProductId.toString()));
+                            // }
+                          });
+                        },
+                        items: productNames.isNotEmpty
+                            ? productNames.map<DropdownMenuItem<String?>>((String data) {
+                          return DropdownMenuItem<String?>(
+                            value: data,
+                            child: Text(data),
+                          );
+                        }).toList()
+                            : [
+                          DropdownMenuItem<String?>(
+                            value: null,
+                            child: Text(''),
                           ),
-                        ),
+                        ],
                       ),
                     ),
-                    Text(
+                  ),
+                ),
+
+                Text(
                       "Specification",
                       style: FTextStyle.formLabelTxtStyle,
                     ).animateOnPageLoad(
@@ -482,7 +483,16 @@ class _EditRequisitionState extends State<EditRequisition> {
                           child: ElevatedButton(
                             onPressed: isButtonPartEnabled
                                 ? () {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => RequisitionScreen()));
+                              // BlocProvider.of<AllRequesterBloc>(context).add(
+                              //   UpdateRequisitionEventHandler(
+                              //     date: dateFrom.text.toString(),
+                              //     unit: unitFromList.toString(),  // Add your value here
+                              //     nextDate: nextFromList.toString(),
+                              //     time: timeFromList.toString(),  // Add your value here
+                              //     userId:userId.toString(),  // Add your value here
+                              //     requisitionList: itemList,
+                              //   ),
+                              // );
                               setState(() {
                                 // Clear the editing item
                               });
@@ -496,10 +506,10 @@ class _EditRequisitionState extends State<EditRequisition> {
                                   ? AppColors.primaryColourDark
                                   : AppColors.disableButtonColor,
                             ),
-                            child: Text(
+                            child:isLoading? Text(
                               "Update",
                               style: FTextStyle.loginBtnStyle,
-                            ),
+                            ):CircularProgressIndicator(color: Colors.blue,),
                           ),
                         ).animateOnPageLoad(
                           animationsMap['imageOnPageLoadAnimation2']!,

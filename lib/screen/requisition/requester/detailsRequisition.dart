@@ -7,7 +7,6 @@ import 'package:shef_erp/utils/font_text_Style.dart';
 
 
 import 'package:flutter/material.dart';
-
 class RequesterDetails extends StatefulWidget {
   final String requestDate;
   final String product;
@@ -35,6 +34,9 @@ class RequesterDetails extends StatefulWidget {
 class _RequesterDetailsState extends State<RequesterDetails> {
   @override
   Widget build(BuildContext context) {
+    // Construct the image URL directly in the build method
+    String imageUrl = 'https://erp.studyhallfoundation.org/public/uploads/requisition/${widget.image}';
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -70,10 +72,9 @@ class _RequesterDetailsState extends State<RequesterDetails> {
                 height: MediaQuery.of(context).size.height / 3,
                 width: MediaQuery.of(context).size.width,
                 child: Image.network(
-                  widget.image,
+                  imageUrl, // Use the constructed image URL
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    // Provide a fallback for when the image fails to load
                     return Center(
                       child: Text(
                         'Failed to load image',
@@ -150,7 +151,7 @@ class _RequesterDetailsState extends State<RequesterDetails> {
                 Row(
                   children: [
                     Expanded(
-                      child: DeliveryStatus(dlStatus: widget.delivery), // Pass int to DeliveryStatus
+                      child: DeliveryStatus(dlStatus: widget.delivery), // Pass appropriate status
                     ),
                     const SizedBox(height: 5),
                   ],
@@ -163,7 +164,7 @@ class _RequesterDetailsState extends State<RequesterDetails> {
                     const Text("Unit: ", style: FTextStyle.listTitle),
                     Expanded(
                       child: Text(
-                        "${widget.unit}",
+                        widget.unit,
                         style: FTextStyle.listTitleSub,
                         maxLines: 2,
                       ),
@@ -189,4 +190,3 @@ class _RequesterDetailsState extends State<RequesterDetails> {
     );
   }
 }
-
