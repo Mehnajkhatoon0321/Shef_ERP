@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 import 'package:shef_erp/screen/requisition/unit_head/add_requisition.dart';
 import 'package:shef_erp/screen/requisition/unit_head/edit_requisition.dart';
 import 'package:shef_erp/screen/requisition/unit_head/view_details.dart';
@@ -433,19 +435,23 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                             IconButton(
                                               icon: const Icon(Icons.edit, color: Colors.black),
                                               onPressed: () {
-                                                Navigator.push(context, MaterialPageRoute(builder: (context) => EditRequisition(
+                                                Navigator.push(context, MaterialPageRoute(builder: (context) => BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: EditRequisition(
+    id:item["id"] ,
 
-                                                  product:item["product"],
-                                                  specification:item["specification"],
-                                                  quantity:item["quantity"],
-                                                  remark:item["unitHead"],
-                                                  upload:item["image"],
+                                                  // product:item["product"],
+                                                  // specification:item["specification"],
+                                                  // quantity:item["quantity"],
+                                                  // remark:item["unitHead"],
+                                                  // upload:item["image"],
+                                                  //
 
 
 
 
-
-                                                )));
+                                                ),
+)));
                                               },
                                             ),
                                             IconButton(

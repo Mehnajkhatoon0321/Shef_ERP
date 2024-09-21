@@ -53,6 +53,45 @@ class AddRequisitionHandler extends AllRequesterEvent {
 //Edit
 
 class EditDetailHandler extends AllRequesterEvent {
-  int id;
+  String id;
   EditDetailHandler(this.id);
+}
+//update profile
+
+class UpdateRequisitionEventHandler extends AllRequesterEvent {
+  final String date;
+  final String unit;
+  final String time;
+  final String product;
+  final String specification;
+  final String userid;
+  final String quantity;
+  final String additional;
+  final String event;
+  final String delivery_date;
+  final String preImg;
+  final String reqID;
+
+  final File? Image;
+
+  UpdateRequisitionEventHandler({
+    required this.date ,
+    required this.unit ,
+    required this.time ,
+    required this.product ,
+    required this.specification ,
+    required this.userid ,
+    required this.quantity ,
+    required this.additional ,
+    required this.event ,
+    required this.delivery_date ,
+    required this.preImg ,
+    required this.reqID ,
+    required this.Image ,
+
+
+
+
+
+  });
 }

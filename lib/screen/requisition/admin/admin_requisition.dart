@@ -445,19 +445,23 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                               IconButton(
                                                 icon: const Icon(Icons.edit, color: Colors.black),
                                                 onPressed: () {
-                                                  Navigator.push(context, MaterialPageRoute(builder: (context) => EditRequisition(
+                                                  Navigator.push(context, MaterialPageRoute(builder: (context) => BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: EditRequisition(
+   id :item["product"],
 
-                                                    product:item["product"],
-                                                    specification:item["specification"],
-                                                    quantity:item["quantity"],
-                                                    remark:item["unitHead"],
-                                                    upload:item["image"],
+                                                    // product:item["product"],
+                                                    // specification:item["specification"],
+                                                    // quantity:item["quantity"],
+                                                    // remark:item["unitHead"],
+                                                    // upload:item["image"],
 
 
 
 
 
-                                                  )));
+                                                  ),
+)));
                                                 },
                                               ),
                                               IconButton(

@@ -1,6 +1,4 @@
-import 'dart:ffi';
 import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -15,13 +13,9 @@ import 'package:shef_erp/utils/form_field_style.dart';
 import 'package:shef_erp/utils/no_space_input_formatter_class.dart';
 import 'package:shef_erp/utils/validator_utils.dart';
 class EditRequisition extends StatefulWidget {
+String id;
 
-  String product;
-  String specification;
-  String quantity;
-  String remark;
-  String upload;
-   EditRequisition({required this.product,required this.specification,required this.quantity, required this.remark , required this.upload ,super.key});
+   EditRequisition({ required this.id, super.key});
 
   @override
   State<EditRequisition> createState() => _EditRequisitionState();
@@ -32,6 +26,11 @@ class EditRequisition extends StatefulWidget {
 
 class _EditRequisitionState extends State<EditRequisition> {
   bool isButtonPartEnabled = false;
+  int? selectedProductId;
+  int? requisitionID;
+  int? requisitionProductID;
+  List<dynamic>   ProductList=[];
+  List<dynamic>   RequisitionList=[];
   bool isSpecificationFieldFocused = false;
   bool isProductFieldFocused = false;
   bool isQuantityFocused = false;
@@ -41,6 +40,8 @@ class _EditRequisitionState extends State<EditRequisition> {
   String? fileName1;
   File? imagesId;
   List<dynamic> list = ['Female', 'data', 'items'];
+  List<String> productNames = [];
+  Map<String, int> productMap={};
   String? selectedItem;
   late final GlobalKey<FormFieldState<String>> _productNameKey =
   GlobalKey<FormFieldState<String>>();
@@ -62,18 +63,12 @@ class _EditRequisitionState extends State<EditRequisition> {
   late final FocusNode _quantityNameNode = FocusNode();
   late final FocusNode _remarkNameNode = FocusNode();
   late final FocusNode _uploadNameNode = FocusNode();
-
+  bool isLoading = false;
   @override
   void initState() {
     super.initState();
-    selectedItem = widget.product; // Set initial value for productName
-    quantityName.text = widget.quantity.toString();
-    remarkName.text = widget.remark;
-    specificationName.text = widget.specification;
-    uploadName.text = widget.upload;
 
-    // Set selectedItem to the initial value of productName if it's in the list
-    selectedItem = list.contains(widget.product) ? widget.product : null;
+    BlocProvider.of<AllRequesterBloc>(context).add(EditDetailHandler(widget.id));
   }
 
   @override
@@ -184,7 +179,62 @@ class _EditRequisitionState extends State<EditRequisition> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
+      body: BlocListener<AllRequesterBloc,AllRequesterState>(
+
+
+
+  listener: (context, state) {
+    if (state is EditLoading) {
+      setState(() {
+        isLoading = true;
+      });
+    } else if (state is EditSuccess) {
+      setState((){
+        var editDetailsList = state.editList;
+        print("AllDataEdit>>>>${editDetailsList}");
+
+        ProductList = state.editList['products'];
+        RequisitionList = state.editList['req'];
+
+        if (RequisitionList.isNotEmpty) {
+          var firstReq = RequisitionList[0];
+
+          requisitionID = firstReq['id'];
+          requisitionProductID = firstReq['product_id'];
+          quantityName.text = firstReq['quantity'].toString();
+          remarkName.text = firstReq['staff_remarks'] ?? ''; // Handle null case
+          specificationName.text = firstReq['specification'];
+          uploadName.text = firstReq['image'];
+        }
+
+        print("ALLProductDat>>>>>>>>>>>>>>>>>a$ProductList");
+        productNames = ProductList.map<String>((item) => item['name'] as String).toList();
+
+        productMap = {
+          for (var item in ProductList) item['name'] as String: item['id'] as int
+        };
+
+        // Check if the requisition product ID matches any product ID in the ProductList
+        bool isMatchFound = ProductList.any((item) => item['id'] == requisitionProductID);
+
+        if (isMatchFound) {
+          print("Product ID matches the requisition product ID: $requisitionProductID");
+          // Perform any additional actions if needed
+        } else {
+          print("No matching product found for Requisition ID: $requisitionProductID");
+          // Handle the case when there is no match
+        }
+      }
+      );
+    } else if (state is AddCartFailure) {
+      setState(() {
+        isLoading = false;
+      });
+      print("error>> ${state.addCartDetailFailure}");
+    }
+    // TODO: implement listener
+  },
+  child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(18.0),
               child: Form(
@@ -211,33 +261,89 @@ class _EditRequisitionState extends State<EditRequisition> {
                     ).animateOnPageLoad(
                       animationsMap['imageOnPageLoadAnimation2']!,
                     ),
+                    // Padding(
+                    //   padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    //   child: Container(
+                    //     width: MediaQuery.of(context).size.width,
+                    //     padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    //     decoration: BoxDecoration(
+                    //       borderRadius: BorderRadius.circular(28.0),
+                    //       border: Border.all(color: AppColors.primaryColourDark),
+                    //       color: Colors.white,
+                    //     ),
+                    //     child: DropdownButtonHideUnderline(
+                    //       child: DropdownButton<String>(
+                    //         key: _productNameKey,
+                    //         focusNode: _productNameNode,
+                    //         value: selectedItem,
+                    //         hint: const Text("Select Product/Service", style: FTextStyle.formhintTxtStyle),
+                    //         onChanged: (String? newValue) {
+                    //           setState(() {
+                    //             selectedItem = newValue;
+                    //             // Update button enable state
+                    //             isButtonPartEnabled = newValue != null && newValue.isNotEmpty && ValidatorUtils.isValidCommon(specificationName.text);
+                    //           });
+                    //         },
+                    //         items: list.map<DropdownMenuItem<String>>((dynamic value) {
+                    //           return DropdownMenuItem<String>(
+                    //             value: value,
+                    //             child: Text(value.toString()),
+                    //           );
+                    //         }).toList(),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      padding:
+                      const EdgeInsets.symmetric(vertical: 8.0),
                       child: Container(
                         width: MediaQuery.of(context).size.width,
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(28.0),
-                          border: Border.all(color: AppColors.primaryColourDark),
+                          border: Border.all(
+                              color: AppColors.primaryColourDark),
                           color: Colors.white,
                         ),
                         child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
+                          child: DropdownButton<String?>(
                             key: _productNameKey,
                             focusNode: _productNameNode,
                             value: selectedItem,
-                            hint: const Text("Select Product/Service", style: FTextStyle.formhintTxtStyle),
+                            hint: const Text("Select Product/Service",
+                                style: FTextStyle.formhintTxtStyle),
                             onChanged: (String? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  selectedItem = newValue;
+                                  selectedProductId = productMap[newValue]; // This can be null
+
+                                  isButtonPartEnabled = newValue.isNotEmpty &&
+                                      ValidatorUtils.isValidCommon(specificationName.text);
+
+                                  // if (selectedProductId != null) {
+                                  //   BlocProvider.of<AllRequesterBloc>(context).add(SepListHandler(selectedProductId.toString()));
+                                  // }
+                                });
+                              } else {
+
+                              }
                               setState(() {
                                 selectedItem = newValue;
                                 // Update button enable state
-                                isButtonPartEnabled = newValue != null && newValue.isNotEmpty && ValidatorUtils.isValidCommon(specificationName.text);
+                                isButtonPartEnabled =
+                                    newValue != null &&
+                                        newValue.isNotEmpty &&
+                                        ValidatorUtils.isValidCommon(
+                                            specificationName.text);
                               });
                             },
-                            items: list.map<DropdownMenuItem<String>>((dynamic value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value.toString()),
+                            items: productNames.map<DropdownMenuItem<String?>>((String data) {
+                              return DropdownMenuItem<String?>(
+                                value: data,
+                                child: Text(data),
                               );
                             }).toList(),
                           ),
@@ -405,6 +511,7 @@ class _EditRequisitionState extends State<EditRequisition> {
               ),
             ),
           ),
+),
     );
   }
 }

@@ -174,11 +174,12 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
           } else if (state is DeleteSuccess) {
             DeletePopupManager.stopLoader();
 
+            var deleteMessage = state.deleteList['message'];
 
             BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.messageSuccess),
+                content: Text(deleteMessage),
                 backgroundColor: AppColors.primaryColour,
               ),
             );
@@ -401,15 +402,13 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                                         IconButton(
                                           icon: const Icon(Icons.edit, color: Colors.black),
                                           onPressed: () {
-                                            Navigator.push(context, MaterialPageRoute(builder: (context) => EditRequisition(
-                                              product: item["product_name"] is String ? item["product_name"] : "",
-                                              specification: item["specification"] is String ? item["specification"] : "",
-                                              quantity: item["quantity"].toString(),
-                                              remark: item["staff_remarks"] is String ? item["staff_remarks"] : "",
-                                              upload: item["image"],
+                                            Navigator.push(context, MaterialPageRoute(builder: (context) => BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: EditRequisition(
+      id:data[index]['id'].toString()
 
-
-                                            )));
+                                            ),
+)));
                                           },
                                         ),
                                         IconButton(

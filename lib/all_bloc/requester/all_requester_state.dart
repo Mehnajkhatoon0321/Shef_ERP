@@ -61,8 +61,8 @@ final class AddRequisitionSuccess extends AllRequesterState{
 
 final class DeleteLoading extends AllRequesterState{}
 final class DeleteSuccess extends AllRequesterState{
-  final String messageSuccess;
-  DeleteSuccess(this.messageSuccess);
+  final Map<String, dynamic> deleteList;
+  DeleteSuccess(this.deleteList);
 
 }
 
@@ -70,5 +70,32 @@ final class DeleteSuccess extends AllRequesterState{
 final class DeleteFailure extends AllRequesterState{
   final Map<String, dynamic> deleteAddressFailure;
   DeleteFailure(this.deleteAddressFailure);
+
+}
+//
+final class EditLoading extends AllRequesterState{}
+final class EditSuccess extends AllRequesterState{
+  final Map<String, dynamic> editList;
+  EditSuccess(this.editList);
+
+}
+
+
+final class EditSuccessFailure extends AllRequesterState{
+  final Map<String, dynamic> deleteAddressFailure;
+  EditSuccessFailure(this.deleteAddressFailure);
+
+}
+final class UpdateLoading extends AllRequesterState{}
+final class UpdateSuccess extends AllRequesterState{
+  final Map<String, dynamic> updateList;
+  UpdateSuccess(this.updateList);
+
+}
+
+
+final class UpdateFailure extends AllRequesterState{
+  final Map<String, dynamic> updateFailure;
+  UpdateFailure(this.updateFailure);
 
 }

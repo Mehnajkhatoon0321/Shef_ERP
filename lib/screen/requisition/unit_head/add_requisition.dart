@@ -915,7 +915,7 @@ String? nextFromList;
                                             if (selectedItemForEditing != null) {
                                               final index = itemList.indexOf(selectedItemForEditing!);
                                               itemList[index] = {
-                                                "product": selectedItem!,
+                                                "product": selectedProductId.toString()!,
                                                 "event": selectedEventItem!,
                                                 "specification": specificationName.text,
                                                 "quantity": quantityName.text,
@@ -927,7 +927,7 @@ String? nextFromList;
                                           } else {
                                             // Adding a new item
                                             itemList.add({
-                                              "product": selectedItem!,
+                                              "product": selectedProductId.toString()!,
                                               "event": selectedEventItem!,
                                               "specification": specificationName.text,
                                               "quantity": quantityName.text,
@@ -1008,9 +1008,9 @@ SizedBox(height: 20,),
                                       text: "Product/Services: ",
                                       style: FTextStyle.listTitleSub,
                                       children: [
-                                        TextSpan(
-                                            text: item["product"] ?? "--",
-                                            style: FTextStyle.listTitle),
+                                        // TextSpan(
+                                        //     text: item["product"] ?? "--",
+                                        //     style: FTextStyle.listTitle),
                                         const TextSpan(
                                             text: "\nSpecialization: ",
                                             style: FTextStyle.listTitleSub),
@@ -1052,7 +1052,7 @@ SizedBox(height: 20,),
                                   onPressed: () {
                                     setState(() {
                                       selectedItemForEditing = item;
-                                      selectedItem = item["product"];
+                                      selectedProductId = item["product"];
                                       specificationName.text =
                                           item["specialisation"] ?? "--";
                                       quantityName.text =

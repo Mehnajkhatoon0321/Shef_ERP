@@ -300,7 +300,14 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
           if (response.statusCode == 200) {
             emit(AddRequisitionSuccess(response.data));
             print(">>>>> Response: ${response.data}");
-          } else {
+          }else if   (response.statusCode == 400) {
+            emit(AddCartFailure(response.data));
+            print(">>>>> Response: ${response.data}");
+          }
+          else if   (response.statusCode == 500) {
+            emit(AddCartFailure(response.data));
+            print(">>>>> Response: ${response.data}");
+          }  else {
             emit(AddCartFailure({'error': 'Failed to upload requisition'}));
           } // Print request details
 
@@ -322,7 +329,7 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
         try {
           String authToken = PrefUtils.getToken();
           int userId = PrefUtils.getUserId();
-          final APIEndpoint = Uri.parse("${APIEndPoints.requesterList}${event.ID}/$userId");
+          final APIEndpoint = Uri.parse("${APIEndPoints.postDelete}${event.ID}/$userId");
           var response = await http.get(
             APIEndpoint,
             headers: {
@@ -334,7 +341,10 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
           developer.log("URL: $response");
 
           if (response.statusCode == 200) {
-            emit(DeleteSuccess('Product deleted successfully from the cart.'));
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(DeleteSuccess(responseData));
+
 
           }
           else {
@@ -355,11 +365,11 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
 
     on<EditDetailHandler>((event, emit) async {
       if (await ConnectivityService.isConnected()) {
-        emit(AddCartLoading());
+        emit(EditLoading());
         try {
           String authToken = PrefUtils.getToken();
           int userId = PrefUtils.getUserId();
-          final APIEndpoint = Uri.parse("${APIEndPoints.postReqEdit}${event.id}$userId");
+          final APIEndpoint = Uri.parse("${APIEndPoints.postReqEdit}${event.id}/$userId");
           var response = await http.get(
             APIEndpoint,
             headers: {
@@ -372,23 +382,120 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
           if (response.statusCode == 200) {
             print('response.statusCode_in>${response.statusCode}');
             final responseData = jsonDecode(response.body);
-            emit(AddCartSuccess(responseData));
+            emit(EditSuccess(responseData));
 
           }
           else {
             final responseError = jsonDecode(response.body);
-            emit(AddCartFailure(responseError));
+            emit(EditSuccessFailure(responseError));
           }
         } catch (e) {
           print('Exception: $e');
-          emit(AddCartFailure({'error': 'Exception occurred: $e'}));
+          emit(EditSuccessFailure({'error': 'Exception occurred: $e'}));
         }
       } else {
         print('Network error');
-        emit(AddCartFailure(const {'error': 'Network error'}));
+        emit(EditSuccessFailure(const {'error': 'Network error'}));
+      }
+    });
+//Update Requisition
+    on<UpdateRequisitionEventHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(UpdateLoading());
+        try {
+          Dio dio = Dio();
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            "Authorization": 'Bearer $authToken',
+          };
+
+          var formData = FormData.fromMap({
+            'date': event.date,
+            'unit': event.unit,
+            'time': event.time,
+            'product': event.product,
+            'specification': event.specification,
+            'user_id': event.userid,
+            'quantity': event.quantity,
+            'additional': event.additional,
+            'event': event.event,
+            'delivery_date': event.delivery_date,
+            'pre_img': event.preImg,
+            'req_id': event.reqID,
+            if (event.Image != null)
+              'image': await MultipartFile.fromFile(event.Image!.path)
+          });
+
+          var response = await dio.post(APIEndPoints.postReqUpdate,
+              data: formData,
+              options: Options(headers: headers)
+          );
+
+          if (response.statusCode == 200) {
+            emit(UpdateSuccess(response.data));
+          } else {
+            emit(UpdateFailure(response.data));
+          }
+        } catch (e) {
+          emit(UpdateFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        emit(UpdateFailure({'error': 'No internet connection'}));
       }
     });
 
+
+    // on<UpdateRequisitionEventHandler>((event, emit) async {
+    //   if (await ConnectivityService.isConnected()) {
+    //     emit(UpdateLoading());
+    //     try {
+    //       Dio dio = Dio();
+    //       String authToken = PrefUtils.getToken();
+    //       dio.options.headers["Authorization"] = 'Bearer $authToken';
+    //       var uri = Uri.parse(APIEndPoints.postReqUpdate);
+    //       var request = http.MultipartRequest('POST', uri);
+    //       request.fields['date'] = event.date;
+    //       request.fields['unit'] = event.unit;
+    //       request.fields['time'] = event.time;
+    //       request.fields['product'] = event.product;
+    //       request.fields['specification'] = event.specification;
+    //       request.fields['user_id'] = event.userid;
+    //       request.fields['quantity'] = event.quantity;
+    //       request.fields['additional'] = event.additional;
+    //       request.fields['event'] = event.event;
+    //       request.fields['delivery_date'] = event.delivery_date;
+    //       request.fields['pre_img'] = event.preImg;
+    //       request.fields['req_id'] = event.reqID;
+    //
+    //       if (event.Image != null) {
+    //         var imageStream = http.ByteStream(event.Image!.openRead());
+    //         var imageLength = await event.Image!.length();
+    //         var multipartImage = http.MultipartFile('image', imageStream, imageLength,
+    //             filename: event.Image!.path.split('/').last);
+    //         request.files.add(multipartImage);
+    //       }
+    //       var streamedResponse = await request.send();
+    //       var response = await http.Response.fromStream(streamedResponse);
+    //
+    //       if (response.statusCode == 200) {
+    //         final responseData = jsonDecode(response.body);
+    //         emit(UpdateFailure(responseData));
+    //         developer.log("responseData>>>>${responseData.runtimeType}");
+    //       } else if (response.statusCode == 400) {
+    //         emit(UpdateFailure(jsonDecode(response.body)));
+    //       } else {
+    //         emit(UpdateFailure(jsonDecode(response.body)));
+    //       }
+    //     } catch (e) {
+    //       if (kDebugMode) {
+    //         print('Exception: $e');
+    //         emit(UpdateFailure({'error': 'Exception occurred: $e'}));
+    //       }
+    //     }
+    //   } else {
+    //     print("error occurred");
+    //   }
+    // });
 
 
 
