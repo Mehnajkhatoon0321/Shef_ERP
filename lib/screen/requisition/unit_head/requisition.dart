@@ -6,10 +6,13 @@ import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 import 'package:shef_erp/screen/requisition/unit_head/add_requisition.dart';
 import 'package:shef_erp/screen/requisition/unit_head/edit_requisition.dart';
 import 'package:shef_erp/screen/requisition/unit_head/view_details.dart';
+import 'package:shef_erp/utils/DeletePopupManager.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
+import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shimmer/shimmer.dart';
 class RequisitionScreen extends StatefulWidget {
   const RequisitionScreen({super.key});
 
@@ -18,20 +21,19 @@ class RequisitionScreen extends StatefulWidget {
 }
 
 class _RequisitionScreenState extends State<RequisitionScreen> {
-  List<Map<String, dynamic>> listData = [
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
 
-  ];
-
-
+  int pageNo = 1;
+  int totalPages = 0;
+  int pageSize = 5;
+  bool hasMoreData = true;
+  List<dynamic> data = [];
+  final controller = ScrollController();
+  final controllerI = ScrollController();
+  TextEditingController _editController = TextEditingController();
 
   final TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
-
+  bool isLoading = false;
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
       trigger: AnimationTrigger.onPageLoad,
@@ -118,7 +120,22 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
         _isTextEmpty = _controller.text.isEmpty;
       });
     });
+    BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
+    paginationCall();
   }
+  void paginationCall() {
+    controllerI.addListener(() {
+      if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
+        if (pageNo < totalPages && !isLoading) {
+          if (hasMoreData) {
+            pageNo++;
+            BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
+          }
+        }
+      }
+    });
+  }
+
   Set<int> selectedIndices = {};
 
   @override
@@ -152,7 +169,10 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>  AddRequisition(flag: "",),
+                        builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: AddRequisition(flag: "",),
+),
                       ),
                     );
 
@@ -191,7 +211,57 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
         ),// You can set this to any color you prefer
       ),
 
-      body: Column(
+      body: BlocListener<AllRequesterBloc, AllRequesterState>(
+        listener: (context, state) {
+          if (state is AddCartLoading) {
+            setState(() {
+              isLoading = true;
+            });
+          } else if (state is AddCartSuccess) {
+            setState(() {
+              var responseData = state.addCartDetails['list']['requisitions'];
+              print(">>>>>>>>>>>ALLDATA$responseData");
+              totalPages = responseData["total"];
+
+              if (pageNo == 1) {
+                data.clear();
+              }
+
+              data.addAll(responseData['data']);
+
+              setState(() {
+                isLoading = false;
+                if (pageNo == totalPages) {
+                  hasMoreData = false;
+                }
+              });
+            });
+          } else if (state is AddCartFailure) {
+            setState(() {
+              isLoading = false;
+            });
+            print("error>> ${state.addCartDetailFailure}");
+          } else if (state is DeleteLoading) {
+            DeletePopupManager.playLoader();
+          } else if (state is DeleteSuccess) {
+            DeletePopupManager.stopLoader();
+
+            var deleteMessage = state.deleteList['message'];
+
+            BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(deleteMessage),
+                backgroundColor: AppColors.primaryColour,
+              ),
+            );
+
+            Future.delayed(const Duration(milliseconds: 500), () {
+              Navigator.pop(context);
+            });
+          }
+        },
+  child: Column(
         children: [
 
           Padding(
@@ -244,245 +314,307 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
               ),
             ),
           ),
+
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-
               children: [
-
-
-              SizedBox(
-                height:
-                (displayType == 'desktop' || displayType == 'tablet')
-                    ? 70
-                    : 38,
-                child: ElevatedButton(
-                    onPressed: () async {
-
+                SizedBox(
+                  height: (displayType == 'desktop' || displayType == 'tablet') ? 70 : 38,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        if (selectedIndices.length == data.length) {
+                          selectedIndices.clear(); // Deselect all if all are selected
+                        } else {
+                          selectedIndices = Set.from(List.generate(data.length, (index) => index)); // Select all
+                        }
+                      });
                     },
-
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(26),
                       ),
-                      backgroundColor: Colors.green
-
+                      backgroundColor: Colors.blue, // Change color as needed
                     ),
-                    child:
-                    Text(
-                      "Accepted",
-                      style: FTextStyle.loginBtnStyle,
-                    )
-
-                  // isLoading? CircularProgressIndicator(color: Colors.white,):Text(
-                  //   Constants.loginBtnTxt,
-                  //   style: FTextStyle.loginBtnStyle,
-                  // )
+                    child: Text(
+                      selectedIndices.length == data.length ? "Deselect All" : "Select All",
+                      style: FTextStyle.emailProfile,
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 10,),
-              SizedBox(
-                height:
-                (displayType == 'desktop' || displayType == 'tablet')
-                    ? 70
-                    : 38,
-                child: ElevatedButton(
-                    onPressed: () async {
-                      // setState(() {
-                      //   isLoading = true;
-                      // });
-
-                      // Navigator.push(
-                      //   context,
-                      //   MaterialPageRoute(
-                      //     builder: (context) =>  Navigation(),
-                      //   ),
-                      // );
-
-                      // );
-                    },
-
-                    style: ElevatedButton.styleFrom(
+                const SizedBox(width: 10,),
+                // Existing Accepted button
+                Expanded(
+                  child: SizedBox(
+                    height: (displayType == 'desktop' || displayType == 'tablet') ? 70 : 38,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        // Accepted button functionality
+                      },
+                      style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(26),
                         ),
-                        backgroundColor: AppColors.errorColor
-
+                        backgroundColor: Colors.green,
+                      ),
+                      child: Text("Approve", style: FTextStyle.emailProfile),
                     ),
-                    child:
-                    Text(
-                      "Rejected",
-                      style: FTextStyle.loginBtnStyle,
-                    )
-
-                  // isLoading? CircularProgressIndicator(color: Colors.white,):Text(
-                  //   Constants.loginBtnTxt,
-                  //   style: FTextStyle.loginBtnStyle,
-                  // )
+                  ),
                 ),
-              ),
-
-            ],),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: listData.length,
-              itemBuilder: (BuildContext context, int index) {
-                final item = listData[index];
-                return GestureDetector(
-                  onTap: (){
-
-
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ViewDetails(
-                        requisition:item["requisitionNo"],
-                        poNumber:item["poNumber"],
-                    requestDate:item["requestDate"],
-                    unit:item["unit"],
-                    product:item["product"],
-                specification:item["specification"],
-                      quantity:item["quantity"],
-                unitHead:item["unitHead"],
-                purchase:item["purchase"],
-                delivery:item["delivery"],
-                vender:item["vender"],
-
-
-
-
-
-
-                    )));
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(top: 10.h),
-                          child: Transform.scale(
-                            scale: 1.3,
-                            child: Checkbox(
-                              value: selectedIndices.contains(index),
-                              activeColor:index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
-                              onChanged: (bool? value) {
-                                setState(() {
-                                  if (value == true) {
-                                    selectedIndices.add(index);
-                                  } else {
-                                    selectedIndices.remove(index);
-                                  }
-                                });
-                              },
-                            ),
-                          ),
+                const SizedBox(width: 10,),
+                // Existing Rejected button
+                Expanded(
+                  child: SizedBox(
+                    height: (displayType == 'desktop' || displayType == 'tablet') ? 70 : 38,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        _showEditDialog();
+                        // Rejected button functionality
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(26),
                         ),
-                        Expanded(
-                          child: Container(
-                            margin: const EdgeInsets.all(8),
-                            padding: const EdgeInsets.all(7),
-                            decoration: BoxDecoration(
-                              color: index % 2 == 0 ? Colors.white : Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
-                                  spreadRadius:4,
-                                  blurRadius: 0.5,
-                                  offset: const Offset(0,1)
+                        backgroundColor: AppColors.errorColor,
+                      ),
+                      child: Text("Reject", style: FTextStyle.emailProfile),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          Expanded(
+            child: isLoading && data.isEmpty
+                ? Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: ListView.builder(
+                itemCount: 10, // Number of shimmer placeholders
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
+                    child: Container(
+                      margin: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            spreadRadius: 2,
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  height: 10,
+                                  color: Colors.grey,
+                                ),
+                                const SizedBox(height: 5),
+                                Container(
+                                  height: 10,
+                                  color: Colors.grey,
+                                ),
+                                const SizedBox(height: 5),
+                                Container(
+                                  height: 10,
+                                  color: Colors.grey,
                                 ),
                               ],
                             ),
-                            child: Column(
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        const Text("Requisition No: ", style: FTextStyle.listTitle),
-                                        Text("${item["requisitionNo"]}", style: FTextStyle.listTitleSub),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Row(
-                                      children: [
-                                        const Text("PO No. : ", style: FTextStyle.listTitle),
-                                        Expanded(child: Text("${item["poNumber"]}", style: FTextStyle.listTitleSub)),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Row(
-                                      children: [
-                                        const Text("Request Date: ", style: FTextStyle.listTitle),
-                                        Text("${item["requestDate"]}", style: FTextStyle.listTitleSub),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                           crossAxisAlignment: CrossAxisAlignment.start,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            )
+                : data.isEmpty?Center(
+              child: isLoading
+                  ? const CircularProgressIndicator() // Show circular progress indicator
+                  : const Text("No more data .", style: FTextStyle.listTitle),
+            ): ListView.builder(
+              controller: controllerI,
+              itemCount: data.length + (hasMoreData ? 1 : 0), // Add one for the loading indicator
+              itemBuilder: (context, index) {
+                if (index < data.length) {
+                  final item = data[index];
 
-                                      children: [
-                                        Row(
-                                          children: [
-                                            const Text("Unit: ", style: FTextStyle.listTitle),
-                                            Text("${item["unit"]}", style: FTextStyle.listTitleSub),
-                                          ],
-                                        ),
-                                        Row(
+                  // Handle case where item might be null
+                  if (item == null) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 10.0),
+                      child: Text("No data available", style: FTextStyle.listTitle),
+                    );
+                  }
 
-                                          children: [
-                                            IconButton(
-                                              icon: const Icon(Icons.edit, color: Colors.black),
-                                              onPressed: () {
-                                                Navigator.push(context, MaterialPageRoute(builder: (context) => BlocProvider(
-  create: (context) => AllRequesterBloc(),
-  child: EditRequisition(
-    id:item["id"] ,
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => ViewDetails(
+                        requisition: item["requisitionNo"] ?? "N/A",
+                        poNumber: item["poNumber"] ?? "N/A",
+                        requestDate: item["req_date"] ?? "N/A",
+                        unit: item["unit"] ?? "N/A",
+                        product: item["product_name"] ?? "N/A",
+                        specification: item["specification"] ?? "N/A",
+                        quantity: item["quantity"].toString() ?? "N/A",
+                        unitHead: item["unitHead"] ?? "N/A",
+                        purchase: item["purchase"] ?? "N/A",
+                        delivery: item["dl_status"].toString() ?? "N/A",
+                        vender: item["vender"] ?? "N/A",
+                        image: item["image"].toString(),
 
-                                                  // product:item["product"],
-                                                  // specification:item["specification"],
-                                                  // quantity:item["quantity"],
-                                                  // remark:item["unitHead"],
-                                                  // upload:item["image"],
-                                                  //
+                        // delivery: item["dl_status"].toString(),
+                        // image: item["image"].toString(),
 
 
-
-
-                                                ),
-)));
-                                              },
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(Icons.delete, color: Colors.red),
-                                              onPressed: () => _showDeleteDialog(index),
-                                            ),
-                                          ],
-                                        ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),                                      ],
-                                    ),
-                                    // const SizedBox(height: 5),
-
-                                    // const SizedBox(height: 5),
-                                  ],
-                                ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-
-                              ],
+                      )));
+                    },
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(top: 10.h),
+                            child: Transform.scale(
+                              scale: 1.3,
+                              child: Checkbox(
+                                value: selectedIndices.contains(index),
+                                activeColor: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
+                                onChanged: (bool? value) {
+                                  setState(() {
+                                    if (value == true) {
+                                      selectedIndices.add(index);
+                                    } else {
+                                      selectedIndices.remove(index);
+                                    }
+                                  });
+                                },
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                          Expanded(
+                            child: Container(
+                              margin: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(7),
+                              decoration: BoxDecoration(
+                                color: index % 2 == 0 ? Colors.white : Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
+                                    spreadRadius: 4,
+                                    blurRadius: 0.5,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          const Text("Requisition No: ", style: FTextStyle.listTitle),
+                                          Text("${item["req_no"] ?? 'N/A'}", style: FTextStyle.listTitleSub),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 5),
+                                      Row(
+                                        children: [
+                                          const Text("PO No. : ", style: FTextStyle.listTitle),
+                                          Expanded(child: Text("${item["po_no"] ?? 'N/A'}", style: FTextStyle.listTitleSub)),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 5),
+                                      Row(
+                                        children: [
+                                          const Text("Request Date: ", style: FTextStyle.listTitle),
+                                          Text("${item["req_date"] ?? 'N/A'}", style: FTextStyle.listTitleSub),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 5),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              const Text("Unit: ", style: FTextStyle.listTitle),
+                                              Text("${item["unit"] ?? 'N/A'}", style: FTextStyle.listTitleSub),
+                                            ],
+                                          ),
+                                          Row(
+                                            children: [
+                                              IconButton(
+                                                icon: const Icon(Icons.edit, color: Colors.black),
+                                                onPressed: () {
+                                                  Navigator.push(context, MaterialPageRoute(builder: (context) => BlocProvider(
+                                                    create: (context) => AllRequesterBloc(),
+                                                    child: EditRequisition(
+                                                      id: item["id"] ?? 'N/A',
+                                                    ),
+                                                  )));
+                                                },
+                                              ),
+                                              IconButton(
+                                                icon: const Icon(Icons.delete, color: Colors.red),
+                                                onPressed: () {
+                                                  CommonPopups.showDeleteCustomPopup(
+                                                    context,
+                                                    "Are you sure you want to delete?",
+                                                        () {
+                                                      BlocProvider.of<AllRequesterBloc>(context).add(DeleteHandlers(data[index]['id'] ?? 'N/A'));
+                                                    },
+                                                  );
+                                                },
+                                              ),
+                                            ],
+                                          ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                                        ],
+                                      ),
+                                      // const SizedBox(height: 5),
+                                    ],
+                                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  )
-
-                );
+                  );
+                } else {
+                  // This is the loading indicator
+                  return Center(
+                    child: isLoading
+                        ? const CircularProgressIndicator() // Show circular progress indicator
+                        : const Text("No more data.", style: FTextStyle.listTitle),
+                  );
+                }
               },
             ),
+
           ),
 
           const SizedBox(height: 20),
         ],
       ),
+),
     );
   }
 
@@ -495,13 +627,57 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
 
 
 
-  void _showDeleteDialog(int index) {
+
+
+  void _showEditDialog() {
+    // Clear or set the controller's text based on the action
+
+      // _editController.text = listData[index]["unithead"];
+
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          content: Text("Are you sure you want to delete?", style: FTextStyle.preHeadingStyle),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(32.0),
+          ),
+          title: Text(
+           "Unit Head Remark",
+            style: FTextStyle.preHeadingStyle,
+          ),
+          content: Container(
+            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: _editController,
+                  decoration: InputDecoration(
+                    hintText:  " Enter Unit Head Remark",
+                    hintStyle: FTextStyle.formhintTxtStyle,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(23.0),
+                      borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(23.0),
+                      borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(23.0),
+                      borderSide: const BorderSide(color: AppColors.primaryColour, width: 1.0),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
+                    fillColor: Colors.grey[100],
+                    filled: true,
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
           actions: [
             Container(
               decoration: BoxDecoration(
@@ -515,18 +691,27 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                 },
               ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
             ),
+            const SizedBox(width: 10), // Add spacing between buttons
             Container(
               decoration: BoxDecoration(
-                color: AppColors.primaryColourDark,
+                color: AppColors.primaryColour,
                 borderRadius: BorderRadius.circular(25.0),
               ),
               child: TextButton(
                 child: const Text("OK", style: TextStyle(color: Colors.white)),
                 onPressed: () {
-                  setState(() {
-                    listData.removeAt(index);
-                  });
-                  Navigator.of(context).pop();
+                  if (_editController.text.isNotEmpty) {
+                    setState(() {
+
+                        // listData[index]["brand_name"] = _editController.text;
+
+                    });
+                    Navigator.of(context).pop();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Brand name cannot be empty.")),
+                    );
+                  }
                 },
               ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
             ),
@@ -535,4 +720,5 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
       },
     );
   }
+
 }

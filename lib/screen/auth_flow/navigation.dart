@@ -176,12 +176,18 @@ class _NavigationState extends State<Navigation> {
         if (userRole == 'Unit Head') {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const RequisitionScreen()),
+            MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: const RequisitionScreen(),
+)),
           );
         }else if (userRole == 'Purchase Manager') {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AdminRequisition()),
+            MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: AdminRequisition(),
+)),
           );
         }else if (userRole == 'Requester') {
           Navigator.push(

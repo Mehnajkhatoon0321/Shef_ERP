@@ -7,10 +7,18 @@ import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 import 'package:shef_erp/screen/requisition/unit_head/add_requisition.dart';
 import 'package:shef_erp/screen/requisition/unit_head/edit_requisition.dart';
 import 'package:shef_erp/screen/requisition/unit_head/view_details.dart';
+import 'package:shef_erp/utils/DeletePopupManager.dart';
+import 'package:shef_erp/utils/asign_vector.dart';
+import 'package:shef_erp/utils/colour_status.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
+import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shef_erp/utils/pref_utils.dart';
+import 'package:shef_erp/utils/unit_head_status.dart';
+import 'package:shef_erp/utils/vender_name.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../utils/validator_utils.dart';
 class AdminRequisition extends StatefulWidget {
@@ -21,18 +29,11 @@ class AdminRequisition extends StatefulWidget {
 }
 
 class _AdminRequisitionState extends State<AdminRequisition> {
-  List<Map<String, dynamic>> listData = [
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
 
-  ];
 
   Map<String, String>? selectedItemForEditing;
   late final GlobalKey<FormFieldState<String>> _vendorNameKey =
-  GlobalKey<FormFieldState<String>>(); 
+  GlobalKey<FormFieldState<String>>();
   late final GlobalKey<FormFieldState<String>> _billingNameKey =
   GlobalKey<FormFieldState<String>>();
   late final TextEditingController vendorName = TextEditingController();
@@ -45,6 +46,14 @@ class _AdminRequisitionState extends State<AdminRequisition> {
   String? selectedItem;
   String? selectedBilling;
   bool isButtonPartEnabled = false;
+  int pageNo = 1;
+  int totalPages = 0;
+  int pageSize = 5;
+  bool hasMoreData = true;
+  List<dynamic> data = [];
+  final controller = ScrollController();
+  final controllerI = ScrollController();
+  bool isLoading = false;
   List<dynamic> list = ['Female', 'data', 'items'];
   List<dynamic> listBilling = ['Demo', 'data', 'items'];
   final animationsMap = {
@@ -125,6 +134,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
       ],
     ),
   };
+
   @override
   void initState() {
     super.initState();
@@ -134,7 +144,24 @@ class _AdminRequisitionState extends State<AdminRequisition> {
       });
     });
     _editController = TextEditingController();
+    BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
+    paginationCall();
   }
+
+  void paginationCall() {
+    controllerI.addListener(() {
+      if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
+        if (pageNo < totalPages && !isLoading) {
+          if (hasMoreData) {
+            pageNo++;
+            BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
+          }
+        }
+      }
+    });
+  }
+
+
   Set<int> selectedIndices = {};
 
   @override
@@ -191,10 +218,6 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                     style: FTextStyle.loginBtnStyle.copyWith(color:AppColors.primaryColourDark),
                   )
 
-                // isLoading? CircularProgressIndicator(color: Colors.white,):Text(
-                //   Constants.loginBtnTxt,
-                //   style: FTextStyle.loginBtnStyle,
-                // )
               ),
             ),
           )
@@ -214,7 +237,57 @@ class _AdminRequisitionState extends State<AdminRequisition> {
         ),// You can set this to any color you prefer
       ),
 
-      body: Column(
+      body: BlocListener<AllRequesterBloc, AllRequesterState>(
+        listener: (context, state) {
+          if (state is AddCartLoading) {
+            setState(() {
+              isLoading = true;
+            });
+          } else if (state is AddCartSuccess) {
+            setState(() {
+              var responseData = state.addCartDetails['list']['requisitions'];
+              print(">>>>>>>>>>>ALLDATA$responseData");
+              totalPages = responseData["total"];
+
+              if (pageNo == 1) {
+                data.clear();
+              }
+
+              data.addAll(responseData['data']);
+
+              setState(() {
+                isLoading = false;
+                if (pageNo == totalPages) {
+                  hasMoreData = false;
+                }
+              });
+            });
+          } else if (state is AddCartFailure) {
+            setState(() {
+              isLoading = false;
+            });
+            print("error>> ${state.addCartDetailFailure}");
+          } else if (state is DeleteLoading) {
+            DeletePopupManager.playLoader();
+          } else if (state is DeleteSuccess) {
+            DeletePopupManager.stopLoader();
+
+            var deleteMessage = state.deleteList['message'];
+
+            BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(deleteMessage),
+                backgroundColor: AppColors.primaryColour,
+              ),
+            );
+
+            Future.delayed(const Duration(milliseconds: 500), () {
+              Navigator.pop(context);
+            });
+          }
+        },
+  child: Column(
         children: [
 
           Padding(
@@ -271,7 +344,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-
+mainAxisAlignment: MainAxisAlignment.start,
               children: [
 
 
@@ -335,37 +408,92 @@ class _AdminRequisitionState extends State<AdminRequisition> {
 
               ],),
           ),
+
           Expanded(
-            child: ListView.builder(
-              itemCount: listData.length,
-              itemBuilder: (BuildContext context, int index) {
-                final item = listData[index];
-                return GestureDetector(
-                    onTap: (){
-
-
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>ViewDetails(
-                        requisition:item["requisitionNo"],
-                        poNumber:item["poNumber"],
-                        requestDate:item["requestDate"],
-                        unit:item["unit"],
-                        product:item["product"],
-                        specification:item["specification"],
-                        quantity:item["quantity"],
-                        unitHead:item["unitHead"],
-                        purchase:item["purchase"],
-                        delivery:item["delivery"],
-                        vender:item["vender"],
-
-
-
-
-
+            child: isLoading && data.isEmpty
+                ? Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: ListView.builder(
+                itemCount: 10, // Number of shimmer placeholders
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
+                    child: Container(
+                      margin: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            spreadRadius: 2,
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  height: 10,
+                                  color: Colors.grey,
+                                ),
+                                const SizedBox(height: 5),
+                                Container(
+                                  height: 10,
+                                  color: Colors.grey,
+                                ),
+                                const SizedBox(height: 5),
+                                Container(
+                                  height: 10,
+                                  color: Colors.grey,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            )
+                : data.isEmpty?Center(
+              child: isLoading
+                  ? const CircularProgressIndicator() // Show circular progress indicator
+                  : const Text("No more data .", style: FTextStyle.listTitle),
+            ): ListView.builder(
+              controller: controllerI,
+              itemCount: data.length + (hasMoreData ? 1 : 0), // Add one for the loading indicator
+              itemBuilder: (context, index) {
+                if (index < data.length) {
+                  final item = data[index];
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => ViewDetails(
+                        requisition: item["req_no"],
+                        poNumber: item["po_no"],
+                        requestDate: item["req_date"],
+                        unit: item["unit"],
+                        product: item["product_name"] ?? "N/A",
+                        specification: item["specification"] ?? "N/A",
+                        quantity: item["quantity"].toString() ?? "N/A",
+                        unitHead: item["unitHead"].toString() ?? "N/A",
+                        purchase: item["purchase"].toString() ?? "N/A",
+                        delivery: item["dl_status"].toString() ?? "N/A",
+                        vender: item["vender"] ?? "N/A",
+                        image: item["image"].toString(),
 
                       )));
                     },
                     child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
+                      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.01, vertical: 5),
                       child: Row(
                         children: [
                           Padding(
@@ -374,7 +502,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                               scale: 1.3,
                               child: Checkbox(
                                 value: selectedIndices.contains(index),
-                                activeColor:index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
+                                activeColor: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
                                 onChanged: (bool? value) {
                                   setState(() {
                                     if (value == true) {
@@ -387,7 +515,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                               ),
                             ),
                           ),
-                          Expanded(
+                          Expanded(  // Wrap Container with Expanded
                             child: Container(
                               margin: const EdgeInsets.all(8),
                               padding: const EdgeInsets.all(7),
@@ -396,103 +524,161 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                 borderRadius: BorderRadius.circular(10),
                                 boxShadow: [
                                   BoxShadow(
-                                      color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
-                                      spreadRadius:4,
-                                      blurRadius: 0.5,
-                                      offset: const Offset(0,1)
+                                    color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
+                                    spreadRadius: 4,
+                                    blurRadius: 0.5,
+                                    offset: const Offset(0, 1),
                                   ),
                                 ],
                               ),
                               child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start, // Align children to the start
                                 children: [
-                                  Column(
+                                  Row(
+                                    children: [
+                                      const Text("Requisition No: ", style: FTextStyle.listTitle),
+                                      Expanded(child: Text("${item["req_no"] ?? 'N/A'}", style: FTextStyle.listTitleSub,maxLines: 1,)),
+                                    ],
+                                  ),
+
+                                  Row(
+                                    children: [
+                                      const Text("PO No. : ", style: FTextStyle.listTitle),
+                                      Expanded(
+                                        child: Text("${item["po_no"] ?? 'N/A'}", style: FTextStyle.listTitleSub,maxLines: 1,),
+                                      ),
+                                    ],
+                                  ),
+
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Row(
-                                        children: [
-                                          const Text("Requisition No: ", style: FTextStyle.listTitle),
-                                          Text("${item["requisitionNo"]}", style: FTextStyle.listTitleSub),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 5),
-                                      Row(
-                                        children: [
-                                          const Text("PO No. : ", style: FTextStyle.listTitle),
-                                          Expanded(child: Text("${item["poNumber"]}", style: FTextStyle.listTitleSub)),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 5),
-                                      Row(
-                                        children: [
-                                          const Text("Request Date: ", style: FTextStyle.listTitle),
-                                          Text("${item["requestDate"]}", style: FTextStyle.listTitleSub),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 5),
-                                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-
-                                        children: [
-                                          Row(
-                                            children: [
-                                              const Text("Unit: ", style: FTextStyle.listTitle),
-                                              Text("${item["unit"]}", style: FTextStyle.listTitleSub),
-                                            ],
-                                          ),
-                                          Row(
-
-                                            children: [
-                                              IconButton(
-                                                icon: const Icon(Icons.edit, color: Colors.black),
-                                                onPressed: () {
-                                                  Navigator.push(context, MaterialPageRoute(builder: (context) => BlocProvider(
-  create: (context) => AllRequesterBloc(),
-  child: EditRequisition(
-   id :item["product"],
-
-                                                    // product:item["product"],
-                                                    // specification:item["specification"],
-                                                    // quantity:item["quantity"],
-                                                    // remark:item["unitHead"],
-                                                    // upload:item["image"],
-
-
-
-
-
-                                                  ),
-)));
-                                                },
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(Icons.delete, color: Colors.red),
-                                                onPressed: () => _showDeleteDialog(index),
-                                              ),
-                                            ],
-                                          ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),                                      ],
-                                      ),
-                                      // const SizedBox(height: 5),
-
-                                      // const SizedBox(height: 5),
+                                      const Text("Request Date: ", style: FTextStyle.listTitle),
+                                      Expanded(child: Text("${item["req_date"] ?? 'N/A'}", style: FTextStyle.listTitleSub,maxLines: 1,)),
                                     ],
-                                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                                  ),
+
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text("Unit: ", style: FTextStyle.listTitle),
+                                      Expanded(child: Text("${item["unit"] ?? 'N/A'}", style: FTextStyle.listTitleSub,maxLines: 1,)),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(child: DeliveryStatus(dlStatus: item["dl_status"].toString())),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(child: UnitHeadStatus(unitStatus: item["uh_status"].toString())),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(child: PurchaseManager(pmStatus: item["pm_status"].toString())),
+                                    ],
+                                  ),
+                                  VendorStatus(
+                                    role: PrefUtils.getRole(), // Example role
+                                    deliveryStatus:  item["dl_status"], // Example delivery status
+                                    companyName: item['company'], // Example company name
+                                  ),
+
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end, // Align children to the end (right)
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      // Check if the user is a Purchase Manager or pm_status is 1
+                                      if (item['pm_status'] == 1 || PrefUtils.getRole() == "Purchase Manager")
+                                        Visibility(
+                                          visible: item['dl_status'] == 1, // Show button only if pm_status is 1
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                            child: ElevatedButton(
+                                              onPressed: () async {
+                                                _showRejectDialog(-1);
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(26),
+                                                ),
+                                                backgroundColor: AppColors.yellow,
+                                                minimumSize: const Size(80, 32),
+                                              ),
+                                              child: Text(
+                                                "Mark Delivery",
+                                                style: FTextStyle.emailProfile,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      else if (item["uh_status"] == 0) // Display edit and delete buttons if uh_status is 0
+                                        Row(
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.edit, color: Colors.black),
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => BlocProvider(
+                                                      create: (context) => AllRequesterBloc(),
+                                                      child: EditRequisition(id: item["id"].toString() ?? 'N/A'),
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.delete, color: Colors.red),
+                                              onPressed: () {
+                                                CommonPopups.showDeleteCustomPopup(
+                                                  context,
+                                                  "Are you sure you want to delete?",
+                                                      () {
+                                                    BlocProvider.of<AllRequesterBloc>(context)
+                                                        .add(DeleteHandlers(data[index]['id'] ?? 'N/A'));
+                                                  },
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      const SizedBox(width: 16), // Optional spacing
+                                    ],
+                                  )
+
+
 
                                 ],
                               ),
-                            ),
+                            ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
                           ),
                         ],
                       ),
-                    )
-
-                );
+                    ),
+                  );
+                } else {
+                  // This is the loading indicator
+                  return Center(
+                    child: isLoading
+                        ? const CircularProgressIndicator() // Show circular progress indicator
+                        : const Text("No more data.", style: FTextStyle.listTitle),
+                  );
+                }
               },
-            ),
+            )
+
           ),
 
           const SizedBox(height: 20),
         ],
       ),
+),
     );
   }
 
@@ -769,44 +955,6 @@ class _AdminRequisitionState extends State<AdminRequisition> {
 
 
 
-  void _showDeleteDialog(int index) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          content: Text("Are you sure you want to delete?", style: FTextStyle.preHeadingStyle),
-          actions: [
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.formFieldBackColour,
-                borderRadius: BorderRadius.circular(25.0),
-              ),
-              child: TextButton(
-                child: const Text("Cancel", style: TextStyle(color: Colors.black)),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.primaryColourDark,
-                borderRadius: BorderRadius.circular(25.0),
-              ),
-              child: TextButton(
-                child: const Text("OK", style: TextStyle(color: Colors.white)),
-                onPressed: () {
-                  setState(() {
-                    listData.removeAt(index);
-                  });
-                  Navigator.of(context).pop();
-                },
-              ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-            ),
-          ],
-        ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation1']!);
-      },
-    );
-  }
+
+
 }

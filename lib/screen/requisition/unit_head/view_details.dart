@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:shef_erp/utils/asign_vector.dart';
+import 'package:shef_erp/utils/colour_status.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shef_erp/utils/unit_head_status.dart';
 
 class ViewDetails extends StatefulWidget {
   String requisition;
@@ -16,7 +19,7 @@ class ViewDetails extends StatefulWidget {
   String purchase;
   String delivery;
   String vender;
-
+  final String image;
   ViewDetails(
       {required this.requisition,
       required this.poNumber,
@@ -29,6 +32,7 @@ class ViewDetails extends StatefulWidget {
       required this.purchase,
       required this.delivery,
       required this.vender,
+      required this.image,
       super.key});
 
   @override
@@ -117,6 +121,8 @@ class _ViewDetailsState extends State<ViewDetails> {
 
   @override
   Widget build(BuildContext context) {
+
+    String imageUrl = 'https://erp.studyhallfoundation.org/public/uploads/requisition/${widget.image}';
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -145,15 +151,52 @@ class _ViewDetailsState extends State<ViewDetails> {
       ),
       body: Column(
         children: [
-          SizedBox(
-              height: MediaQuery.of(context).size.height / 3,
-              width: MediaQuery.of(context).size.width,
-              // color: Colors.yellow,
-
-              child: Image.asset(
-                "assets/images/onboarding2.png",
-                fit: BoxFit.cover,
-              )).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+      Stack(
+      children: [
+      widget.image.isNotEmpty
+      ? SizedBox(
+      height: MediaQuery.of(context).size.height / 3,
+      width: MediaQuery.of(context).size.width,
+      child: Image.network(
+        imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            height: MediaQuery.of(context).size.height / 3,
+            width: MediaQuery.of(context).size.width,
+            color: Colors.grey[200],
+            child: Center(
+              child: Text(
+                'Failed to load image',
+                style: TextStyle(color: Colors.red, fontSize: 16),
+              ),
+            ),
+          );
+        },
+      ),
+    )
+        : Container(
+    height: MediaQuery.of(context).size.height / 3,
+    width: MediaQuery.of(context).size.width,
+    color: Colors.grey[200], // Light grey background for no image
+    child: Center(
+    child: Text(
+    'No Image Available',
+    style: TextStyle(color: Colors.black, fontSize: 16),
+    ),
+    ),
+    ),
+    if (widget.image.isEmpty)
+    Positioned.fill(
+    child: Center(
+    child: Text(
+    'No Image Available',
+    style: TextStyle(color: Colors.black, fontSize: 16),
+    ),
+    ),
+    ),
+    ],
+    ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Column(
@@ -202,14 +245,7 @@ class _ViewDetailsState extends State<ViewDetails> {
                   ],
                 ),
                 const SizedBox(height: 5),
-                Row(
-                  children: [
-                    const Text("Specification: ",
-                        style: FTextStyle.listTitleBig),
-                    Text(widget.specification,
-                        style: FTextStyle.listTitleSubBig),
-                  ],
-                ),
+
                 const SizedBox(height: 5),
                 Row(
                   children: [
@@ -219,57 +255,31 @@ class _ViewDetailsState extends State<ViewDetails> {
                   ],
                 ),
                 const SizedBox(height: 5),
+
+
+
                 Row(
-                  children: [
-                    const Text("Unit Head Status: ",
-                        style: FTextStyle.listTitleBig),
-                    Text(
-                      widget.unitHead,
-                      style: widget.unitHead == 'Pending'
-                          ? FTextStyle.listTitleSubBig
-                              .copyWith(color: Colors.red)
-                          : FTextStyle.listTitleSubBig
-                              .copyWith(color: Colors.green),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    const Text("Purchase Manager Status: ",
-                        style: FTextStyle.listTitleBig),
-                    Text(
-                      widget.purchase,
-                      style: widget.purchase == 'Pending'
-                          ? FTextStyle.listTitleSubBig
-                              .copyWith(color: Colors.red)
-                          : FTextStyle.listTitleSubBig
-                              .copyWith(color: Colors.green),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    const Text("Delivery Status: ",
-                        style: FTextStyle.listTitleBig),
-                    Text(
-                      widget.delivery,
-                      style: widget.delivery == 'Pending'
-                          ? FTextStyle.listTitleSubBig
-                              .copyWith(color: Colors.red)
-                          : FTextStyle.listTitleSubBig
-                              .copyWith(color: Colors.green),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text("Vendor Name: ", style: FTextStyle.listTitleBig),
                     Text(widget.vender, style: FTextStyle.listTitleSubBig),
                   ],
-                )
+                ),
+                const SizedBox(height: 5),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Specification: ",
+                        style: FTextStyle.listTitleBig),
+                    Expanded(
+                      child: Text(widget.specification,
+                          style: FTextStyle.listTitleSubBig,maxLines: 2,),
+                    ),
+                  ],
+                ),
               ],
             ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
           )

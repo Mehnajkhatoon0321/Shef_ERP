@@ -11,7 +11,7 @@ import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/deletePopupManager.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 import 'package:shef_erp/utils/unit_head_status.dart';
-import 'dart:developer' as developer;
+
 import 'package:shimmer/shimmer.dart';
 class RequisitionRequester extends StatefulWidget {
   const RequisitionRequester({super.key});
@@ -293,7 +293,12 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                   },
                 ),
               )
-                  : ListView.builder(
+                  : data.isEmpty?Center(
+                child: isLoading
+                    ? const CircularProgressIndicator() // Show circular progress indicator
+                    : const Text("No more data .", style: FTextStyle.listTitle),
+              ):
+              ListView.builder(
                 controller: controllerI,
                 itemCount: data.length + (hasMoreData ? 1 : 0), // Add one for the loading indicator
                 itemBuilder: (context, index) {
@@ -336,7 +341,6 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-
                               Row(
                                 children: [
                                   const Text("Requisition No: ", style: FTextStyle.listTitle),
@@ -346,7 +350,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                               Row(
                                 children: [
                                   const Text("PO No: ", style: FTextStyle.listTitle),
-                                  Expanded(child: Text("${item["req_no"]}", style: FTextStyle.listTitleSub)),
+                                  Expanded(child: Text("${item["po_no"]}", style: FTextStyle.listTitleSub)),
                                 ],
                               ),
                               Row(
@@ -355,9 +359,6 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                                   Expanded(child: Text("${item["product_name"]}", style: FTextStyle.listTitleSub)),
                                 ],
                               ),
-
-
-
                               Row(
                                 children: [
                                   Expanded(child: DeliveryStatus(dlStatus: item["dl_status"].toString())),
@@ -373,9 +374,9 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                                   Expanded(child: PurchaseManager(pmStatus: item["pm_status"].toString())),
                                 ],
                               ),
-                              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.start,
-
                                 children: [
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -386,52 +387,28 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                                           Text("${item["req_date"]}", style: FTextStyle.listTitleSub),
                                         ],
                                       ),
-
                                     ],
                                   ),
                                   Visibility(
-                                    visible: ( item['roles'] == 'Requester' &&  item["uh_status"] == 0),
+                                    visible: (item['roles'] == 'Requester' && item["uh_status"] == 0),
                                     child: Row(
-
                                       children: [
-//                                         IconButton(
-//                                           icon: const Icon(Icons.edit, color: Colors.black),
-//                                           onPressed: () {
-//                                             Navigator.push(context, MaterialPageRoute(builder: (context) => BlocProvider(
-//   create: (context) => AllRequesterBloc(),
-//   child: EditRequisition(
-//       id:data[index]['id'].toString()
-//
-//                                             ),
-// )));
-//                                           },
-//                                         ),
                                         IconButton(
                                           icon: const Icon(Icons.delete, color: Colors.red),
-                                          onPressed: () =>
-                                          {
-
-                                          CommonPopups
-                                              .showDeleteCustomPopup(
-                                          context,
-                                          "Are you sure you want to delete?",
-                                          () {
-                                          BlocProvider.of<
-                                          AllRequesterBloc>(
-                                          context)
-                                              .add(
-                                          DeleteHandlers(
-                                      data[index]['id'],
-                                          ),
-                                          );
-                                          },
-                                          )
-                                            // _showDeleteDialog(index)
+                                          onPressed: () {
+                                            CommonPopups.showDeleteCustomPopup(
+                                              context,
+                                              "Are you sure you want to delete?",
+                                                  () {
+                                                BlocProvider.of<AllRequesterBloc>(context).add(DeleteHandlers(data[index]['id']));
+                                              },
+                                            );
                                           },
                                         ),
                                       ],
                                     ),
-                                  ),                                      ],
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -439,14 +416,16 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                       ),
                     );
                   } else {
+                    // This is the loading indicator
                     return Center(
                       child: isLoading
-                          ? const CircularProgressIndicator()
-                          : const Center(child: Text("No more data.", style: FTextStyle.listTitle)),
+                          ? const CircularProgressIndicator() // Show circular progress indicator
+                          : const Text("No more data.", style: FTextStyle.listTitle),
                     );
                   }
                 },
               ),
+
             ),
           ],
         ),

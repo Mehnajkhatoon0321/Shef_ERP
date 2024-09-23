@@ -1,12 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shef_erp/utils/colour_status.dart';
 import 'package:shef_erp/utils/colours.dart';
-import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
-
-
-import 'package:flutter/material.dart';
 class RequesterDetails extends StatefulWidget {
   final String requestDate;
   final String product;
@@ -34,7 +29,7 @@ class RequesterDetails extends StatefulWidget {
 class _RequesterDetailsState extends State<RequesterDetails> {
   @override
   Widget build(BuildContext context) {
-    // Construct the image URL directly in the build method
+
     String imageUrl = 'https://erp.studyhallfoundation.org/public/uploads/requisition/${widget.image}';
 
     return Scaffold(
@@ -72,13 +67,18 @@ class _RequesterDetailsState extends State<RequesterDetails> {
                 height: MediaQuery.of(context).size.height / 3,
                 width: MediaQuery.of(context).size.width,
                 child: Image.network(
-                  imageUrl, // Use the constructed image URL
+                  imageUrl,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    return Center(
-                      child: Text(
-                        'Failed to load image',
-                        style: TextStyle(color: Colors.red, fontSize: 16),
+                    return Container(
+                      height: MediaQuery.of(context).size.height / 3,
+                      width: MediaQuery.of(context).size.width,
+                      color: Colors.grey[200],
+                      child: Center(
+                        child: Text(
+                          'Failed to load image',
+                          style: TextStyle(color: Colors.red, fontSize: 16),
+                        ),
                       ),
                     );
                   },

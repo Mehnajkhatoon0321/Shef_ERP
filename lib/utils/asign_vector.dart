@@ -40,13 +40,15 @@ class PurchaseManager extends StatelessWidget {
     }
 
     return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-            "Purchase  Manager  Status:",
+            "Purchase Manager Status:",
             style: FTextStyle.listTitle // Replace with FTextStyle.listTitleBig if needed
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        SizedBox(width: 2,),
+        Expanded(
           child: Text(
               deliveryStatusText,
               style: FTextStyle.listTitle.copyWith( color: deliveryStatusColor)// Replace with FTextStyle.listTitleSubBig.copyWith if needed
