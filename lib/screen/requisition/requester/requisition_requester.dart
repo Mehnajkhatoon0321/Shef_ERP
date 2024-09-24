@@ -70,7 +70,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
       data: MediaQuery.of(context)
           .copyWith(textScaler: const TextScaler.linear(1.0)),
       child: Scaffold(
-        backgroundColor: AppColors.dividerColor,
+        backgroundColor: AppColors.formFieldBorderColour,
         appBar: AppBar(
           centerTitle: true,
           automaticallyImplyLeading: false,
@@ -206,7 +206,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                   child: TextFormField(
                     controller: _controller,
                     decoration: InputDecoration(
-                      hintText: 'Search requisition',
+                      hintText: 'Search Requisition',
                       hintStyle: FTextStyle.formhintTxtStyle,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(23.0),
@@ -354,12 +354,10 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                                         borderRadius: BorderRadius.circular(10),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: index % 2 == 0
-                                                ? AppColors.yellow
-                                                : AppColors.primaryColourDark!,
-                                            spreadRadius: 4,
-                                            blurRadius: 0.5,
-                                            offset: const Offset(0, 1),
+                                            color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
+                                            spreadRadius: 1.5,
+                                            blurRadius: 0.4,
+                                            offset: const Offset(0, 0.9),
                                           ),
                                         ],
                                       ),

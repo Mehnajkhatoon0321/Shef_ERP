@@ -144,7 +144,7 @@ class FTextStyle {
   );
   static TextStyle nameProfile = TextStyle(
     fontFamily: 'Outfit-SemiBold',
-    fontSize: 16.sp,
+    fontSize: 20.sp,
     // fontWeight: FontWeight.w400,
     color: Colors.white,
   );
@@ -211,7 +211,7 @@ class FTextStyle {
 
     fontFamily: 'Outfit-Regular',
 
-    fontSize: 14,fontWeight: FontWeight.w700,color: Colors.black,
+    fontSize: 14,fontWeight: FontWeight.w600,color: Colors.black,
 
   );
   static const TextStyle listTitleBig = TextStyle(
@@ -227,7 +227,7 @@ class FTextStyle {
 
     fontFamily: "Outfit-SemiBold",
 
-    fontSize: 14,fontWeight: FontWeight.w600,color: Colors.grey,
+    fontSize: 15,fontWeight: FontWeight.w600,color: Colors.grey,
 
   );
   static const TextStyle listTitleSubBig = TextStyle(

@@ -12,6 +12,9 @@ import 'package:shef_erp/screen/dashboard/admin_dashboard.dart';
 import 'package:shef_erp/screen/dashboard/dashboard.dart';
 import 'package:shef_erp/screen/dashboard/vender_dashboard.dart';
 import 'package:shef_erp/screen/master/master.dart';
+import 'package:shef_erp/screen/master/master_list/events.dart';
+import 'package:shef_erp/screen/master/master_list/product_category.dart';
+import 'package:shef_erp/screen/master/master_list/product_service.dart';
 import 'package:shef_erp/screen/reports/reports.dart';
 import 'package:shef_erp/screen/requisition/admin/admin_requisition.dart';
 import 'package:shef_erp/screen/requisition/requester/requisition_requester.dart';
@@ -32,14 +35,7 @@ class RequesterDashboard extends StatefulWidget {
 
 class _RequesterDashboardState extends State<RequesterDashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  List<Map<String, dynamic>> listItem = [
-    {'subtitle': 'Dashboard', 'icon': Icons.dashboard},
-    {'subtitle': 'Requisition', 'icon': Icons.list_alt},
-    {'subtitle': 'Reports', 'icon': Icons.request_page_outlined},
-    {'subtitle': 'Master', 'icon': Icons.book},
-    {'subtitle': 'My Profile', 'icon': Icons.person},
-    {'subtitle': 'Logout', 'icon': Icons.logout},
-  ];
+
 
   List<dynamic> _items = [
     {
@@ -151,14 +147,38 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
     ),
   };
 
+  List<Map<String, dynamic>> listItem = [
+    {'subtitle': 'Dashboard', 'icon': Icons.dashboard},
+    {'subtitle': 'Requisition', 'icon': Icons.list_alt},
+
+    {'subtitle': 'Master', 'icon': Icons.book,"subLine": [{
+      'icon': Icons.padding_rounded,
+      "title": 'Product/Services',
+    },
+      {
+        'icon': Icons.category_rounded,
+        "title": 'Product/Category',
+      },
+      {
+        'icon': Icons.event,
+        "title": 'Events',
+      },],},
+    {'subtitle': 'Reports', 'icon': Icons.request_page_outlined},
+    {'subtitle': 'My Profile', 'icon': Icons.person},
+    {'subtitle': 'Logout', 'icon': Icons.logout},
+  ];
+  int? _expandedIndex;
+
+
   @override
   Widget build(BuildContext context) {
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
     var displayType = valueType.toString().split('.').last;
     print('displayType>> $displayType');
-
+    String? userRole;
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+
       child: Scaffold(
         key: _scaffoldKey,
         backgroundColor: Colors.white,
@@ -171,14 +191,21 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
             textAlign: TextAlign.center,
           ),
           backgroundColor: AppColors.primaryColourDark,
-          leading: GestureDetector(
-            onTap: () {
-              _scaffoldKey.currentState?.openDrawer();
-            },
-            child: const Icon(
-              Icons.menu,
-              size: 35,
-              color: Colors.white,
+
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 15),
+            child: Padding(
+              padding: const EdgeInsets.only(right: 15),
+              child: GestureDetector(
+                onTap: () {
+                  _scaffoldKey.currentState!.openDrawer(); // Open the end drawer
+                },
+                child: const Icon(
+                  Icons.menu,
+                  size: 35,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
         ),
@@ -188,207 +215,67 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
             padding: EdgeInsets.zero,
             children: <Widget>[
               SizedBox(
-                height: MediaQuery.of(context).size.height / 5,
+                height: MediaQuery.of(context).size.height / 3.9,
                 child: UserAccountsDrawerHeader(
+
                   accountName:
-                      Text("${PrefUtils.getUserName()}", style: FTextStyle.nameProfile),
-                  accountEmail: Text("${PrefUtils.getUserEmailLogin()}",
+                  Text("${PrefUtils.getUserName()}", style: FTextStyle.nameProfile),
+                  accountEmail: Text("${PrefUtils.getUserEmailLogin()}",maxLines: 1,
                       style: FTextStyle.emailProfile),
                   decoration: const BoxDecoration(
                     color: AppColors.primaryColourDark,
                   ),
                 ),
               ),
-              ...listItem.map((item) {
-                // Allow all items for Purchase Manager role
-                if (userRole == 'Purchase Manager') {
-                  return  Column(
-                    children: [
-                      ListTile(
-                        leading: Icon(item['icon'],color: AppColors.primaryColourDark,),
-                        title: Text(item['subtitle'],
-                            style: FTextStyle.FaqsTxtStyle.copyWith( color: AppColors.primaryColourDark)),
-                        onTap: () {
-                          Navigator.pop(context); // Close the drawer
-                          switch (item['subtitle']) {
-                            case 'Dashboard':
-                              _navigateBasedOnRole(PrefUtils.getRole());
-                              break;
-                            case 'Requisition':
-                              _navigateOnRole(PrefUtils.getRole());
-                              break;
-                            case 'Reports':
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const ReportScreen()),
-                              );
-                              break;
-                            case 'Master':
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const MasterScreen()),
-                              );
-                              break;
-                            case 'My Profile':
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const ProfileDetails()),
-                              );
-                              break;
-                            case 'Logout':
-                              _showLogDialog();
-                              break;
-                            default:
-                            // Handle default case if needed
-                              break;
-                          }
-                        },
-                      ),
-                      const Divider(
-                          height: 1,
-                          color: AppColors.primaryColourDark,
-                          thickness: 1), // Add a divider after each ListTile
-                    ],
-                  );
-                }
+              ...buildMenuItems(listItem, PrefUtils.getRole()),
 
-                // Hide Master and Reports for Requester role
-                if (userRole == 'Requester' &&
-                    (item['subtitle'] == 'Master' ||
-                        item['subtitle'] == 'Reports')) {
-                  return SizedBox.shrink(); // Hide these items
-                }
-
-                return Column(
-                  children: [
-                    ListTile(
-                      leading: Icon(item['icon'],color: AppColors.primaryColourDark,),
-                      title: Text(item['subtitle'],
-                          style: FTextStyle.FaqsTxtStyle.copyWith( color: AppColors.primaryColourDark)),
-                      onTap: () {
-                        Navigator.pop(context); // Close the drawer
-                        switch (item['subtitle']) {
-                          case 'Dashboard':
-                            _navigateBasedOnRole(PrefUtils.getRole());
-                            break;
-                          case 'Requisition':
-                            _navigateOnRole(PrefUtils.getRole());
-                            break;
-                          case 'Reports':
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const ReportScreen()),
-                            );
-                            break;
-                          case 'Master':
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const MasterScreen()),
-                            );
-                            break;
-                          case 'My Profile':
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const ProfileDetails()),
-                            );
-                            break;
-                          case 'Logout':
-                            _showLogDialog();
-                            break;
-                          default:
-                            // Handle default case if needed
-                            break;
-                        }
-                      },
-                    ),
-                    const Divider(
-                        height: 1,
-                        color: AppColors.primaryColourDark,
-                        thickness: 1), // Add a divider after each ListTile
-                  ],
-                );
-              }),
             ],
           ),
         ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 10),
+        body:  Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18.0,vertical: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '',
-                      style: FTextStyle.preHeadingBoldStyle
-                          .copyWith(color: Colors.black, fontSize: 24),
-                    ),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'Welcome',
-                            style: FTextStyle.preHeadingBoldStyle
-                                .copyWith(color: AppColors.primaryColourDark, fontSize: 29),
-                          ),
-                          SizedBox(height: 10,),
-                          Text(
-                            'Hi  ${PrefUtils.getUserName()}',
-                            style: FTextStyle.preHeadingBoldStyle
-                                .copyWith(color: Colors.black),
-                          ).animateOnPageLoad(
-                              animationsMap['imageOnPageLoadAnimation2']!),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 3.0, vertical: 10),
+                const EdgeInsets.symmetric(horizontal: 3.0, vertical: 10),
                 child: Container(
-                  height: MediaQuery.of(context).size.height / 6,
+                  height: MediaQuery.of(context).size.height / 7,
                   decoration: BoxDecoration(
                     color: Colors.white, // Background color
                     borderRadius: BorderRadius.circular(12), // Rounded corners
                     border: Border.all(
-                        color: AppColors.yellow, // Border color
-                        width: 3 // Border width
-                        ),
+                        color: AppColors.primaryColourDark, // Border color
+                        width: 1 // Border width
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color:
-                            AppColors.yellow.withOpacity(0.5), // Shadow color
-                        spreadRadius: 2, // Spread radius
-                        blurRadius: 4, // Blur radius
-                        offset: const Offset(0, 3), // Offset from the container
+                        AppColors.primaryColourDark.withOpacity(0.5), // Shadow color
+                        spreadRadius: 0.5, // Spread radius
+                        blurRadius: 5, // Blur radius
+                        // offset: const Offset(0, 3), // Offset from the container
                       ),
                     ],
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          'Welcome \n lets plan your day',
-                          style: FTextStyle.preHeadingStyle,
-                        ).animateOnPageLoad(
-                            animationsMap['imageOnPageLoadAnimation2']!),
+                        Container(
+                          width: MediaQuery.of(context).size.width/1.9,
+                          child: Text(
+                            'Welcome \n${PrefUtils.getUserName()}'
+                                '\n lets plan your day',maxLines: 3,overflow: TextOverflow.ellipsis,
+                            style: FTextStyle.preHeadingStyle.copyWith(fontWeight: FontWeight.w700),
+                          ).animateOnPageLoad(
+                              animationsMap['imageOnPageLoadAnimation2']!),
+                        ),
                         Container(
                           height: 220,
                           // color: Colors.redAccent,
@@ -397,11 +284,11 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
                             'assets/images/timer.png',
                             // color: AppColors.primaryColourDarkDark,
                             width: (displayType == 'desktop' ||
-                                    displayType == 'tablet')
+                                displayType == 'tablet')
                                 ? 150.w
                                 : 120,
                             height: (displayType == 'desktop' ||
-                                    displayType == 'tablet')
+                                displayType == 'tablet')
                                 ? 100.h
                                 : 200,
                           ),
@@ -411,69 +298,79 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
                     ),
                   ),
                 ),
-              ),
+              ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 10, top: 20),
-                  child: ListView.builder(
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2, // Number of columns
+                      childAspectRatio: 1.8, // Aspect ratio of each grid item
+                      crossAxisSpacing: 13, // Space between columns
+                      mainAxisSpacing: 16, // Space between rows
+                    ),
                     itemCount: _items.length, // Number of items
                     itemBuilder: (context, index) {
                       final item = _items[index];
-                      bool isEvenIndex = index % 2 == 0;
+                      bool isEvenIndex = index % 3 == 0;
 
                       return Container(
-                        margin: const EdgeInsets.only(bottom: 15.0),
-                        // Spacing between rows
+
                         decoration: BoxDecoration(
-                          color: isEvenIndex ? Colors.blue : Colors.yellow,
-                          borderRadius: BorderRadius.circular(10),
+
+                          color: Colors.white,
+                          border: Border.all(
+                              color: isEvenIndex ? AppColors.primaryColourDark : Colors.yellow.shade700, // Border color
+                              width: 1 // Border width
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: isEvenIndex
-                                  ? Colors.blue.shade700
-                                  : Colors.yellow.shade700,
-                              spreadRadius: 2,
-                              blurRadius: 1,
-                              offset: const Offset(0, 2),
+                              color: isEvenIndex ? AppColors.primaryColourDark : Colors.yellow.shade700,
+                              spreadRadius: 1,
+                              blurRadius: 3,
+                              offset: const Offset(0, 0.5),
                             ),
                           ],
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(18.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                child: Text(
-                                  item['total'], // Title from JSON
-                                  style: const TextStyle(
-                                    fontSize: 16.0, // Font size
-                                    fontWeight: FontWeight.bold, // Text weight
-                                  ),
-                                ),
-                              ),
-                              Text(
-                                item['title'], // Title from JSON
-                                style: const TextStyle(
-                                  fontSize: 16.0, // Font size
-                                  fontWeight: FontWeight.bold, // Text weight
-                                ),
-                              ),
-                            ],
-                          ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              item['total'], // Title from JSON
+                              style:FTextStyle.authlogin_signupTxtStyle.copyWith(fontSize: 20)
+                            ),
+                            SizedBox(height: 20,),
+                            Text(
+                              item['title'], // Title from JSON
+                                style:FTextStyle.authlogin_signupTxtStyle,
+                              overflow:TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       );
                     },
                   ),
                 ),
               )
+
+
+
+
+
             ],
           ),
         ),
       ),
     );
   }
+
+
+
+
+
+
 
   void _showLogDialog() {
     showDialog(
@@ -519,9 +416,9 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => BlocProvider(
-                                    create: (context) => AuthFlowBloc(),
-                                    child: const LogScreen(),
-                                  )),
+                                create: (context) => AuthFlowBloc(),
+                                child: const LogScreen(),
+                              )),
                         );
                       },
                     ),
@@ -609,4 +506,178 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
 
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => nextPage));
   }
+  List<Widget> buildMenuItems(List<Map<String, dynamic>> listItem, String userRole) {
+    List<Widget> widgets = [];
+
+    for (int index = 0; index < listItem.length; index++) {
+      var item = listItem[index];
+
+      // Check if the item is valid and has the necessary keys
+      if (item == null || !item.containsKey('subtitle')) {
+        print('Invalid item: $item'); // Log invalid items
+        continue; // Skip this item if it's not valid
+      }
+
+      // Ensure subtitle is not null
+      String subtitle = item['subtitle'] ?? 'Unknown'; // Provide a default value
+
+      // Allow all items for Purchase Manager role
+      if (userRole == 'Purchase Manager') {
+        if (item.containsKey('subLine') && item['subLine'] != null && item['subLine'].isNotEmpty) {
+          widgets.add(
+            Column(
+              children: [
+                Container(
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Colors.grey, width: 1.0),
+                    ),
+                  ),
+                  child: ExpansionTile(
+                    backgroundColor: Colors.transparent,
+                    leading: Icon(item['icon'],      color: AppColors.aboutUsHeadingColor),
+                    title: Text(subtitle, style: FTextStyle.FaqsTxtStyle.copyWith()),
+                    initiallyExpanded: _expandedIndex == index,
+                    onExpansionChanged: (expanded) {
+                      setState(() {
+                        _expandedIndex = expanded ? index : null;
+                      });
+                    },
+                    children: buildSubMenuItems(item['subLine']),
+                  ),
+                ),
+              ],
+            ),
+          );
+        } else {
+          widgets.add(buildListTile(item, index, listItem.length));
+          if (index != listItem.length - 1)
+            const Divider(height: 1, color: Colors.black, thickness: 2);
+        }
+      }
+      // Hide Master and Reports for Requester role
+      else if (userRole == 'Requester' && (subtitle == 'Master' || subtitle == 'Reports')) {
+        continue; // Skip these items
+      } else {
+        widgets.add(buildListTile(item, index, listItem.length));
+      }
+    }
+
+    return widgets;
+  }
+
+  List<Widget> buildSubMenuItems(List<Map<String, dynamic>>? subItems) {
+    if (subItems == null || subItems.isEmpty) return []; // Return empty if subItems is null or empty
+
+    List<Widget> widgets = [];
+    for (var item in subItems) {
+      if (item == null || !item.containsKey('title')) {
+        continue; // Skip invalid sub-items
+      }
+
+      String subtitle = item['title'] ?? 'Unknown';
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.all(2.0),
+          child: Container(
+            color: Colors.grey[100],
+            child: ListTile(
+              leading: Icon(item['icon'],color: AppColors.aboutUsTextColor,),
+              title: Text(subtitle, style: FTextStyle.Faqssubtitle),
+              onTap: () {
+                handleSubMenuTap(item);
+              },
+            ),
+          ),
+        ),
+      );
+    }
+    return widgets;
+  }
+
+  Widget buildListTile(Map<String, dynamic> item, int index, int totalLength) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+
+
+        Visibility(
+            visible: index == totalLength - 3 && PrefUtils.getRole() == 'Purchase Manager',
+            child: const Divider(height: 1, color: Colors.black, thickness: 3)),
+        ListTile(
+          leading: Icon(item['icon'],       color: AppColors.aboutUsHeadingColor),
+          title: Text(item['subtitle'] ?? 'Unknown', style: FTextStyle.FaqsTxtStyle),
+          onTap: () {
+            Navigator.pop(context); // Close the drawer
+            handleMenuNavigation(item['subtitle']);
+          },
+        ),
+        if (index != totalLength - 1)
+
+          const Divider(height: 1, color: Colors.black, thickness: 3)
+      ],
+    );
+  }
+
+
+
+
+
+  void handleMenuNavigation(String subtitle) {
+    switch (subtitle) {
+      case 'Dashboard':
+        _navigateBasedOnRole(PrefUtils.getRole());
+        break;
+      case 'Requisition':
+        _navigateOnRole(PrefUtils.getRole());
+        break;
+      case 'Reports':
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportScreen()));
+        break;
+      case 'Master':
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const MasterScreen()));
+        break;
+      case 'My Profile':
+        Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileDetails()));
+        break;
+      case 'Logout':
+        _showLogDialog();
+        break;
+      default:
+      // Handle default case if needed
+        break;
+    }
+  }
+
+  void handleSubMenuTap(Map<String, dynamic> subMenuItem) {
+    Navigator.pop(context); // Close the drawer after selection
+
+    // Navigate based on the submenu item tapped
+    switch (subMenuItem['title']) {
+      case 'Product/Category':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ProductCategory()),
+        );
+        break;
+      case 'Product/Services':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ProductService()),
+        );
+        break;
+      case 'Events':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => EventScreen()),
+        );
+        break;
+      default:
+      // Handle other cases if necessary
+        break;
+    }
+  }
+
+
 }

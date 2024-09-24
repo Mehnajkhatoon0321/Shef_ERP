@@ -3,6 +3,7 @@ import 'package:shef_erp/screen/auth_flow/edit_profile.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shef_erp/utils/pref_utils.dart';
 class ProfileDetails extends StatefulWidget {
   const ProfileDetails({super.key});
 
@@ -92,13 +93,13 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                     ),
                   ],
                 ),
-                const Expanded(
+                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Mehnaj Khatoon",
+                        PrefUtils.getUserName(),
                         style: FTextStyle.formhintTxtStyle,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
@@ -107,7 +108,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
-                          "mehnaj0321@gmail.com",
+                          PrefUtils.getUserEmailLogin(),
                           style: FTextStyle.formhintTxtStyle,
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,

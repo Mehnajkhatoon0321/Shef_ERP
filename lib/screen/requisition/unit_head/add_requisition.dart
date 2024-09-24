@@ -466,52 +466,62 @@ class _AddRequisitionState extends State<AddRequisition> {
                           animationsMap['imageOnPageLoadAnimation2']!,
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min, // Prevent the Row from taking up unnecessary space
-                            children: [
-                              Expanded(
-
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(28.0),
-                                    border: Border.all(color: AppColors.primaryColourDark),
-                                    color: Colors.white,
-                                  ),
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton<String?>(
-                                      key: _unitNameKey,
-                                      focusNode: _unitNameNode,
-                                      value: selectedUnitItem,
-                                      hint: const Text(
-                                        "Select Unit",
-                                        style: FTextStyle.formhintTxtStyle,
-                                      ),
-                                      onChanged: (String? categoryValue) {
-                                        if (categoryValue != null) {
-                                          setState(() {
-                                            selectedUnitItem = categoryValue;
-                                            selectedUnitId = categoryMap[categoryValue]; // This can be null
-                                            selectedItem = null;
-                                            isButtonPartEnabled = categoryValue.isNotEmpty &&
-                                                ValidatorUtils.isValidCommon(specificationName.text);
-                                          });
-                                        }
-                                      },
-                                      items: UnitNames.map<DropdownMenuItem<String?>>((String value) {
-                                        return DropdownMenuItem<String?>(
-                                          value: value,
-                                          child: Expanded(child: Text(value)),
-                                        );
-                                      }).toList(),
-                                    ),
-                                  ),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 8.0),
+                          child: Container(
+                            // Ensure the container width is constrained properly
+                            width: double.infinity,
+                            // Expand to full width of parent container
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0),
+                            decoration: BoxDecoration(
+                              borderRadius:
+                              BorderRadius.circular(28.0),
+                              border: Border.all(
+                                  color: AppColors
+                                      .boarderColour),
+                              color: AppColors.formFieldBackColour,
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                key: _unitNameKey,
+                                focusNode: _uploadNameNode,
+                                isExpanded: true,
+                                // Make the DropdownButton expand to fill the width of the container
+                                value: selectedUnitItem,
+                                hint: const Text(
+                                  "Select Unit",
+                                  style:
+                                  FTextStyle.formhintTxtStyle,
                                 ),
+                                onChanged: (String? eventValue) {
+                                  setState(() {
+                                    selectedUnitItem =
+                                        eventValue;
+                                    // Update button enable state
+                                    isButtonPartEnabled =
+                                        eventValue != null &&
+                                            eventValue
+                                                .isNotEmpty &&
+                                            ValidatorUtils
+                                                .isValidCommon(
+                                                specificationName
+                                                    .text);
+                                  });
+                                },
+                                items: UnitNames.map<
+                                    DropdownMenuItem<String>>(
+                                        (String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(value),
+                                      );
+                                    }).toList(),
                               ),
-                            ],
+                            ),
                           ),
                         ),
+
                       ],
                     ),
                   ),

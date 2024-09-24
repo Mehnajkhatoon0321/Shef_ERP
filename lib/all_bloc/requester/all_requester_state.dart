@@ -99,3 +99,51 @@ final class UpdateFailure extends AllRequesterState{
   UpdateFailure(this.updateFailure);
 
 }
+// reject Requisition
+
+final class RejectLoading extends AllRequesterState{}
+final class RejectSuccess extends AllRequesterState{
+  final Map<String, dynamic> rejectList;
+  RejectSuccess(this.rejectList);
+
+}
+
+
+final class RejectFailure extends AllRequesterState{
+  final Map<String, dynamic> rejectFailure;
+  RejectFailure(this.rejectFailure);
+
+}
+
+
+//Vendor Assign and billing Assign
+
+final class VendorAssignLoading extends AllRequesterState{}
+final class VendorAssignSuccess extends AllRequesterState{
+  final Map<String, dynamic> vendorList;
+  VendorAssignSuccess(this.vendorList);
+
+}
+
+
+final class VendorAssignFailure extends AllRequesterState{
+  final Map<String, dynamic> vendorFailure;
+  VendorAssignFailure(this.vendorFailure);
+
+}
+
+//Mark And Delivery
+
+final class MarkLoading extends AllRequesterState{}
+final class MarkSuccess extends AllRequesterState{
+  final Map<String, dynamic> markList;
+  MarkSuccess(this.markList);
+
+}
+
+
+final class MarkFailure extends AllRequesterState{
+  final Map<String, dynamic> markFailure;
+  MarkFailure(this.markFailure);
+
+}

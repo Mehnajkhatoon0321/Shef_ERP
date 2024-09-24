@@ -145,7 +145,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
     var displayType = valueType.toString().split('.').last;
     return Scaffold(
-      backgroundColor: AppColors.dividerColor,
+      backgroundColor: AppColors.formFieldBorderColour,
       appBar: AppBar(
         centerTitle: true,
         automaticallyImplyLeading: false,
@@ -516,9 +516,10 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                 boxShadow: [
                                   BoxShadow(
                                     color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
-                                    spreadRadius: 4,
-                                    blurRadius: 0.5,
-                                    offset: const Offset(0, 1),
+
+                                    spreadRadius: 1.5,
+                                    blurRadius: 0.4,
+                                    offset: const Offset(0, 0.9),
                                   ),
                                 ],
                               ),

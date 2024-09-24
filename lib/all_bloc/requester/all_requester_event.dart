@@ -95,3 +95,10 @@ class UpdateRequisitionEventHandler extends AllRequesterEvent {
 
   });
 }
+//Reject Event
+class RejectHandler extends AllRequesterEvent {
+  String remark;
+  RejectHandler(this.remark);
+}
+
+//
