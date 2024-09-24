@@ -246,7 +246,7 @@ class _ViewDetailsState extends State<ViewDetails> {
                 ),
                 const SizedBox(height: 5),
 
-                const SizedBox(height: 5),
+
                 Row(
                   children: [
                     const Text("Quantity: ", style: FTextStyle.listTitleBig),
@@ -276,7 +276,7 @@ class _ViewDetailsState extends State<ViewDetails> {
                         style: FTextStyle.listTitleBig),
                     Expanded(
                       child: Text(widget.specification,
-                          style: FTextStyle.listTitleSubBig,maxLines: 2,),
+                          style: FTextStyle.listTitleSubBig,),
                     ),
                   ],
                 ),

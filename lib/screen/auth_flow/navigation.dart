@@ -36,6 +36,8 @@ class Navigation extends StatefulWidget {
 class _NavigationState extends State<Navigation> {
   List<Map<String, dynamic>> listItem = [
 
+    {'subtitle': 'Dashboard', 'icon': Icons.dashboard},
+    {'subtitle': 'Home', 'icon': Icons.home},
     {'subtitle': 'My Profile', 'icon': Icons.person},
 
     {'subtitle': 'Logout', 'icon': Icons.logout},
@@ -140,37 +142,7 @@ class _NavigationState extends State<Navigation> {
     final selectedItemTitle = filteredItems[index]["title"];
 
     switch (selectedItemTitle) {
-      case 'Dashboard':
-        if (userRole == 'Vendor' ) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const VendorDashboard()),
-          );
-        }else if (userRole == 'Purchase Manager') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AdminDashboard()),
-          );
-        }
-        else if (userRole == 'Requester') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const RequesterDashboard()),
-          );
-        }
-        else if (userRole == 'Program Director') {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AdminDashboard()),
-          );
-        }
-        else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const Dashboard()),
-          );
-        }
-        break;
+
 
       case 'Requisition':
         if (userRole == 'Unit Head') {
@@ -186,7 +158,7 @@ class _NavigationState extends State<Navigation> {
             context,
             MaterialPageRoute(builder: (context) =>  BlocProvider(
   create: (context) => AllRequesterBloc(),
-  child: AdminRequisition(),
+  child: const AdminRequisition(),
 )),
           );
         }else if (userRole == 'Requester') {
@@ -194,7 +166,7 @@ class _NavigationState extends State<Navigation> {
             context,
             MaterialPageRoute(builder: (context) =>  BlocProvider(
   create: (context) => AllRequesterBloc(),
-  child: RequisitionRequester(),
+  child: const RequisitionRequester(),
 )),
           );
         } else {
@@ -214,6 +186,8 @@ class _NavigationState extends State<Navigation> {
         }
         // Handle cases for other roles if necessary
         break;
+
+
 
       case 'Master':
         Navigator.push(
@@ -239,7 +213,7 @@ class _NavigationState extends State<Navigation> {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
-    // Define common dimensions based on screen sizedouble containerHeight =(displayType == 'desktop' || displayType == 'tablet') ? screenHeight * 0.55:screenHeight * 0.5;
+
     double servicesContainerHeight = (displayType == 'desktop' || displayType == 'tablet') ?screenHeight * 0.9:screenHeight * 0.75; // Remaining height for services section
 
     return Scaffold(
@@ -259,17 +233,14 @@ class _NavigationState extends State<Navigation> {
 
         leading: Padding(
           padding: const EdgeInsets.only(left: 15),
-          child: Padding(
-            padding: const EdgeInsets.only(right: 15),
-            child: GestureDetector(
-              onTap: () {
-                _scaffoldKey.currentState!.openDrawer(); // Open the end drawer
-              },
-              child: const Icon(
-                Icons.menu,
-                size: 35,
-                color: Colors.white,
-              ),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Icon(
+              Icons.arrow_back_ios,
+              size: 25,
+              color: Colors.white,
             ),
           ),
         ),
@@ -300,7 +271,47 @@ class _NavigationState extends State<Navigation> {
                       Navigator.pop(context); // Close the drawer
 
                       switch (item['subtitle']) {
+                        case 'Dashboard':
+                          if (userRole == 'Vendor' ) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const VendorDashboard()),
+                            );
+                          }else if (userRole == 'Purchase Manager') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const AdminDashboard()),
+                            );
+                          }
+                          else if (userRole == 'Requester') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const RequesterDashboard()),
+                            );
+                          }
+                          else if (userRole == 'Program Director') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const AdminDashboard()),
+                            );
+                          }
+                          else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => const Dashboard()),
+                            );
+                          }
+                          break;
 
+                        case 'Home':
+                          if (userRole == 'Purchase Manager') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) =>  Navigation()),
+                            );
+                          }
+                          // Handle cases for other roles if necessary
+                          break;
 
                         case 'My Profile':
                           Navigator.push(
@@ -327,31 +338,31 @@ class _NavigationState extends State<Navigation> {
       ),
       body: SingleChildScrollView(
         child: Column(
-
+        
           children: [
-            Divider(color: Colors.white,thickness: 3,),
+            const Divider(color: Colors.white,thickness: 3,),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 18.0,horizontal: 20),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
-
-
-
+        
+        
+        
+        
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 2.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text('Good Day',style: FTextStyle.preHeadingBoldStyle.copyWith(color: Colors.white,fontSize: 24),),
-                        Text('Hi Mehnaj khatoon',style: FTextStyle.preHeadingBoldStyle.copyWith(color: Colors.white),).animateOnPageLoad(
+                        Text('Hi ${PrefUtils.getUserName()}',style: FTextStyle.preHeadingBoldStyle.copyWith(color: Colors.white),).animateOnPageLoad(
                             animationsMap['imageOnPageLoadAnimation2']!),   ],
                     ),
                   ).animateOnPageLoad(
                       animationsMap['imageOnPageLoadAnimation2']!),
-
+        
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 4.0,vertical: 20),
                     child: Container(
@@ -360,7 +371,7 @@ class _NavigationState extends State<Navigation> {
                         color:Colors.white, // Background color
                         borderRadius: BorderRadius.circular(12), // Rounded corners
                         border: Border.all(
-
+        
                             color: AppColors.yellow, // Border color
                             width:5 // Border width
                         ), boxShadow: [
@@ -372,7 +383,7 @@ class _NavigationState extends State<Navigation> {
                         ),
                       ],
                       ),
-
+        
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10.0),
                         child: Row(
@@ -384,7 +395,7 @@ class _NavigationState extends State<Navigation> {
                             Expanded(
                               child: Container(
                                 alignment: Alignment.topCenter,
-
+        
                                 child: Image.asset(
                                   'assets/images/timer.png',
                                   // color: AppColors.primaryColourDarkDark,
@@ -415,62 +426,64 @@ class _NavigationState extends State<Navigation> {
                       textAlign: TextAlign.center,
                     ),
                   ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation3']!),
-
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.01),
-                    child: Container(
-                      height: servicesContainerHeight,
-                      child: GridView.builder(
-                        padding: EdgeInsets.all(screenWidth * 0.02),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount:  3,
-                          crossAxisSpacing: screenWidth * 0.02,
-                          mainAxisSpacing: screenHeight * 0.02,
-                        ),
-                        itemCount: getFilteredItems(userRole!).length,
-                        itemBuilder: (context, index) {
-                          final item = getFilteredItems(userRole!)[index];
-                          return GestureDetector(
-                            onTap: () => _onTap(context, index,userRole!),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.all(Radius.circular(screenWidth * 0.03)),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(screenWidth * 0.1),
-                                      child: Container(
-                                        width: (displayType == 'desktop' || displayType == 'tablet') ? screenWidth * 0.15 : screenWidth * 0.15,
-                                        height: (displayType == 'desktop' || displayType == 'tablet') ? screenWidth * 0.15 : screenWidth * 0.15,
-                                        color: Colors.grey,
-                                        child: Image.asset(
-                                          item["image"],
-                                          fit: BoxFit.fill,
+        
+                  SingleChildScrollView(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.01),
+                      child: SizedBox(
+                        height: servicesContainerHeight,
+                        child: GridView.builder(
+                          padding: EdgeInsets.all(screenWidth * 0.02),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount:  3,
+                            crossAxisSpacing: screenWidth * 0.02,
+                            mainAxisSpacing: screenHeight * 0.02,
+                          ),
+                          itemCount: getFilteredItems(userRole!).length,
+                          itemBuilder: (context, index) {
+                            final item = getFilteredItems(userRole!)[index];
+                            return GestureDetector(
+                              onTap: () => _onTap(context, index,userRole!),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.all(Radius.circular(screenWidth * 0.03)),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(screenWidth * 0.1),
+                                        child: Container(
+                                          width: (displayType == 'desktop' || displayType == 'tablet') ? screenWidth * 0.15 : screenWidth * 0.15,
+                                          height: (displayType == 'desktop' || displayType == 'tablet') ? screenWidth * 0.15 : screenWidth * 0.15,
+                                          color: Colors.grey,
+                                          child: Image.asset(
+                                            item["image"],
+                                            fit: BoxFit.fill,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                  // SizedBox(height: screenHeight * 0.01),
-                                  Text(
-                                    item["title"],
-                                    style: FTextStyle.HeadingTxtStyle.copyWith(
-                                      fontSize: screenWidth * 0.04,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black,
+                                    // SizedBox(height: screenHeight * 0.01),
+                                    Text(
+                                      item["title"],
+                                      style: FTextStyle.HeadingTxtStyle.copyWith(
+                                        fontSize: screenWidth * 0.04,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black,
+                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
-                              ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                            ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation3']!),
-                          );
-                        },
+                                  ],
+                                ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                              ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation3']!),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   )
@@ -484,10 +497,10 @@ class _NavigationState extends State<Navigation> {
   }
   List<Map<String, dynamic>> getFilteredItems(String userRole) {
     final List<Map<String, dynamic>> allItems = [
-      {
-        "image": "assets/images/dashboard.png",
-        "title": 'Dashboard',
-      },
+      // {
+      //   "image": "assets/images/dashboard.png",
+      //   "title": 'Dashboard',
+      // },
       {
         "image": "assets/images/requisition.png",
         "title": 'Requisition',

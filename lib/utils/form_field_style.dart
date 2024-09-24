@@ -1,7 +1,4 @@
-
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/constant.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
@@ -14,7 +11,7 @@ class FormFieldStyle {
 
 
 
-  static InputDecoration defaultemailDecoration = InputDecoration(
+  static InputDecoration defaultemailDecoration = const InputDecoration(
       enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.all(
             Radius.circular(28),
@@ -64,7 +61,7 @@ class FormFieldStyle {
 
 
 
-  static InputDecoration defaultPasswordInputDecoration = InputDecoration(
+  static InputDecoration defaultPasswordInputDecoration = const InputDecoration(
     enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(28),
@@ -106,21 +103,21 @@ class FormFieldStyle {
     fillColor: AppColors.formFieldBackColour,
   );
   static InputDecoration defaultDropdownInputDecoration = InputDecoration(
-      enabledBorder: OutlineInputBorder(
+      enabledBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(
             Radius.circular(5),
           ),
           borderSide: BorderSide(
             color: AppColors.formFieldBorderColour,
           )),
-      disabledBorder: OutlineInputBorder(
+      disabledBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(
             Radius.circular(5),
           ),
           borderSide: BorderSide(
             color: AppColors.formFieldBorderColour,
           )),
-      focusedBorder: OutlineInputBorder(
+      focusedBorder: const OutlineInputBorder(
           borderRadius: BorderRadius.all(
             Radius.circular(5),
           ),
@@ -132,12 +129,12 @@ class FormFieldStyle {
       fillColor: AppColors.formFieldBackColour,
       hintText: Constants.dobHint,
       hintStyle: FTextStyle.formhintTxtStyle,
-      contentPadding: EdgeInsets.symmetric(vertical: 18,horizontal: 12)
+      contentPadding: const EdgeInsets.symmetric(vertical: 18,horizontal: 12)
   );
 
 
   static InputDecoration defaultAddressInputDecoration =
-  InputDecoration(
+  const InputDecoration(
     enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(28),
@@ -183,7 +180,7 @@ class FormFieldStyle {
 
 
   static InputDecoration defaultInputDecoration =
-  InputDecoration(
+  const InputDecoration(
     enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(28),
@@ -233,30 +230,30 @@ class FormFieldStyle {
 
   static InputDecoration dropDown=InputDecoration(
     border: OutlineInputBorder(
-      borderSide: BorderSide(color:   AppColors.formFieldBorderColour),
+      borderSide: const BorderSide(color:   AppColors.formFieldBorderColour),
       borderRadius: BorderRadius.circular(28),
     ),
     focusedBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: AppColors.primaryColourDark),
+      borderSide: const BorderSide(color: AppColors.primaryColourDark),
       borderRadius: BorderRadius.circular(28),
     ),
-    errorBorder: OutlineInputBorder(
+    errorBorder: const OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(28)),
       borderSide: BorderSide(color: Colors.red),
     ),
-    focusedErrorBorder: OutlineInputBorder(
+    focusedErrorBorder: const OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(28)),
       borderSide: BorderSide(color: Colors.red),
     ),
     enabledBorder: OutlineInputBorder(
-      borderSide: BorderSide(color: AppColors.formFieldBorderColour),
+      borderSide: const BorderSide(color: AppColors.formFieldBorderColour),
       borderRadius: BorderRadius.circular(28),
     ),
-    contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+    contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 10),
     filled: true,
     fillColor: AppColors.formFieldBackColour,
     hintText: "Select Product Category",
     hintStyle:FTextStyle.formhintTxtStyle,
-    errorStyle: TextStyle(color: Colors.red),
+    errorStyle: const TextStyle(color: Colors.red),
   );
 }

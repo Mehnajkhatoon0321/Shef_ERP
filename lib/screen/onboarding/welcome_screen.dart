@@ -118,7 +118,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.3, // 30% of screen height
+                  height: MediaQuery.of(context).size.height * 0.28, // 30% of screen height
                 ),
                 Image.asset(
                   "assets/images/logowhite.png",
@@ -129,16 +129,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       ? 140.h // Use ScreenUtil for height
                       : 140.h, // Adjust height based on screen size
                 ),
-                SizedBox(height: 20.h), // Use ScreenUtil for spacing
+                SizedBox(height: 5.h), // Use ScreenUtil for spacing
                 Text(
                   "Welcome To",
                   style: FTextStyle.HeadingTxtStyle.copyWith(
-                    fontSize: 30.sp, // Use ScreenUtil for font size
-                    // fontWeight: FontWeight.w900,
+                    fontSize: 30.sp,
                     color: Colors.white,
                   ),
                 ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                SizedBox(height: 5.h), // Use ScreenUtil for spacing
+                SizedBox(height: 7.h), // Use ScreenUtil for spacing
                 Text(
                   "Login an account and access thousand of cool stuffs",
                   style: FTextStyle.formSubheadingTxtStyle.copyWith(

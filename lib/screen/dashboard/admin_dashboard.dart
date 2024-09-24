@@ -1,11 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shef_erp/all_bloc/authflow/auth_flow_bloc.dart';
+import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 
 import 'package:shef_erp/screen/auth_flow/login_screen.dart';
+import 'package:shef_erp/screen/auth_flow/navigation.dart';
+import 'package:shef_erp/screen/auth_flow/profile_details.dart';
+import 'package:shef_erp/screen/dashboard/requester_dashboard.dart';
+import 'package:shef_erp/screen/dashboard/vender_dashboard.dart';
+import 'package:shef_erp/screen/master/master.dart';
+import 'package:shef_erp/screen/reports/reports.dart';
+import 'package:shef_erp/screen/requisition/admin/admin_requisition.dart';
+import 'package:shef_erp/screen/requisition/requester/requisition_requester.dart';
+import 'package:shef_erp/screen/requisition/unit_head/requisition.dart';
+import 'package:shef_erp/screen/requisition/vender/vendor_requisition.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
+import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shef_erp/utils/pref_utils.dart';
+
+import 'dashboard.dart';
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
 
@@ -15,6 +32,15 @@ class AdminDashboard extends StatefulWidget {
 
 class _AdminDashboardState extends State<AdminDashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  List<Map<String, dynamic>> listItem = [
+    {'subtitle': 'Dashboard', 'icon': Icons.dashboard},
+    {'subtitle': 'Requisition', 'icon': Icons.list_alt},
+    {'subtitle': 'Reports', 'icon': Icons.request_page_outlined},
+    {'subtitle': 'Master', 'icon': Icons.book},
+    {'subtitle': 'My Profile', 'icon': Icons.person},
+    {'subtitle': 'Logout', 'icon': Icons.logout},
+  ];
+
   List<dynamic> _items = [
     {"title": "All Requisitions","total": "21", "image": "https://via.placeholder.com/150"},
     {"title": "Today,s Requisitions","total": "12", "image": "https://via.placeholder.com/150"},
@@ -22,12 +48,90 @@ class _AdminDashboardState extends State<AdminDashboard> {
     {"title": "Delivered Requisition","total": "4", "image": "https://via.placeholder.com/150"}
   ];
 
+  final animationsMap = {
+    'columnOnPageLoadAnimation1': AnimationInfo(
+      trigger: AnimationTrigger.onPageLoad,
+      effects: [
+        FadeEffect(
+          curve: Curves.easeInOut,
+          delay: 0.ms,
+          duration: 600.ms,
+          begin: 0.0,
+          end: 1.0,
+        ),
+        MoveEffect(
+          curve: Curves.easeInOut,
+          delay: 0.ms,
+          duration: 600.ms,
+          begin: const Offset(0.0, 20.0),
+          end: const Offset(0.0, 0.0),
+        ),
+      ],
+    ),
+    'columnOnPageLoadAnimation2': AnimationInfo(
+      trigger: AnimationTrigger.onPageLoad,
+      effects: [
+        FadeEffect(
+          curve: Curves.easeInOut,
+          delay: 200.ms,
+          duration: 600.ms,
+          begin: 0.0,
+          end: 1.0,
+        ),
+        MoveEffect(
+          curve: Curves.easeInOut,
+          delay: 200.ms,
+          duration: 600.ms,
+          begin: const Offset(0.0, 20.0),
+          end: const Offset(0.0, 0.0),
+        ),
+      ],
+    ),
+    'columnOnPageLoadAnimation3': AnimationInfo(
+      trigger: AnimationTrigger.onPageLoad,
+      effects: [
+        FadeEffect(
+          curve: Curves.easeInOut,
+          delay: 400.ms,
+          duration: 600.ms,
+          begin: 0.0,
+          end: 1.0,
+        ),
+        MoveEffect(
+          curve: Curves.easeInOut,
+          delay: 400.ms,
+          duration: 600.ms,
+          begin: const Offset(0.0, 20.0),
+          end: const Offset(0.0, 0.0),
+        ),
+      ],
+    ),
+    'imageOnPageLoadAnimation2': AnimationInfo(
+      trigger: AnimationTrigger.onPageLoad,
+      effects: [
+        MoveEffect(
+          curve: Curves.easeInOut,
+          delay: 0.ms,
+          duration: 600.ms,
+          begin: const Offset(40.0, 0.0),
+          end: const Offset(0.0, 0.0),
+        ),
+        FadeEffect(
+          curve: Curves.easeInOut,
+          delay: 0.ms,
+          duration: 600.ms,
+          begin: 0.0,
+          end: 1.0,
+        ),
+      ],
+    ),
+  };
   @override
   Widget build(BuildContext context) {
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
     var displayType = valueType.toString().split('.').last;
     print('displayType>> $displayType');
-
+    String? userRole;
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
 
@@ -46,30 +150,251 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
           leading: Padding(
             padding: const EdgeInsets.only(left: 15),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: const Icon(
-                Icons.arrow_back_ios,
-                size: 25,
-                color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 15),
+              child: GestureDetector(
+                onTap: () {
+                  _scaffoldKey.currentState!.openDrawer(); // Open the end drawer
+                },
+                child: const Icon(
+                  Icons.menu,
+                  size: 35,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
         ),
+        drawer: Drawer(
+          backgroundColor: Colors.white,
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              SizedBox(
+                height: MediaQuery.of(context).size.height / 5,
+                child: UserAccountsDrawerHeader(
+                  accountName:
+                  Text("${PrefUtils.getUserName()}", style: FTextStyle.nameProfile),
+                  accountEmail: Text("${PrefUtils.getUserEmailLogin()}",
+                      style: FTextStyle.emailProfile),
+                  decoration: const BoxDecoration(
+                    color: AppColors.primaryColourDark,
+                  ),
+                ),
+              ),
+              ...listItem.map((item) {
+                // Allow all items for Purchase Manager role
+                if (userRole == 'Purchase Manager') {
+                  return  Column(
+                    children: [
+                      ListTile(
+                        leading: Icon(item['icon'],color: AppColors.primaryColourDark,),
+                        title: Text(item['subtitle'],
+                            style: FTextStyle.FaqsTxtStyle.copyWith( color: AppColors.primaryColourDark)),
+                        onTap: () {
+                          Navigator.pop(context); // Close the drawer
+                          switch (item['subtitle']) {
+                            case 'Dashboard':
+                              _navigateBasedOnRole(PrefUtils.getRole());
+                              break;
+                            case 'Requisition':
+                              _navigateOnRole(PrefUtils.getRole());
+                              break;
+                            case 'Reports':
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const ReportScreen()),
+                              );
+                              break;
+                            case 'Master':
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const MasterScreen()),
+                              );
+                              break;
+                            case 'My Profile':
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const ProfileDetails()),
+                              );
+                              break;
+                            case 'Logout':
+                              _showLogDialog();
+                              break;
+                            default:
+                            // Handle default case if needed
+                              break;
+                          }
+                        },
+                      ),
+                      const Divider(
+                          height: 5,
+                          color: AppColors.primaryColourDark,
+                          thickness: 3), // Add a divider after each ListTile
+                    ],
+                  );
+                }
 
+                // Hide Master and Reports for Requester role
+                if (userRole == 'Requester' &&
+                    (item['subtitle'] == 'Master' ||
+                        item['subtitle'] == 'Reports')) {
+                  return SizedBox.shrink(); // Hide these items
+                }
+
+                return Column(
+                  children: [
+                    ListTile(
+                      leading: Icon(item['icon'],color: AppColors.primaryColourDark,),
+                      title: Text(item['subtitle'],
+                          style: FTextStyle.FaqsTxtStyle.copyWith( color: AppColors.primaryColourDark)),
+                      onTap: () {
+                        Navigator.pop(context); // Close the drawer
+                        switch (item['subtitle']) {
+                          case 'Dashboard':
+                            _navigateBasedOnRole(PrefUtils.getRole());
+                            break;
+                          case 'Requisition':
+                            _navigateOnRole(PrefUtils.getRole());
+                            break;
+                          case 'Reports':
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const ReportScreen()),
+                            );
+                            break;
+                          case 'Master':
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const MasterScreen()),
+                            );
+                            break;
+                          case 'My Profile':
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const ProfileDetails()),
+                            );
+                            break;
+                          case 'Logout':
+                            _showLogDialog();
+                            break;
+                          default:
+                          // Handle default case if needed
+                            break;
+                        }
+                      },
+                    ),
+                    const Divider(
+                        height: 1,
+                        color: AppColors.primaryColourDark,
+                        thickness: 1), // Add a divider after each ListTile
+                  ],
+                );
+              }),
+            ],
+          ),
+        ),
         body:  Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18.0,vertical: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-             Text("Welcome to Admin ",style: FTextStyle.HeadingTxtStyle.copyWith(
-               fontSize: 28,
-               color: Colors.black
-               // fontWeight: FontWeight.w900
-             ),),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '',
+                      style: FTextStyle.preHeadingBoldStyle
+                          .copyWith(color: Colors.black, fontSize: 24),
+                    ),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'Welcome',
+                            style: FTextStyle.preHeadingBoldStyle
+                                .copyWith(color: AppColors.primaryColourDark, fontSize: 29),
+                          ),
+                          SizedBox(height: 10,),
+                          Text(
+                            'Hi  ${PrefUtils.getUserName()}',
+                            style: FTextStyle.preHeadingBoldStyle
+                                .copyWith(color: Colors.black),
+                          ).animateOnPageLoad(
+                              animationsMap['imageOnPageLoadAnimation2']!),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+              Padding(
+                padding:
+                const EdgeInsets.symmetric(horizontal: 3.0, vertical: 10),
+                child: Container(
+                  height: MediaQuery.of(context).size.height / 6,
+                  decoration: BoxDecoration(
+                    color: Colors.white, // Background color
+                    borderRadius: BorderRadius.circular(12), // Rounded corners
+                    border: Border.all(
+                        color: AppColors.yellow, // Border color
+                        width: 3 // Border width
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                        AppColors.yellow.withOpacity(0.5), // Shadow color
+                        spreadRadius: 2, // Spread radius
+                        blurRadius: 4, // Blur radius
+                        offset: const Offset(0, 3), // Offset from the container
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Welcome \n lets plan your day',
+                          style: FTextStyle.preHeadingStyle,
+                        ).animateOnPageLoad(
+                            animationsMap['imageOnPageLoadAnimation2']!),
+                        Container(
+                          height: 220,
+                          // color: Colors.redAccent,
+                          alignment: Alignment.center,
+                          child: Image.asset(
+                            'assets/images/timer.png',
+                            // color: AppColors.primaryColourDarkDark,
+                            width: (displayType == 'desktop' ||
+                                displayType == 'tablet')
+                                ? 150.w
+                                : 120,
+                            height: (displayType == 'desktop' ||
+                                displayType == 'tablet')
+                                ? 100.h
+                                : 200,
+                          ),
+                        ).animateOnPageLoad(
+                            animationsMap['imageOnPageLoadAnimation2']!),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(
@@ -141,7 +466,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
 
 
-  void _showDeleteDialog() {
+
+  void _showLogDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -199,5 +525,80 @@ class _AdminDashboardState extends State<AdminDashboard> {
         );
       },
     );
+  }
+  void _navigateBasedOnRole(String role) {
+    Widget nextPage;
+
+    switch (role) {
+      case 'Unit Head':
+        nextPage = const Dashboard(); // Replace with your Admin screen widget
+        break;
+      case 'super-admin':
+        nextPage = const Navigation(); // Replace with your Admin screen widget
+        break;
+      case 'Purchase Manager':
+        nextPage = const AdminDashboard(); // Replace with your User screen widget
+        break;
+
+      case 'Program Director':
+        nextPage = const AdminDashboard(); // Replace with your User screen widget
+        break;
+      case 'Vendor':
+        nextPage = const VendorDashboard(); // Replace with your User screen widget
+        break;
+      case 'Requester':
+        nextPage = const RequesterDashboard(); // Replace with your User screen widget
+        break;
+      default:
+
+
+        return; // No navigation occurs if the role is not recognized
+    }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => nextPage),
+    );
+  }
+  void _navigateOnRole(String role) {
+    Widget nextPage;
+
+    switch (role) {
+      case 'Unit Head':
+        nextPage =  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: RequisitionScreen(),
+);
+        break;
+
+      case 'Purchase Manager':
+        nextPage =  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: AdminRequisition(),
+);
+        break;
+      case 'Program Director':
+        nextPage =  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: VenderRequisition(),
+);
+        break;
+      case 'Vendor':
+        nextPage =  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: VenderRequisition(),
+);
+        break;
+      case 'Requester':
+        nextPage =  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: RequisitionRequester(),
+);
+        break;
+      default:
+        return;
+    }
+
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => nextPage));
   }
 }

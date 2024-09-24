@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -293,7 +294,9 @@ class _AddRequisitionState extends State<AddRequisition> {
             setState(() {
               isLoading = false;
             });
-            print("error>> ${state.addCartDetailFailure}");
+            if (kDebugMode) {
+              print("error>> ${state.addCartDetailFailure}");
+            }
           }
           if (state is ProductListLoading) {
             setState(() {
@@ -344,7 +347,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                MaterialPageRoute(
                  builder: (context) => BlocProvider(
                    create: (context) => AllRequesterBloc(),
-                   child: RequisitionScreen(),
+                   child: const RequisitionScreen(),
                  ),
                ),
              );
@@ -354,7 +357,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                MaterialPageRoute(
                  builder: (context) => BlocProvider(
                    create: (context) => AllRequesterBloc(),
-                   child: AdminRequisition(),
+                   child: const AdminRequisition(),
                  ),
                ),
              );
@@ -365,11 +368,13 @@ class _AddRequisitionState extends State<AddRequisition> {
                 MaterialPageRoute(
                   builder: (context) => BlocProvider(
                     create: (context) => AllRequesterBloc(),
-                    child: RequisitionRequester(),
+                    child: const RequisitionRequester(),
                   ),
                 ),
               );}
-              print(">>>>>AddSucess$Add");
+              if (kDebugMode) {
+                print(">>>>>AddSucess$Add");
+              }
               // if (widget.flag=="unit") {
               //   Navigator.push(
               //     context,
@@ -1087,7 +1092,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                       ),
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   SizedBox(
@@ -1194,11 +1199,11 @@ class _AddRequisitionState extends State<AddRequisition> {
                       },
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   Padding(
-                    padding: EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8.0),
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width,
                       height:
@@ -1237,7 +1242,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                                 : AppColors.disableButtonColor,
                           ),
                           child: isAddLoading
-                              ? CircularProgressIndicator(
+                              ? const CircularProgressIndicator(
                                   color: Colors.white,
                                 )
                               : Text(

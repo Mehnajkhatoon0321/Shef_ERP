@@ -53,6 +53,15 @@ class PrefUtils {
     return value ?? '';
   }
 
+  static void setUserName(String value) {
+    Prefs.prefs?.setString(SharedPrefsKeys.name, value);
+  }
+
+  static String getUserName() {
+    final String? value =
+    Prefs.prefs?.getString(SharedPrefsKeys.name);
+    return value ?? '';
+  }
   static void setUserId(int value) {
     Prefs.prefs?.setString(SharedPrefsKeys.userId, value.toString());
   }
@@ -74,4 +83,6 @@ class SharedPrefsKeys {
   static const userPassword = 'userPassword';
   static const userEmailLogin = 'userEmailLogin';
   static const userId = 'userId';
+  static const name = 'name';
+
 }

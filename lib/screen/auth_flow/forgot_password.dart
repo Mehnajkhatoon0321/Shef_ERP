@@ -112,10 +112,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   Widget build(BuildContext context) {
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
     var displayType = valueType.toString().split('.').last;
-    print('displayType>> $displayType');
+
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+      data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(1.0)),
       child: Scaffold(
+        backgroundColor: Colors.white,
         body: Stack(
           children: [
             Positioned(
@@ -144,12 +145,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                 ),),
               ),
             ),
-            // Container(
-            //   color: AppColors.primaryColourDark,
-            // ),
+
             Center(
               child: Container(
-                margin:  EdgeInsets.only(             top: MediaQuery.of(context).size.height * 0.2),
+                margin:  EdgeInsets.only(
+                    top: MediaQuery.of(context).size.height * 0.2),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.only(
@@ -258,7 +258,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
                         Navigator.push(context, MaterialPageRoute(builder: (context)=>  BlocProvider(
   create: (context) => AuthFlowBloc(),
-  child: LogScreen(),
+  child: const LogScreen(),
 )));
                       },
                       child: Row(

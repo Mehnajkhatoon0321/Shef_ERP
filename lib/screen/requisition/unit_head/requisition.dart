@@ -455,7 +455,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
 
                   // Handle case where item might be null
                   if (item == null) {
-                    return Padding(
+                    return const Padding(
                       padding: EdgeInsets.symmetric(vertical: 10.0),
                       child: Text("No data available", style: FTextStyle.listTitle),
                     );
@@ -528,23 +528,29 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           const Text("Requisition No: ", style: FTextStyle.listTitle),
-                                          Text("${item["req_no"] ?? 'N/A'}", style: FTextStyle.listTitleSub),
+                                          Expanded(child: Text("${item["req_no"] ?? 'N/A'}", style: FTextStyle.listTitleSub, maxLines: 1,)),
                                         ],
                                       ),
                                       const SizedBox(height: 5),
                                       Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           const Text("PO No. : ", style: FTextStyle.listTitle),
-                                          Expanded(child: Text("${item["po_no"] ?? 'N/A'}", style: FTextStyle.listTitleSub)),
+                                          Expanded(child: Text("${item["po_no"] ?? 'N/A'}", style: FTextStyle.listTitleSub,maxLines: 1,)),
                                         ],
                                       ),
                                       const SizedBox(height: 5),
                                       Row(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           const Text("Request Date: ", style: FTextStyle.listTitle),
-                                          Text("${item["req_date"] ?? 'N/A'}", style: FTextStyle.listTitleSub),
+                                          Text("${item["req_date"] ?? 'N/A'}", style: FTextStyle.listTitleSub,maxLines: 1,),
                                         ],
                                       ),
                                       const SizedBox(height: 5),
@@ -553,9 +559,11 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Row(
+                                            mainAxisAlignment: MainAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               const Text("Unit: ", style: FTextStyle.listTitle),
-                                              Text("${item["unit"] ?? 'N/A'}", style: FTextStyle.listTitleSub),
+                                              Text("${item["unit"] ?? 'N/A'}", style: FTextStyle.listTitleSub,maxLines: 1,),
                                             ],
                                           ),
                                           Row(
@@ -626,13 +634,8 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
   }
 
 
-
-
-
   void _showEditDialog() {
-    // Clear or set the controller's text based on the action
 
-      // _editController.text = listData[index]["unithead"];
 
 
     showDialog(
