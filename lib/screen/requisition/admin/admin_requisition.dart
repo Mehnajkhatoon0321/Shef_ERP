@@ -632,7 +632,7 @@ mainAxisAlignment: MainAxisAlignment.start,
                                             padding: const EdgeInsets.symmetric(vertical: 4.0),
                                             child: ElevatedButton(
                                               onPressed: () async {
-                                                _showRejectDialog(-1);
+                                                _showMarkDeliveryDialog(-1);
                                               },
                                               style: ElevatedButton.styleFrom(
                                                 shape: RoundedRectangleBorder(
@@ -946,6 +946,116 @@ mainAxisAlignment: MainAxisAlignment.start,
               ),
               title: Text(
                 "Reject",
+                style: FTextStyle.preHeading16BoldStyle,
+              ),
+              content: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.7,
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        "Purchase Manager Remark",
+                        style: FTextStyle.preHeadingStyle,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          controller: _editController,
+                          decoration: InputDecoration(
+                            hintText: "Enter Purchase Manager Remark",
+                            hintStyle: FTextStyle.formhintTxtStyle,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(23.0),
+                              borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(23.0),
+                              borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(23.0),
+                              borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
+                            fillColor: Colors.grey[100],
+                            filled: true,
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter a remark';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.formFieldBackColour,
+                    borderRadius: BorderRadius.circular(25.0),
+                  ),
+                  child: TextButton(
+                    child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    color: isButtonEnabled ? AppColors.primaryColourDark : AppColors.formFieldBorderColour,
+                    borderRadius: BorderRadius.circular(25.0),
+                  ),
+                  child: TextButton(
+                    onPressed: isButtonEnabled ? () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        // Handle the reject action here
+                        Navigator.of(context).pop();
+                      }
+                    } : null,
+                    child:  Text("Reject", style: TextStyle(color:isButtonEnabled ? Colors.white:Colors.white)),
+                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                ),
+              ],
+            ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation1']!);
+          },
+        );
+      },
+    );
+  }
+  void _showMarkDeliveryDialog(int index) {
+    final _formKey = GlobalKey<FormState>();
+    final TextEditingController _editController = TextEditingController();
+    bool isButtonEnabled = false; // Initialize button state
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            // Add listener to the TextEditingController to monitor text changes
+            _editController.addListener(() {
+              setState(() {
+                isButtonEnabled = _editController.text.isNotEmpty;
+              });
+            });
+
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(32.0),
+              ),
+              title: Text(
+                "Mark Delivery",
                 style: FTextStyle.preHeading16BoldStyle,
               ),
               content: SizedBox(
