@@ -38,7 +38,7 @@ class UnitHeadStatus extends StatelessWidget {
     return Row(
       children: [
         const Text(
-            "Unit Head Status:",
+            "U.H. Status:",
             style: FTextStyle.listTitle // Replace with FTextStyle.listTitleBig if needed
         ),
         Padding(

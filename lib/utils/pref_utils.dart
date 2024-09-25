@@ -71,12 +71,21 @@ class PrefUtils {
     return int.tryParse(value ?? '') ?? 0;
   }
 
+  static void setIsLogin(bool value) {
+    Prefs.prefs?.setBool(SharedPrefsKeys.isLogin, value);
+  }
+
+  static bool getIsLogin() {
+    final bool? value = Prefs.prefs?.getBool(SharedPrefsKeys.isLogin);
+    return value ?? false;
+  }
 
 
 }
 
-class SharedPrefsKeys {
 
+class SharedPrefsKeys {
+  static const isLogin = 'isLogin';
   static const token = 'token';
   static const role = 'role';
   static const rememberMe = 'rememberMe';

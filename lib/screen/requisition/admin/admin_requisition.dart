@@ -230,6 +230,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
         leading: Padding(
           padding: const EdgeInsets.only(left: 15),
           child: GestureDetector(
+
+
             onTap: () {
               Navigator.pop(context);
             },
@@ -615,7 +617,7 @@ mainAxisAlignment: MainAxisAlignment.start,
                                   VendorStatus(
                                     role: PrefUtils.getRole(), // Example role
                                     deliveryStatus:  item["dl_status"], // Example delivery status
-                                    companyName: item['company'], // Example company name
+                                    companyName: item['company']??"NA", // Example company name
                                   ),
 
                                   Row(
@@ -900,10 +902,10 @@ mainAxisAlignment: MainAxisAlignment.start,
                     borderRadius: BorderRadius.circular(25.0),
                   ),
                   child: TextButton(
-                    child: const Text("OK", style: TextStyle(color: Colors.white)),
                     onPressed: isButtonPartEnabled ? () {
                       Navigator.of(context).pop();
                     } : null,
+                    child: const Text("OK", style: TextStyle(color: Colors.white)),
                   ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
                 ),
               ],
@@ -1014,13 +1016,13 @@ mainAxisAlignment: MainAxisAlignment.start,
                     borderRadius: BorderRadius.circular(25.0),
                   ),
                   child: TextButton(
-                    child:  Text("Reject", style: TextStyle(color:isButtonEnabled ? Colors.white:Colors.white)),
                     onPressed: isButtonEnabled ? () {
                       if (_formKey.currentState?.validate() ?? false) {
                         // Handle the reject action here
                         Navigator.of(context).pop();
                       }
                     } : null,
+                    child:  Text("Reject", style: TextStyle(color:isButtonEnabled ? Colors.white:Colors.white)),
                   ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
                 ),
               ],

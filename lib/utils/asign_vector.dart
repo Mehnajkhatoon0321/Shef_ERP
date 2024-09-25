@@ -44,7 +44,7 @@ class PurchaseManager extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-            "Purchase Manager Status:",
+            "P.M. Status:",
             style: FTextStyle.listTitle // Replace with FTextStyle.listTitleBig if needed
         ),
         SizedBox(width: 2,),

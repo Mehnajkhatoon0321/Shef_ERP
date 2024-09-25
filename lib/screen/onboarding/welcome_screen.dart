@@ -7,12 +7,18 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shef_erp/all_bloc/authflow/auth_flow_bloc.dart';
 
 import 'package:shef_erp/screen/auth_flow/login_screen.dart';
+import 'package:shef_erp/screen/auth_flow/navigation.dart';
+import 'package:shef_erp/screen/dashboard/admin_dashboard.dart';
+import 'package:shef_erp/screen/dashboard/dashboard.dart';
+import 'package:shef_erp/screen/dashboard/requester_dashboard.dart';
+import 'package:shef_erp/screen/dashboard/vender_dashboard.dart';
 
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/constant.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shef_erp/utils/pref_utils.dart';
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
@@ -152,13 +158,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   height: 50.h, // Use ScreenUtil for height
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) =>  BlocProvider(
-                          create: (context) => AuthFlowBloc(),
-                          child: LogScreen(),
-                        )),
-                      );
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => BlocProvider(
+                                    create: (context) => AuthFlowBloc(),
+                                    child: LogScreen(),
+                                  )),
+                        );
+
                     },
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(

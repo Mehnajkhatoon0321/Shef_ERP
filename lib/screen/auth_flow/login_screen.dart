@@ -183,7 +183,9 @@ class _LogScreenState extends State<LogScreen> {
             } else if (state is LogSuccess) {
               setState(() {
                 isLoading = false;
+                PrefUtils.setIsLogin(true);
               });
+
 
               Map<String, dynamic> data = state.logResponse;
 
@@ -209,35 +211,6 @@ class _LogScreenState extends State<LogScreen> {
                   PrefUtils.setUserName(name);
 
 
-                  // if (userRole == 'Vendor' ) {
-                  //   Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute(builder: (context) => const VendorDashboard()),
-                  //   );
-                  // }else if (userRole == 'Purchase Manager') {
-                  //   Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute(builder: (context) => const AdminDashboard()),
-                  //   );
-                  // }
-                  // else if (userRole == 'Requester') {
-                  //   Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute(builder: (context) => const RequesterDashboard()),
-                  //   );
-                  // }
-                  // else if (userRole == 'Program Director') {
-                  //   Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute(builder: (context) => const AdminDashboard()),
-                  //   );
-                  // }
-                  // else {
-                  //   Navigator.push(
-                  //     context,
-                  //     MaterialPageRoute(builder: (context) => const Dashboard()),
-                  //   );
-                  // }
                   _navigateBasedOnRole(roleUser);
                 }
               }

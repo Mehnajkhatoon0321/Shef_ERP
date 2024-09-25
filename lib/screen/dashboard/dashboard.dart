@@ -70,7 +70,26 @@ class _DashboardState extends State<Dashboard> {
     {'subtitle': 'Logout', 'icon': Icons.logout},
   ];
   int? _expandedIndex;
-
+  Future<bool> _showExitConfirmation(BuildContext context) async {
+    return (await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title:  Text('Exit Confirmation',style: FTextStyle.FaqsTxtStyle,),
+        content:  const Text('Do you really want to exit the app?',style: FTextStyle.listTitle),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false), // Don't exit
+            child: const Text('No'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true), // Exit
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    )) ??
+        false; // Return false if the dialog was dismissed without a choice
+  }
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
       trigger: AnimationTrigger.onPageLoad,
@@ -155,26 +174,31 @@ class _DashboardState extends State<Dashboard> {
     var displayType = valueType.toString().split('.').last;
     print('displayType>> $displayType');
     String? userRole;
-    return MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+    return WillPopScope(
+      onWillPop: () async {
+        bool shouldExit=(await _showExitConfirmation(context)) as bool;
+        return shouldExit;
 
-      child: Scaffold(
-        key: _scaffoldKey,
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          centerTitle: true,
-          automaticallyImplyLeading: false,
-          title: Text(
-            'Dashboard',
-            style: FTextStyle.HeadingTxtWhiteStyle,
-            textAlign: TextAlign.center,
-          ),
-          backgroundColor: AppColors.primaryColourDark,
 
-          leading: Padding(
-            padding: const EdgeInsets.only(left: 15),
-            child: Padding(
-              padding: const EdgeInsets.only(right: 15),
+      },
+
+      child: MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+
+        child: Scaffold(
+          key: _scaffoldKey,
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            centerTitle: true,
+            automaticallyImplyLeading: false,
+            title: Text(
+              'Dashboard',
+              style: FTextStyle.HeadingTxtWhiteStyle,
+              textAlign: TextAlign.center,
+            ),
+            backgroundColor: AppColors.primaryColourDark,
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 15),
               child: GestureDetector(
                 onTap: () {
                   _scaffoldKey.currentState!.openDrawer(); // Open the end drawer
@@ -186,159 +210,177 @@ class _DashboardState extends State<Dashboard> {
                 ),
               ),
             ),
-          ),
-        ),
-        drawer: Drawer(
-          backgroundColor: Colors.white,
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: <Widget>[
-              SizedBox(
-                height: MediaQuery.of(context).size.height / 3.9,
-                child: UserAccountsDrawerHeader(
-
-                  accountName:
-                  Text("${PrefUtils.getUserName()}", style: FTextStyle.nameProfile),
-                  accountEmail: Text("${PrefUtils.getUserEmailLogin()}",maxLines: 1,
-                      style: FTextStyle.emailProfile),
-                  decoration: const BoxDecoration(
-                    color: AppColors.primaryColourDark,
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 15),
+                child: GestureDetector(
+                  onTap: () {
+                    // Add your action here
+                    print("Bell icon tapped!");
+                    // You can navigate to another page or show a dialog, etc.
+                  },
+                  child: const Icon(
+                    Icons.notifications,
+                    size: 35,
+                    color: Colors.white,
                   ),
                 ),
               ),
-              ...buildMenuItems(listItem, PrefUtils.getRole()),
-
             ],
           ),
-        ),
-        body:  Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5.0,vertical: 10),
-          child:  Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
 
-              Padding(
-                padding:
-                const EdgeInsets.symmetric(horizontal: 3.0, vertical: 10),
-                child: Container(
-                  height: MediaQuery.of(context).size.height / 7,
-                  decoration: BoxDecoration(
-                    color: Colors.white, // Background color
-                    borderRadius: BorderRadius.circular(12), // Rounded corners
-                    border: Border.all(
-                        color: AppColors.primaryColourDark, // Border color
-                        width: 1 // Border width
+          drawer: Drawer(
+            backgroundColor: Colors.white,
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                SizedBox(
+                  height: MediaQuery.of(context).size.height / 3.9,
+                  child: UserAccountsDrawerHeader(
+
+                    accountName:
+                    Text("${PrefUtils.getUserName()}", style: FTextStyle.nameProfile),
+                    accountEmail: Text("${PrefUtils.getUserEmailLogin()}",maxLines: 1,
+                        style: FTextStyle.emailProfile),
+                    decoration: const BoxDecoration(
+                      color: AppColors.primaryColourDark,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color:
-                        AppColors.primaryColourDark.withOpacity(0.5), // Shadow color
-                        spreadRadius: 0.5, // Spread radius
-                        blurRadius: 5, // Blur radius
-                        // offset: const Offset(0, 3), // Offset from the container
-                      ),
-                    ],
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: MediaQuery.of(context).size.width/1.9,
-                          child: Text(
-                            'Welcome\n ${PrefUtils.getUserName()}'
-                                '\n lets plan your day',maxLines: 3,overflow: TextOverflow.ellipsis,
-                            style: FTextStyle.preHeadingStyle.copyWith(fontWeight: FontWeight.w700),
-                          ).animateOnPageLoad(
-                              animationsMap['imageOnPageLoadAnimation2']!),
+                ),
+                ...buildMenuItems(listItem, PrefUtils.getRole()),
+
+              ],
+            ),
+          ),
+          body:  Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5.0,vertical: 10),
+            child:  Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+
+                Padding(
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 3.0, vertical: 10),
+                  child: Container(
+                    height: MediaQuery.of(context).size.height / 7,
+                    decoration: BoxDecoration(
+                      color: Colors.white, // Background color
+                      borderRadius: BorderRadius.circular(12), // Rounded corners
+                      border: Border.all(
+                          color: AppColors.primaryColourDark, // Border color
+                          width: 1 // Border width
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color:
+                          AppColors.primaryColourDark.withOpacity(0.5), // Shadow color
+                          spreadRadius: 0.5, // Spread radius
+                          blurRadius: 5, // Blur radius
+                          // offset: const Offset(0, 3), // Offset from the container
                         ),
-                        Container(
-                          height: 220,
-                          // color: Colors.redAccent,
-                          alignment: Alignment.center,
-                          child: Image.asset(
-                            'assets/images/timer.png',
-                            // color: AppColors.primaryColourDarkDark,
-                            width: (displayType == 'desktop' ||
-                                displayType == 'tablet')
-                                ? 150.w
-                                : 120,
-                            height: (displayType == 'desktop' ||
-                                displayType == 'tablet')
-                                ? 100.h
-                                : 200,
-                          ),
-                        ).animateOnPageLoad(
-                            animationsMap['imageOnPageLoadAnimation2']!),
                       ],
                     ),
-                  ),
-                ),
-              ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 10, top: 20),
-                  child: GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, // Number of columns
-                      childAspectRatio: 1.8, // Aspect ratio of each grid item
-                      crossAxisSpacing: 13, // Space between columns
-                      mainAxisSpacing: 16, // Space between rows
-                    ),
-                    itemCount: _items.length, // Number of items
-                    itemBuilder: (context, index) {
-                      final item = _items[index];
-                      bool isEvenIndex = index % 3 == 0;
-
-                      return Container(
-
-                        decoration: BoxDecoration(
-
-                          color: Colors.white,
-                          border: Border.all(
-                              color: isEvenIndex ? AppColors.primaryColourDark : Colors.yellow.shade700, // Border color
-                              width: 1 // Border width
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: MediaQuery.of(context).size.width/1.9,
+                            child: Text(
+                              'Welcome\n ${PrefUtils.getUserName()}'
+                                  '\n lets plan your day',maxLines: 3,overflow: TextOverflow.ellipsis,
+                              style: FTextStyle.preHeadingStyle.copyWith(fontWeight: FontWeight.w700),
+                            ).animateOnPageLoad(
+                                animationsMap['imageOnPageLoadAnimation2']!),
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: isEvenIndex ? AppColors.primaryColourDark : Colors.yellow.shade700,
-                              spreadRadius: 1,
-                              blurRadius: 3,
-                              offset: const Offset(0, 0.5),
+                          Container(
+                            height: 220,
+                            // color: Colors.redAccent,
+                            alignment: Alignment.center,
+                            child: Image.asset(
+                              'assets/images/timer.png',
+                              // color: AppColors.primaryColourDarkDark,
+                              width: (displayType == 'desktop' ||
+                                  displayType == 'tablet')
+                                  ? 150.w
+                                  : 120,
+                              height: (displayType == 'desktop' ||
+                                  displayType == 'tablet')
+                                  ? 100.h
+                                  : 200,
                             ),
-                          ],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                                item['total'], // Title from JSON
-                                style:FTextStyle.authlogin_signupTxtStyle.copyWith(fontSize: 20)
-                            ),
-                            SizedBox(height: 20,),
-                            Text(
-                              item['title'], // Title from JSON
-                              style:FTextStyle.authlogin_signupTxtStyle,
-                              overflow:TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                          ).animateOnPageLoad(
+                              animationsMap['imageOnPageLoadAnimation2']!),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              )
+                ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 10, top: 20),
+                    child: GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2, // Number of columns
+                        childAspectRatio: 1.8, // Aspect ratio of each grid item
+                        crossAxisSpacing: 13, // Space between columns
+                        mainAxisSpacing: 16, // Space between rows
+                      ),
+                      itemCount: _items.length, // Number of items
+                      itemBuilder: (context, index) {
+                        final item = _items[index];
+                        bool isEvenIndex = index % 3 == 0;
+
+                        return Container(
+
+                          decoration: BoxDecoration(
+
+                            color: Colors.white,
+                            border: Border.all(
+                                color: isEvenIndex ? AppColors.primaryColourDark : Colors.yellow.shade700, // Border color
+                                width: 1 // Border width
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: isEvenIndex ? AppColors.primaryColourDark : Colors.yellow.shade700,
+                                spreadRadius: 1,
+                                blurRadius: 3,
+                                offset: const Offset(0, 0.5),
+                              ),
+                            ],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                  item['total'], // Title from JSON
+                                  style:FTextStyle.authlogin_signupTxtStyle.copyWith(fontSize: 20)
+                              ),
+                              SizedBox(height: 20,),
+                              Text(
+                                item['title'], // Title from JSON
+                                style:FTextStyle.authlogin_signupTxtStyle,
+                                overflow:TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                )
 
 
 
 
 
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -444,47 +486,47 @@ class _DashboardState extends State<Dashboard> {
       MaterialPageRoute(builder: (context) => nextPage),
     );
   }
-  void _navigateOnRole(String role) {
-    Widget nextPage;
-
-    switch (role) {
-      case 'Unit Head':
-        nextPage =  BlocProvider(
-          create: (context) => AllRequesterBloc(),
-          child: RequisitionScreen(),
-        );
-        break;
-
-      case 'Purchase Manager':
-        nextPage =  BlocProvider(
-          create: (context) => AllRequesterBloc(),
-          child: AdminRequisition(),
-        );
-        break;
-      case 'Program Director':
-        nextPage =  BlocProvider(
-          create: (context) => AllRequesterBloc(),
-          child: VenderRequisition(),
-        );
-        break;
-      case 'Vendor':
-        nextPage =  BlocProvider(
-          create: (context) => AllRequesterBloc(),
-          child: VenderRequisition(),
-        );
-        break;
-      case 'Requester':
-        nextPage =  BlocProvider(
-          create: (context) => AllRequesterBloc(),
-          child: RequisitionRequester(),
-        );
-        break;
-      default:
-        return;
-    }
-
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => nextPage));
-  }
+  // void _navigateOnRole(String role) {
+  //   Widget nextPage;
+  //
+  //   switch (role) {
+  //     case 'Unit Head':
+  //       nextPage =  BlocProvider(
+  //         create: (context) => AllRequesterBloc(),
+  //         child: const RequisitionScreen(),
+  //       );
+  //       break;
+  //
+  //     case 'Purchase Manager':
+  //       nextPage =  BlocProvider(
+  //         create: (context) => AllRequesterBloc(),
+  //         child: const AdminRequisition(),
+  //       );
+  //       break;
+  //     case 'Program Director':
+  //       nextPage =  BlocProvider(
+  //         create: (context) => AllRequesterBloc(),
+  //         child: const VenderRequisition(),
+  //       );
+  //       break;
+  //     case 'Vendor':
+  //       nextPage =  BlocProvider(
+  //         create: (context) => AllRequesterBloc(),
+  //         child: const VenderRequisition(),
+  //       );
+  //       break;
+  //     case 'Requester':
+  //       nextPage =  BlocProvider(
+  //         create: (context) => AllRequesterBloc(),
+  //         child: const RequisitionRequester(),
+  //       );
+  //       break;
+  //     default:
+  //       return;
+  //   }
+  //
+  //   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => nextPage));
+  // }
   List<Widget> buildMenuItems(List<Map<String, dynamic>> listItem, String userRole) {
     List<Widget> widgets = [];
 
@@ -530,8 +572,9 @@ class _DashboardState extends State<Dashboard> {
           );
         } else {
           widgets.add(buildListTile(item, index, listItem.length));
-          if (index != listItem.length - 1)
-            const Divider(height: 1, color: Colors.black, thickness: 2);
+          if (index != listItem.length - 1) {
+            const Divider(height: 1, color: Colors.grey, thickness: 1.5);
+          }
         }
       }
       // Hide Master and Reports for Requester role
@@ -583,7 +626,7 @@ class _DashboardState extends State<Dashboard> {
 
         Visibility(
             visible: index == totalLength - 3 && PrefUtils.getRole() == 'Purchase Manager',
-            child: const Divider(height: 1, color: Colors.black, thickness: 3)),
+            child: const Divider(height: 1, color: Colors.grey, thickness: 1.5)),
         ListTile(
           leading: Icon(item['icon'],       color: AppColors.aboutUsHeadingColor),
           title: Text(item['subtitle'] ?? 'Unknown', style: FTextStyle.FaqsTxtStyle),
@@ -594,7 +637,7 @@ class _DashboardState extends State<Dashboard> {
         ),
         if (index != totalLength - 1)
 
-          const Divider(height: 1, color: Colors.black, thickness: 3)
+          const Divider(height: 1, color: Colors.grey, thickness: 1.5)
       ],
     );
   }
@@ -609,7 +652,10 @@ class _DashboardState extends State<Dashboard> {
         _navigateBasedOnRole(PrefUtils.getRole());
         break;
       case 'Requisition':
-        _navigateOnRole(PrefUtils.getRole());
+        Navigator.push(context, MaterialPageRoute(builder: (context) =>  BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: RequisitionScreen(),
+        )));
         break;
       case 'Reports':
         Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportScreen()));
@@ -637,19 +683,19 @@ class _DashboardState extends State<Dashboard> {
       case 'Product/Category':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ProductCategory()),
+          MaterialPageRoute(builder: (context) => const ProductCategory()),
         );
         break;
       case 'Product/Services':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ProductService()),
+          MaterialPageRoute(builder: (context) => const ProductService()),
         );
         break;
       case 'Events':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => EventScreen()),
+          MaterialPageRoute(builder: (context) => const EventScreen()),
         );
         break;
       default:
@@ -660,3 +706,7 @@ class _DashboardState extends State<Dashboard> {
 
 
 }
+
+
+
+
