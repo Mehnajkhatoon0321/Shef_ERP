@@ -493,7 +493,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                               scale: 1.3,
                               child: Checkbox(
                                 value: selectedIndices.contains(index),
-                                activeColor: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
+                                activeColor: AppColors.primaryColourDark,
                                 onChanged: (bool? value) {
                                   setState(() {
                                     if (value == true) {
@@ -515,7 +515,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                 borderRadius: BorderRadius.circular(10),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
+                                    color: AppColors.primaryColourDark,
 
                                     spreadRadius: 1.5,
                                     blurRadius: 0.4,

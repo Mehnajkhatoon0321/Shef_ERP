@@ -101,4 +101,64 @@ class RejectHandler extends AllRequesterEvent {
   RejectHandler(this.remark);
 }
 
-//
+//Master Events
+
+class MasterDetailHandler extends AllRequesterEvent {
+  String search;
+  int page;
+  int size;
+  MasterDetailHandler(this.search,this.page,this.size);
+}
+
+class DeleteMasterHandlers extends AllRequesterEvent {
+  int id;
+
+
+  DeleteMasterHandlers(this.id);
+}
+class EditMasterHandler extends AllRequesterEvent {
+  String id;
+  EditMasterHandler(this.id);
+}
+
+// Master Product  Services
+
+class MasterServiceHandler extends AllRequesterEvent {
+  String search;
+  int page;
+  int size;
+  MasterServiceHandler(this.search,this.page,this.size);
+}
+
+class DeleteMasterServiceHandlers extends AllRequesterEvent {
+  int id;
+
+
+  DeleteMasterServiceHandlers(this.id);
+}
+
+class EditMasterServiceHandler extends AllRequesterEvent {
+  String id;
+  EditMasterServiceHandler(this.id);
+}
+
+
+//Master Category  Services
+class MasterCategoryHandler extends AllRequesterEvent {
+  String search;
+  int page;
+  int size;
+  MasterCategoryHandler(this.search,this.page,this.size);
+}
+
+class DeleteMasterCategoryHandlers extends AllRequesterEvent {
+  int id;
+
+
+  DeleteMasterCategoryHandlers(this.id);
+}
+
+class EditMasterCategoryHandler extends AllRequesterEvent {
+  String id;
+  EditMasterCategoryHandler(this.id);
+}

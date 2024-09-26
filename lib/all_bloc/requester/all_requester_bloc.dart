@@ -443,57 +443,7 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
     });
 
 
-    // on<UpdateRequisitionEventHandler>((event, emit) async {
-    //   if (await ConnectivityService.isConnected()) {
-    //     emit(UpdateLoading());
-    //     try {
-    //       Dio dio = Dio();
-    //       String authToken = PrefUtils.getToken();
-    //       dio.options.headers["Authorization"] = 'Bearer $authToken';
-    //       var uri = Uri.parse(APIEndPoints.postReqUpdate);
-    //       var request = http.MultipartRequest('POST', uri);
-    //       request.fields['date'] = event.date;
-    //       request.fields['unit'] = event.unit;
-    //       request.fields['time'] = event.time;
-    //       request.fields['product'] = event.product;
-    //       request.fields['specification'] = event.specification;
-    //       request.fields['user_id'] = event.userid;
-    //       request.fields['quantity'] = event.quantity;
-    //       request.fields['additional'] = event.additional;
-    //       request.fields['event'] = event.event;
-    //       request.fields['delivery_date'] = event.delivery_date;
-    //       request.fields['pre_img'] = event.preImg;
-    //       request.fields['req_id'] = event.reqID;
-    //
-    //       if (event.Image != null) {
-    //         var imageStream = http.ByteStream(event.Image!.openRead());
-    //         var imageLength = await event.Image!.length();
-    //         var multipartImage = http.MultipartFile('image', imageStream, imageLength,
-    //             filename: event.Image!.path.split('/').last);
-    //         request.files.add(multipartImage);
-    //       }
-    //       var streamedResponse = await request.send();
-    //       var response = await http.Response.fromStream(streamedResponse);
-    //
-    //       if (response.statusCode == 200) {
-    //         final responseData = jsonDecode(response.body);
-    //         emit(UpdateFailure(responseData));
-    //         developer.log("responseData>>>>${responseData.runtimeType}");
-    //       } else if (response.statusCode == 400) {
-    //         emit(UpdateFailure(jsonDecode(response.body)));
-    //       } else {
-    //         emit(UpdateFailure(jsonDecode(response.body)));
-    //       }
-    //     } catch (e) {
-    //       if (kDebugMode) {
-    //         print('Exception: $e');
-    //         emit(UpdateFailure({'error': 'Exception occurred: $e'}));
-    //       }
-    //     }
-    //   } else {
-    //     print("error occurred");
-    //   }
-    // });
+//
 
 
 

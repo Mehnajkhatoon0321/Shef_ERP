@@ -351,7 +351,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                  ),
                ),
              );
-           }else if  ( PrefUtils.getRole() == 'Unit Head'){
+           }else if  ( PrefUtils.getRole() == 'Purchase Manager'){
              Navigator.push(
                context,
                MaterialPageRoute(
@@ -485,7 +485,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
                                 key: _unitNameKey,
-                                focusNode: _uploadNameNode,
+                                focusNode: _unitNameNode,
                                 isExpanded: true,
                                 // Make the DropdownButton expand to fill the width of the container
                                 value: selectedUnitItem,
@@ -1223,20 +1223,39 @@ class _AddRequisitionState extends State<AddRequisition> {
                       child: ElevatedButton(
                           onPressed: isButtonEnabled
                               ? () async {
-                                  BlocProvider.of<AllRequesterBloc>(context)
-                                      .add(
-                                    AddRequisitionHandler(
-                                      date: dateFrom.text.toString(),
-                                      unit: unitFromList.toString(),
-                                      // Add your value here
-                                      nextDate: nextFromList.toString(),
-                                      time: timeFromList.toString(),
-                                      // Add your value here
-                                      userId: userId.toString(),
-                                      // Add your value here
-                                      requisitionList: itemList,
-                                    ),
-                                  );
+                            if(PrefUtils.getRole() == 'Purchase Manager') {
+                                    BlocProvider.of<AllRequesterBloc>(context)
+                                        .add(
+                                      AddRequisitionHandler(
+                                        date: dateFrom.text.toString(),
+                                        unit: unitFromList.toString(),
+                                        // Add your value here
+                                        nextDate: selectedUnitItem.toString(),
+                                        time: timeFromList.toString(),
+                                        // Add your value here
+                                        userId: userId.toString(),
+                                        // Add your value here
+                                        requisitionList: itemList,
+                                      ),
+                                    );
+                                  }
+                            else{
+                              BlocProvider.of<AllRequesterBloc>(context)
+                                  .add(
+                                AddRequisitionHandler(
+                                  date: dateFrom.text.toString(),
+                                  unit: unitFromList.toString(),
+                                  // Add your value here
+                                  nextDate: nextFromList.toString(),
+                                  time: timeFromList.toString(),
+                                  // Add your value here
+                                  userId: userId.toString(),
+                                  // Add your value here
+                                  requisitionList: itemList,
+                                ),
+                              );
+
+                            }
 
                                   setState(() {
                                     isAddLoading = true;

@@ -51,7 +51,7 @@ class PurchaseManager extends StatelessWidget {
         Expanded(
           child: Text(
               deliveryStatusText,
-              style: FTextStyle.listTitle.copyWith( color: deliveryStatusColor)// Replace with FTextStyle.listTitleSubBig.copyWith if needed
+              style: FTextStyle.listTitle.copyWith( color: deliveryStatusColor,fontSize: 15)// Replace with FTextStyle.listTitleSubBig.copyWith if needed
           ),
         ),
       ],

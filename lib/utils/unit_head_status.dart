@@ -15,7 +15,7 @@ class UnitHeadStatus extends StatelessWidget {
     switch (unitStatus) {
 
       case '0':
-        deliveryStatusText = 'Pending';
+        deliveryStatusText = 'Pending Approval';
         deliveryStatusColor = Colors.red;
         break;
       case '1':
@@ -45,7 +45,7 @@ class UnitHeadStatus extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Text(
               deliveryStatusText,
-              style: FTextStyle.listTitle.copyWith( color: deliveryStatusColor)// Replace with FTextStyle.listTitleSubBig.copyWith if needed
+              style: FTextStyle.listTitle.copyWith( color: deliveryStatusColor,fontSize: 15)// Replace with FTextStyle.listTitleSubBig.copyWith if needed
           ),
         ),
       ],

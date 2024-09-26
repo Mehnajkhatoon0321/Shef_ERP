@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
+import 'package:shef_erp/utils/DeletePopupManager.dart';
 
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
+import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shimmer/shimmer.dart';
 
 class ProductService extends StatefulWidget {
   const ProductService({super.key});
@@ -14,14 +19,30 @@ class ProductService extends StatefulWidget {
 }
 
 class _ProductServiceState extends State<ProductService> {
-  List<Map<String, dynamic>> listData = [
-    { "category": "12000","name": "4544200","status": "Success","specification":"NA",},
-    { "category": "12000","name": "4544200","status": "Success","specification":"NA",},
-    { "category": "12000","name": "4544200","status": "Pending","specification":"NA",},
-    { "category": "12000","name": "4544200","status": "Success","specification":"NA",},
-    { "category": "12000","name": "4544200","status": "Success","specification":"NA",},
-
+  int pageNo = 1;
+  int totalPages = 0;
+  int pageSize = 5;
+  bool hasMoreData = true;
+  List<dynamic> data = [
+    {
+      "name": "Event1",
+    },
+    {
+      "name": "Event2",
+    },
+    {
+      "name": "Event3",
+    },
+    {
+      "name": "Event4",
+    },
+    {
+      "name": "Event5",
+    },
   ];
+  final controller = ScrollController();
+  final controllerI = ScrollController();
+  bool isLoading = false;
 
   TextEditingController _editController = TextEditingController();
   final TextEditingController _controller = TextEditingController();
@@ -105,6 +126,8 @@ class _ProductServiceState extends State<ProductService> {
       ],
     ),
   };
+  Set<int> selectedIndices = {};
+
   @override
   void initState() {
     super.initState();
@@ -113,9 +136,26 @@ class _ProductServiceState extends State<ProductService> {
         _isTextEmpty = _controller.text.isEmpty;
       });
     });
+
     _editController = TextEditingController();
+    BlocProvider.of<AllRequesterBloc>(context)
+        .add(MasterServiceHandler("", pageNo, pageSize));
+    paginationCall();
   }
-  Set<int> selectedIndices = {};
+
+  void paginationCall() {
+    controllerI.addListener(() {
+      if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
+        if (pageNo < totalPages && !isLoading) {
+          if (hasMoreData) {
+            pageNo++;
+            BlocProvider.of<AllRequesterBloc>(context)
+                .add(MasterServiceHandler("", pageNo, pageSize));
+          }
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -128,15 +168,17 @@ class _ProductServiceState extends State<ProductService> {
       appBar: AppBar(
         centerTitle: true,
         automaticallyImplyLeading: false,
-        title: Text('Services', style: FTextStyle.HeadingTxtWhiteStyle,
-          textAlign: TextAlign.center,),
+        title: Text(
+          'Services',
+          style: FTextStyle.HeadingTxtWhiteStyle,
+          textAlign: TextAlign.center,
+        ),
         backgroundColor: AppColors.primaryColourDark,
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: SizedBox(
-              height:
-              (displayType == 'desktop' || displayType == 'tablet')
+              height: (displayType == 'desktop' || displayType == 'tablet')
                   ? 70
                   : 43,
               child: ElevatedButton(
@@ -155,25 +197,22 @@ class _ProductServiceState extends State<ProductService> {
 
                     // );
                   },
-
                   style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(26),
                       ),
-                      backgroundColor:Colors.white
-
-                  ),
-                  child:
-                  Text(
+                      backgroundColor: Colors.white),
+                  child: Text(
                     "Add +",
-                    style: FTextStyle.loginBtnStyle.copyWith(color:AppColors.primaryColourDark),
+                    style: FTextStyle.loginBtnStyle
+                        .copyWith(color: AppColors.primaryColourDark),
                   )
 
-                // isLoading? CircularProgressIndicator(color: Colors.white,):Text(
-                //   Constants.loginBtnTxt,
-                //   style: FTextStyle.loginBtnStyle,
-                // )
-              ),
+                  // isLoading? CircularProgressIndicator(color: Colors.white,):Text(
+                  //   Constants.loginBtnTxt,
+                  //   style: FTextStyle.loginBtnStyle,
+                  // )
+                  ),
             ),
           )
         ],
@@ -189,14 +228,67 @@ class _ProductServiceState extends State<ProductService> {
               color: Colors.white,
             ),
           ),
-        ),// You can set this to any color you prefer
+        ), // You can set this to any color you prefer
       ),
+      body: BlocListener<AllRequesterBloc, AllRequesterState>(
+  listener: (context, state) {
+    if (state is ServiceLoading) {
+      setState(() {
+        isLoading = true;
+      });
+    } else if (state is ServiceSuccess) {
+      setState(() {
+        var responseData = state.serviceList['list']['requisitions'];
+        print(">>>>>>>>>>>ALLDATA$responseData");
+        totalPages = responseData["total"];
 
-      body: Column(
+        if (pageNo == 1) {
+          data.clear();
+        }
+
+        data.addAll(responseData['data']);
+
+        setState(() {
+          isLoading = false;
+          if (pageNo == totalPages) {
+            hasMoreData = false;
+          }
+        });
+      });
+    } else if (state is ServiceCategoryFailure) {
+      setState(() {
+        isLoading = false;
+      });
+      print("error>> ${state.serviceCategoryFailure}");
+    }
+    //Delete Services
+    else if (state is DeleteServiceLoading) {
+    DeletePopupManager.playLoader();
+    } else if (state is DeleteServiceSuccess) {
+    DeletePopupManager.stopLoader();
+
+    var deleteMessage = state.deleteEventServiceList['message'];
+
+    BlocProvider.of<AllRequesterBloc>(context)
+        .add(AddCartDetailHandler("", pageNo, pageSize));
+    ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+    content: Text(deleteMessage),
+    backgroundColor: AppColors.primaryColour,
+    ),
+    );
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+    Navigator.pop(context);
+    });
+    }
+    // TODO: implement listener
+  },
+  child: Column(
         children: [
-
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05, vertical: 10),
+            padding: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.05, vertical: 10),
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -217,23 +309,29 @@ class _ProductServiceState extends State<ProductService> {
                   hintStyle: FTextStyle.formhintTxtStyle,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
+                    borderSide: const BorderSide(
+                        color: AppColors.primaryColourDark, width: 1.0),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
+                    borderSide: const BorderSide(
+                        color: AppColors.primaryColourDark, width: 1.0),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
+                    borderSide: const BorderSide(
+                        color: AppColors.primaryColourDark, width: 1.0),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 13.0, horizontal: 18.0),
                   suffixIcon: _isTextEmpty
-                      ? const Icon(Icons.search, color: AppColors.primaryColourDark)
+                      ? const Icon(Icons.search,
+                          color: AppColors.primaryColourDark)
                       : IconButton(
-                    icon: const Icon(Icons.clear, color: AppColors.primaryColourDark),
-                    onPressed: _clearText,
-                  ),
+                          icon: const Icon(Icons.clear,
+                              color: AppColors.primaryColourDark),
+                          onPressed: _clearText,
+                        ),
                   fillColor: Colors.grey[100],
                   filled: true,
                 ),
@@ -245,119 +343,243 @@ class _ProductServiceState extends State<ProductService> {
               ),
             ),
           ),
-
           Expanded(
-            child: ListView.builder(
-              itemCount: listData.length,
-              itemBuilder: (BuildContext context, int index) {
-                final item = listData[index];
-                return GestureDetector(
-                    onTap: (){
-
-
-
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
-                      child: Row(
-                        children: [
-
-                          Expanded(
-                            child: Container(
-                              margin: const EdgeInsets.all(8),
-                              padding: const EdgeInsets.all(7),
-                              decoration: BoxDecoration(
-                                color: index % 2 == 0 ? Colors.white : Colors.white!,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark!,
-                                      spreadRadius:4,
-                                      blurRadius: 0.5,
-                                      offset: const Offset(0,1)
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                children: [
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+            child: isLoading && data.isEmpty
+                ? Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: ListView.builder(
+                      itemCount: 10, // Number of shimmer placeholders
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.03, vertical: 5),
+                          child: Container(
+                            margin: const EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(7),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  spreadRadius: 2,
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Row(
-                                        children: [
-                                          const Text("Sr. No: ", style: FTextStyle.listTitle),
-                                          Text("${index+1}", style: FTextStyle.listTitleSub),
-                                        ],
+                                      Container(
+                                        height: 10,
+                                        color: Colors.grey,
                                       ),
-
-                                      Row(
-                                        children: [
-                                          const Text("Category: ", style: FTextStyle.listTitle),
-                                          Expanded(child: Text("${item["category"]}", style: FTextStyle.listTitleSub)),
-                                        ],
+                                      const SizedBox(height: 5),
+                                      Container(
+                                        height: 10,
+                                        color: Colors.grey,
                                       ),
-
-                                      Row(
-                                        children: [
-                                          const Text("Name: ", style: FTextStyle.listTitle),
-                                          Text("${item["name"]}", style: FTextStyle.listTitleSub),
-                                        ],
+                                      const SizedBox(height: 5),
+                                      Container(
+                                        height: 10,
+                                        color: Colors.grey,
                                       ),
-                                      Row(
-                                        children: [
-                                          const Text("Specification: ", style: FTextStyle.listTitle),
-                                          Text("${item["specification"]}", style: FTextStyle.listTitleSub),
-                                        ],
-                                      ),
-
-                                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-
-                                        children: [
-                                          Row(
-                                            children: [
-                                              const Text("Status: ", style: FTextStyle.listTitle),
-                                              Text("${item["status"]}", style:item['status']=='Pending' ?FTextStyle.listTitleSub.copyWith(color: Colors.red):FTextStyle.listTitleSub.copyWith(color: Colors.green)),
-                                            ],
-                                          ),
-                                          Row(
-
-                                            children: [
-                                              IconButton(
-                                                icon: const Icon(Icons.edit, color: Colors.black),
-                                                onPressed: () {
-                                                  _showCategoryDialog(isEditing: true, index: index);
-                                                },
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(Icons.delete, color: Colors.red),
-                                                onPressed: () => _showDeleteDialog(index),
-                                              ),
-                                            ],
-                                          ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),                                      ],
-                                      ),
-                                      // const SizedBox(height: 5),
-
-                                      // const SizedBox(height: 5),
                                     ],
-                                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-
-                                ],
-                              ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
+                        );
+                      },
+                    ),
+                  )
+                : data.isEmpty
+                    ? Center(
+                        child: isLoading
+                            ? const CircularProgressIndicator() // Show circular progress indicator
+                            : const Text("No more data .",
+                                style: FTextStyle.listTitle),
+                      )
+                    : ListView.builder(
+                        itemCount: data.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final item = data[index];
+                          return GestureDetector(
+                              onTap: () {},
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: screenWidth * 0.03,
+                                    vertical: 5),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        margin: const EdgeInsets.all(2),
+                                        padding: const EdgeInsets.all(7),
+                                        decoration: BoxDecoration(
+                                          color: index % 2 == 0
+                                              ? Colors.white
+                                              : Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          boxShadow: const [
+                                            BoxShadow(
+                                              color:
+                                                  AppColors.primaryColourDark,
+                                              spreadRadius: 1.5,
+                                              blurRadius: 0.4,
+                                              offset: Offset(0, 0.9),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    const Text("Sr. No: ",
+                                                        style: FTextStyle
+                                                            .listTitle),
+                                                    Text("${index + 1}",
+                                                        style: FTextStyle
+                                                            .listTitleSub),
+                                                  ],
+                                                ),
+
+                                                Row(
+                                                  children: [
+                                                    const Text("Category: ",
+                                                        style: FTextStyle
+                                                            .listTitle),
+                                                    Expanded(
+                                                        child: Text(
+                                                            "${item["category"]}",
+                                                            style: FTextStyle
+                                                                .listTitleSub)),
+                                                  ],
+                                                ),
+
+                                                Row(
+                                                  children: [
+                                                    const Text("Name: ",
+                                                        style: FTextStyle
+                                                            .listTitle),
+                                                    Text("${item["name"]}",
+                                                        style: FTextStyle
+                                                            .listTitleSub),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    const Text(
+                                                        "Specification: ",
+                                                        style: FTextStyle
+                                                            .listTitle),
+                                                    Text(
+                                                        "${item["specification"]}",
+                                                        style: FTextStyle
+                                                            .listTitleSub),
+                                                  ],
+                                                ),
+
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        const Text("Status: ",
+                                                            style: FTextStyle
+                                                                .listTitle),
+                                                        Text(
+                                                            "${item["status"]}",
+                                                            style: item['status'] ==
+                                                                    'Pending'
+                                                                ? FTextStyle
+                                                                    .listTitleSub
+                                                                    .copyWith(
+                                                                        color: Colors
+                                                                            .red)
+                                                                : FTextStyle
+                                                                    .listTitleSub
+                                                                    .copyWith(
+                                                                        color: Colors
+                                                                            .green)),
+                                                      ],
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        IconButton(
+                                                          icon: const Icon(
+                                                              Icons.edit,
+                                                              color:
+                                                                  Colors.black),
+                                                          onPressed: () {
+                                                            _showCategoryDialog(
+                                                                isEditing: true,
+                                                                index: index);
+                                                          },
+                                                        ),
+                                                        IconButton(
+                                                          icon: const Icon(
+                                                              Icons.delete,
+                                                              color:
+                                                                  Colors.red),
+                                                          onPressed: () =>{
+                                                            CommonPopups
+                                                                .showDeleteCustomPopup(
+                                                              context,
+                                                              "Are you sure you want to delete?",
+                                                                  () {
+                                                                BlocProvider.of<
+                                                                    AllRequesterBloc>(
+                                                                    context)
+                                                                    .add(DeleteHandlers(
+                                                                    data[index][
+                                                                    'id']));
+                                                              },
+                                                            )
+                                                          },
+                                                        ),
+                                                      ],
+                                                    ).animateOnPageLoad(
+                                                        animationsMap[
+                                                            'imageOnPageLoadAnimation2']!),
+                                                  ],
+                                                ),
+                                                // const SizedBox(height: 5),
+
+                                                // const SizedBox(height: 5),
+                                              ],
+                                            ).animateOnPageLoad(animationsMap[
+                                                'imageOnPageLoadAnimation2']!),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ));
+                        },
                       ),
-                    )
-
-                );
-              },
-            ),
           ),
-
           const SizedBox(height: 20),
         ],
       ),
+),
     );
   }
 
@@ -368,19 +590,16 @@ class _ProductServiceState extends State<ProductService> {
     });
   }
 
-
-
-
   void _showCategoryDialog({bool isEditing = false, int? index}) {
     final _formKey = GlobalKey<FormState>();
     final TextEditingController _editController = TextEditingController(
-      text: isEditing ? listData[index!]["name"] : '',
+      text: isEditing ? data[index!]["name"] : '',
     );
     final TextEditingController _descriptionController = TextEditingController(
-      text: isEditing ? listData[index!]["specification"] : '',
+      text: isEditing ? data[index!]["specification"] : '',
     );
     final TextEditingController _categoryController = TextEditingController(
-      text: isEditing ? listData[index!]["category"] : '',
+      text: isEditing ? data[index!]["category"] : '',
     );
     bool isButtonEnabled = isEditing;
 
@@ -406,7 +625,9 @@ class _ProductServiceState extends State<ProductService> {
                 borderRadius: BorderRadius.circular(32.0),
               ),
               title: Text(
-                isEditing ? "Edit Product / Service" : "Create Product / Service",
+                isEditing
+                    ? "Edit Product / Service"
+                    : "Create Product / Service",
                 style: FTextStyle.preHeading16BoldStyle,
               ),
               content: Container(
@@ -428,27 +649,31 @@ class _ProductServiceState extends State<ProductService> {
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(28.0),
-                              border: Border.all(color: AppColors.primaryColourDark),
+                              border: Border.all(
+                                  color: AppColors.primaryColourDark),
                               color: Colors.grey[100],
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
-
                                 value: selectedItem,
-                                hint: const Text("Select Category", style: FTextStyle.formhintTxtStyle),
+                                hint: const Text("Select Category",
+                                    style: FTextStyle.formhintTxtStyle),
                                 onChanged: (String? newValue) {
                                   setState(() {
                                     selectedItem = newValue;
-                                    isButtonEnabled = _categoryController.text.isNotEmpty && selectedItem != null;
+                                    isButtonEnabled =
+                                        _categoryController.text.isNotEmpty &&
+                                            selectedItem != null;
                                   });
                                 },
-                                items: list.map<DropdownMenuItem<String>>((String value) {
+                                items: list.map<DropdownMenuItem<String>>(
+                                    (String value) {
                                   return DropdownMenuItem<String>(
                                     value: value,
-
                                     child: Text(value),
                                   );
                                 }).toList(),
@@ -470,17 +695,24 @@ class _ProductServiceState extends State<ProductService> {
                               hintStyle: FTextStyle.formhintTxtStyle,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(23.0),
-                                borderSide: BorderSide(color: AppColors.primaryColourDark, width: 1.0),
+                                borderSide: const BorderSide(
+                                    color: AppColors.primaryColourDark,
+                                    width: 1.0),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(23.0),
-                                borderSide: BorderSide(color: AppColors.primaryColourDark, width: 1.0),
+                                borderSide: const BorderSide(
+                                    color: AppColors.primaryColourDark,
+                                    width: 1.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(23.0),
-                                borderSide: BorderSide(color: AppColors.primaryColourDark, width: 1.0),
+                                borderSide: const BorderSide(
+                                    color: AppColors.primaryColourDark,
+                                    width: 1.0),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 13.0, horizontal: 18.0),
                               fillColor: Colors.grey[100],
                               filled: true,
                             ),
@@ -503,22 +735,28 @@ class _ProductServiceState extends State<ProductService> {
                             maxLines: 3,
                             controller: _descriptionController,
                             decoration: InputDecoration(
-
                               hintText: "Enter description",
                               hintStyle: FTextStyle.formhintTxtStyle,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(23.0),
-                                borderSide: BorderSide(color: AppColors.primaryColourDark, width: 1.0),
+                                borderSide: const BorderSide(
+                                    color: AppColors.primaryColourDark,
+                                    width: 1.0),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(23.0),
-                                borderSide: BorderSide(color: AppColors.primaryColourDark, width: 1.0),
+                                borderSide: const BorderSide(
+                                    color: AppColors.primaryColourDark,
+                                    width: 1.0),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(23.0),
-                                borderSide: BorderSide(color: AppColors.primaryColourDark, width: 1.0),
+                                borderSide: const BorderSide(
+                                    color: AppColors.primaryColourDark,
+                                    width: 1.0),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 13.0, horizontal: 18.0),
                               fillColor: Colors.grey[100],
                               filled: true,
                             ),
@@ -543,7 +781,8 @@ class _ProductServiceState extends State<ProductService> {
                     borderRadius: BorderRadius.circular(25.0),
                   ),
                   child: TextButton(
-                    child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+                    child: const Text("Cancel",
+                        style: TextStyle(color: Colors.black)),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -554,44 +793,48 @@ class _ProductServiceState extends State<ProductService> {
                 const SizedBox(width: 10),
                 Container(
                   decoration: BoxDecoration(
-                    color: isButtonEnabled ? AppColors.primaryColourDark : AppColors.formFieldBorderColour,
+                    color: isButtonEnabled
+                        ? AppColors.primaryColourDark
+                        : AppColors.formFieldBorderColour,
                     borderRadius: BorderRadius.circular(25.0),
                   ),
                   child: TextButton(
+                    onPressed: isButtonEnabled
+                        ? () {
+                            if (_formKey.currentState?.validate() ?? false) {
+                              // Handle form submission
+                              setState(() {
+                                if (isEditing) {
+                                  data[index!] = {
+                                    "name": _editController.text,
+                                    "category": selectedItem,
+                                    "specification": _descriptionController.text
+                                    // Add other fields as needed
+                                  };
+                                } else {
+                                  data.add({
+                                    "name": _editController.text,
+                                    "category": selectedItem,
+                                    "specification": _descriptionController.text
+                                    // Add other fields as needed
+                                  });
+                                }
+                              });
+                              Navigator.of(context).pop();
+                            }
+                          }
+                        : null,
                     child: Text(
                       isEditing ? "Save" : "Add",
-                      style: TextStyle(color: Colors.white),
+                      style: const TextStyle(color: Colors.white),
                     ),
-                    onPressed: isButtonEnabled ? () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        // Handle form submission
-                        setState(() {
-                          if (isEditing) {
-                            listData[index!] = {
-                              "name": _editController.text,
-                              "category": selectedItem,
-                              "specification":_descriptionController.text
-                              // Add other fields as needed
-                            };
-                          } else {
-                            listData.add({
-                              "name": _editController.text,
-                              "category": selectedItem,
-                              "specification":_descriptionController.text
-                              // Add other fields as needed
-                            });
-                          }
-                        });
-                        Navigator.of(context).pop();
-                      }
-                    } : null,
                   ).animateOnPageLoad(
-                    animationsMap['imageOnPageLoadAnimation2']! ,
+                    animationsMap['imageOnPageLoadAnimation2']!,
                   ),
                 ),
               ],
             ).animateOnPageLoad(
-              animationsMap['columnOnPageLoadAnimation1']! ,
+              animationsMap['columnOnPageLoadAnimation1']!,
             );
           },
         );
@@ -605,7 +848,8 @@ class _ProductServiceState extends State<ProductService> {
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          content: Text("Are you sure you want to delete?", style: FTextStyle.preHeadingStyle),
+          content: Text("Are you sure you want to delete?",
+              style: FTextStyle.preHeadingStyle),
           actions: [
             Container(
               decoration: BoxDecoration(
@@ -613,7 +857,8 @@ class _ProductServiceState extends State<ProductService> {
                 borderRadius: BorderRadius.circular(25.0),
               ),
               child: TextButton(
-                child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+                child:
+                    const Text("Cancel", style: TextStyle(color: Colors.black)),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -621,14 +866,16 @@ class _ProductServiceState extends State<ProductService> {
             ),
             Container(
               decoration: BoxDecoration(
-                color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark!,
+                color: index % 2 == 0
+                    ? AppColors.yellow
+                    : AppColors.primaryColourDark!,
                 borderRadius: BorderRadius.circular(25.0),
               ),
               child: TextButton(
                 child: const Text("OK", style: TextStyle(color: Colors.white)),
                 onPressed: () {
                   setState(() {
-                    listData.removeAt(index);
+                    data.removeAt(index);
                   });
                   Navigator.of(context).pop();
                 },
@@ -640,4 +887,3 @@ class _ProductServiceState extends State<ProductService> {
     );
   }
 }
-

@@ -253,8 +253,8 @@ class _DashboardState extends State<Dashboard> {
             ),
           ),
           body:  Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0,vertical: 10),
-            child:  Column(
+            padding: const EdgeInsets.symmetric(horizontal: 18.0,vertical: 10),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -268,13 +268,13 @@ class _DashboardState extends State<Dashboard> {
                       color: Colors.white, // Background color
                       borderRadius: BorderRadius.circular(12), // Rounded corners
                       border: Border.all(
-                          color: AppColors.primaryColourDark, // Border color
+                          color:  Colors.yellow.shade700, // Border color
                           width: 1 // Border width
                       ),
                       boxShadow: [
                         BoxShadow(
                           color:
-                          AppColors.primaryColourDark.withOpacity(0.5), // Shadow color
+                          Colors.yellow.shade700, // Shadow color
                           spreadRadius: 0.5, // Spread radius
                           blurRadius: 5, // Blur radius
                           // offset: const Offset(0, 3), // Offset from the container
@@ -287,11 +287,13 @@ class _DashboardState extends State<Dashboard> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Container(
+                          SizedBox(
                             width: MediaQuery.of(context).size.width/1.9,
                             child: Text(
-                              'Welcome\n ${PrefUtils.getUserName()}'
-                                  '\n lets plan your day',maxLines: 3,overflow: TextOverflow.ellipsis,
+                              'Welcome\n'
+                                  '${PrefUtils.getUserName()}'
+                                  '\nlets plan your day',overflow: TextOverflow.ellipsis,
+                              maxLines: 3,
                               style: FTextStyle.preHeadingStyle.copyWith(fontWeight: FontWeight.w700),
                             ).animateOnPageLoad(
                                 animationsMap['imageOnPageLoadAnimation2']!),
@@ -323,7 +325,7 @@ class _DashboardState extends State<Dashboard> {
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 10, top: 20),
                     child: GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2, // Number of columns
                         childAspectRatio: 1.8, // Aspect ratio of each grid item
                         crossAxisSpacing: 13, // Space between columns
@@ -340,12 +342,12 @@ class _DashboardState extends State<Dashboard> {
 
                             color: Colors.white,
                             border: Border.all(
-                                color: isEvenIndex ? AppColors.primaryColourDark : Colors.yellow.shade700, // Border color
+                                color:  AppColors.primaryColourDark , // Border color
                                 width: 1 // Border width
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: isEvenIndex ? AppColors.primaryColourDark : Colors.yellow.shade700,
+                                color: AppColors.primaryColourDark,
                                 spreadRadius: 1,
                                 blurRadius: 3,
                                 offset: const Offset(0, 0.5),
@@ -361,7 +363,7 @@ class _DashboardState extends State<Dashboard> {
                                   item['total'], // Title from JSON
                                   style:FTextStyle.authlogin_signupTxtStyle.copyWith(fontSize: 20)
                               ),
-                              SizedBox(height: 20,),
+                              const SizedBox(height: 20,),
                               Text(
                                 item['title'], // Title from JSON
                                 style:FTextStyle.authlogin_signupTxtStyle,
@@ -683,19 +685,28 @@ class _DashboardState extends State<Dashboard> {
       case 'Product/Category':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ProductCategory()),
+          MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: ProductCategory(),
+)),
         );
         break;
       case 'Product/Services':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ProductService()),
+          MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: ProductService(),
+)),
         );
         break;
       case 'Events':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const EventScreen()),
+          MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: EventScreen(),
+)),
         );
         break;
       default:

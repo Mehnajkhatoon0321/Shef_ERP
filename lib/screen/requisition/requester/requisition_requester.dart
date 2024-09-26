@@ -354,7 +354,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                                         borderRadius: BorderRadius.circular(10),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
+                                            color:  AppColors.primaryColourDark,
                                             spreadRadius: 1.5,
                                             blurRadius: 0.4,
                                             offset: const Offset(0, 0.9),

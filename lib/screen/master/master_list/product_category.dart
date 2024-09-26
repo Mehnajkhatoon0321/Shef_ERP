@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
+import 'package:shef_erp/utils/DeletePopupManager.dart';
 
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
+import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shimmer/shimmer.dart';
 class ProductCategory extends StatefulWidget {
   const ProductCategory({super.key});
 
@@ -13,17 +18,23 @@ class ProductCategory extends StatefulWidget {
 }
 
 class _ProductCategoryState extends State<ProductCategory> {
-  List<Map<String, dynamic>> listData = [
-    { "name": "Mahi", },
-    { "name": "Alias", },
-    { "name": "Alias", },
-    { "name": "Alias", },
-    { "name": "Alias", },
-    { "name": "Alias", },
-    { "name": "Alias", },
-    // ... additional data
-  ];
 
+
+
+  int pageNo = 1;
+  int totalPages = 0;
+  int pageSize = 5;
+  bool hasMoreData = true;
+  List<dynamic> data = [
+    { "name": "Event1", },
+    { "name": "Event2", },
+    { "name": "Event3", },
+    { "name": "Event4", },
+    { "name": "Event5", },
+  ];
+  final controller = ScrollController();
+  final controllerI = ScrollController();
+  bool isLoading = false;
   TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
 
@@ -114,14 +125,24 @@ class _ProductCategoryState extends State<ProductCategory> {
         _isTextEmpty = _controller.text.isEmpty;
       });
     });
+    BlocProvider.of<AllRequesterBloc>(context)
+        .add(MasterCategoryHandler("", pageNo, pageSize));
+    paginationCall();
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  void paginationCall() {
+    controllerI.addListener(() {
+      if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
+        if (pageNo < totalPages && !isLoading) {
+          if (hasMoreData) {
+            pageNo++;
+            BlocProvider.of<AllRequesterBloc>(context)
+                .add(MasterCategoryHandler("", pageNo, pageSize));
+          }
+        }
+      }
+    });
   }
-
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -130,7 +151,7 @@ class _ProductCategoryState extends State<ProductCategory> {
     var displayType = valueType.toString().split('.').last;
 
     return Scaffold(
-      backgroundColor: AppColors.dividerColor,
+      backgroundColor: AppColors.formFieldBorderColour,
       appBar: AppBar(
         centerTitle: true,
         automaticallyImplyLeading: false,
@@ -173,7 +194,62 @@ class _ProductCategoryState extends State<ProductCategory> {
           ),
         ),
       ),
-      body: Column(
+      body: BlocListener<AllRequesterBloc, AllRequesterState>(
+  listener: (context, state) {
+
+    if (state is EventLoading) {
+      setState(() {
+        isLoading = true;
+      });
+    } else if (state is EventSuccess) {
+      setState(() {
+        var responseData = state.eventList['list']['requisitions'];
+        print(">>>>>>>>>>>ALLDATA$responseData");
+        totalPages = responseData["total"];
+
+        if (pageNo == 1) {
+          data.clear();
+        }
+
+        data.addAll(responseData['data']);
+
+        setState(() {
+          isLoading = false;
+          if (pageNo == totalPages) {
+            hasMoreData = false;
+          }
+        });
+      });
+    } else if (state is EventFailure) {
+      setState(() {
+        isLoading = false;
+      });
+      print("error>> ${state.eventFailure}");
+    }
+    else if (state is DeleteServiceCategoryLoading) {
+      DeletePopupManager.playLoader();
+    } else if (state is DeleteServiceCategorySuccess) {
+      DeletePopupManager.stopLoader();
+
+      var deleteMessage = state.deleteEventCategoryList['message'];
+
+      BlocProvider.of<AllRequesterBloc>(context)
+          .add(AddCartDetailHandler("", pageNo, pageSize));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(deleteMessage),
+          backgroundColor: AppColors.primaryColour,
+        ),
+      );
+
+      Future.delayed(const Duration(milliseconds: 500), () {
+        Navigator.pop(context);
+      });
+    }
+
+    // TODO: implement listener
+  },
+  child: Column(
         children: [
           Padding(
             padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05, vertical: 10),
@@ -226,12 +302,73 @@ class _ProductCategoryState extends State<ProductCategory> {
             ),
           ),
           Expanded(
-            child: listData.isEmpty
-                ? Center(child: Text("No categories available.", style: FTextStyle.listTitleSub))
+            child:isLoading && data.isEmpty
+                ? Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: ListView.builder(
+                itemCount: 10, // Number of shimmer placeholders
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.03, vertical: 5),
+                    child: Container(
+                      margin: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            spreadRadius: 2,
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  height: 10,
+                                  color: Colors.grey,
+                                ),
+                                const SizedBox(height: 5),
+                                Container(
+                                  height: 10,
+                                  color: Colors.grey,
+                                ),
+                                const SizedBox(height: 5),
+                                Container(
+                                  height: 10,
+                                  color: Colors.grey,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            )
+                : data.isEmpty
+                ? Center(
+              child: isLoading
+                  ? const CircularProgressIndicator() // Show circular progress indicator
+                  : const Text("No more data .",
+                  style: FTextStyle.listTitle),
+            )
                 : ListView.builder(
-              itemCount: listData.length,
+              itemCount: data.length,
               itemBuilder: (BuildContext context, int index) {
-                final item = listData[index];
+                final item = data[index];
                 return GestureDetector(
                   onTap: () {
                     // Handle tap event if needed
@@ -242,17 +379,18 @@ class _ProductCategoryState extends State<ProductCategory> {
                       children: [
                         Expanded(
                           child: Container(
-                            margin: const EdgeInsets.all(8),
+                            margin: const EdgeInsets.all(2),
                             padding: const EdgeInsets.all(7),
                             decoration: BoxDecoration(
-                              color: index % 2 == 0 ? Colors.white : Colors.white!,
+                              color: index % 2 == 0 ? Colors.white : Colors.white,
                               borderRadius: BorderRadius.circular(10),
                               boxShadow: [
                                 BoxShadow(
-                                  color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark!,
-                                  spreadRadius: 4,
-                                  blurRadius: 0.5,
-                                  offset: const Offset(0, 1),
+                                  color: AppColors.primaryColourDark,
+
+                                  spreadRadius: 1.5,
+                                  blurRadius: 0.4,
+                                  offset: const Offset(0, 0.9),
                                 ),
                               ],
                             ),
@@ -285,7 +423,21 @@ class _ProductCategoryState extends State<ProductCategory> {
                                             ),
                                             IconButton(
                                               icon: const Icon(Icons.delete, color: Colors.red),
-                                              onPressed: () => _showDeleteDialog(index),
+                                              onPressed: () => {
+                                                CommonPopups
+                                                    .showDeleteCustomPopup(
+                                                  context,
+                                                  "Are you sure you want to delete?",
+                                                      () {
+                                                    BlocProvider.of<
+                                                        AllRequesterBloc>(
+                                                        context)
+                                                        .add(DeleteHandlers(
+                                                        data[index][
+                                                        'id']));
+                                                  },
+                                                )
+                                              },
                                             ),
                                           ],
                                         ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
@@ -307,6 +459,7 @@ class _ProductCategoryState extends State<ProductCategory> {
           const SizedBox(height: 20),
         ],
       ),
+),
     );
   }
 
@@ -346,7 +499,7 @@ class _ProductCategoryState extends State<ProductCategory> {
                 child: const Text("OK", style: TextStyle(color: Colors.white)),
                 onPressed: () {
                   setState(() {
-                    listData.removeAt(index);
+                    data.removeAt(index);
                   });
                   Navigator.of(context).pop();
                 },
@@ -360,7 +513,7 @@ class _ProductCategoryState extends State<ProductCategory> {
 
   void _showCategoryDialog({bool isEditing = false, int? index}) {
     final _formKey = GlobalKey<FormState>();
-    final _editController = TextEditingController(text: isEditing ? listData[index!]["name"] : '');
+    final _editController = TextEditingController(text: isEditing ? data[index!]["name"] : '');
     bool isButtonEnabled = isEditing ? true : false;
 
     showDialog(
@@ -456,9 +609,9 @@ class _ProductCategoryState extends State<ProductCategory> {
                       if (_formKey.currentState?.validate() ?? false) {
                         setState(() {
                           if (isEditing) {
-                            listData[index!] = {"name": _editController.text};
+                            data[index!] = {"name": _editController.text};
                           } else {
-                            listData.add({"name": _editController.text});
+                            data.add({"name": _editController.text});
                           }
                         });
                         Navigator.of(context).pop();

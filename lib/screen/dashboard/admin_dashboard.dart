@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,7 +36,7 @@ class AdminDashboard extends StatefulWidget {
 
 class _AdminDashboardState extends State<AdminDashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  List<dynamic> _items = [
+  final List<dynamic> _items = [
     {"title": "All Requisitions","total": "21", "image": "https://via.placeholder.com/150"},
     {"title": "Today,s Requisitions","total": "12", "image": "https://via.placeholder.com/150"},
     {"title": "Pending Requisitions","total": "33", "image": "https://via.placeholder.com/150"},
@@ -50,10 +51,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
       'icon': Icons.padding_rounded,
       "title": 'Product/Services',
     },
+
       {
         'icon': Icons.category_rounded,
         "title": 'Product/Category',
       },
+
       {
         'icon': Icons.event,
         "title": 'Events',
@@ -165,11 +168,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
   Widget build(BuildContext context) {
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
     var displayType = valueType.toString().split('.').last;
-    print('displayType>> $displayType');
-    String? userRole;
+
+
     return WillPopScope(
         onWillPop: () async {
-          bool shouldExit=(await _showExitConfirmation(context)) as bool;
+          bool shouldExit = (await _showExitConfirmation(context));
           return shouldExit;
 
 
@@ -177,7 +180,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
 
       child: MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+        data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
 
         child: Scaffold(
           key: _scaffoldKey,
@@ -262,13 +265,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       color: Colors.white, // Background color
                       borderRadius: BorderRadius.circular(12), // Rounded corners
                       border: Border.all(
-                          color: AppColors.primaryColourDark, // Border color
+                          color:  Colors.yellow.shade700, // Border color
                           width: 1 // Border width
                       ),
                       boxShadow: [
                         BoxShadow(
                           color:
-                          AppColors.primaryColourDark.withOpacity(0.5), // Shadow color
+                          Colors.yellow.shade700, // Shadow color
                           spreadRadius: 0.5, // Spread radius
                           blurRadius: 5, // Blur radius
                           // offset: const Offset(0, 3), // Offset from the container
@@ -336,15 +339,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
                             color: Colors.white,
                             border: Border.all(
-                                color: isEvenIndex ? AppColors.primaryColourDark : Colors.yellow.shade700, // Border color
+                                color:  AppColors.primaryColourDark , // Border color
                                 width: 1 // Border width
                             ),
-                            boxShadow: [
+                            boxShadow: const [
                               BoxShadow(
-                                color: isEvenIndex ? AppColors.primaryColourDark : Colors.yellow.shade700,
+                                color: AppColors.primaryColourDark,
                                 spreadRadius: 1,
                                 blurRadius: 3,
-                                offset: const Offset(0, 0.5),
+                                offset: Offset(0, 0.5),
                               ),
                             ],
                             borderRadius: BorderRadius.circular(12),
@@ -532,7 +535,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
       // Check if the item is valid and has the necessary keys
       if (item == null || !item.containsKey('subtitle')) {
-        print('Invalid item: $item'); // Log invalid items
+        if (kDebugMode) {
+          print('Invalid item: $item');
+        } // Log invalid items
         continue; // Skip this item if it's not valid
       }
 
@@ -651,7 +656,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       case 'Requisition':
         Navigator.push(context, MaterialPageRoute(builder: (context) =>  BlocProvider(
   create: (context) => AllRequesterBloc(),
-  child: AdminRequisition(),
+  child: const AdminRequisition(),
 )));
         break;
       case 'Reports':
@@ -680,19 +685,28 @@ class _AdminDashboardState extends State<AdminDashboard> {
       case 'Product/Category':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ProductCategory()),
+          MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: const ProductCategory(),
+)),
         );
         break;
       case 'Product/Services':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const ProductService()),
+          MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: const ProductService(),
+)),
         );
         break;
       case 'Events':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => const EventScreen()),
+          MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: const EventScreen(),
+)),
         );
         break;
       default:

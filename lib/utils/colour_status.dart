@@ -18,7 +18,7 @@ class DeliveryStatus extends StatelessWidget {
         deliveryStatusColor = Colors.black;
         break;
       case '1':
-        deliveryStatusText = 'Pending';
+        deliveryStatusText = 'Pending Approval';
         deliveryStatusColor = Colors.red;
         break;
       case '2':
@@ -44,7 +44,7 @@ class DeliveryStatus extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Text(
             deliveryStatusText,
-            style: FTextStyle.listTitle.copyWith( color: deliveryStatusColor)// Replace with FTextStyle.listTitleSubBig.copyWith if needed
+            style: FTextStyle.listTitle.copyWith( color: deliveryStatusColor,fontSize: 15)// Replace with FTextStyle.listTitleSubBig.copyWith if needed
           ),
         ),
       ],

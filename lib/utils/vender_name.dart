@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 
-import 'package:flutter/material.dart';
+
 
 class VendorStatus extends StatelessWidget {
   final String role;
@@ -9,11 +9,11 @@ class VendorStatus extends StatelessWidget {
   final String companyName;
 
   const VendorStatus({
-    Key? key,
+    super.key,
     required this.role,
     required this.deliveryStatus,
     required this.companyName,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class VendorStatus extends StatelessWidget {
     switch (deliveryStatus) {
       case 0:
         statusText = 'NA';
-        statusColor = const Color(0xFF051FF5); // NA color
+        statusColor = Colors.black; // NA color
         break;
       case 1:
       case 8:
@@ -46,12 +46,12 @@ class VendorStatus extends StatelessWidget {
 
     return Row(
       children: [
-        const Text("Vendor Name: ", style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text("Vendor Name:", style: TextStyle(fontWeight: FontWeight.bold)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Text(
             statusText,
-            style: FTextStyle.listTitle.copyWith( color: statusColor),
+            style: FTextStyle.listTitle.copyWith( color: statusColor,fontSize: 15),
           ),
         ),
       ],

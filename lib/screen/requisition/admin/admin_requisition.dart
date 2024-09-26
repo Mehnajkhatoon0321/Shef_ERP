@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -6,7 +9,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 
 import 'package:shef_erp/screen/requisition/unit_head/add_requisition.dart';
-import 'package:shef_erp/screen/requisition/unit_head/edit_requisition.dart';
 import 'package:shef_erp/screen/requisition/unit_head/view_details.dart';
 import 'package:shef_erp/utils/DeletePopupManager.dart';
 import 'package:shef_erp/utils/asign_vector.dart';
@@ -16,12 +18,13 @@ import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shef_erp/utils/form_field_style.dart';
 import 'package:shef_erp/utils/pref_utils.dart';
 import 'package:shef_erp/utils/unit_head_status.dart';
+import 'package:shef_erp/utils/validator_utils.dart';
 import 'package:shef_erp/utils/vender_name.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../utils/validator_utils.dart';
 class AdminRequisition extends StatefulWidget {
   const AdminRequisition({super.key});
 
@@ -57,6 +60,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
   final controller = ScrollController();
   final controllerI = ScrollController();
   bool isLoading = false;
+  bool isLoadingApprove = false;
   List<dynamic> list = [];
   List<dynamic> billing = [];
   List<dynamic> listBilling = ['Demo', 'data', 'items'];
@@ -172,7 +176,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
     var displayType = valueType.toString().split('.').last;
     return Scaffold(
@@ -317,9 +321,28 @@ class _AdminRequisitionState extends State<AdminRequisition> {
             Future.delayed(const Duration(milliseconds: 500), () {
               Navigator.pop(context);
             });
+          }else  if (state is RejectLoading) {
+            setState(() {
+              isLoadingApprove = true;
+            });
+          } else if (state is RejectSuccess) {
+            isLoadingApprove=false;
+            setState(() {
+              var responseData = state.rejectList;
+              Navigator.of(context).pop();
+
+            });
+
+            print("RejectSuccess>>>");
+          } else if (state is RejectFailure) {
+            setState(() {
+              isLoading = false;
+            });
+            print("error>> ${state.rejectFailure}");
           }
+
         },
-  child: Column(
+         child: Column(
         children: [
 
           Padding(
@@ -376,7 +399,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
             padding: const EdgeInsets.all(8.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
-mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
 
 
@@ -403,10 +426,7 @@ mainAxisAlignment: MainAxisAlignment.start,
                         style: FTextStyle.loginBtnStyle,
                       )
 
-                    // isLoading? CircularProgressIndicator(color: Colors.white,):Text(
-                    //   Constants.loginBtnTxt,
-                    //   style: FTextStyle.loginBtnStyle,
-                    // )
+
                   ),
                 ),
                 const SizedBox(width: 10,),
@@ -509,10 +529,10 @@ mainAxisAlignment: MainAxisAlignment.start,
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => ViewDetails(
-                        requisition: item["req_no"],
-                        poNumber: item["po_no"],
-                        requestDate: item["req_date"],
-                        unit: item["unit"],
+                        requisition: item["req_no"] ?? "N/A",
+                        poNumber: item["po_no"] ?? "N/A",
+                        requestDate: item["req_date"] ?? "N/A",
+                        unit: item["unit"] ?? "N/A",
                         product: item["product_name"] ?? "N/A",
                         specification: item["specification"] ?? "N/A",
                         quantity: item["quantity"].toString() ?? "N/A",
@@ -534,7 +554,7 @@ mainAxisAlignment: MainAxisAlignment.start,
                               scale: 1.3,
                               child: Checkbox(
                                 value: selectedIndices.contains(index),
-                                activeColor: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
+                                activeColor: AppColors.primaryColourDark,
                                 onChanged: (bool? value) {
                                   setState(() {
                                     if (value == true) {
@@ -554,12 +574,12 @@ mainAxisAlignment: MainAxisAlignment.start,
                               decoration: BoxDecoration(
                                 color: index % 2 == 0 ? Colors.white : Colors.white,
                                 borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
+                                boxShadow: const [
                                   BoxShadow(
-                                    color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
+                                    color:  AppColors.primaryColourDark,
                                     spreadRadius: 1.5,
                                     blurRadius: 0.4,
-                                    offset: const Offset(0, 0.9),
+                                    offset: Offset(0, 0.9),
                                   ),
                                 ],
                               ),
@@ -621,52 +641,57 @@ mainAxisAlignment: MainAxisAlignment.start,
                                   ),
 
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.end, // Align children to the end (right)
+                                    mainAxisAlignment: MainAxisAlignment.end,
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
-                                      // Check if the user is a Purchase Manager or pm_status is 1
-                                      if (item['pm_status'] == 1 || PrefUtils.getRole() == "Purchase Manager")
-                                        Visibility(
-                                          visible: item['dl_status'] == 1, // Show button only if pm_status is 1
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                            child: ElevatedButton(
-                                              onPressed: () async {
-                                                _showMarkDeliveryDialog(-1);
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(26),
+
+
+                                        Column(
+                                          children: [
+                                            if (PrefUtils.getRole() == "Purchase Manager")
+                                            Visibility(
+                                              visible: item['dl_status'] == 1,
+                                              child: Padding(
+                                                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                                child: ElevatedButton(
+                                                  onPressed: () async {
+                                                    _showMarkDeliveryDialog(-1);
+                                                  },
+                                                  style: ElevatedButton.styleFrom(
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(26),
+                                                    ),
+                                                    backgroundColor: AppColors.yellow,
+                                                    minimumSize: const Size(80, 32),
+                                                  ),
+                                                  child: Text(
+                                                    "Mark Delivery",
+                                                    style: FTextStyle.emailProfile,
+                                                  ),
                                                 ),
-                                                backgroundColor: AppColors.yellow,
-                                                minimumSize: const Size(80, 32),
-                                              ),
-                                              child: Text(
-                                                "Mark Delivery",
-                                                style: FTextStyle.emailProfile,
                                               ),
                                             ),
-                                          ),
-                                        )
-                                      else if (item["uh_status"] == 0) // Display edit and delete buttons if uh_status is 0
+                                          ],
+                                        ),
+                                      if (item["uh_status"] == 1 && item['pm_status'] == 1) // Display edit and delete buttons if uh_status is 0
                                         Row(
                                           children: [
+                                            // IconButton(
+                                            //   icon: const Icon(Icons.edit, color: Colors.black),
+                                            //   onPressed: () {
+                                            //     Navigator.push(
+                                            //       context,
+                                            //       MaterialPageRoute(
+                                            //         builder: (context) => BlocProvider(
+                                            //           create: (context) => AllRequesterBloc(),
+                                            //           child: EditRequisition(id: item["id"].toString() ?? 'N/A'),
+                                            //         ),
+                                            //       ),
+                                            //     );
+                                            //   },
+                                            // ),
                                             IconButton(
-                                              icon: const Icon(Icons.edit, color: Colors.black),
-                                              onPressed: () {
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) => BlocProvider(
-                                                      create: (context) => AllRequesterBloc(),
-                                                      child: EditRequisition(id: item["id"].toString() ?? 'N/A'),
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(Icons.delete, color: Colors.red),
+                                              icon: const Icon(Icons.delete, color: Colors.red,size: 26,),
                                               onPressed: () {
                                                 CommonPopups.showDeleteCustomPopup(
                                                   context,
@@ -680,9 +705,42 @@ mainAxisAlignment: MainAxisAlignment.start,
                                             ),
                                           ],
                                         ),
-                                      const SizedBox(width: 16), // Optional spacing
+                                      // else if (item["uh_status"] == 1 && item['pm_status'] == 1 ) // Display edit and delete buttons if uh_status is 0
+                                      //   Row(
+                                      //     children: [
+                                      //       IconButton(
+                                      //         icon: const Icon(Icons.edit, color: Colors.black),
+                                      //         onPressed: () {
+                                      //           Navigator.push(
+                                      //             context,
+                                      //             MaterialPageRoute(
+                                      //               builder: (context) => BlocProvider(
+                                      //                 create: (context) => AllRequesterBloc(),
+                                      //                 child: EditRequisition(id: item["id"].toString() ?? 'N/A'),
+                                      //               ),
+                                      //             ),
+                                      //           );
+                                      //         },
+                                      //       ),
+                                      //       IconButton(
+                                      //         icon: const Icon(Icons.delete, color: Colors.red),
+                                      //         onPressed: () {
+                                      //           CommonPopups.showDeleteCustomPopup(
+                                      //             context,
+                                      //             "Are you sure you want to delete?",
+                                      //                 () {
+                                      //               BlocProvider.of<AllRequesterBloc>(context)
+                                      //                   .add(DeleteHandlers(data[index]['id'] ?? 'N/A'));
+                                      //             },
+                                      //           );
+                                      //         },
+                                      //       ),
+                                      //     ],
+                                      //   ),
+                                      // const SizedBox(width: 16), // Optional spacing
                                     ],
-                                  )
+                                  ),
+
 
 
 
@@ -710,7 +768,7 @@ mainAxisAlignment: MainAxisAlignment.start,
           const SizedBox(height: 20),
         ],
       ),
-),
+       ),
     );
   }
 
@@ -1036,7 +1094,14 @@ mainAxisAlignment: MainAxisAlignment.start,
     final _formKey = GlobalKey<FormState>();
     final TextEditingController _editController = TextEditingController();
     bool isButtonEnabled = false; // Initialize button state
-
+    late final GlobalKey<FormFieldState<String>> _uploadNameKey =
+    GlobalKey<FormFieldState<String>>();
+    late final TextEditingController uploadName = TextEditingController();
+    late final FocusNode _uploadNameNode = FocusNode();
+    bool isUploadFocused = false;
+    bool isImageUploaded = false;
+    String? fileName1;
+    File? imagesId;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1056,7 +1121,7 @@ mainAxisAlignment: MainAxisAlignment.start,
               ),
               title: Text(
                 "Mark Delivery",
-                style: FTextStyle.preHeading16BoldStyle,
+                style: FTextStyle.preHeading16BoldStyle.copyWith(fontSize: 20),
               ),
               content: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.7,
@@ -1069,72 +1134,192 @@ mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
                         "Purchase Manager Remark",
-                        style: FTextStyle.preHeadingStyle,
+                        style: FTextStyle.preHeading16BoldStyle,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextFormField(
-                          controller: _editController,
-                          decoration: InputDecoration(
-                            hintText: "Enter Purchase Manager Remark",
-                            hintStyle: FTextStyle.formhintTxtStyle,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(23.0),
-                              borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(23.0),
-                              borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(23.0),
-                              borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
-                            fillColor: Colors.grey[100],
-                            filled: true,
+                      const SizedBox(height: 10),
+
+                      TextFormField(
+                        controller: _editController,
+                        decoration: InputDecoration(
+                          hintText: "Enter Purchase Manager Remark",
+                          hintStyle: FTextStyle.formhintTxtStyle,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(23.0),
+                            borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter a remark';
-                            }
-                            return null;
-                          },
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(23.0),
+                            borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(23.0),
+                            borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
+                          fillColor: Colors.grey[100],
+                          filled: true,
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a remark';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 10),
+
+                      Text(
+                        "Upload",
+                        style: FTextStyle.formLabelTxtStyle,
+                      ).animateOnPageLoad(
+                        animationsMap['imageOnPageLoadAnimation2']!,
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        readOnly: true,
+                        key: _uploadNameKey,
+                        focusNode: _uploadNameNode,
+                        decoration: FormFieldStyle
+                            .defaultInputDecoration
+                            .copyWith(
+                          fillColor: AppColors.formFieldBackColour,
+                          hintText: "Upload File",
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.attach_file),
+                            onPressed: () async {
+                              final result = await FilePicker.platform
+                                  .pickFiles();
+                              if (result != null &&
+                                  result.files.isNotEmpty) {
+                                setState(() {
+                                  fileName1 =
+                                      result.files.single.name;
+                                  imagesId =
+                                      File(result.files.single.path!);
+                                  isImageUploaded = true;
+                                  uploadName.text = fileName1!;
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                        controller: uploadName,
+                        validator: ValidatorUtils.uploadValidator,
+                        onChanged: (text) {
+                          setState(() {
+                            isButtonPartEnabled = selectedItem !=
+                                null &&
+                                selectedItem!.isNotEmpty &&
+                                ValidatorUtils.isValidCommon(text);
+                          });
+                        },
+                        onTap: () {
+                          setState(() {
+                            isUploadFocused = true;
+                          });
+                        },
+                        onEditingComplete: () {
+                          setState(() {
+                            isUploadFocused = false;
+                          });
+                        },
+                      ).animateOnPageLoad(
+                        animationsMap['imageOnPageLoadAnimation2']!,
                       ),
                     ],
                   ),
                 ),
               ),
               actions: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.formFieldBackColour,
-                    borderRadius: BorderRadius.circular(25.0),
+                ElevatedButton(
+                  onPressed: (){
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryColourDark,
+                    textStyle: FTextStyle.loginBtnStyle,
+                    // Adjusted button height
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(35.0),
+                    ),
+                    elevation: 1,
+                    side: const BorderSide(color: Colors.white),
                   ),
-                  child: TextButton(
-                    child: const Text("Cancel", style: TextStyle(color: Colors.black)),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                ),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(
+                        fontFamily: 'Outfit-Regular',
+                        fontSize: 15,
+                        overflow: TextOverflow.ellipsis,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w300),
+                  ),
+                ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+
                 const SizedBox(width: 10),
-                Container(
-                  decoration: BoxDecoration(
-                    color: isButtonEnabled ? AppColors.primaryColourDark : AppColors.formFieldBorderColour,
-                    borderRadius: BorderRadius.circular(25.0),
+
+                ElevatedButton(
+                  onPressed:  isButtonEnabled ? () {
+                    if (_formKey.currentState?.validate() ?? false) {
+
+                      BlocProvider.of<AllRequesterBloc>(context)
+                          .add(
+                        RejectHandler(
+                            _editController.text.toString()
+
+
+                        ),
+                      );
+
+                      // Handle the reject action here
+
+                    }
+                  } : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryColourDark,
+                    textStyle: FTextStyle.loginBtnStyle,
+                    // Adjusted button height
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(35.0),
+                    ),
+                    elevation: 1,
+                    side: const BorderSide(color: Colors.white),
                   ),
-                  child: TextButton(
-                    onPressed: isButtonEnabled ? () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        // Handle the reject action here
-                        Navigator.of(context).pop();
-                      }
-                    } : null,
-                    child:  Text("Reject", style: TextStyle(color:isButtonEnabled ? Colors.white:Colors.white)),
-                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                ),
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(
+                        fontFamily: 'Outfit-Regular',
+                        fontSize: 15,
+                        overflow: TextOverflow.ellipsis,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w300),
+                  ),
+                ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                // Container(
+                //   decoration: BoxDecoration(
+                //     color: isButtonEnabled ? AppColors.primaryColourDark : AppColors.formFieldBorderColour,
+                //     borderRadius: BorderRadius.circular(25.0),
+                //   ),
+                //   child: TextButton(
+                //     onPressed: isButtonEnabled ? () {
+                //       if (_formKey.currentState?.validate() ?? false) {
+                //
+                //         BlocProvider.of<AllRequesterBloc>(context)
+                //             .add(
+                //           RejectHandler(
+                //               _editController.text.toString()
+                //
+                //
+                //           ),
+                //         );
+                //
+                //         // Handle the reject action here
+                //
+                //       }
+                //     } : null,
+                //     child:isLoadingApprove? CircularProgressIndicator(color: Colors.white,): Text("Reject", style: TextStyle(color:isButtonEnabled ? Colors.white:Colors.white)),
+                //   ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                // ),
               ],
             ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation1']!);
           },

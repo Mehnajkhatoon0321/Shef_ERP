@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 import 'package:shef_erp/screen/requisition/vender/vendor_details.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
@@ -23,7 +25,7 @@ class _VenderRequisitionState extends State<VenderRequisition> {
   ];
   final TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
-
+  bool isLoading = false;
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
       trigger: AnimationTrigger.onPageLoad,
@@ -102,6 +104,13 @@ class _VenderRequisitionState extends State<VenderRequisition> {
       ],
     ),
   };
+  int pageNo = 1;
+  int totalPages = 0;
+  int pageSize = 5;
+  bool hasMoreData = true;
+  List<dynamic> data = [];
+  final controller = ScrollController();
+  final controllerI = ScrollController();
   @override
   void initState() {
     super.initState();
@@ -111,6 +120,21 @@ class _VenderRequisitionState extends State<VenderRequisition> {
       });
     });
 
+    BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
+    paginationCall();
+  }
+
+  void paginationCall() {
+    controllerI.addListener(() {
+      if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
+        if (pageNo < totalPages && !isLoading) {
+          if (hasMoreData) {
+            pageNo++;
+            BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
+          }
+        }
+      }
+    });
   }
 
   @override
@@ -128,49 +152,7 @@ class _VenderRequisitionState extends State<VenderRequisition> {
           textAlign: TextAlign.center,),
         backgroundColor: AppColors.primaryColourDark,
         actions: [
-          // Padding(
-          //   padding: const EdgeInsets.all(8.0),
-          //   child: SizedBox(
-          //     height:
-          //     (displayType == 'desktop' || displayType == 'tablet')
-          //         ? 70
-          //         : 43,
-          //     child: ElevatedButton(
-          //         onPressed: () async {
-          //           // setState(() {
-          //           //   isLoading = true;
-          //           // });
-          //
-          //           Navigator.push(
-          //             context,
-          //             MaterialPageRoute(
-          //               builder: (context) =>  AddRequisition(),
-          //             ),
-          //           );
-          //
-          //           // );
-          //         },
-          //
-          //         style: ElevatedButton.styleFrom(
-          //             shape: RoundedRectangleBorder(
-          //               borderRadius: BorderRadius.circular(26),
-          //             ),
-          //             backgroundColor:Colors.white
-          //
-          //         ),
-          //         child:
-          //         Text(
-          //           "Add +",
-          //           style: FTextStyle.loginBtnStyle.copyWith(color:AppColors.primaryColourDark),
-          //         )
-          //
-          //       // isLoading? CircularProgressIndicator(color: Colors.white,):Text(
-          //       //   Constants.loginBtnTxt,
-          //       //   style: FTextStyle.loginBtnStyle,
-          //       // )
-          //     ),
-          //   ),
-          // )
+
         ],
         leading: Padding(
           padding: const EdgeInsets.only(left: 15),
@@ -272,7 +254,7 @@ class _VenderRequisitionState extends State<VenderRequisition> {
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: [
                           BoxShadow(
-                            color: index % 2 == 0 ? AppColors.yellow : AppColors.primaryColourDark,
+                            color: AppColors.primaryColourDark,
                             spreadRadius: 1.5,
                             blurRadius: 0.4,
                             offset: const Offset(0, 0.9),
