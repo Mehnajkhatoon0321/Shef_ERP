@@ -289,3 +289,60 @@ final class EditSuccessEventFailure extends AllRequesterState{
 }
 
 
+//Get UNit
+
+final class UnitLoading extends AllRequesterState{}
+final class  UnitSuccess extends AllRequesterState{
+  final Map<String, dynamic> UnitList;
+  UnitSuccess(this.UnitList);
+
+}
+
+
+final class  UnitFailure extends AllRequesterState{
+  final Map<String, dynamic> unitFailure;
+  UnitFailure(this.unitFailure);
+
+}
+
+final class UnitDeleteLoading extends AllRequesterState{}
+final class  UnitDeleteSuccess extends AllRequesterState{
+  final Map<String, dynamic> unitDeleteList;
+  UnitDeleteSuccess(this.unitDeleteList);
+
+}
+
+
+final class  UnitDeleteFailure extends AllRequesterState{
+  final Map<String, dynamic> deleteUnitFailure;
+  UnitDeleteFailure(this.deleteUnitFailure);
+
+}
+
+//create
+final class  UnitCreateLoading extends AllRequesterState {}
+
+final class  UnitCreateSuccess extends AllRequesterState {
+  final Map<String ,dynamic> createResponse;
+  UnitCreateSuccess(this.createResponse);
+
+}
+final class UnitCreateFailure extends AllRequesterState {
+
+  final String failureMessage;
+  UnitCreateFailure(this.failureMessage);
+
+}
+
+
+final class AuthFlowServerFailure extends AllRequesterState {
+  final String error;
+  AuthFlowServerFailure(this.error);
+
+}
+
+
+class CheckNetworkConnection extends AllRequesterState {
+  final String errorMessage;
+  CheckNetworkConnection(this.errorMessage);
+}

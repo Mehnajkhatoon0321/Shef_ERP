@@ -1106,7 +1106,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                     height: 20,
                   ),
                   SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.5,
+                    height: MediaQuery.of(context).size.height * 0.4,
                     child: ListView.builder(
                       itemCount: itemList.length,
                       itemBuilder: (context, index) {

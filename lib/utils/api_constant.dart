@@ -11,5 +11,8 @@ class  APIEndPoints{
   static const String postDelete= '${baseUrl}req/destroy/';
   static const String postReqEdit= '${baseUrl}req/edit/';
   static const String postReqUpdate= '${baseUrl}req/update/';
+  static const String getUnits= '${baseUrl}unit';
+  static const String deleteUnits= '${baseUrl}unit/delete/';
+  static const String createUnits= '${baseUrl}billing/create';
 
 }

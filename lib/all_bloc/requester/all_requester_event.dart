@@ -162,3 +162,29 @@ class EditMasterCategoryHandler extends AllRequesterEvent {
   String id;
   EditMasterCategoryHandler(this.id);
 }
+//Get Unit
+
+class GetUnitHandler extends AllRequesterEvent {
+  String search;
+  int page;
+  int size;
+  GetUnitHandler(this.search,this.page,this.size);
+}
+
+//Destroy
+
+class DeleteUnitHandlers extends AllRequesterEvent {
+  int id;
+
+
+  DeleteUnitHandlers(this.id);
+}
+
+//create unit
+
+class UnitCreateEventHandler extends AllRequesterEvent {
+  final String billingAddress;
+  final String address;
+  final String name;
+  UnitCreateEventHandler({required this.billingAddress, required this.address, required this.name});
+}

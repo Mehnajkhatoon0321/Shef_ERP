@@ -18,7 +18,7 @@ class DeliveryStatus extends StatelessWidget {
         deliveryStatusColor = Colors.black;
         break;
       case '1':
-        deliveryStatusText = 'Pending Approval';
+        deliveryStatusText = 'Pending for Delivery';
         deliveryStatusColor = Colors.red;
         break;
       case '2':
@@ -37,7 +37,7 @@ class DeliveryStatus extends StatelessWidget {
     return Row(
       children: [
         const Text(
-          "Delivery Status: ",
+          "Delivery Status:",
           style: FTextStyle.listTitle // Replace with FTextStyle.listTitleBig if needed
         ),
         Padding(

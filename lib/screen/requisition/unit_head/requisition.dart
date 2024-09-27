@@ -4,14 +4,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 import 'package:shef_erp/screen/requisition/unit_head/add_requisition.dart';
-import 'package:shef_erp/screen/requisition/unit_head/edit_requisition.dart';
+
 import 'package:shef_erp/screen/requisition/unit_head/view_details.dart';
 import 'package:shef_erp/utils/DeletePopupManager.dart';
+import 'package:shef_erp/utils/asign_vector.dart';
+import 'package:shef_erp/utils/colour_status.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shef_erp/utils/unit_head_status.dart';
 import 'package:shimmer/shimmer.dart';
 class RequisitionScreen extends StatefulWidget {
   const RequisitionScreen({super.key});
@@ -30,7 +33,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
   final controller = ScrollController();
   final controllerI = ScrollController();
   TextEditingController _editController = TextEditingController();
-
+  List<dynamic> filteredData = [];
   final TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
   bool isLoading = false;
@@ -120,9 +123,28 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
         _isTextEmpty = _controller.text.isEmpty;
       });
     });
+    filteredData = data;
     BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
     paginationCall();
   }
+  void _filterData(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        _isTextEmpty = true;
+        filteredData = data; // Show all data when query is empty
+      });
+    } else {
+      setState(() {
+        _isTextEmpty = false;
+        filteredData = data.where((item) {
+          return item["req_no"].toString().toLowerCase().contains(query.toLowerCase()) ||
+              item["po_no"].toString().toLowerCase().contains(query.toLowerCase())|| item["unit"].toString().toLowerCase().contains(query.toLowerCase()) ||
+              item["req_date"].toString().toLowerCase().contains(query.toLowerCase());
+        }).toList();
+      });
+    }
+  }
+
   void paginationCall() {
     controllerI.addListener(() {
       if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
@@ -308,6 +330,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                 ),
                 onChanged: (value) {
                   setState(() {
+                    _filterData(value);
                     _isTextEmpty = value.isEmpty;
                   });
                 },
@@ -316,35 +339,11 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
           ),
 
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(10.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(
-                  height: (displayType == 'desktop' || displayType == 'tablet') ? 70 : 38,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        if (selectedIndices.length == data.length) {
-                          selectedIndices.clear(); // Deselect all if all are selected
-                        } else {
-                          selectedIndices = Set.from(List.generate(data.length, (index) => index)); // Select all
-                        }
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(26),
-                      ),
-                      backgroundColor: Colors.blue, // Change color as needed
-                    ),
-                    child: Text(
-                      selectedIndices.length == data.length ? "Deselect All" : "Select All",
-                      style: FTextStyle.emailProfile,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10,),
+
                 // Existing Accepted button
                 Expanded(
                   child: SizedBox(
@@ -442,16 +441,18 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                 },
               ),
             )
-                : data.isEmpty?Center(
+                : data.isEmpty&& filteredData.isEmpty?Center(
               child: isLoading
                   ? const CircularProgressIndicator() // Show circular progress indicator
                   : const Text("No more data .", style: FTextStyle.listTitle),
-            ): ListView.builder(
+            ):  filteredData.isEmpty
+          ? const Center(child: Text("No results available.", style: FTextStyle.listTitle))
+        : ListView.builder(
               controller: controllerI,
-              itemCount: data.length + (hasMoreData ? 1 : 0), // Add one for the loading indicator
+              itemCount: filteredData.length + (hasMoreData ? 1 : 0), // Add one for the loading indicator
               itemBuilder: (context, index) {
-                if (index < data.length) {
-                  final item = data[index];
+                if (index < filteredData.length) {
+                  final item = filteredData[index];
 
                   // Handle case where item might be null
                   if (item == null) {
@@ -536,7 +537,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                           Expanded(child: Text("${item["req_no"] ?? 'N/A'}", style: FTextStyle.listTitleSub, maxLines: 1,)),
                                         ],
                                       ),
-                                      const SizedBox(height: 5),
+
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -545,7 +546,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                           Expanded(child: Text("${item["po_no"] ?? 'N/A'}", style: FTextStyle.listTitleSub,maxLines: 1,)),
                                         ],
                                       ),
-                                      const SizedBox(height: 5),
+
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -554,48 +555,73 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                           Text("${item["req_date"] ?? 'N/A'}", style: FTextStyle.listTitleSub,maxLines: 1,),
                                         ],
                                       ),
-                                      const SizedBox(height: 5),
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment: MainAxisAlignment.start,
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.start,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              const Text("Unit: ", style: FTextStyle.listTitle),
-                                              Text("${item["unit"] ?? 'N/A'}", style: FTextStyle.listTitleSub,maxLines: 1,),
-                                            ],
-                                          ),
-                                          Row(
-                                            children: [
-                                              IconButton(
-                                                icon: const Icon(Icons.edit, color: Colors.black),
-                                                onPressed: () {
-                                                  Navigator.push(context, MaterialPageRoute(builder: (context) => BlocProvider(
-                                                    create: (context) => AllRequesterBloc(),
-                                                    child: EditRequisition(
-                                                      id: item["id"] ?? 'N/A',
-                                                    ),
-                                                  )));
-                                                },
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(Icons.delete, color: Colors.red),
-                                                onPressed: () {
-                                                  CommonPopups.showDeleteCustomPopup(
-                                                    context,
-                                                    "Are you sure you want to delete?",
-                                                        () {
-                                                      BlocProvider.of<AllRequesterBloc>(context).add(DeleteHandlers(data[index]['id'] ?? 'N/A'));
-                                                    },
-                                                  );
-                                                },
-                                              ),
-                                            ],
-                                          ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                                          const Text("Unit: ", style: FTextStyle.listTitle),
+                                          Expanded(child: Text("${item["unit"] ?? 'N/A'}", style: FTextStyle.listTitleSub,maxLines: 1,)),
                                         ],
                                       ),
+
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                              child: DeliveryStatus(
+                                                  dlStatus:
+                                                  item["dl_status"]
+                                                      .toString())),
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                              child: UnitHeadStatus(
+                                                  unitStatus:
+                                                  item["uh_status"]
+                                                      .toString())),
+                                        ],
+                                      ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                              child: PurchaseManager(
+                                                  pmStatus:
+                                                  item["pm_status"]
+                                                      .toString())),
+                                        ],
+                                      ),
+
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        children: [
+
+                                          // IconButton(
+                                          //   icon: const Icon(Icons.edit, color: Colors.black),
+                                          //   onPressed: () {
+                                          //     Navigator.push(context, MaterialPageRoute(builder: (context) => BlocProvider(
+                                          //       create: (context) => AllRequesterBloc(),
+                                          //       child: EditRequisition(
+                                          //         id: item["id"].toString()?? 'N/A',
+                                          //       ),
+                                          //     )));
+                                          //   },
+                                          // ),
+                                          IconButton(
+                                            icon: const Icon(Icons.delete, color: Colors.red),
+                                            onPressed: () {
+                                              CommonPopups.showDeleteCustomPopup(
+                                                context,
+                                                "Are you sure you want to delete?",
+                                                    () {
+                                                  BlocProvider.of<AllRequesterBloc>(context).add(DeleteHandlers(data[index]['id'] ?? 'N/A'));
+                                                },
+                                              );
+                                            },
+                                          ),
+                                        ],
+                                      ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
                                       // const SizedBox(height: 5),
                                     ],
                                   ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
@@ -629,7 +655,9 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
 
   void _clearText() {
     _controller.clear();
+    BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
     setState(() {
+
       _isTextEmpty = true;
     });
   }

@@ -443,9 +443,142 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
     });
 
 
-//
+//Get Unit
+    on<GetUnitHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(UnitLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.getUnits}/$userId?page=${event.page}&per_page=${event.size}");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(UnitSuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(UnitFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(UnitFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(UnitFailure(const {'error': 'Network error'}));
+      }
+    });
+//Delete
+
+    on<DeleteUnitHandlers>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(UnitDeleteLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+
+          final APIEndpoint = Uri.parse("${APIEndPoints.deleteUnits}${event.id}");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $response");
+
+          if (response.statusCode == 200) {
+            print('response>>>>>>>>>>>>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(UnitDeleteSuccess(responseData));
 
 
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(UnitDeleteFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(UnitDeleteFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(UnitDeleteFailure( {'error': 'Network error'}));
+      }
+    });
+
+    //Create Unit
+    on<UnitCreateEventHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(UnitCreateLoading());
+        try {
+          final requestData = json.encode({
+            "billing_name": event.billingAddress,
+            "address": event.address,
+            "name": event.address,
+          });
+
+          developer.log("Requesting login: ${Uri.parse(APIEndPoints.login)}");
+
+          var response = await http.post(
+            Uri.parse(APIEndPoints.createUnits),
+            headers: {'Content-Type': 'application/json'},
+            body: requestData,
+          );
+
+          if (response.statusCode == 200) {
+            final responseData = jsonDecode(response.body);
+            if (responseData.containsKey("token")) {
+              var token = responseData["token"];
+              PrefUtils.setToken(token);
+              emit(UnitCreateSuccess(responseData));
+              developer.log("Create successful: ${responseData.runtimeType}");
+            } else if (response.statusCode == 400) {
+              emit(UnitCreateFailure(jsonDecode(response.body)["message"]));
+              developer.log("Create LogFailure: ${responseData.runtimeType}");
+            }
+            else if (response.statusCode == 401) {
+              emit(UnitCreateFailure(jsonDecode(response.body)["message"]));
+              developer.log("Login LogFailure: ${responseData.runtimeType}");
+            }
+            else if (response.statusCode == 500) {
+              emit(UnitCreateFailure(jsonDecode(response.body)["message"]));
+            } else {
+              emit(UnitCreateFailure("Unexpected response format"));
+            }
+          }
+          else {
+            String errorMessage;
+            try {
+              final errorData = jsonDecode(response.body);
+              errorMessage = errorData["message"] ?? "An error occurred";
+            } catch (_) {
+              errorMessage = "An error occurred";
+            }
+            emit(UnitCreateFailure(errorMessage));
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            emit(AuthFlowServerFailure(e.toString()));
+            developer.log("Error during login: ${e.toString()}");
+          }
+        }
+      } else {
+        emit(CheckNetworkConnection("No internet connection"));
+      }
+    });
 
   }
 }

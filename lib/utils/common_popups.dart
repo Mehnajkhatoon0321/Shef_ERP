@@ -1,9 +1,10 @@
 
-import 'package:flutter/material.dart';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shef_erp/utils/DeletePopupManager.dart';
 import 'package:shef_erp/utils/common_function.dart';
-import 'package:shef_erp/utils/deletePopupManager.dart';
 
 import 'colours.dart';
 import 'font_text_Style.dart';
@@ -46,10 +47,10 @@ class CommonPopups {
         var displayType = valueType.toString().split('.').last;
         print('displayType>> $displayType');
         return CustomPopup(
-          message: message,
-          onOkPressed: () {
-            Navigator.pop(context); // Close the popup when OK is pressed.
-          },
+            message: message,
+            onOkPressed: () {
+              Navigator.pop(context); // Close the popup when OK is pressed.
+            },
             displayType: displayType
         );
       },
@@ -57,10 +58,10 @@ class CommonPopups {
   }
 
   static void showDeleteCustomPopup(
-    BuildContext context,
-    String message,
-    VoidCallback onActionPressed,
-  ) {
+      BuildContext context,
+      String message,
+      VoidCallback onActionPressed,
+      ) {
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
     var displayType = valueType.toString().split('.').last;
     print('displayType>> $displayType');
@@ -69,10 +70,10 @@ class CommonPopups {
       barrierDismissible: false, // Prevent dismissing dialog on outside tap
       builder: (BuildContext context) {
         return DeleteCustomPopup(
-          message: message,
-          onActionPressed: () {
-            onActionPressed(); // Call the provided callback
-          },
+            message: message,
+            onActionPressed: () {
+              onActionPressed(); // Call the provided callback
+            },
             displayType:displayType
         );
       },
@@ -112,7 +113,7 @@ class CustomPopup extends StatelessWidget {
                 ? ElevatedButton(
               onPressed: onOkPressed,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryColourDark,
+                backgroundColor: AppColors.primaryColour,
                 textStyle: FTextStyle.loginBtnStyle,
                 // Adjusted button height
                 shape: RoundedRectangleBorder(
@@ -134,10 +135,10 @@ class CustomPopup extends StatelessWidget {
                 : SizedBox(
               height: 52.h,
               width: 100.h,
-                  child: ElevatedButton(
-                                onPressed: onOkPressed,
-                                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColourDark,
+              child: ElevatedButton(
+                onPressed: onOkPressed,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColour,
                   textStyle: FTextStyle.loginBtnStyle,
                   // Adjusted button height
                   shape: RoundedRectangleBorder(
@@ -145,8 +146,8 @@ class CustomPopup extends StatelessWidget {
                   ),
                   elevation: 1,
                   side: const BorderSide(color: Colors.white),
-                                ),
-                                child:  Text(
+                ),
+                child:  Text(
                   'OK',
                   style: TextStyle(
                       fontFamily: 'Outfit-Regular',
@@ -154,9 +155,9 @@ class CustomPopup extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       color: Colors.white,
                       fontWeight: FontWeight.w300),
-                                ),
-                              ),
                 ),
+              ),
+            ),
           )
         ],
       ),
@@ -223,7 +224,7 @@ class _DeleteCustomPopupState extends State<DeleteCustomPopup> {
                   Navigator.pop(context); // Call the provided callback
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColourDark,
+                  backgroundColor: AppColors.primaryColour,
                   textStyle: FTextStyle.loginBtnStyle,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(35.0),
@@ -250,7 +251,7 @@ class _DeleteCustomPopupState extends State<DeleteCustomPopup> {
                     Navigator.pop(context); // Call the provided callback
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColourDark,
+                    backgroundColor: AppColors.primaryColour,
                     textStyle: FTextStyle.loginBtnStyle,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(35.0),
@@ -279,7 +280,7 @@ class _DeleteCustomPopupState extends State<DeleteCustomPopup> {
                   widget.onActionPressed(); // Call the provided callback
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColourDark,
+                  backgroundColor: AppColors.primaryColour,
                   textStyle: FTextStyle.loginBtnStyle,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(35.0),
@@ -312,10 +313,10 @@ class _DeleteCustomPopupState extends State<DeleteCustomPopup> {
                   onPressed: _isLoadingUi
                       ? null // Disable button when loading
                       : () {
-                          widget.onActionPressed(); // Call the provided callback
-                        },
+                    widget.onActionPressed(); // Call the provided callback
+                  },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColourDark,
+                    backgroundColor: AppColors.primaryColour,
                     textStyle: FTextStyle.loginBtnStyle,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(35.0),
@@ -325,21 +326,21 @@ class _DeleteCustomPopupState extends State<DeleteCustomPopup> {
                   ),
                   child: _isLoadingUi
                       ? const SizedBox(
-                          width: 15.0,
-                          height: 15.0,
-                          child: CircularProgressIndicator(
-                              color: Colors.black,
-                              strokeWidth: 1)) // Disable button when loading
+                      width: 15.0,
+                      height: 15.0,
+                      child: CircularProgressIndicator(
+                          color: Colors.black,
+                          strokeWidth: 1)) // Disable button when loading
                       : Text(
-                          'Yes',
-                          style: TextStyle(
-                            fontFamily: 'Outfit-Regular',
-                            fontSize: 15.sp,
-                            overflow: TextOverflow.ellipsis,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w300,
-                          ),
-                        ),
+                    'Yes',
+                    style: TextStyle(
+                      fontFamily: 'Outfit-Regular',
+                      fontSize: 15.sp,
+                      overflow: TextOverflow.ellipsis,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
                 ),
               ),
             ],
