@@ -26,11 +26,7 @@ class _ProductCategoryState extends State<ProductCategory> {
   int pageSize = 5;
   bool hasMoreData = true;
   List<dynamic> data = [
-    { "name": "Event1", },
-    { "name": "Event2", },
-    { "name": "Event3", },
-    { "name": "Event4", },
-    { "name": "Event5", },
+
   ];
   final controller = ScrollController();
   final controllerI = ScrollController();
@@ -126,7 +122,7 @@ class _ProductCategoryState extends State<ProductCategory> {
       });
     });
     BlocProvider.of<AllRequesterBloc>(context)
-        .add(MasterCategoryHandler("", pageNo, pageSize));
+        .add(GetProductCategoryHandler("", pageNo, pageSize));
     paginationCall();
   }
 
@@ -137,7 +133,7 @@ class _ProductCategoryState extends State<ProductCategory> {
           if (hasMoreData) {
             pageNo++;
             BlocProvider.of<AllRequesterBloc>(context)
-                .add(MasterCategoryHandler("", pageNo, pageSize));
+                .add(GetProductCategoryHandler("", pageNo, pageSize));
           }
         }
       }
@@ -167,7 +163,7 @@ class _ProductCategoryState extends State<ProductCategory> {
             child: SizedBox(
               height: (displayType == 'desktop' || displayType == 'tablet') ? 70 : 43,
               child: ElevatedButton(
-                onPressed: () => _showCategoryDialog(),
+                onPressed: () => _showCategoryDialog(context),
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(26),
@@ -197,13 +193,13 @@ class _ProductCategoryState extends State<ProductCategory> {
       body: BlocListener<AllRequesterBloc, AllRequesterState>(
   listener: (context, state) {
 
-    if (state is EventLoading) {
+    if (state is ServiceCategoryLoading) {
       setState(() {
         isLoading = true;
       });
-    } else if (state is EventSuccess) {
+    } else if (state is ServiceCategorySuccess) {
       setState(() {
-        var responseData = state.eventList['list']['requisitions'];
+        var responseData = state.serviceCategoryList['list'];
         print(">>>>>>>>>>>ALLDATA$responseData");
         totalPages = responseData["total"];
 
@@ -233,8 +229,6 @@ class _ProductCategoryState extends State<ProductCategory> {
 
       var deleteMessage = state.deleteEventCategoryList['message'];
 
-      BlocProvider.of<AllRequesterBloc>(context)
-          .add(AddCartDetailHandler("", pageNo, pageSize));
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(deleteMessage),
@@ -246,7 +240,41 @@ class _ProductCategoryState extends State<ProductCategory> {
         Navigator.pop(context);
       });
     }
+    else if (state is CreateCategorySuccess) {
 
+
+      var deleteMessage = state.createResponse['message'];
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(deleteMessage),
+          backgroundColor: AppColors.primaryColour,
+        ),
+      );
+
+      Future.delayed(const Duration(milliseconds: 500), () {
+        Navigator.pop(context);
+      });
+    }
+    else if (state is CreateCategoryFailure) {
+
+      var deleteMessage = state.failureMessage;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(deleteMessage),
+          backgroundColor: AppColors.primaryColour,
+        ),
+      );
+
+      Future.delayed(const Duration(milliseconds: 500), () {
+        Navigator.pop(context);
+      });
+      setState(() {
+        isLoading = false;
+      });
+      print("error>> ${state.failureMessage}");
+    }
     // TODO: implement listener
   },
   child: Column(
@@ -302,7 +330,7 @@ class _ProductCategoryState extends State<ProductCategory> {
             ),
           ),
           Expanded(
-            child:isLoading && data.isEmpty
+            child: isLoading
                 ? Shimmer.fromColors(
               baseColor: Colors.grey[300]!,
               highlightColor: Colors.grey[100]!,
@@ -365,7 +393,7 @@ class _ProductCategoryState extends State<ProductCategory> {
                   : const Text("No more data .",
                   style: FTextStyle.listTitle),
             )
-                : ListView.builder(
+                :   ListView.builder(
               itemCount: data.length,
               itemBuilder: (BuildContext context, int index) {
                 final item = data[index];
@@ -402,7 +430,7 @@ class _ProductCategoryState extends State<ProductCategory> {
                                     Row(
                                       children: [
                                         const Text("ID: ", style: FTextStyle.listTitle),
-                                        Text("${index + 1}", style: FTextStyle.listTitleSub),
+                                        Text("${item["id"]}", style: FTextStyle.listTitleSub),
                                       ],
                                     ),
                                     Row(
@@ -412,14 +440,14 @@ class _ProductCategoryState extends State<ProductCategory> {
                                         Row(
                                           children: [
                                             const Text("Name: ", style: FTextStyle.listTitle),
-                                            Text("${item["name"]}", style: FTextStyle.listTitleSub),
+                                            Text("${item["cate_name"]}", style: FTextStyle.listTitleSub),
                                           ],
                                         ),
                                         Row(
                                           children: [
                                             IconButton(
                                               icon: const Icon(Icons.edit, color: Colors.black),
-                                              onPressed: () => _showCategoryDialog(isEditing: true, index: index),
+                                              onPressed: () => _showCategoryDialog(context,isEditing: true, index: index),
                                             ),
                                             IconButton(
                                               icon: const Icon(Icons.delete, color: Colors.red),
@@ -432,7 +460,7 @@ class _ProductCategoryState extends State<ProductCategory> {
                                                     BlocProvider.of<
                                                         AllRequesterBloc>(
                                                         context)
-                                                        .add(DeleteHandlers(
+                                                        .add(DeleteMasterCategoryHandlers(
                                                         data[index][
                                                         'id']));
                                                   },
@@ -470,48 +498,8 @@ class _ProductCategoryState extends State<ProductCategory> {
     });
   }
 
-  void _showDeleteDialog(int index) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          content: Text("Are you sure you want to delete?", style: FTextStyle.preHeadingStyle),
-          actions: [
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.formFieldBackColour,
-                borderRadius: BorderRadius.circular(25.0),
-              ),
-              child: TextButton(
-                child: const Text("Cancel", style: TextStyle(color: Colors.black)),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.primaryColourDark!,
-                borderRadius: BorderRadius.circular(25.0),
-              ),
-              child: TextButton(
-                child: const Text("OK", style: TextStyle(color: Colors.white)),
-                onPressed: () {
-                  setState(() {
-                    data.removeAt(index);
-                  });
-                  Navigator.of(context).pop();
-                },
-              ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-            ),
-          ],
-        ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation1']!);
-      },
-    );
-  }
 
-  void _showCategoryDialog({bool isEditing = false, int? index}) {
+   Future<bool?>  _showCategoryDialog(BuildContext context,{bool isEditing = false, int? index}) async{
     final _formKey = GlobalKey<FormState>();
     final _editController = TextEditingController(text: isEditing ? data[index!]["name"] : '');
     bool isButtonEnabled = isEditing ? true : false;
@@ -607,14 +595,17 @@ class _ProductCategoryState extends State<ProductCategory> {
                     ),
                     onPressed: isButtonEnabled ? () {
                       if (_formKey.currentState?.validate() ?? false) {
-                        setState(() {
-                          if (isEditing) {
-                            data[index!] = {"name": _editController.text};
-                          } else {
-                            data.add({"name": _editController.text});
-                          }
-                        });
-                        Navigator.of(context).pop();
+                        //
+                        // Navigator.of(context).pop(true); // Allow the app to be closed
+                        // Navigator.pushAndRemoveUntil(
+                        //   context,
+                        //   MaterialPageRoute(builder: (context) =>
+                        //       BlocProvider(
+                        //         create: (context) => AllRequesterBloc(),
+                        //         child: CategoryCreateEventHandler(category:_editController.text ),
+                        //       )),
+                        //       (Route<dynamic> route) => false,
+                        // );
                       }
                     } : null,
                   ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),

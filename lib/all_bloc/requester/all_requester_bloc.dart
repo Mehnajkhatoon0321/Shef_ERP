@@ -522,44 +522,31 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
     //Create Unit
     on<UnitCreateEventHandler>((event, emit) async {
       if (await ConnectivityService.isConnected()) {
+        String authToken = PrefUtils.getToken();
         emit(UnitCreateLoading());
         try {
           final requestData = json.encode({
             "billing_name": event.billingAddress,
             "address": event.address,
-            "name": event.address,
+            "name": event.name,
           });
 
-          developer.log("Requesting login: ${Uri.parse(APIEndPoints.login)}");
+          developer.log("Requesting create: ${Uri.parse(APIEndPoints.createUnits)}");
 
           var response = await http.post(
             Uri.parse(APIEndPoints.createUnits),
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+            },
             body: requestData,
           );
 
           if (response.statusCode == 200) {
             final responseData = jsonDecode(response.body);
-            if (responseData.containsKey("token")) {
-              var token = responseData["token"];
-              PrefUtils.setToken(token);
-              emit(UnitCreateSuccess(responseData));
-              developer.log("Create successful: ${responseData.runtimeType}");
-            } else if (response.statusCode == 400) {
-              emit(UnitCreateFailure(jsonDecode(response.body)["message"]));
-              developer.log("Create LogFailure: ${responseData.runtimeType}");
-            }
-            else if (response.statusCode == 401) {
-              emit(UnitCreateFailure(jsonDecode(response.body)["message"]));
-              developer.log("Login LogFailure: ${responseData.runtimeType}");
-            }
-            else if (response.statusCode == 500) {
-              emit(UnitCreateFailure(jsonDecode(response.body)["message"]));
-            } else {
-              emit(UnitCreateFailure("Unexpected response format"));
-            }
-          }
-          else {
+            emit(UnitCreateSuccess(responseData));
+
+          } else {
             String errorMessage;
             try {
               final errorData = jsonDecode(response.body);
@@ -568,11 +555,190 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
               errorMessage = "An error occurred";
             }
             emit(UnitCreateFailure(errorMessage));
+            developer.log("Create failure: ${response.statusCode} - $errorMessage");
           }
         } catch (e) {
           if (kDebugMode) {
             emit(AuthFlowServerFailure(e.toString()));
-            developer.log("Error during login: ${e.toString()}");
+            developer.log("Error during unit creation: ${e.toString()}");
+          }
+        }
+      } else {
+        emit(CheckNetworkConnection("No internet connection"));
+      }
+    });
+
+    //Update
+    on<UnitUpdateEventHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(UnitCreateLoading());
+
+        try {
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            'Authorization': 'Bearer $authToken',
+          };
+
+          var request = http.MultipartRequest(
+            'POST',
+            Uri.parse(APIEndPoints.updateUnits),
+          );
+print("RequestData>>>>>>>>>>$request");
+          request.fields.addAll({
+            'billing_name': event.billingAddress,
+            'address': event.address,
+            'name': event.name,
+            'id': event.id,
+          });
+
+          request.headers.addAll(headers);
+
+          final response = await request.send();
+          final responseData = await response.stream.bytesToString();
+
+          developer.log("Response status: ${response.statusCode}");
+          developer.log("Response body: $responseData");
+
+          if (response.statusCode == 200) {
+            emit(UnitUpdateSuccess(jsonDecode(responseData)));
+          } else {
+
+            emit(UnitUpdateFailure(responseData));
+            developer.log("Update failure: ${response.statusCode} - $responseData");
+          }
+        } catch (e) {
+          emit(AuthFlowServerFailure(e.toString()));
+          developer.log("Error during unit update: ${e.toString()}");
+        }
+      } else {
+        emit(CheckNetworkConnection("No internet connection"));
+      }
+    });
+
+
+//GetProduct Category
+    on<GetProductCategoryHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(ServiceCategoryLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.productGetCategory}$userId?page=${event.page}&per_page=${event.size}");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(ServiceCategorySuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(ServiceCategoryFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(UnitFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(UnitFailure(const {'error': 'Network error'}));
+      }
+    });
+
+//delete category
+
+    on<DeleteMasterCategoryHandlers>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        int userId = PrefUtils.getUserId();
+        emit(DeleteServiceCategoryLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+
+          final APIEndpoint = Uri.parse("${APIEndPoints.productGetCategoryDelete}${event.id}/$userId");
+          developer.log("Making DELETE request to: $APIEndpoint");
+          developer.log("Authorization Token: $authToken");
+
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+            },
+          );
+
+          // Log response details
+          developer.log("Response status: ${response.statusCode}");
+          developer.log("Response body: ${response.body}");
+
+          if (response.statusCode == 200) {
+            print('Response successful: ${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(DeleteServiceCategorySuccess(responseData));
+          } else {
+            final responseError = jsonDecode(response.body);
+            emit(DeleteEventCategoryFailure(responseError));
+            developer.log("Error response: ${responseError}");
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(DeleteEventCategoryFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(DeleteEventCategoryFailure({'error': 'Network error'}));
+      }
+    });
+
+//create category
+
+    on<CategoryCreateEventHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        String authToken = PrefUtils.getToken();
+        emit(ServiceCategoryLoading());
+        try {
+          final requestData = json.encode({
+            "cate_name": event.category,
+
+          });
+
+          developer.log("Requesting create: ${Uri.parse(APIEndPoints.productGetCategoryCreate)}");
+
+          var response = await http.post(
+            Uri.parse(APIEndPoints.createUnits),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+            },
+            body: requestData,
+          );
+
+          if (response.statusCode == 200) {
+            final responseData = jsonDecode(response.body);
+            emit(CreateCategorySuccess(responseData));
+
+          } else {
+            String errorMessage;
+            try {
+              final errorData = jsonDecode(response.body);
+              errorMessage = errorData["message"] ?? "An error occurred";
+            } catch (_) {
+              errorMessage = "An error occurred";
+            }
+            emit(CreateCategoryFailure(errorMessage));
+            developer.log("Create failure: ${response.statusCode} - $errorMessage");
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            emit(CreateCategoryFailure(e.toString()));
+            developer.log("Error during unit creation: ${e.toString()}");
           }
         }
       } else {

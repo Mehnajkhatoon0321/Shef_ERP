@@ -11,8 +11,14 @@ class  APIEndPoints{
   static const String postDelete= '${baseUrl}req/destroy/';
   static const String postReqEdit= '${baseUrl}req/edit/';
   static const String postReqUpdate= '${baseUrl}req/update/';
+
+  //Friday
   static const String getUnits= '${baseUrl}unit';
   static const String deleteUnits= '${baseUrl}unit/delete/';
-  static const String createUnits= '${baseUrl}billing/create';
+  static const String createUnits= '${baseUrl}unit/create';
+  static const String updateUnits= '${baseUrl}unit/update';
+  static const String productGetCategory= '${baseUrl}category/';
+  static const String productGetCategoryDelete= '${baseUrl}category/delete/';
+  static const String productGetCategoryCreate= '${baseUrl}category/create';
 
 }

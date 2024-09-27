@@ -101,6 +101,8 @@ final class UpdateFailure extends AllRequesterState{
   UpdateFailure(this.updateFailure);
 
 }
+
+
 // reject Requisition
 
 final class RejectLoading extends AllRequesterState{}
@@ -345,4 +347,28 @@ final class AuthFlowServerFailure extends AllRequesterState {
 class CheckNetworkConnection extends AllRequesterState {
   final String errorMessage;
   CheckNetworkConnection(this.errorMessage);
+}
+final class  UnitUpdateSuccess extends AllRequesterState {
+  final Map<String ,dynamic> updateResponse;
+  UnitUpdateSuccess(this.updateResponse);
+
+}
+final class UnitUpdateFailure extends AllRequesterState {
+
+  final String failureMessage;
+  UnitUpdateFailure(this.failureMessage);
+
+}
+//create category
+
+final class  CreateCategorySuccess extends AllRequesterState {
+  final Map<String ,dynamic> createResponse;
+  CreateCategorySuccess(this.createResponse);
+
+}
+final class CreateCategoryFailure extends AllRequesterState {
+
+  final String failureMessage;
+  CreateCategoryFailure(this.failureMessage);
+
 }

@@ -176,7 +176,11 @@ class _UnitsState extends State<Units> {
                     MaterialPageRoute(builder: (context) =>  BlocProvider(
                       create: (context) => AllRequesterBloc(),
                       child:  UnitEdit(
-                          screenflag:""
+                        id: "",
+                          screenflag:"",
+                              name:"",
+                        billingAddress:"",
+                        address:""
                       ),
                     )),
                   )
@@ -258,75 +262,6 @@ class _UnitsState extends State<Units> {
               Navigator.pop(context);
             });
           }
-          else if (state is EditEventLoading) {
-            isLoadingEdit = true;
-          } else if (state is EditEventSuccess) {
-            isLoadingEdit = false;
-
-            var deleteMessage = state.editEventList['message'];
-
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(deleteMessage),
-                backgroundColor: AppColors.primaryColour,
-              ),
-            );
-            Navigator.pop(context);
-
-            Future.delayed(const Duration(milliseconds: 500), () {
-              Navigator.pop(context);
-            });
-          }
-
-
-
-
-          else if (state is EditSuccessFailure) {
-            setState(() {
-              isLoading = false;
-            });
-            print("error>> ${state.deleteAddressFailure}");
-          }
-          if (state is UnitCreateLoading) {
-            setState(() {
-              isLoadingEdit = true;
-            });
-          } else if (state is UnitCreateSuccess) {
-            setState(() {
-              isLoadingEdit = false;
-              var deleteMessage = state.createResponse['message'];
-
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(deleteMessage),
-                  backgroundColor: AppColors.primaryColour,
-                ),
-              );
-              Navigator.pop(context);
-
-              Future.delayed(const Duration(milliseconds: 500), () {
-                Navigator.pop(context);
-              });
-            });
-
-
-
-
-          } else if (state is UnitCreateFailure) {
-            setState(() {
-              isLoading = false;
-            });
-
-            CommonPopups.showCustomPopup(context, state.failureMessage);
-          } else if (state is CheckNetworkConnection) {
-            CommonPopups.showCustomPopup(
-              context,
-              'Internet is not connected.',
-            );
-          }
-
 
 
 
@@ -532,7 +467,12 @@ class _UnitsState extends State<Units> {
                                               MaterialPageRoute(builder: (context) =>  BlocProvider(
                                               create: (context) => AllRequesterBloc(),
                                               child:  UnitEdit(
-                                                screenflag:"Edit"
+                                                id:item["id"].toString() ,
+                                                screenflag:"Edit",
+
+                                                  name:item["name"],
+                                                  billingAddress:item["billing_name"],
+                                                  address:item["address"]
                                               ),
                                               )),
                                               )

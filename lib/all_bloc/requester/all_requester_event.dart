@@ -143,13 +143,7 @@ class EditMasterServiceHandler extends AllRequesterEvent {
 }
 
 
-//Master Category  Services
-class MasterCategoryHandler extends AllRequesterEvent {
-  String search;
-  int page;
-  int size;
-  MasterCategoryHandler(this.search,this.page,this.size);
-}
+
 
 class DeleteMasterCategoryHandlers extends AllRequesterEvent {
   int id;
@@ -187,4 +181,26 @@ class UnitCreateEventHandler extends AllRequesterEvent {
   final String address;
   final String name;
   UnitCreateEventHandler({required this.billingAddress, required this.address, required this.name});
+}
+class UnitUpdateEventHandler extends AllRequesterEvent {
+  final String billingAddress;
+  final String address;
+  final String name;
+  final String id;
+  UnitUpdateEventHandler({required this.billingAddress, required this.address, required this.name, required this.id});
+}
+//product get category
+class GetProductCategoryHandler extends AllRequesterEvent {
+  String search;
+  int page;
+  int size;
+  GetProductCategoryHandler(this.search,this.page,this.size);
+}
+
+//create category
+
+class CategoryCreateEventHandler extends AllRequesterEvent {
+  final String category;
+
+  CategoryCreateEventHandler({required this.category});
 }
