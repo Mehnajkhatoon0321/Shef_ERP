@@ -9,8 +9,6 @@ import 'package:shef_erp/screen/dashboard/vender_dashboard.dart';
 import 'package:shef_erp/screen/onboarding/welcome_screen.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/pref_utils.dart';
-import 'package:flutter/material.dart';
-import 'dart:async';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:shef_erp/utils/asign_vector.dart';
-import 'package:shef_erp/utils/colour_status.dart';
+
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
-import 'package:shef_erp/utils/unit_head_status.dart';
 
 class ViewDetails extends StatefulWidget {
   String requisition;
