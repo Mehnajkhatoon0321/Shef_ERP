@@ -551,7 +551,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                           Padding(
                             padding: EdgeInsets.only(top: 10.h),
                             child: Transform.scale(
-                              scale: 1.3,
+                              scale: 1.2,
+                              
                               child: Checkbox(
                                 value: selectedIndices.contains(index),
                                 activeColor: AppColors.primaryColourDark,
@@ -577,9 +578,9 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                 boxShadow: const [
                                   BoxShadow(
                                     color:  AppColors.primaryColourDark,
-                                    spreadRadius: 1.5,
-                                    blurRadius: 0.4,
-                                    offset: Offset(0, 0.9),
+                                    spreadRadius: 1.6,
+                                    blurRadius: 0.6,
+                                    offset: Offset(0, 1),
                                   ),
                                 ],
                               ),
@@ -705,39 +706,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                             ),
                                           ],
                                         ),
-                                      // else if (item["uh_status"] == 1 && item['pm_status'] == 1 ) // Display edit and delete buttons if uh_status is 0
-                                      //   Row(
-                                      //     children: [
-                                      //       IconButton(
-                                      //         icon: const Icon(Icons.edit, color: Colors.black),
-                                      //         onPressed: () {
-                                      //           Navigator.push(
-                                      //             context,
-                                      //             MaterialPageRoute(
-                                      //               builder: (context) => BlocProvider(
-                                      //                 create: (context) => AllRequesterBloc(),
-                                      //                 child: EditRequisition(id: item["id"].toString() ?? 'N/A'),
-                                      //               ),
-                                      //             ),
-                                      //           );
-                                      //         },
-                                      //       ),
-                                      //       IconButton(
-                                      //         icon: const Icon(Icons.delete, color: Colors.red),
-                                      //         onPressed: () {
-                                      //           CommonPopups.showDeleteCustomPopup(
-                                      //             context,
-                                      //             "Are you sure you want to delete?",
-                                      //                 () {
-                                      //               BlocProvider.of<AllRequesterBloc>(context)
-                                      //                   .add(DeleteHandlers(data[index]['id'] ?? 'N/A'));
-                                      //             },
-                                      //           );
-                                      //         },
-                                      //       ),
-                                      //     ],
-                                      //   ),
-                                      // const SizedBox(width: 16), // Optional spacing
+
                                     ],
                                   ),
 

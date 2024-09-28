@@ -372,3 +372,80 @@ final class CreateCategoryFailure extends AllRequesterState {
   CreateCategoryFailure(this.failureMessage);
 
 }
+
+
+//get user list api
+
+
+final class  GetUserListSuccess extends AllRequesterState {
+  final Map<String ,dynamic> userResponse;
+  GetUserListSuccess(this.userResponse);
+
+}
+final class GetUserListFailure extends AllRequesterState {
+
+  final String failureMessage;
+  GetUserListFailure(this.failureMessage);
+
+}
+//delete user list id
+
+final class UserDeleteLoading extends AllRequesterState{}
+final class  UserDeleteSuccess extends AllRequesterState{
+  final Map<String, dynamic> userDeleteList;
+  UserDeleteSuccess(this.userDeleteList);
+
+}
+
+
+final class  UserDeleteFailure extends AllRequesterState{
+  final Map<String, dynamic> deleteFailure;
+  UserDeleteFailure(this.deleteFailure);
+
+}
+
+//Edits Details
+
+final class UserEditDetailsLoading extends AllRequesterState{}
+final class UserEditDetailsSuccess extends AllRequesterState{
+  final Map<String, dynamic> userEditDeleteList;
+  UserEditDetailsSuccess(this.userEditDeleteList);
+
+}
+
+
+final class  UserEditDetailsFailure extends AllRequesterState{
+  final Map<String, dynamic> deleteEditFailure;
+  UserEditDetailsFailure(this.deleteEditFailure);
+
+}
+
+final class UserBillingLoading extends AllRequesterState{}
+final class UserBillingSuccess extends AllRequesterState{
+  final Map<String, dynamic> BillingList;
+  UserBillingSuccess(this.BillingList);
+
+}
+
+
+final class  BillingFailure extends AllRequesterState{
+  final Map<String, dynamic> billingFailure;
+  BillingFailure(this.billingFailure);
+
+}
+
+///
+
+final class UserBillingDeleteLoading extends AllRequesterState{}
+final class UserBillingDeleteSuccess extends AllRequesterState{
+  final Map<String, dynamic> deleteBillingList;
+  UserBillingDeleteSuccess(this.deleteBillingList);
+
+}
+
+
+final class  UserBillingDeleteFailure extends AllRequesterState{
+  final Map<String, dynamic> billingFailure;
+  UserBillingDeleteFailure(this.billingFailure);
+
+}

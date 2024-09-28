@@ -204,3 +204,40 @@ class CategoryCreateEventHandler extends AllRequesterEvent {
 
   CategoryCreateEventHandler({required this.category});
 }
+//Get UserList
+
+
+class GetUserListHandler extends AllRequesterEvent {
+  String search;
+  int page;
+  int size;
+  GetUserListHandler(this.search,this.page,this.size);
+}
+
+//delete User Id
+
+class DeleteUserIDHandlers extends AllRequesterEvent {
+  int id;
+
+
+  DeleteUserIDHandlers(this.id);
+}
+//Edit Details
+class EditDetailUserHandler extends AllRequesterEvent {
+  String id;
+  EditDetailUserHandler(this.id);
+}
+class GetBillingListHandler extends AllRequesterEvent {
+  String search;
+  int page;
+  int size;
+  GetBillingListHandler(this.search,this.page,this.size);
+}
+//delete billing id
+
+class DeleteBillingHandlers extends AllRequesterEvent {
+  int id;
+
+
+  DeleteBillingHandlers(this.id);
+}

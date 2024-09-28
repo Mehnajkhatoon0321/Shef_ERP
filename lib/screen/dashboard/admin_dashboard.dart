@@ -12,10 +12,12 @@ import 'package:shef_erp/screen/auth_flow/profile_details.dart';
 import 'package:shef_erp/screen/dashboard/requester_dashboard.dart';
 import 'package:shef_erp/screen/dashboard/vender_dashboard.dart';
 import 'package:shef_erp/screen/master/master.dart';
+import 'package:shef_erp/screen/master/master_list/billing.dart';
 import 'package:shef_erp/screen/master/master_list/events.dart';
 import 'package:shef_erp/screen/master/master_list/product_category.dart';
 import 'package:shef_erp/screen/master/master_list/product_service.dart';
 import 'package:shef_erp/screen/master/master_list/units.dart';
+import 'package:shef_erp/screen/master/master_list/user_list.dart';
 import 'package:shef_erp/screen/reports/reports.dart';
 import 'package:shef_erp/screen/requisition/admin/admin_requisition.dart';
 import 'package:shef_erp/screen/requisition/requester/requisition_requester.dart';
@@ -52,6 +54,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
       {
         'icon': Icons.ac_unit,
         "title": 'Units',
+      },
+      {
+        'icon': Icons.person,
+        "title": 'Users',
+      },
+ {
+        'icon': Icons.card_membership_sharp,
+        "title": 'Billing',
       },
 
       {
@@ -723,6 +733,24 @@ class _AdminDashboardState extends State<AdminDashboard> {
   create: (context) => AllRequesterBloc(),
   child:  Units(),
 )),
+        );
+        break;
+      case 'Users':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) =>  BlocProvider(
+            create: (context) => AllRequesterBloc(),
+            child:  UserList(),
+          )),
+        );
+        break;
+        case 'Billing':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) =>  BlocProvider(
+            create: (context) => AllRequesterBloc(),
+            child:  BillingList(),
+          )),
         );
         break;
       default:

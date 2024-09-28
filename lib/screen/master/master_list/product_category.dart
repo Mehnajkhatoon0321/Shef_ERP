@@ -239,6 +239,21 @@ class _ProductCategoryState extends State<ProductCategory> {
       Future.delayed(const Duration(milliseconds: 500), () {
         Navigator.pop(context);
       });
+    }else if (state is DeleteEventCategoryFailure) {
+      DeletePopupManager.stopLoader();
+
+      var deleteMessage = state.deleteEventCategoryFailure['message'];
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(deleteMessage,style: FTextStyle.loginBtnStyle,),
+          backgroundColor: AppColors.primaryColour,
+        ),
+      );
+
+      Future.delayed(const Duration(milliseconds: 500), () {
+        Navigator.pop(context);
+      });
     }
     else if (state is CreateCategorySuccess) {
 

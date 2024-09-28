@@ -597,7 +597,7 @@ print("RequestData>>>>>>>>>>$request");
           final responseData = await response.stream.bytesToString();
 
           developer.log("Response status: ${response.statusCode}");
-          developer.log("Response body: $responseData");
+          developer.log(" Update$responseData");
 
           if (response.statusCode == 200) {
             emit(UnitUpdateSuccess(jsonDecode(responseData)));
@@ -682,7 +682,9 @@ print("RequestData>>>>>>>>>>$request");
             print('Response successful: ${response.statusCode}');
             final responseData = jsonDecode(response.body);
             emit(DeleteServiceCategorySuccess(responseData));
-          } else {
+          }
+
+          else {
             final responseError = jsonDecode(response.body);
             emit(DeleteEventCategoryFailure(responseError));
             developer.log("Error response: ${responseError}");
@@ -703,15 +705,16 @@ print("RequestData>>>>>>>>>>$request");
       if (await ConnectivityService.isConnected()) {
         String authToken = PrefUtils.getToken();
         emit(ServiceCategoryLoading());
+
         try {
           final requestData = json.encode({
             "cate_name": event.category,
-
           });
 
-          developer.log("Requesting create: ${Uri.parse(APIEndPoints.productGetCategoryCreate)}");
+          developer.log(
+              "Requesting create: ${Uri.parse(APIEndPoints.createUnits)}");
 
-          var response = await http.post(
+          final response = await http.post(
             Uri.parse(APIEndPoints.createUnits),
             headers: {
               'Content-Type': 'application/json',
@@ -723,26 +726,219 @@ print("RequestData>>>>>>>>>>$request");
           if (response.statusCode == 200) {
             final responseData = jsonDecode(response.body);
             emit(CreateCategorySuccess(responseData));
-
-          } else {
-            String errorMessage;
-            try {
-              final errorData = jsonDecode(response.body);
-              errorMessage = errorData["message"] ?? "An error occurred";
-            } catch (_) {
-              errorMessage = "An error occurred";
-            }
-            emit(CreateCategoryFailure(errorMessage));
-            developer.log("Create failure: ${response.statusCode} - $errorMessage");
+          } else if (response.statusCode == 401) {
+            final responseError = jsonDecode(response.body);
+            emit(CreateCategoryFailure(responseError));
           }
+          else if (response.statusCode == 500) {
+            final responseError = jsonDecode(response.body);
+            emit(CreateCategoryFailure(responseError));
+          } else {
+            emit(CreateCategoryFailure('Failed to upload requisition'));
+          } // Print request details
+
         } catch (e) {
           if (kDebugMode) {
-            emit(CreateCategoryFailure(e.toString()));
-            developer.log("Error during unit creation: ${e.toString()}");
+            developer.log(e.toString());
           }
+          emit(CreateCategoryFailure('Exception occurred: ${e.toString()}'));
         }
       } else {
-        emit(CheckNetworkConnection("No internet connection"));
+        emit(CreateCategoryFailure('No internet connection'));
+      }
+
+    });
+
+
+    //get user List
+    on<GetUserListHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(UnitLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.getUserList}$userId?page=${event.page}&per_page=${event.size}");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(GetUserListSuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(GetUserListFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(GetUserListFailure('Exception occurred'));
+        }
+      } else {
+        print('Network error');
+        emit(UnitFailure(const {'error': 'Network error'}));
+      }
+    });
+    //get billing address
+
+    //delete user list id
+
+    on<DeleteUserIDHandlers>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(UserDeleteLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+
+          final APIEndpoint = Uri.parse("${APIEndPoints.deleteUserList}${event.id}");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $response");
+
+          if (response.statusCode == 200) {
+            print('response>>>>>>>>>>>>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(UserDeleteSuccess(responseData));
+
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(UserDeleteFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(UserDeleteFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(UserDeleteFailure( {'error': 'Network error'}));
+      }
+    });
+
+    //Edit Details
+
+    on<EditDetailUserHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(UserEditDetailsLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.editDetailsUserList}${event.id}$userId");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(UserEditDetailsSuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(UserEditDetailsFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(UserEditDetailsFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(UserEditDetailsFailure(const {'error': 'Network error'}));
+      }
+    });
+
+    //billing in master section
+    on<GetBillingListHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(UserBillingLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.getBillingList}$userId?page=${event.page}&per_page=${event.size}");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(UserBillingSuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(BillingFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(BillingFailure(const {'error': 'Network error'}));
+        }
+      } else {
+        print('Network error');
+        emit(BillingFailure(const {'error': 'Network error'}));
+      }
+    });
+
+    //delete
+    on<DeleteBillingHandlers>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(UserBillingDeleteLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+
+          final APIEndpoint = Uri.parse("${APIEndPoints.deleteBillingList}${event.id}");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $response");
+
+          if (response.statusCode == 200) {
+            print('response>>>>>>>>>>>>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(UserBillingDeleteSuccess(responseData));
+
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(UserBillingDeleteFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(UserBillingDeleteFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(UserBillingDeleteFailure( {'error': 'Network error'}));
       }
     });
 
