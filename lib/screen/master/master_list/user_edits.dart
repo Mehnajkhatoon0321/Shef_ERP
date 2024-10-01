@@ -167,8 +167,6 @@ class _UserEditsState extends State<UserEdits>{
             });
           } else if (state is UserEditDetailsSuccess) {
             setState(() {
-              //
-              // responseData = state.userEditDeleteList['list'];
 
               unitFromList = state.userEditDeleteList['units'];
 
@@ -178,7 +176,6 @@ class _UserEditsState extends State<UserEdits>{
               var UnitsDataList = state.userEditDeleteList['units'];
               var RoleDataList = state.userEditDeleteList['roles'];
 
-
               UnitNames = UnitsDataList
                   .map<String>((item) => item['name'] as String)
                   .toList();
@@ -186,8 +183,6 @@ class _UserEditsState extends State<UserEdits>{
               RolesNames = RoleDataList
                   .map<String>((item) => item['name'] as String)
                   .toList();
-
-
 
 
             });

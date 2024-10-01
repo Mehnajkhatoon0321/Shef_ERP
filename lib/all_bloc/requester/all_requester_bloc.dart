@@ -1106,41 +1106,41 @@ print("RequestData>>>>>>>>>>$request");
 
 
     //Product service
-
-    on<GetBillingListHandler>((event, emit) async {
-      if (await ConnectivityService.isConnected()) {
-        emit(UserBillingLoading());
-        try {
-          String authToken = PrefUtils.getToken();
-          int userId = PrefUtils.getUserId();
-          final APIEndpoint = Uri.parse("${APIEndPoints.getBillingList}$userId?page=${event.page}&per_page=${event.size}");
-          var response = await http.get(
-            APIEndpoint,
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $authToken',
-
-            },
-          );
-          developer.log("URL: $APIEndpoint");
-          if (response.statusCode == 200) {
-            print('response.statusCode_in>${response.statusCode}');
-            final responseData = jsonDecode(response.body);
-            emit(UserBillingSuccess(responseData));
-
-          }
-          else {
-            final responseError = jsonDecode(response.body);
-            emit(BillingFailure(responseError));
-          }
-        } catch (e) {
-          print('Exception: $e');
-          emit(BillingFailure(const {'error': 'Network error'}));
-        }
-      } else {
-        print('Network error');
-        emit(BillingFailure(const {'error': 'Network error'}));
-      }
-    });
+    //
+    // on<GetBillingListHandler>((event, emit) async {
+    //   if (await ConnectivityService.isConnected()) {
+    //     emit(UserBillingLoading());
+    //     try {
+    //       String authToken = PrefUtils.getToken();
+    //       int userId = PrefUtils.getUserId();
+    //       final APIEndpoint = Uri.parse("${APIEndPoints.getBillingList}$userId?page=${event.page}&per_page=${event.size}");
+    //       var response = await http.get(
+    //         APIEndpoint,
+    //         headers: {
+    //           'Content-Type': 'application/json',
+    //           'Authorization': 'Bearer $authToken',
+    //
+    //         },
+    //       );
+    //       developer.log("URL: $APIEndpoint");
+    //       if (response.statusCode == 200) {
+    //         print('response.statusCode_in>${response.statusCode}');
+    //         final responseData = jsonDecode(response.body);
+    //         emit(UserBillingSuccess(responseData));
+    //
+    //       }
+    //       else {
+    //         final responseError = jsonDecode(response.body);
+    //         emit(BillingFailure(responseError));
+    //       }
+    //     } catch (e) {
+    //       print('Exception: $e');
+    //       emit(BillingFailure(const {'error': 'Network error'}));
+    //     }
+    //   } else {
+    //     print('Network error');
+    //     emit(BillingFailure(const {'error': 'Network error'}));
+    //   }
+    // });
   }
 }
