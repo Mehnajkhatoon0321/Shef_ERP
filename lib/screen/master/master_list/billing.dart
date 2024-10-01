@@ -176,7 +176,10 @@ class _BillingListState extends State<BillingList> {
                     MaterialPageRoute(
                         builder: (context) => BlocProvider(
                               create: (context) => AllRequesterBloc(),
-                              child: BillingEdit(),
+                              child: BillingEdit(screenflag: '', billingAddress: '', address: '', id: '',
+
+
+                              ),
                             )),
                   )
                 },
@@ -219,7 +222,6 @@ class _BillingListState extends State<BillingList> {
               print(">>>>>>>>>>>ALLDATA$responseData");
               totalPages = responseData["total"] ?? 0; // Default to 0 if null
 
-
               if (pageNo == 1) {
                 data.clear();
               }
@@ -238,8 +240,28 @@ class _BillingListState extends State<BillingList> {
               isLoading = false;
             });
             print("error>> ${state.deleteEditFailure}");
-          } else if (state is UserBillingDeleteSuccess) {
+          } else if (state is UserBillingDeleteLoading) {
+            setState(() {
+              isLoading = false;
+            });
             DeletePopupManager.playLoader();
+          } else if (state is UserBillingDeleteSuccess) {
+            DeletePopupManager.stopLoader();
+
+            var deleteMessage = state.deleteBillingList['message'];
+            print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
+            BlocProvider.of<AllRequesterBloc>(context)
+                .add(GetUnitHandler("", pageNo, pageSize));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(deleteMessage),
+                backgroundColor: AppColors.primaryColour,
+              ),
+            );
+
+            Future.delayed(const Duration(milliseconds: 500), () {
+              Navigator.pop(context);
+            });
           } else if (state is UserBillingDeleteFailure) {
             DeletePopupManager.stopLoader();
 
@@ -502,7 +524,7 @@ class _BillingListState extends State<BillingList> {
                                                                           create: (context) =>
                                                                               AllRequesterBloc(),
                                                                           child:
-                                                                              BillingEdit(),
+                                                                              BillingEdit(screenflag: 'Edit', billingAddress: item["billing_name"], address: item["address"], id: item["id"].toString(),),
                                                                         )),
                                                           )
                                                         },

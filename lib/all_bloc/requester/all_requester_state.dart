@@ -463,3 +463,31 @@ final class  UserBillingDeleteFailure extends AllRequesterState{
   UserBillingDeleteFailure(this.billingFailure);
 
 }
+
+//create billing  address
+final class  BillingCreateLoading extends AllRequesterState {}
+
+final class   BillingCreateSuccess extends AllRequesterState {
+  final Map<String ,dynamic> createResponse;
+  BillingCreateSuccess(this.createResponse);
+
+}
+final class BillingCreateFailure extends AllRequesterState {
+
+  final String failureMessage;
+  BillingCreateFailure(this.failureMessage);
+
+}
+//update billing address
+
+final class   BillingUpdateSuccess extends AllRequesterState {
+  final Map<String ,dynamic> updateResponse;
+  BillingUpdateSuccess(this.updateResponse);
+
+}
+final class  BillingUpdateFailure extends AllRequesterState {
+
+  final String failureMessage;
+  BillingUpdateFailure(this.failureMessage);
+
+}

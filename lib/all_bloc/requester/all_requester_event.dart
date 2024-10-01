@@ -246,3 +246,17 @@ class DeleteBillingHandlers extends AllRequesterEvent {
 
   DeleteBillingHandlers(this.id);
 }
+
+class BillingCreateEventHandler extends AllRequesterEvent {
+  final String billingAddress;
+  final String address;
+
+  BillingCreateEventHandler({required this.billingAddress, required this.address});
+}
+class BillingUpdateEventHandler extends AllRequesterEvent {
+  final String billingAddress;
+  final String address;
+
+  final String id;
+  BillingUpdateEventHandler({required this.billingAddress, required this.address, required this.id});
+}

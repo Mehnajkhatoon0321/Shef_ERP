@@ -965,6 +965,8 @@ print("RequestData>>>>>>>>>>$request");
           String authToken = PrefUtils.getToken();
 
           final APIEndpoint = Uri.parse("${APIEndPoints.deleteBillingList}${event.id}");
+
+          print(">>>>>ApiUrl deleteBilling>>>>$APIEndpoint");
           var response = await http.get(
             APIEndpoint,
             headers: {
@@ -974,13 +976,22 @@ print("RequestData>>>>>>>>>>$request");
             },
           );
           developer.log("URL: $response");
+          print(">>>>>Response deleteBilling>>>>$APIEndpoint");
 
           if (response.statusCode == 200) {
             print('response>>>>>>>>>>>>${response.statusCode}');
             final responseData = jsonDecode(response.body);
             emit(UserBillingDeleteSuccess(responseData));
+            print(">>>>>Response deleteBilling>>>>$responseData");
 
-
+          }
+          else if (response.statusCode == 401) {
+            final responseError = jsonDecode(response.body);
+            emit(UserBillingDeleteFailure(responseError));
+          }
+          else if (response.statusCode == 500) {
+            final responseError = jsonDecode(response.body);
+            emit(UserBillingDeleteFailure(responseError));
           }
           else {
             final responseError = jsonDecode(response.body);
@@ -996,5 +1007,140 @@ print("RequestData>>>>>>>>>>$request");
       }
     });
 
+//billing create
+    on<BillingCreateEventHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        String authToken = PrefUtils.getToken();
+        emit(BillingCreateLoading());
+        try {
+          final requestData = json.encode({
+            "billing_name": event.billingAddress,
+            "address": event.address,
+
+          });
+
+          developer.log("Requesting create: ${Uri.parse(APIEndPoints.createBillingList)}");
+
+          var response = await http.post(
+            Uri.parse(APIEndPoints.createBillingList),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+            },
+            body: requestData,
+          );
+
+          if (response.statusCode == 200) {
+            final responseData = jsonDecode(response.body);
+            emit(BillingCreateSuccess(responseData));
+
+          } else {
+            String errorMessage;
+            try {
+              final errorData = jsonDecode(response.body);
+              errorMessage = errorData["message"] ?? "An error occurred";
+            } catch (_) {
+              errorMessage = "An error occurred";
+            }
+            emit(BillingCreateFailure(errorMessage));
+            developer.log("Create failure: ${response.statusCode} - $errorMessage");
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            emit(BillingCreateFailure(e.toString()));
+            developer.log("Error during unit creation: ${e.toString()}");
+          }
+        }
+      } else {
+        emit(CheckNetworkConnection("No internet connection"));
+      }
+    });
+
+    //Update
+    on<BillingUpdateEventHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(BillingCreateLoading());
+
+        try {
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            'Authorization': 'Bearer $authToken',
+          };
+
+          var request = http.MultipartRequest(
+            'POST',
+            Uri.parse(APIEndPoints.updateBillingList),
+          );
+          print("RequestData>>>>>>>>>>$request");
+          request.fields.addAll({
+            'billing_name': event.billingAddress,
+            'address': event.address,
+
+            'id': event.id,
+          });
+
+          request.headers.addAll(headers);
+
+          final response = await request.send();
+          final responseData = await response.stream.bytesToString();
+
+          developer.log("Response status: ${response.statusCode}");
+          developer.log(" Update$responseData");
+
+          if (response.statusCode == 200) {
+            emit(BillingUpdateSuccess(jsonDecode(responseData)));
+          } else {
+
+            emit(BillingUpdateFailure(responseData));
+            developer.log("Update failure: ${response.statusCode} - $responseData");
+          }
+        } catch (e) {
+          emit(BillingUpdateFailure(e.toString()));
+          developer.log("Error during unit update: ${e.toString()}");
+        }
+      } else {
+        emit(CheckNetworkConnection("No internet connection"));
+      }
+    });
+
+
+
+    //Product service
+
+    on<GetBillingListHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(UserBillingLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.getBillingList}$userId?page=${event.page}&per_page=${event.size}");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(UserBillingSuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(BillingFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(BillingFailure(const {'error': 'Network error'}));
+        }
+      } else {
+        print('Network error');
+        emit(BillingFailure(const {'error': 'Network error'}));
+      }
+    });
   }
 }

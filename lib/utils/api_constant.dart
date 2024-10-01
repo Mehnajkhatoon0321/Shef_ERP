@@ -31,4 +31,6 @@ class  APIEndPoints{
 
   static const String getBillingList= '${baseUrl}billing/';
   static const String deleteBillingList= '${baseUrl}billing/delete/';
+  static const String createBillingList= '${baseUrl}billing/create';
+  static const String updateBillingList= '${baseUrl}billing/update';
 }
