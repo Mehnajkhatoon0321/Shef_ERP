@@ -163,7 +163,7 @@ class _ProductCategoryState extends State<ProductCategory> {
             child: SizedBox(
               height: (displayType == 'desktop' || displayType == 'tablet') ? 70 : 43,
               child: ElevatedButton(
-                onPressed: () => _showCategoryDialog(context),
+                onPressed: () => _showCategoryDialog(BlocProvider.of<AllRequesterBloc>(context), context),
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(26),
@@ -462,7 +462,7 @@ class _ProductCategoryState extends State<ProductCategory> {
                                           children: [
                                             IconButton(
                                               icon: const Icon(Icons.edit, color: Colors.black),
-                                              onPressed: () => _showCategoryDialog(context,isEditing: true, index: index),
+                                              onPressed: () => _showCategoryDialog(BlocProvider.of<AllRequesterBloc>(context),context,isEditing: true, index: index),
                                             ),
                                             IconButton(
                                               icon: const Icon(Icons.delete, color: Colors.red),
@@ -514,7 +514,7 @@ class _ProductCategoryState extends State<ProductCategory> {
   }
 
 
-   Future<bool?>  _showCategoryDialog(BuildContext context,{bool isEditing = false, int? index}) async{
+   Future<bool?>  _showCategoryDialog(AllRequesterBloc of,BuildContext context,{bool isEditing = false, int? index}) async{
     final _formKey = GlobalKey<FormState>();
     final _editController = TextEditingController(text: isEditing ? data[index!]["name"] : '');
     bool isButtonEnabled = isEditing ? true : false;
@@ -610,6 +610,7 @@ class _ProductCategoryState extends State<ProductCategory> {
                     ),
                     onPressed: isButtonEnabled ? () {
                       if (_formKey.currentState?.validate() ?? false) {
+                        of.add(CategoryCreateEventHandler(category:_editController.text ));
                         //
                         // Navigator.of(context).pop(true); // Allow the app to be closed
                         // Navigator.pushAndRemoveUntil(
