@@ -20,6 +20,7 @@ class  APIEndPoints{
   static const String productGetCategory= '${baseUrl}category/';
   static const String productGetCategoryDelete= '${baseUrl}category/delete/';
   static const String productGetCategoryCreate= '${baseUrl}category/create';
+  static const String productCategoryUpdate= '${baseUrl}category/update';
 
   //UserList Saturday
   static const String getUserList= '${baseUrl}user/';

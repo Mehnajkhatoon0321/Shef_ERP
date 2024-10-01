@@ -205,7 +205,12 @@ class CategoryCreateEventHandler extends AllRequesterEvent {
   CategoryCreateEventHandler({required this.category});
 }
 //Get UserList
-
+class CategoryUpdateEventHandler extends AllRequesterEvent {
+  final String category;
+  int userId;
+   int id;
+  CategoryUpdateEventHandler({required this.category,required this.userId,required this.id,});
+}
 
 class GetUserListHandler extends AllRequesterEvent {
   String search;

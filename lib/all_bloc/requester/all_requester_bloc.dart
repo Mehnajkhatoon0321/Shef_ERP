@@ -704,7 +704,7 @@ print("RequestData>>>>>>>>>>$request");
     on<CategoryCreateEventHandler>((event, emit) async {
       if (await ConnectivityService.isConnected()) {
         String authToken = PrefUtils.getToken();
-        emit(ServiceCategoryLoading());
+        emit(CreateCategoryLoading());
 
         try {
           final requestData = json.encode({
@@ -712,10 +712,10 @@ print("RequestData>>>>>>>>>>$request");
           });
 
           developer.log(
-              "Requesting create: ${Uri.parse(APIEndPoints.createUnits)}");
+              "Requesting create: ${Uri.parse(APIEndPoints.productGetCategoryCreate)}");
 
           final response = await http.post(
-            Uri.parse(APIEndPoints.createUnits),
+            Uri.parse(APIEndPoints.productGetCategoryCreate),
             headers: {
               'Content-Type': 'application/json',
               'Authorization': 'Bearer $authToken',
@@ -745,6 +745,60 @@ print("RequestData>>>>>>>>>>$request");
         }
       } else {
         emit(CreateCategoryFailure('No internet connection'));
+      }
+
+    });
+
+//Edit Category
+
+    on<CategoryUpdateEventHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        String authToken = PrefUtils.getToken();
+        emit(UpdateCategoryLoading());
+
+        try {
+          final requestData = json.encode({
+            "cate_name": event.category,
+            "user_id": event.userId,
+            "id": event.id,
+          });
+
+          developer.log(
+              "Requesting update: ${Uri.parse(APIEndPoints.productCategoryUpdate)}");
+
+
+          print("requestData>>>>>${requestData}");
+          final response = await http.post(
+            Uri.parse(APIEndPoints.productCategoryUpdate),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+            },
+            body: requestData,
+          );
+
+          if (response.statusCode == 200) {
+            final responseData = jsonDecode(response.body);
+            emit(UpdateCategorySuccess(responseData));
+          } else if (response.statusCode == 401) {
+            final responseError = jsonDecode(response.body);
+            emit(UpdateCategoryFailure(responseError));
+          }
+          else if (response.statusCode == 500) {
+            final responseError = jsonDecode(response.body);
+            emit(UpdateCategoryFailure(responseError));
+          } else {
+            emit(UpdateCategoryFailure({'error': 'Exception occurred: '}));
+          } // Print request details
+
+        } catch (e) {
+          if (kDebugMode) {
+            developer.log(e.toString());
+          }
+          emit(UpdateCategoryFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        emit(UpdateCategoryFailure({'error':'No internet connection'}));
       }
 
     });

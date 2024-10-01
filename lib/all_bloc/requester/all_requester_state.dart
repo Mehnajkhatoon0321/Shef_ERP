@@ -360,7 +360,7 @@ final class UnitUpdateFailure extends AllRequesterState {
 
 }
 //create category
-
+final class CreateCategoryLoading extends AllRequesterState{}
 final class  CreateCategorySuccess extends AllRequesterState {
   final Map<String ,dynamic> createResponse;
   CreateCategorySuccess(this.createResponse);
@@ -370,6 +370,20 @@ final class CreateCategoryFailure extends AllRequesterState {
 
   final String failureMessage;
   CreateCategoryFailure(this.failureMessage);
+
+}
+
+//Update category
+final class UpdateCategoryLoading extends AllRequesterState{}
+final class UpdateCategorySuccess extends AllRequesterState {
+  final Map<String, dynamic> updateResponse;
+  UpdateCategorySuccess(this.updateResponse);
+
+}
+final class UpdateCategoryFailure extends AllRequesterState {
+
+  final Map<String, dynamic> failureMessage;
+  UpdateCategoryFailure(this.failureMessage);
 
 }
 

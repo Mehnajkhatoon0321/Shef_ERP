@@ -9,7 +9,9 @@ import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shef_erp/utils/pref_utils.dart';
 import 'package:shimmer/shimmer.dart';
+
 class ProductCategory extends StatefulWidget {
   const ProductCategory({super.key});
 
@@ -18,19 +20,15 @@ class ProductCategory extends StatefulWidget {
 }
 
 class _ProductCategoryState extends State<ProductCategory> {
-
-
-
   int pageNo = 1;
   int totalPages = 0;
   int pageSize = 5;
   bool hasMoreData = true;
-  List<dynamic> data = [
-
-  ];
+  List<dynamic> data = [];
   final controller = ScrollController();
   final controllerI = ScrollController();
   bool isLoading = false;
+  bool isLoadingCreate = false;
   TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
 
@@ -139,6 +137,7 @@ class _ProductCategoryState extends State<ProductCategory> {
       }
     });
   }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -161,9 +160,12 @@ class _ProductCategoryState extends State<ProductCategory> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: SizedBox(
-              height: (displayType == 'desktop' || displayType == 'tablet') ? 70 : 43,
+              height: (displayType == 'desktop' || displayType == 'tablet')
+                  ? 70
+                  : 43,
               child: ElevatedButton(
-                onPressed: () => _showCategoryDialog(BlocProvider.of<AllRequesterBloc>(context), context),
+                onPressed: () => _showCategoryDialog(
+                    BlocProvider.of<AllRequesterBloc>(context), context),
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(26),
@@ -172,7 +174,8 @@ class _ProductCategoryState extends State<ProductCategory> {
                 ),
                 child: Text(
                   "Add +",
-                  style: FTextStyle.loginBtnStyle.copyWith(color: AppColors.primaryColourDark),
+                  style: FTextStyle.loginBtnStyle
+                      .copyWith(color: AppColors.primaryColourDark),
                 ),
               ),
             ),
@@ -191,318 +194,366 @@ class _ProductCategoryState extends State<ProductCategory> {
         ),
       ),
       body: BlocListener<AllRequesterBloc, AllRequesterState>(
-  listener: (context, state) {
+        listener: (context, state) {
+          if (state is ServiceCategoryLoading) {
+            setState(() {
+              isLoading = true;
+            });
+          } else if (state is ServiceCategorySuccess) {
+            setState(() {
+              var responseData = state.serviceCategoryList['list'];
+              print(">>>>>>>>>>>ALLDATA$responseData");
+              totalPages = responseData["total"];
 
-    if (state is ServiceCategoryLoading) {
-      setState(() {
-        isLoading = true;
-      });
-    } else if (state is ServiceCategorySuccess) {
-      setState(() {
-        var responseData = state.serviceCategoryList['list'];
-        print(">>>>>>>>>>>ALLDATA$responseData");
-        totalPages = responseData["total"];
+              if (pageNo == 1) {
+                data.clear();
+              }
 
-        if (pageNo == 1) {
-          data.clear();
-        }
+              data.addAll(responseData['data']);
 
-        data.addAll(responseData['data']);
+              setState(() {
+                isLoading = false;
+                if (pageNo == totalPages) {
+                  hasMoreData = false;
+                }
+              });
+            });
+          } else if (state is EventFailure) {
+            setState(() {
+              isLoading = false;
+            });
+            print("error>> ${state.eventFailure}");
+          } else if (state is DeleteServiceCategoryLoading) {
+            DeletePopupManager.playLoader();
+          } else if (state is DeleteServiceCategorySuccess) {
+            DeletePopupManager.stopLoader();
 
-        setState(() {
-          isLoading = false;
-          if (pageNo == totalPages) {
-            hasMoreData = false;
-          }
-        });
-      });
-    } else if (state is EventFailure) {
-      setState(() {
-        isLoading = false;
-      });
-      print("error>> ${state.eventFailure}");
-    }
-    else if (state is DeleteServiceCategoryLoading) {
-      DeletePopupManager.playLoader();
-    } else if (state is DeleteServiceCategorySuccess) {
-      DeletePopupManager.stopLoader();
+            var deleteMessage = state.deleteEventCategoryList['message'];
 
-      var deleteMessage = state.deleteEventCategoryList['message'];
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(deleteMessage),
-          backgroundColor: AppColors.primaryColour,
-        ),
-      );
-
-      Future.delayed(const Duration(milliseconds: 500), () {
-        Navigator.pop(context);
-      });
-    }else if (state is DeleteEventCategoryFailure) {
-      DeletePopupManager.stopLoader();
-
-      var deleteMessage = state.deleteEventCategoryFailure['message'];
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(deleteMessage,style: FTextStyle.loginBtnStyle,),
-          backgroundColor: AppColors.primaryColour,
-        ),
-      );
-
-      Future.delayed(const Duration(milliseconds: 500), () {
-        Navigator.pop(context);
-      });
-    }
-    else if (state is CreateCategorySuccess) {
-
-
-      var deleteMessage = state.createResponse['message'];
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(deleteMessage),
-          backgroundColor: AppColors.primaryColour,
-        ),
-      );
-
-      Future.delayed(const Duration(milliseconds: 500), () {
-        Navigator.pop(context);
-      });
-    }
-    else if (state is CreateCategoryFailure) {
-
-      var deleteMessage = state.failureMessage;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(deleteMessage),
-          backgroundColor: AppColors.primaryColour,
-        ),
-      );
-
-      Future.delayed(const Duration(milliseconds: 500), () {
-        Navigator.pop(context);
-      });
-      setState(() {
-        isLoading = false;
-      });
-      print("error>> ${state.failureMessage}");
-    }
-    // TODO: implement listener
-  },
-  child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05, vertical: 10),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(23.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    spreadRadius: 2,
-                    blurRadius: 4,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(deleteMessage),
+                backgroundColor: AppColors.primaryColour,
               ),
-              child: TextFormField(
-                controller: _controller,
-                decoration: InputDecoration(
-                  hintText: 'Search',
-                  hintStyle: FTextStyle.formhintTxtStyle,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
-                  suffixIcon: _isTextEmpty
-                      ? const Icon(Icons.search, color: AppColors.primaryColourDark)
-                      : IconButton(
-                    icon: const Icon(Icons.clear, color: AppColors.primaryColourDark),
-                    onPressed: _clearText,
-                  ),
-                  fillColor: Colors.grey[100],
-                  filled: true,
+            );
+
+            Future.delayed(const Duration(milliseconds: 500), () {
+              Navigator.pop(context);
+            });
+          } else if (state is DeleteEventCategoryFailure) {
+            DeletePopupManager.stopLoader();
+
+            var deleteMessage = state.deleteEventCategoryFailure['message'];
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  deleteMessage,
+                  style: FTextStyle.loginBtnStyle,
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    _isTextEmpty = value.isEmpty;
-                  });
-                },
+                backgroundColor: AppColors.primaryColour,
+              ),
+            );
+
+            Future.delayed(const Duration(milliseconds: 500), () {
+              Navigator.pop(context);
+            });
+          } else if (state is CreateCategoryLoading) {
+            setState(() {
+              isLoadingCreate = true;
+            });
+          } else if (state is CreateCategorySuccess) {
+            isLoadingCreate = false;
+
+            var deleteMessage = state.createResponse['message'];
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(deleteMessage),
+                backgroundColor: AppColors.primaryColour,
+              ),
+            );
+
+            Future.delayed(const Duration(milliseconds: 500), () {
+              Navigator.pop(context);
+            });
+          } else if (state is CreateCategoryFailure) {
+            var deleteMessage = state.failureMessage;
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(deleteMessage),
+                backgroundColor: AppColors.primaryColour,
+              ),
+            );
+
+            Future.delayed(const Duration(milliseconds: 500), () {
+              Navigator.pop(context);
+            });
+            setState(() {
+              isLoadingCreate = false;
+            });
+            print("error>> ${state.failureMessage}");
+          }
+          // TODO: implement listener
+        },
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.05, vertical: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(23.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      spreadRadius: 2,
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: TextFormField(
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    hintText: 'Search',
+                    hintStyle: FTextStyle.formhintTxtStyle,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(23.0),
+                      borderSide: const BorderSide(
+                          color: AppColors.primaryColourDark, width: 1.0),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(23.0),
+                      borderSide: const BorderSide(
+                          color: AppColors.primaryColourDark, width: 1.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(23.0),
+                      borderSide: const BorderSide(
+                          color: AppColors.primaryColourDark, width: 1.0),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 13.0, horizontal: 18.0),
+                    suffixIcon: _isTextEmpty
+                        ? const Icon(Icons.search,
+                            color: AppColors.primaryColourDark)
+                        : IconButton(
+                            icon: const Icon(Icons.clear,
+                                color: AppColors.primaryColourDark),
+                            onPressed: _clearText,
+                          ),
+                    fillColor: Colors.grey[100],
+                    filled: true,
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _isTextEmpty = value.isEmpty;
+                    });
+                  },
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: isLoading
-                ? Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
-              child: ListView.builder(
-                itemCount: 10, // Number of shimmer placeholders
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: screenWidth * 0.03, vertical: 5),
-                    child: Container(
-                      margin: const EdgeInsets.all(8),
-                      padding: const EdgeInsets.all(7),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            spreadRadius: 2,
-                            blurRadius: 4,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  height: 10,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(height: 5),
-                                Container(
-                                  height: 10,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(height: 5),
-                                Container(
-                                  height: 10,
-                                  color: Colors.grey,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            )
-                : data.isEmpty
-                ? Center(
+            Expanded(
               child: isLoading
-                  ? const CircularProgressIndicator() // Show circular progress indicator
-                  : const Text("No more data .",
-                  style: FTextStyle.listTitle),
-            )
-                :   ListView.builder(
-              itemCount: data.length,
-              itemBuilder: (BuildContext context, int index) {
-                final item = data[index];
-                return GestureDetector(
-                  onTap: () {
-                    // Handle tap event if needed
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            margin: const EdgeInsets.all(2),
-                            padding: const EdgeInsets.all(7),
-                            decoration: BoxDecoration(
-                              color: index % 2 == 0 ? Colors.white : Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primaryColourDark,
-
-                                  spreadRadius: 1.5,
-                                  blurRadius: 0.4,
-                                  offset: const Offset(0, 0.9),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
+                  ? Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: ListView.builder(
+                        itemCount: 10, // Number of shimmer placeholders
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: screenWidth * 0.03, vertical: 5),
+                            child: Container(
+                              margin: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(7),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    spreadRadius: 2,
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        const Text("ID: ", style: FTextStyle.listTitle),
-                                        Text("${item["id"]}", style: FTextStyle.listTitleSub),
+                                        Container(
+                                          height: 10,
+                                          color: Colors.grey,
+                                        ),
+                                        const SizedBox(height: 5),
+                                        Container(
+                                          height: 10,
+                                          color: Colors.grey,
+                                        ),
+                                        const SizedBox(height: 5),
+                                        Container(
+                                          height: 10,
+                                          color: Colors.grey,
+                                        ),
                                       ],
                                     ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            const Text("Name: ", style: FTextStyle.listTitle),
-                                            Text("${item["cate_name"]}", style: FTextStyle.listTitleSub),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                  : data.isEmpty
+                      ? Center(
+                          child: isLoading
+                              ? const CircularProgressIndicator() // Show circular progress indicator
+                              : const Text("No more data .",
+                                  style: FTextStyle.listTitle),
+                        )
+                      : ListView.builder(
+                          itemCount: data.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final item = data[index];
+                            return GestureDetector(
+                              onTap: () {
+                                // Handle tap event if needed
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: screenWidth * 0.03,
+                                    vertical: 5),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        margin: const EdgeInsets.all(2),
+                                        padding: const EdgeInsets.all(7),
+                                        decoration: BoxDecoration(
+                                          color: index % 2 == 0
+                                              ? Colors.white
+                                              : Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  AppColors.primaryColourDark,
+                                              spreadRadius: 1.5,
+                                              blurRadius: 0.4,
+                                              offset: const Offset(0, 0.9),
+                                            ),
                                           ],
                                         ),
-                                        Row(
+                                        child: Column(
                                           children: [
-                                            IconButton(
-                                              icon: const Icon(Icons.edit, color: Colors.black),
-                                              onPressed: () => _showCategoryDialog(BlocProvider.of<AllRequesterBloc>(context),context,isEditing: true, index: index),
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(Icons.delete, color: Colors.red),
-                                              onPressed: () => {
-                                                CommonPopups
-                                                    .showDeleteCustomPopup(
-                                                  context,
-                                                  "Are you sure you want to delete?",
-                                                      () {
-                                                    BlocProvider.of<
-                                                        AllRequesterBloc>(
-                                                        context)
-                                                        .add(DeleteMasterCategoryHandlers(
-                                                        data[index][
-                                                        'id']));
-                                                  },
-                                                )
-                                              },
-                                            ),
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    const Text("ID: ",
+                                                        style: FTextStyle
+                                                            .listTitle),
+                                                    Text("${item["id"]}",
+                                                        style: FTextStyle
+                                                            .listTitleSub),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        const Text("Name: ",
+                                                            style: FTextStyle
+                                                                .listTitle),
+                                                        Text(
+                                                            "${item["cate_name"]}",
+                                                            style: FTextStyle
+                                                                .listTitleSub),
+                                                      ],
+                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        IconButton(
+                                                          icon: const Icon(
+                                                              Icons.edit,
+                                                              color:
+                                                                  Colors.black),
+                                                          onPressed: () =>
+                                                              _showCategoryDialog(
+                                                                  BlocProvider.of<
+                                                                          AllRequesterBloc>(
+                                                                      context),
+                                                                  context,
+                                                                  isEditing:
+                                                                      true,
+                                                                  index: index),
+                                                        ),
+                                                        IconButton(
+                                                          icon: const Icon(
+                                                              Icons.delete,
+                                                              color:
+                                                                  Colors.red),
+                                                          onPressed: () {
+                                                          final localContext = context; // Capture context
+
+                                                          CommonPopups.showDeleteCustomPopup(
+                                                            localContext,
+                                                              "Are you sure you want to delete?",
+                                                              () async {
+                                                                await Future.delayed(const Duration(seconds: 1));
+
+                                                                if (!mounted) return; // Check if still mounted
+
+                                                                BlocProvider.of<AllRequesterBloc>(localContext).add(
+                                                                  DeleteMasterCategoryHandlers(data[index]['id']),
+                                                                );
+                                                                // BlocProvider.of<AllRequesterBloc>(context).add(DeleteMasterCategoryHandlers(data[index]['id']));
+                                                             // print("================");
+                                                              },
+                                                            );
+                                                          },
+                                                        ),
+                                                      ],
+                                                    ).animateOnPageLoad(
+                                                        animationsMap[
+                                                            'imageOnPageLoadAnimation2']!),
+                                                  ],
+                                                ),
+                                              ],
+                                            ).animateOnPageLoad(animationsMap[
+                                                'imageOnPageLoadAnimation2']!),
                                           ],
-                                        ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                                      ],
+                                        ),
+                                      ),
                                     ),
                                   ],
-                                ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                              ],
-                            ),
-                          ),
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      ],
-                    ),
-                  ),
-                );
-              },
             ),
-          ),
-          const SizedBox(height: 20),
-        ],
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
-),
     );
   }
 
@@ -513,10 +564,11 @@ class _ProductCategoryState extends State<ProductCategory> {
     });
   }
 
-
-   Future<bool?>  _showCategoryDialog(AllRequesterBloc of,BuildContext context,{bool isEditing = false, int? index}) async{
+  Future<bool?> _showCategoryDialog(AllRequesterBloc of, BuildContext context,
+      {bool isEditing = false, int? index}) async {
     final _formKey = GlobalKey<FormState>();
-    final _editController = TextEditingController(text: isEditing ? data[index!]["name"] : '');
+    final _editController =
+        TextEditingController(text: isEditing ? data[index!]["cate_name"] : '');
     bool isButtonEnabled = isEditing ? true : false;
 
     showDialog(
@@ -530,103 +582,206 @@ class _ProductCategoryState extends State<ProductCategory> {
               });
             });
 
-            return AlertDialog(
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(32.0),
-              ),
-              title: Text(
-                isEditing ? "Edit Product / Service Category" : "Create Product / Service Category",
-                style: FTextStyle.preHeading16BoldStyle,
-              ),
-              content: Container(
-                width: MediaQuery.of(context).size.width * 0.7,
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text("Category Name", style: FTextStyle.preHeadingStyle),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextFormField(
-                          controller: _editController,
-                          decoration: InputDecoration(
-                            hintText: "Enter Category",
-                            hintStyle: FTextStyle.formhintTxtStyle,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(23.0),
-                              borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
+            return BlocProvider.value(
+              value: of,  // Use the existing Bloc instance
+              child: AlertDialog(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(32.0),
+                ),
+                title: Text(
+                  isEditing
+                      ? "Edit Product / Service Category"
+                      : "Create Product / Service Category",
+                  style: FTextStyle.preHeading16BoldStyle,
+                ),
+                content: Container(
+                  width: MediaQuery.of(context).size.width * 0.7,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text("Category Name",
+                            style: FTextStyle.preHeadingStyle),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            controller: _editController,
+                            decoration: InputDecoration(
+                              hintText: "Enter Category",
+                              hintStyle: FTextStyle.formhintTxtStyle,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(23.0),
+                                borderSide: const BorderSide(
+                                    color: AppColors.formFieldHintColour,
+                                    width: 1.0),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(23.0),
+                                borderSide: const BorderSide(
+                                    color: AppColors.formFieldHintColour,
+                                    width: 1.0),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(23.0),
+                                borderSide: const BorderSide(
+                                    color: AppColors.primaryColourDark,
+                                    width: 1.0),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 13.0, horizontal: 18.0),
+                              fillColor: Colors.grey[100],
+                              filled: true,
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(23.0),
-                              borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(23.0),
-                              borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
-                            fillColor: Colors.grey[100],
-                            filled: true,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter a category';
+                              }
+                              return null;
+                            },
                           ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter a category';
-                            }
-                            return null;
-                          },
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              actions: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.formFieldBackColour,
-                    borderRadius: BorderRadius.circular(25.0),
-                  ),
-                  child: TextButton(
-                    child: const Text("Cancel", style: TextStyle(color: Colors.black)),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                ),
-                const SizedBox(width: 10),
-                Container(
-                  decoration: BoxDecoration(
-                    color: isButtonEnabled ? AppColors.primaryColourDark! : AppColors.formFieldBorderColour,
-                    borderRadius: BorderRadius.circular(25.0),
-                  ),
-                  child: TextButton(
-                    child: Text(
-                      isEditing ? "Save" : "Add",
-                      style: TextStyle(color: isButtonEnabled ? Colors.white : Colors.white),
+                      ],
                     ),
-                    onPressed: isButtonEnabled ? () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        of.add(CategoryCreateEventHandler(category:_editController.text ));
-                        //
-                        // Navigator.of(context).pop(true); // Allow the app to be closed
-                        // Navigator.pushAndRemoveUntil(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) =>
-                        //       BlocProvider(
-                        //         create: (context) => AllRequesterBloc(),
-                        //         child: CategoryCreateEventHandler(category:_editController.text ),
-                        //       )),
-                        //       (Route<dynamic> route) => false,
-                        // );
-                      }
-                    } : null,
-                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                  ),
                 ),
-              ],
+                actions: [
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.formFieldBackColour,
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
+                    child: TextButton(
+                      child: const Text("Cancel",
+                          style: TextStyle(color: Colors.black)),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ).animateOnPageLoad(
+                        animationsMap['imageOnPageLoadAnimation2']!),
+                  ),
+                  const SizedBox(width: 10),
+                  BlocListener<AllRequesterBloc, AllRequesterState>(
+                    listener: (context, state) {
+                      if (state is CreateCategoryLoading) {
+                        setState(() {
+                          isLoadingCreate = true;
+                        });
+                      } else if (state is CreateCategorySuccess) {
+                        isLoadingCreate = false;
+
+                        if (state.createResponse is Map && state.createResponse.containsKey('message')) {
+                          var deleteMessage = state.createResponse['message'];
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(deleteMessage),
+                              backgroundColor: AppColors.primaryColour,
+                            ),
+                          );
+                        }
+
+
+                        Future.delayed(const Duration(milliseconds: 500), () {
+                          Navigator.pop(context);
+                        });
+                      } else if (state is CreateCategoryFailure) {
+                        var deleteMessage = state.failureMessage;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(deleteMessage),
+                            backgroundColor: AppColors.primaryColour,
+                          ),
+                        );
+
+                        Future.delayed(const Duration(milliseconds: 500), () {
+                          Navigator.pop(context);
+                        });
+                        setState(() {
+                          isLoadingCreate = false;
+                        });
+                        print("error>> ${state.failureMessage}");
+                      }
+                    else  if (state is UpdateCategoryLoading) {
+                        setState(() {
+                          isLoadingCreate = true;
+                        });
+                      } else if (state is UpdateCategorySuccess) {
+                        isLoadingCreate = false;
+
+
+
+                        var update = state.updateResponse['message'];
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(update),
+                            backgroundColor: AppColors.primaryColour,
+                          ),
+                        );
+
+                        Future.delayed(const Duration(milliseconds: 500), () {
+                          Navigator.pop(context);
+                        });
+                      } else if (state is UpdateCategoryFailure) {
+                        var deleteMessage = state.failureMessage['message'];
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(deleteMessage),
+                            backgroundColor: AppColors.primaryColour,
+                          ),
+                        );
+
+                        Future.delayed(const Duration(milliseconds: 500), () {
+                          Navigator.pop(context);
+                        });
+                        setState(() {
+                          isLoadingCreate = false;
+                        });
+                        print("error>> ${state.failureMessage}");
+                      }
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isButtonEnabled
+                            ? AppColors.primaryColourDark
+                            : AppColors.formFieldBorderColour,
+                        borderRadius: BorderRadius.circular(25.0),
+                      ),
+                      child: TextButton(
+                        child: isLoadingCreate
+                            ? CircularProgressIndicator(color: Colors.white)
+                            : Text(
+                                isEditing ? "Save" : "Add",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                        onPressed: isButtonEnabled
+                            ? () {
+                                if (_formKey.currentState?.validate() ??
+                                    false) {
+                                  if (mounted) {  // Check if the widget is still mounted
+                                    if (isEditing) {
+                                      of.add(CategoryUpdateEventHandler(
+                                        category: _editController.text,
+                                        userId: PrefUtils.getUserId(),
+                                        id: data[index!]["id"],
+                                      ));
+                                    } else {
+                                      of.add(CategoryCreateEventHandler(category: _editController.text));
+                                    }
+                                  }
+                                }
+                        } : null,
+                      ).animateOnPageLoad(
+                          animationsMap['imageOnPageLoadAnimation2']!),
+                    ),
+                  )
+                ],
+              ),
             ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation1']!);
           },
         );
@@ -634,5 +789,3 @@ class _ProductCategoryState extends State<ProductCategory> {
     );
   }
 }
-
-
