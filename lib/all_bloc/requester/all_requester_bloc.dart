@@ -890,7 +890,7 @@ print("RequestData>>>>>>>>>>$request");
         try {
           String authToken = PrefUtils.getToken();
           int userId = PrefUtils.getUserId();
-          final APIEndpoint = Uri.parse("${APIEndPoints.editDetailsUserList}${event.id}$userId");
+          final APIEndpoint = Uri.parse("${APIEndPoints.editDetailsUserList}${event.id}");
           var response = await http.get(
             APIEndpoint,
             headers: {
@@ -919,6 +919,131 @@ print("RequestData>>>>>>>>>>$request");
         emit(UserEditDetailsFailure(const {'error': 'Network error'}));
       }
     });
+
+    //user update
+    on<UserUpdateEventHandler>((event, emit) async {
+      // Check for internet connectivity
+      if (await ConnectivityService.isConnected()) {
+        emit(UserUpdateLoading());
+
+        try {
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            'Authorization': 'Bearer $authToken',
+          };
+
+          var request = http.MultipartRequest(
+            'POST',
+            Uri.parse(APIEndPoints.updateDetailsUserList),
+          );
+
+          // Log the request details for debugging
+          developer.log("Request Data: ${request.toString()}");
+
+          // Add fields to the request
+          request.fields.addAll({
+            'name': event.name,
+            'email': event.email,
+            'contact': event.contact,
+            'address': event.address,
+            'designation': event.designation,
+            'password': event.password,
+            'roles': event.role,
+            'id': event.id,
+            'unitid': event.unitID,
+          });
+
+          // Add headers to the request
+          request.headers.addAll(headers);
+
+          // Send the request
+          final response = await request.send();
+          final responseData = await response.stream.bytesToString();
+
+          // Log the response status and data
+          developer.log("Response status: ${response.statusCode}");
+          developer.log("Update response: $responseData");
+
+          // Handle the response based on status code
+          if (response.statusCode == 200) {
+            emit(UserUpdateSuccess(jsonDecode(responseData)));
+          } else {
+            // Assuming the error response format is JSON
+            final responseError = jsonDecode(responseData);
+            emit(UserUpdateFailure(responseError));
+            developer.log("Update failure: ${response.statusCode} - ${responseError['message'] ?? responseData}");
+          }
+        } catch (e) {
+          emit(AuthFlowServerFailure(e.toString()));
+          developer.log("Error during user update: ${e.toString()}");
+        }
+      } else {
+        emit(CheckNetworkConnection("No internet connection"));
+      }
+    });
+    //user create
+
+    on<UserCreateEventHandler>((event, emit) async {
+      // Check for internet connectivity
+      if (await ConnectivityService.isConnected()) {
+        emit(UserCreateLoading());
+
+        try {
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            'Authorization': 'Bearer $authToken',
+          };
+
+          var request = http.MultipartRequest(
+            'POST',
+            Uri.parse(APIEndPoints.createDetailsUserList),
+          );
+
+          // Log the request details for debugging
+          developer.log("Request Data: ${request.toString()}");
+
+          // Add fields to the request
+          request.fields.addAll({
+            'name': event.name,
+            'email': event.email,
+            'contact': event.contact,
+            'address': event.address,
+            'designation': event.designation,
+            'password': event.password,
+            'roles': event.role,
+            'id': event.id,
+            'unitid': event.unitID,
+          });
+
+          // Add headers to the request
+          request.headers.addAll(headers);
+
+          // Send the request
+          final response = await request.send();
+          final responseData = await response.stream.bytesToString();
+
+          // Log the response status and data
+          developer.log("Response status: ${response.statusCode}");
+          developer.log("Update response: $responseData");
+
+          // Handle the response based on status code
+          if (response.statusCode == 200) {
+            emit(UserCreateSuccess(jsonDecode(responseData)));
+          } else {
+            // Assuming the error response format is JSON
+            final responseError = jsonDecode(responseData);
+            emit(UserCreateFailure(responseError));
+            developer.log("Update failure: ${response.statusCode} - ${responseError['message'] ?? responseData}");
+          }
+        } catch (e) {
+          emit(AuthFlowServerFailure(e.toString()));
+          developer.log("Error during user update: ${e.toString()}");
+        }
+      } else {
+        emit(CheckNetworkConnection("No internet connection"));
+      }
+    });
+
 
     //billing in master section
     on<GetBillingListHandler>((event, emit) async {
@@ -956,6 +1081,7 @@ print("RequestData>>>>>>>>>>$request");
         emit(BillingFailure(const {'error': 'Network error'}));
       }
     });
+
 
     //delete
     on<DeleteBillingHandlers>((event, emit) async {
@@ -1007,7 +1133,7 @@ print("RequestData>>>>>>>>>>$request");
       }
     });
 
-//billing create
+    //billing create
     on<BillingCreateEventHandler>((event, emit) async {
       if (await ConnectivityService.isConnected()) {
         String authToken = PrefUtils.getToken();
@@ -1103,44 +1229,291 @@ print("RequestData>>>>>>>>>>$request");
       }
     });
 
+       //product Service list
+
+    on<MasterServiceHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(ServiceLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.getProductList}$userId?page=${event.page}&per_page=${event.size}");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(ServiceSuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(ServiceFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(ServiceFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(ServiceFailure(const {'error': 'Network error'}));
+      }
+    });
 
 
-    //Product service
-    //
-    // on<GetBillingListHandler>((event, emit) async {
-    //   if (await ConnectivityService.isConnected()) {
-    //     emit(UserBillingLoading());
-    //     try {
-    //       String authToken = PrefUtils.getToken();
-    //       int userId = PrefUtils.getUserId();
-    //       final APIEndpoint = Uri.parse("${APIEndPoints.getBillingList}$userId?page=${event.page}&per_page=${event.size}");
-    //       var response = await http.get(
-    //         APIEndpoint,
-    //         headers: {
-    //           'Content-Type': 'application/json',
-    //           'Authorization': 'Bearer $authToken',
-    //
-    //         },
-    //       );
-    //       developer.log("URL: $APIEndpoint");
-    //       if (response.statusCode == 200) {
-    //         print('response.statusCode_in>${response.statusCode}');
-    //         final responseData = jsonDecode(response.body);
-    //         emit(UserBillingSuccess(responseData));
-    //
-    //       }
-    //       else {
-    //         final responseError = jsonDecode(response.body);
-    //         emit(BillingFailure(responseError));
-    //       }
-    //     } catch (e) {
-    //       print('Exception: $e');
-    //       emit(BillingFailure(const {'error': 'Network error'}));
-    //     }
-    //   } else {
-    //     print('Network error');
-    //     emit(BillingFailure(const {'error': 'Network error'}));
-    //   }
-    // });
+    //product delete
+
+    on<DeleteMasterServiceHandlers>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(DeleteServiceLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+
+          final APIEndpoint = Uri.parse("${APIEndPoints.deleteProductList}$userId/${event.id}");
+
+          print(">>>>>ApiUrl deleteBilling>>>>$APIEndpoint");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $response");
+          print(">>>>>Response deleteBilling>>>>$APIEndpoint");
+
+          if (response.statusCode == 200) {
+            print('response>>>>>>>>>>>>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(DeleteServiceSuccess(responseData));
+            print(">>>>>Response deleteBilling>>>>$responseData");
+
+          }
+          else if (response.statusCode == 401) {
+            final responseError = jsonDecode(response.body);
+            emit(DeleteEventServiceFailure(responseError));
+          }
+          else if (response.statusCode == 500) {
+            final responseError = jsonDecode(response.body);
+            emit(DeleteEventServiceFailure(responseError));
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(DeleteEventServiceFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(DeleteEventServiceFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(DeleteEventServiceFailure( {'error': 'Network error'}));
+      }
+    });
+
+
+//product edit
+
+    on<ProductEditDetailUserHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(ProductEditDetailsLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.EditList}${event.id}");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(ProductEditSuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(ProductEditFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(ProductEditFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(ProductEditFailure(const {'error': 'Network error'}));
+      }
+    });
+
+    //product create
+
+    on<ProductListUserHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(ProductEditListLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.getEditList}/$userId");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(ProductEditListSuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(ProductEditListFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(ProductEditListFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(ProductEditListFailure(const {'error': 'Network error'}));
+      }
+    });
+
+    //create product post api
+    on<ProductCreateEventHandler>((event, emit) async {
+      // Check for internet connectivity
+      if (await ConnectivityService.isConnected()) {
+        emit(CreateProductLoading());
+
+        try {
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            'Authorization': 'Bearer $authToken',
+          };
+
+          var request = http.MultipartRequest(
+            'POST',
+            Uri.parse(APIEndPoints.createProductList),
+          );
+
+          // Log the request details for debugging
+          developer.log("Request Data: ${request.toString()}");
+
+          // Add fields to the request
+          request.fields.addAll({
+            'name': event.name,
+            'cate': event.cateName,
+            'specification': event.specification,
+            'user_id': event.user_id,
+
+
+          });
+
+          // Add headers to the request
+          request.headers.addAll(headers);
+
+          // Send the request
+          final response = await request.send();
+          final responseData = await response.stream.bytesToString();
+
+          // Log the response status and data
+          developer.log("Response status: ${response.statusCode}");
+          developer.log("Update response: $responseData");
+
+          // Handle the response based on status code
+          if (response.statusCode == 200) {
+            emit(CreateProductSuccess(jsonDecode(responseData)));
+          } else {
+            // Assuming the error response format is JSON
+            final responseError = jsonDecode(responseData);
+            emit(CreateProductFailure(responseError));
+            developer.log("Update failure: ${response.statusCode} - ${responseError['message'] ?? responseData}");
+          }
+        } catch (e) {
+          emit(AuthFlowServerFailure(e.toString()));
+          developer.log("Error during user update: ${e.toString()}");
+        }
+      } else {
+        emit(CheckNetworkConnection("No internet connection"));
+      }
+    });
+
+    //product update
+
+    on<ProductUpdateEventHandler>((event, emit) async {
+      // Check for internet connectivity
+      if (await ConnectivityService.isConnected()) {
+        emit(UpdateProductLoading());
+
+        try {
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            'Authorization': 'Bearer $authToken',
+          };
+
+          var request = http.MultipartRequest(
+            'POST',
+            Uri.parse(APIEndPoints.updateProductList),
+          );
+
+          // Log the request details for debugging
+          developer.log("Request Data: ${request.toString()}");
+
+          // Add fields to the request
+          request.fields.addAll({
+            'name': event.name,
+            'cate': event.cateName,
+            'specification': event.specification,
+            'user_id': event.user_id,
+
+
+          });
+
+          // Add headers to the request
+          request.headers.addAll(headers);
+
+          // Send the request
+          final response = await request.send();
+          final responseData = await response.stream.bytesToString();
+
+          // Log the response status and data
+          developer.log("Response status: ${response.statusCode}");
+          developer.log("Update response: $responseData");
+
+          // Handle the response based on status code
+          if (response.statusCode == 200) {
+            emit(UpdateProductSuccess(jsonDecode(responseData)));
+          } else {
+            // Assuming the error response format is JSON
+            final responseError = jsonDecode(responseData);
+            emit(UpdateProductFailure(responseError));
+            developer.log("Update failure: ${response.statusCode} - ${responseError['message'] ?? responseData}");
+          }
+        } catch (e) {
+          emit(AuthFlowServerFailure(e.toString()));
+          developer.log("Error during user update: ${e.toString()}");
+        }
+      } else {
+        emit(CheckNetworkConnection("No internet connection"));
+      }
+    });
   }
 }

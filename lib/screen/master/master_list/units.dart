@@ -8,6 +8,7 @@ import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shef_erp/utils/pref_utils.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../utils/flutter_flow_animations.dart';
@@ -176,7 +177,7 @@ class _UnitsState extends State<Units> {
                     MaterialPageRoute(builder: (context) =>  BlocProvider(
                       create: (context) => AllRequesterBloc(),
                       child:  UnitEdit(
-                        id: "",
+                        id: PrefUtils.getUserId().toString(),
                           screenflag:"",
                               name:"",
                         billingAddress:"",

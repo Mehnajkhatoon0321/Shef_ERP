@@ -227,6 +227,39 @@ class DeleteUserIDHandlers extends AllRequesterEvent {
 
   DeleteUserIDHandlers(this.id);
 }
+
+//user update
+
+class UserUpdateEventHandler extends AllRequesterEvent {
+
+  final String name;
+  final String email;
+  final String contact;
+  final String address;
+  final String role;
+  final String unitID;
+  final String id;
+  final String password;
+  final String designation;
+ UserUpdateEventHandler({ required this.name, required this.email, required this.contact,required this.address,required this.role, required this.unitID, required this.id, required this.password, required this.designation});
+}
+
+
+//user create
+
+class UserCreateEventHandler extends AllRequesterEvent {
+
+  final String name;
+  final String email;
+  final String contact;
+  final String address;
+  final String role;
+  final String unitID;
+  final String id;
+  final String password;
+  final String designation;
+  UserCreateEventHandler({ required this.name, required this.email, required this.contact,required this.address,required this.role, required this.unitID, required this.id, required this.password, required this.designation});
+}
 //Edit Details
 class EditDetailUserHandler extends AllRequesterEvent {
   String id;
@@ -259,4 +292,38 @@ class BillingUpdateEventHandler extends AllRequesterEvent {
 
   final String id;
   BillingUpdateEventHandler({required this.billingAddress, required this.address, required this.id});
+}
+//product edit
+
+class ProductEditDetailUserHandler extends AllRequesterEvent {
+  String id;
+  ProductEditDetailUserHandler(this.id);
+}
+//get create list
+
+class ProductListUserHandler extends AllRequesterEvent {
+  String id;
+  ProductListUserHandler(this.id);
+}
+
+//post create api
+
+
+class ProductCreateEventHandler extends AllRequesterEvent {
+  final String cateName;
+  final String name;
+  final String specification;
+  final String user_id;
+
+  ProductCreateEventHandler({required this.cateName, required this.name, required this.specification, required this.user_id,});
+}
+
+
+class ProductUpdateEventHandler extends AllRequesterEvent {
+  final String cateName;
+  final String name;
+  final String specification;
+  final String user_id;
+
+  ProductUpdateEventHandler({required this.cateName, required this.name, required this.specification, required this.user_id,});
 }

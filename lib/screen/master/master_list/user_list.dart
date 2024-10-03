@@ -9,6 +9,7 @@ import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shef_erp/utils/pref_utils.dart';
 import 'package:shimmer/shimmer.dart';
 class UserList extends StatefulWidget {
   const UserList({super.key});
@@ -177,7 +178,7 @@ class _UserListState extends State<UserList> {
                       child:  UserEdits(
 
                           screenflag:"",
-                          id:"",
+                          id:PrefUtils.getUserId().toString(),
                       ),
                     )),
                   )
@@ -494,7 +495,8 @@ class _UserListState extends State<UserList> {
                                                     create: (context) => AllRequesterBloc(),
                                                     child:  UserEdits(
                                                         screenflag:"Edit",
-                                                      id:item["id"].toString()
+                                                      id:item["id"].toString(),
+
                                                     ),
                                                   )),
                                                 )

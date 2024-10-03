@@ -170,8 +170,8 @@ final class ServiceFailure extends AllRequesterState{
 
 final class DeleteServiceLoading extends AllRequesterState{}
 final class DeleteServiceSuccess extends AllRequesterState{
-  final Map<String, dynamic> deleteEventServiceList;
-  DeleteServiceSuccess(this.deleteEventServiceList);
+  final Map<String, dynamic> deleteServiceList;
+  DeleteServiceSuccess(this.deleteServiceList);
 
 }
 
@@ -433,6 +433,41 @@ final class  UserEditDetailsFailure extends AllRequesterState{
   UserEditDetailsFailure(this.deleteEditFailure);
 
 }
+//user update
+
+final class  UserUpdateLoading extends AllRequesterState {}
+
+final class UserUpdateSuccess extends AllRequesterState {
+  final Map<String ,dynamic> updateResponse;
+  UserUpdateSuccess(this.updateResponse);
+
+}
+final class UserUpdateFailure extends AllRequesterState {
+
+  final Map<String, dynamic> failureMessage;
+  UserUpdateFailure(this.failureMessage);
+
+}
+
+
+//user create
+
+final class  UserCreateLoading extends AllRequesterState{}
+final class UserCreateSuccess extends AllRequesterState {
+  final Map<String, dynamic> createResponse;
+  UserCreateSuccess(this.createResponse);
+
+}
+final class UserCreateFailure extends AllRequesterState {
+
+  final Map<String, dynamic> failureMessage;
+  UserCreateFailure(this.failureMessage);
+
+}
+
+
+
+
 
 final class UserBillingLoading extends AllRequesterState{}
 final class UserBillingSuccess extends AllRequesterState{
@@ -489,5 +524,67 @@ final class  BillingUpdateFailure extends AllRequesterState {
 
   final String failureMessage;
   BillingUpdateFailure(this.failureMessage);
+
+}
+//product edit
+final class ProductEditDetailsLoading extends AllRequesterState{}
+final class ProductEditSuccess extends AllRequesterState{
+  final Map<String, dynamic> userList;
+  ProductEditSuccess(this.userList);
+
+}
+
+
+final class  ProductEditFailure extends AllRequesterState{
+  final Map<String, dynamic> deleteEditFailure;
+  ProductEditFailure(this.deleteEditFailure);
+
+}
+
+//product list data
+final class  ProductEditListLoading extends AllRequesterState{}
+final class ProductEditListSuccess extends AllRequesterState{
+  final Map<String, dynamic> userEditDeleteList;
+  ProductEditListSuccess(this.userEditDeleteList);
+
+}
+
+
+final class  ProductEditListFailure extends AllRequesterState{
+  final Map<String, dynamic> deleteEditFailure;
+  ProductEditListFailure(this.deleteEditFailure);
+
+}
+//create product
+
+final class  CreateProductLoading extends AllRequesterState{}
+final class CreateProductSuccess extends AllRequesterState{
+  final Map<String, dynamic> createList;
+  CreateProductSuccess(this.createList);
+
+}
+
+
+final class CreateProductFailure extends AllRequesterState{
+  final Map<String, dynamic> createFailure;
+  CreateProductFailure(this.createFailure);
+
+}
+
+//update product
+
+
+
+final class  UpdateProductLoading extends AllRequesterState{}
+final class  UpdateProductSuccess extends AllRequesterState{
+  final Map<String, dynamic> updateList;
+  UpdateProductSuccess(this.updateList);
+
+}
+
+
+final class UpdateProductFailure extends AllRequesterState{
+  final Map<String, dynamic> updateFailure;
+  UpdateProductFailure(this.updateFailure);
 
 }
