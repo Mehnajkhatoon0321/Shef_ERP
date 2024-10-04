@@ -103,38 +103,6 @@ final class UpdateFailure extends AllRequesterState{
 }
 
 
-// reject Requisition
-
-final class RejectLoading extends AllRequesterState{}
-final class RejectSuccess extends AllRequesterState{
-  final Map<String, dynamic> rejectList;
-  RejectSuccess(this.rejectList);
-
-}
-
-
-final class RejectFailure extends AllRequesterState{
-  final Map<String, dynamic> rejectFailure;
-  RejectFailure(this.rejectFailure);
-
-}
-
-
-//Vendor Assign and billing Assign
-
-final class VendorAssignLoading extends AllRequesterState{}
-final class VendorAssignSuccess extends AllRequesterState{
-  final Map<String, dynamic> vendorList;
-  VendorAssignSuccess(this.vendorList);
-
-}
-
-
-final class VendorAssignFailure extends AllRequesterState{
-  final Map<String, dynamic> vendorFailure;
-  VendorAssignFailure(this.vendorFailure);
-
-}
 
 //Mark And Delivery
 
@@ -586,5 +554,72 @@ final class  UpdateProductSuccess extends AllRequesterState{
 final class UpdateProductFailure extends AllRequesterState{
   final Map<String, dynamic> updateFailure;
   UpdateProductFailure(this.updateFailure);
+
+}
+
+//assign the vendor
+
+// reject Requisition
+
+final class RejectLoading extends AllRequesterState{}
+final class RejectSuccess extends AllRequesterState{
+  final Map<String, dynamic> rejectList;
+  RejectSuccess(this.rejectList);
+
+}
+
+
+final class RejectFailure extends AllRequesterState{
+  final Map<String, dynamic> rejectFailure;
+  RejectFailure(this.rejectFailure);
+
+}
+
+
+//Vendor Assign and billing Assign
+
+final class VendorAssignLoading extends AllRequesterState{}
+final class VendorAssignSuccess extends AllRequesterState{
+  final Map<String, dynamic> vendorList;
+  VendorAssignSuccess(this.vendorList);
+
+}
+
+
+final class VendorAssignFailure extends AllRequesterState{
+  final Map<String, dynamic> vendorFailure;
+  VendorAssignFailure(this.vendorFailure);
+
+}
+
+
+
+//status
+
+final class StatusLoading extends AllRequesterState{}
+final class StatusSuccess extends AllRequesterState{
+  final Map<String, dynamic> statusList;
+  StatusSuccess(this.statusList);
+
+}
+
+
+final class StatusFailure extends AllRequesterState{
+  final Map<String, dynamic> statusFailure;
+  StatusFailure(this.statusFailure);
+
+}
+//status changes
+final class StatusChangeLoading extends AllRequesterState{}
+final class StatusChangeSuccess extends AllRequesterState{
+  final Map<String, dynamic> statusChangeList;
+  StatusChangeSuccess(this.statusChangeList);
+
+}
+
+
+final class StatusChangeFailure extends AllRequesterState{
+  final Map<String, dynamic> statusChangeFailure;
+  StatusChangeFailure(this.statusChangeFailure);
 
 }

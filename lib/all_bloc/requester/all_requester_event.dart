@@ -327,3 +327,32 @@ class ProductUpdateEventHandler extends AllRequesterEvent {
 
   ProductUpdateEventHandler({required this.cateName, required this.name, required this.specification, required this.user_id,});
 }
+
+//product status
+
+class ProductStatusHandler extends AllRequesterEvent {
+  String id;
+  ProductStatusHandler({required  this.id});
+}
+
+
+
+class ProductStatusChangeHandler extends AllRequesterEvent {
+  String id;
+  String status;
+  String userID;
+  ProductStatusChangeHandler({required this.userID, required this.status,required this.id});
+}
+
+
+
+class VendorActionHandler extends AllRequesterEvent {
+  String userRole;
+  String btnAssign;
+  String userID;
+  String vendor;
+  String billing;
+  String count;
+  List<dynamic> allCount;
+  VendorActionHandler({required this.userID, required this.btnAssign,required this.userRole,required this.vendor,required this.billing,required this.allCount,required this.count});
+}

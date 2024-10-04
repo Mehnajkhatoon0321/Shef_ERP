@@ -12,6 +12,7 @@ class  APIEndPoints{
   static const String postReqEdit= '${baseUrl}req/edit/';
   static const String postReqUpdate= '${baseUrl}req/update/';
 
+
   //Friday  unit and category
   static const String getUnits= '${baseUrl}unit';
   static const String deleteUnits= '${baseUrl}unit/delete/';
@@ -44,6 +45,11 @@ class  APIEndPoints{
   static const String updateProductList= '${baseUrl}product/update';
   static const String EditList= '${baseUrl}product/edit/';
   static const String getEditList= '${baseUrl}product/create';
+  static const String getStatusProductList= '${baseUrl}product/status';
+  static const String getStatusChangeProductList= '${baseUrl}product/statusChange';
+
+//vendor reject
+  static const String actionVendor= '${baseUrl}req/action';
 
   //events
 

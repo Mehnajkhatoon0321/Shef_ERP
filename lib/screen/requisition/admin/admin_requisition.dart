@@ -35,13 +35,14 @@ class AdminRequisition extends StatefulWidget {
 class _AdminRequisitionState extends State<AdminRequisition> {
   int? selectedId;
   int? selectedBillingId;
+  List<String> selectedIds = [];
   Map<String, String>? selectedItemForEditing;
   Map<String, int> productMap = {};
   Map<String, int> billingMap = {};
   late final GlobalKey<FormFieldState<String>> _vendorNameKey =
-  GlobalKey<FormFieldState<String>>();
+      GlobalKey<FormFieldState<String>>();
   late final GlobalKey<FormFieldState<String>> _billingNameKey =
-  GlobalKey<FormFieldState<String>>();
+      GlobalKey<FormFieldState<String>>();
   late final TextEditingController vendorName = TextEditingController();
   late final TextEditingController billingName = TextEditingController();
   late final FocusNode _vendorNameNode = FocusNode();
@@ -152,7 +153,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
       });
     });
     _editController = TextEditingController();
-    BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
+    BlocProvider.of<AllRequesterBloc>(context)
+        .add(AddCartDetailHandler("", pageNo, pageSize));
     paginationCall();
   }
 
@@ -162,17 +164,18 @@ class _AdminRequisitionState extends State<AdminRequisition> {
         if (pageNo < totalPages && !isLoading) {
           if (hasMoreData) {
             pageNo++;
-            BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
+            BlocProvider.of<AllRequesterBloc>(context)
+                .add(AddCartDetailHandler("", pageNo, pageSize));
           }
         }
       }
     });
   }
 
-
   Set<int> selectedIndices = {};
   List<String> productNames = [];
   List<String> billingNames = [];
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -184,15 +187,17 @@ class _AdminRequisitionState extends State<AdminRequisition> {
       appBar: AppBar(
         centerTitle: true,
         automaticallyImplyLeading: false,
-        title: Text('Requisition', style: FTextStyle.HeadingTxtWhiteStyle,
-          textAlign: TextAlign.center,),
+        title: Text(
+          'Requisition',
+          style: FTextStyle.HeadingTxtWhiteStyle,
+          textAlign: TextAlign.center,
+        ),
         backgroundColor: AppColors.primaryColourDark,
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: SizedBox(
-              height:
-              (displayType == 'desktop' || displayType == 'tablet')
+              height: (displayType == 'desktop' || displayType == 'tablet')
                   ? 70
                   : 43,
               child: ElevatedButton(
@@ -204,38 +209,33 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>   BlocProvider(
-  create: (context) => AllRequesterBloc(),
-  child: AddRequisition( flag: "unit",),
-),
+                        builder: (context) => BlocProvider(
+                          create: (context) => AllRequesterBloc(),
+                          child: AddRequisition(
+                            flag: "unit",
+                          ),
+                        ),
                       ),
                     );
 
                     // );
                   },
-
                   style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(26),
                       ),
-                      backgroundColor:Colors.white
-
-                  ),
-                  child:
-                  Text(
+                      backgroundColor: Colors.white),
+                  child: Text(
                     "Add +",
-                    style: FTextStyle.loginBtnStyle.copyWith(color:AppColors.primaryColourDark),
-                  )
-
-              ),
+                    style: FTextStyle.loginBtnStyle
+                        .copyWith(color: AppColors.primaryColourDark),
+                  )),
             ),
           )
         ],
         leading: Padding(
           padding: const EdgeInsets.only(left: 15),
           child: GestureDetector(
-
-
             onTap: () {
               Navigator.pop(context);
             },
@@ -245,9 +245,12 @@ class _AdminRequisitionState extends State<AdminRequisition> {
               color: Colors.white,
             ),
           ),
-        ),// You can set this to any color you prefer
+        ), // You can set this to any color you prefer
       ),
 
+      // Add this method to get all selected IDs
+
+// Your existing BlocListener and UI code
       body: BlocListener<AllRequesterBloc, AllRequesterState>(
         listener: (context, state) {
           if (state is AddCartLoading) {
@@ -259,9 +262,9 @@ class _AdminRequisitionState extends State<AdminRequisition> {
               var responseData = state.addCartDetails['list']['requisitions'];
               list = state.addCartDetails['list']['vendors'];
 
-              productNames =
-                  list.map<String>((item) => item['company_name'] as String)
-                      .toList();
+              productNames = list
+                  .map<String>((item) => item['company_name'] as String)
+                  .toList();
 
               productMap = {
                 for (var item in list)
@@ -270,19 +273,15 @@ class _AdminRequisitionState extends State<AdminRequisition> {
 
               billing = state.addCartDetails['list']['billings'];
 
-              billingNames =
-                  billing.map<String>((item) => item['billing_name'] as String)
-                      .toList();
-
+              billingNames = billing
+                  .map<String>((item) => item['billing_name'] as String)
+                  .toList();
 
               billingMap = {
                 for (var item in billing)
                   item['billing_name'] as String: item['id'] as int
               };
 
-              if (kDebugMode) {
-                print(">>>>>>>>>>>ALLDATA$responseData");
-              }
               totalPages = responseData["total"];
 
               if (pageNo == 1) {
@@ -302,7 +301,6 @@ class _AdminRequisitionState extends State<AdminRequisition> {
             setState(() {
               isLoading = false;
             });
-            print("error>> ${state.addCartDetailFailure}");
           } else if (state is DeleteLoading) {
             DeletePopupManager.playLoader();
           } else if (state is DeleteSuccess) {
@@ -310,7 +308,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
 
             var deleteMessage = state.deleteList['message'];
 
-            BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
+            BlocProvider.of<AllRequesterBloc>(context)
+                .add(AddCartDetailHandler("", pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(deleteMessage),
@@ -321,423 +320,483 @@ class _AdminRequisitionState extends State<AdminRequisition> {
             Future.delayed(const Duration(milliseconds: 500), () {
               Navigator.pop(context);
             });
-          }else  if (state is RejectLoading) {
+          } else if (state is RejectLoading) {
             setState(() {
               isLoadingApprove = true;
             });
           } else if (state is RejectSuccess) {
-            isLoadingApprove=false;
+            isLoadingApprove = false;
             setState(() {
-              var responseData = state.rejectList;
               Navigator.of(context).pop();
-
             });
-
-            print("RejectSuccess>>>");
           } else if (state is RejectFailure) {
             setState(() {
               isLoading = false;
             });
-            print("error>> ${state.rejectFailure}");
           }
-
         },
-         child: Column(
-        children: [
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.05, vertical: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(23.0),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      spreadRadius: 2,
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
+                child: TextFormField(
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    hintText: 'Search Requisition',
+                    hintStyle: FTextStyle.formhintTxtStyle,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(23.0),
+                      borderSide: const BorderSide(
+                          color: AppColors.primaryColourDark, width: 1.0),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(23.0),
+                      borderSide: const BorderSide(
+                          color: AppColors.primaryColourDark, width: 1.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(23.0),
+                      borderSide: const BorderSide(
+                          color: AppColors.primaryColourDark, width: 1.0),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 13.0, horizontal: 18.0),
+                    suffixIcon: _isTextEmpty
+                        ? const Icon(Icons.search,
+                            color: AppColors.primaryColourDark)
+                        : IconButton(
+                            icon: const Icon(Icons.clear,
+                                color: AppColors.primaryColourDark),
+                            onPressed: _clearText,
+                          ),
+                    fillColor: Colors.grey[100],
+                    filled: true,
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      _isTextEmpty = value.isEmpty;
+                    });
+                  },
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height:
+                        (displayType == 'desktop' || displayType == 'tablet')
+                            ? 70
+                            : 38,
+                    child: ElevatedButton(
+                      onPressed: () async {
 
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05, vertical: 10),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(23.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    spreadRadius: 2,
-                    blurRadius: 4,
-                    offset: const Offset(0, 1),
+                        _showBrandDialog(
+                            BlocProvider.of<AllRequesterBloc>(context),
+                            context, selectedIds
+                            );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(26),
+                        ),
+                        backgroundColor: Colors.green,
+                      ),
+                      child: Text("Approve & Assign Vendor",
+                          style: FTextStyle.loginBtnStyle),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    height:
+                        (displayType == 'desktop' || displayType == 'tablet')
+                            ? 70
+                            : 38,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        List<int> selectedIds = _getSelectedIds();
+                        print("Selected IDs for Rejection: $selectedIds");
+                        _showRejectDialog(-1);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(26),
+                        ),
+                        backgroundColor: AppColors.errorColor,
+                      ),
+                      child: Text("Reject", style: FTextStyle.loginBtnStyle),
+                    ),
                   ),
                 ],
               ),
-              child: TextFormField(
-                controller: _controller,
-                decoration: InputDecoration(
-                  hintText: 'Search Requisition',
-                  hintStyle: FTextStyle.formhintTxtStyle,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(23.0),
-                    borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
-                  suffixIcon: _isTextEmpty
-                      ? const Icon(Icons.search, color: AppColors.primaryColourDark)
-                      : IconButton(
-                    icon: const Icon(Icons.clear, color: AppColors.primaryColourDark),
-                    onPressed: _clearText,
-                  ),
-                  fillColor: Colors.grey[100],
-                  filled: true,
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    _isTextEmpty = value.isEmpty;
-                  });
-                },
-              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-
-
-                SizedBox(
-                  height:
-                  (displayType == 'desktop' || displayType == 'tablet')
-                      ? 70
-                      : 38,
-                  child: ElevatedButton(
-                      onPressed: () async {
-                        _showBrandDialog(-1);
-                      },
-
-                      style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(26),
-                          ),
-                          backgroundColor: Colors.green
-
-                      ),
-                      child:
-                      Text(
-                        "Approve & Assign Vendor",
-                        style: FTextStyle.loginBtnStyle,
-                      )
-
-
-                  ),
-                ),
-                const SizedBox(width: 10,),
-                SizedBox(
-                  height:
-                  (displayType == 'desktop' || displayType == 'tablet')
-                      ? 70
-                      : 38,
-                  child: ElevatedButton(
-                      onPressed: () async {
-                        _showRejectDialog(-1);
-
-                      },
-
-                      style: ElevatedButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(26),
-                          ),
-                          backgroundColor: AppColors.errorColor
-
-                      ),
-                      child:
-                      Text(
-                        "Reject",
-                        style: FTextStyle.loginBtnStyle,
-                      )
-
-
-                  ),
-                ),
-
-              ],),
-          ),
-
-          Expanded(
-            child: isLoading && data.isEmpty
-                ? Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
-              child: ListView.builder(
-                itemCount: 10, // Number of shimmer placeholders
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
-                    child: Container(
-                      margin: const EdgeInsets.all(8),
-                      padding: const EdgeInsets.all(7),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            spreadRadius: 2,
-                            blurRadius: 4,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  height: 10,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(height: 5),
-                                Container(
-                                  height: 10,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(height: 5),
-                                Container(
-                                  height: 10,
-                                  color: Colors.grey,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            )
-                : data.isEmpty?Center(
-              child: isLoading
-                  ? const CircularProgressIndicator() // Show circular progress indicator
-                  : const Text("No more data .", style: FTextStyle.listTitle),
-            ): ListView.builder(
-              controller: controllerI,
-              itemCount: data.length + (hasMoreData ? 1 : 0), // Add one for the loading indicator
-              itemBuilder: (context, index) {
-                if (index < data.length) {
-                  final item = data[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => ViewDetails(
-                        requisition: item["req_no"] ?? "N/A",
-                        poNumber: item["po_no"] ?? "N/A",
-                        requestDate: item["req_date"] ?? "N/A",
-                        unit: item["unit"] ?? "N/A",
-                        product: item["product_name"] ?? "N/A",
-                        specification: item["specification"] ?? "N/A",
-                        quantity: item["quantity"].toString() ?? "N/A",
-                        unitHead: item["unitHead"].toString() ?? "N/A",
-                        purchase: item["purchase"].toString() ?? "N/A",
-                        delivery: item["dl_status"].toString() ?? "N/A",
-                        vender: item["vender"] ?? "N/A",
-                        image: item["image"].toString(),
-
-                      )));
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.01, vertical: 5),
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(top: 10.h),
-                            child: Transform.scale(
-                              scale: 1.2,
-                              
-                              child: Checkbox(
-                                value: selectedIndices.contains(index),
-                                activeColor: AppColors.primaryColourDark,
-                                onChanged: (bool? value) {
-                                  setState(() {
-                                    if (value == true) {
-                                      selectedIndices.add(index);
-                                    } else {
-                                      selectedIndices.remove(index);
-                                    }
-                                  });
-                                },
-                              ),
-                            ),
-                          ),
-                          Expanded(  // Wrap Container with Expanded
+            Expanded(
+              child: isLoading && data.isEmpty
+                  ? Shimmer.fromColors(
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: ListView.builder(
+                        itemCount: 10, // Number of shimmer placeholders
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: screenWidth * 0.03, vertical: 5),
                             child: Container(
                               margin: const EdgeInsets.all(8),
                               padding: const EdgeInsets.all(7),
                               decoration: BoxDecoration(
-                                color: index % 2 == 0 ? Colors.white : Colors.white,
+                                color: Colors.white,
                                 borderRadius: BorderRadius.circular(10),
-                                boxShadow: const [
+                                boxShadow: [
                                   BoxShadow(
-                                    color:  AppColors.primaryColourDark,
-                                    spreadRadius: 1.6,
-                                    blurRadius: 0.6,
-                                    offset: Offset(0, 1),
+                                    color: Colors.black.withOpacity(0.1),
+                                    spreadRadius: 2,
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 1),
                                   ),
                                 ],
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start, // Align children to the start
+                              child: Row(
                                 children: [
-                                  Row(
-                                    children: [
-                                      const Text("Requisition No: ", style: FTextStyle.listTitle),
-                                      Expanded(child: Text("${item["req_no"] ?? 'N/A'}", style: FTextStyle.listTitleSub,maxLines: 1,)),
-                                    ],
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                            height: 10, color: Colors.grey),
+                                        const SizedBox(height: 5),
+                                        Container(
+                                            height: 10, color: Colors.grey),
+                                        const SizedBox(height: 5),
+                                        Container(
+                                            height: 10, color: Colors.grey),
+                                      ],
+                                    ),
                                   ),
-
-                                  Row(
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                  : data.isEmpty
+                      ? Center(
+                          child: isLoading
+                              ? const CircularProgressIndicator()
+                              : const Text("No more data.",
+                                  style: FTextStyle.listTitle),
+                        )
+                      : ListView.builder(
+                          controller: controllerI,
+                          itemCount: data.length + (hasMoreData ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (index < data.length) {
+                              final item = data[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ViewDetails(
+                                        requisition: item["req_no"] ?? "N/A",
+                                        poNumber: item["po_no"] ?? "N/A",
+                                        requestDate: item["req_date"] ?? "N/A",
+                                        unit: item["unit"] ?? "N/A",
+                                        product: item["product_name"] ?? "N/A",
+                                        specification:
+                                            item["specification"] ?? "N/A",
+                                        quantity: item["quantity"].toString() ??
+                                            "N/A",
+                                        unitHead: item["unitHead"].toString() ??
+                                            "N/A",
+                                        purchase: item["purchase"].toString() ??
+                                            "N/A",
+                                        delivery:
+                                            item["dl_status"].toString() ??
+                                                "N/A",
+                                        vender: item["vender"] ?? "N/A",
+                                        image: item["image"].toString(),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: screenWidth * 0.01,
+                                      vertical: 5),
+                                  child: Row(
                                     children: [
-                                      const Text("PO No. : ", style: FTextStyle.listTitle),
+                                      Padding(
+                                        padding: EdgeInsets.only(top: 10.h),
+                                        child: Transform.scale(
+                                          scale: 1.2,
+                                          child: Checkbox(
+                                            value:
+                                                selectedIndices.contains(index),
+                                            activeColor:
+                                                AppColors.primaryColourDark,
+                                            onChanged: (bool? value) {
+                                              setState(() {
+                                                if (value == true) {
+                                                  selectedIndices.add(index);
+                                                  selectedIds.add(item['id']
+                                                      .toString()); // Add ID when checked
+                                                } else {
+                                                  selectedIndices.remove(index);
+                                                  selectedIds.remove(item['id']
+                                                      .toString()); // Remove ID when unchecked
+                                                }
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ),
+
                                       Expanded(
-                                        child: Text("${item["po_no"] ?? 'N/A'}", style: FTextStyle.listTitleSub,maxLines: 1,),
+                                        child: Container(
+                                          margin: const EdgeInsets.all(8),
+                                          padding: const EdgeInsets.all(7),
+                                          decoration: BoxDecoration(
+                                            color: index % 2 == 0
+                                                ? Colors.white
+                                                : Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(10),
+                                            boxShadow: const [
+                                              BoxShadow(
+                                                color:
+                                                    AppColors.primaryColourDark,
+                                                spreadRadius: 1.6,
+                                                blurRadius: 0.6,
+                                                offset: Offset(0, 1),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  const Text("Requisition No: ",
+                                                      style:
+                                                          FTextStyle.listTitle),
+                                                  Expanded(
+                                                      child: Text(
+                                                          "${item["req_no"] ?? 'N/A'}",
+                                                          style: FTextStyle
+                                                              .listTitleSub,
+                                                          maxLines: 1)),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  const Text("PO No. : ",
+                                                      style:
+                                                          FTextStyle.listTitle),
+                                                  Expanded(
+                                                      child: Text(
+                                                          "${item["po_no"] ?? 'N/A'}",
+                                                          style: FTextStyle
+                                                              .listTitleSub,
+                                                          maxLines: 1)),
+                                                ],
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  const Text("Request Date: ",
+                                                      style:
+                                                          FTextStyle.listTitle),
+                                                  Expanded(
+                                                      child: Text(
+                                                          "${item["req_date"] ?? 'N/A'}",
+                                                          style: FTextStyle
+                                                              .listTitleSub,
+                                                          maxLines: 1)),
+                                                ],
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  const Text("Unit: ",
+                                                      style:
+                                                          FTextStyle.listTitle),
+                                                  Expanded(
+                                                      child: Text(
+                                                          "${item["unit"] ?? 'N/A'}",
+                                                          style: FTextStyle
+                                                              .listTitleSub,
+                                                          maxLines: 1)),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                      child: DeliveryStatus(
+                                                          dlStatus:
+                                                              item["dl_status"]
+                                                                  .toString())),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                      child: UnitHeadStatus(
+                                                          unitStatus:
+                                                              item["uh_status"]
+                                                                  .toString())),
+                                                ],
+                                              ),
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                      child: PurchaseManager(
+                                                          pmStatus:
+                                                              item["pm_status"]
+                                                                  .toString())),
+                                                ],
+                                              ),
+                                              VendorStatus(
+                                                role: PrefUtils.getRole(),
+                                                deliveryStatus:
+                                                    item["dl_status"],
+                                                companyName:
+                                                    item['company'] ?? "NA",
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.end,
+                                                children: [
+                                                  Column(
+                                                    children: [
+                                                      if (PrefUtils.getRole() ==
+                                                          "Purchase Manager")
+                                                        Visibility(
+                                                          visible: item[
+                                                                  'dl_status'] ==
+                                                              1,
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    vertical:
+                                                                        4.0),
+                                                            child:
+                                                                ElevatedButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                _showMarkDeliveryDialog(
+                                                                    -1);
+                                                              },
+                                                              style:
+                                                                  ElevatedButton
+                                                                      .styleFrom(
+                                                                shape:
+                                                                    RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              26),
+                                                                ),
+                                                                backgroundColor:
+                                                                    AppColors
+                                                                        .yellow,
+                                                                minimumSize:
+                                                                    const Size(
+                                                                        80, 32),
+                                                              ),
+                                                              child: Text(
+                                                                "Mark Delivery",
+                                                                style: FTextStyle
+                                                                    .emailProfile,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                    ],
+                                                  ),
+                                                  if (item["uh_status"] == 1 &&
+                                                      item['pm_status'] == 1)
+                                                    Row(
+                                                      children: [
+                                                        IconButton(
+                                                          icon: const Icon(
+                                                              Icons.delete,
+                                                              color: Colors.red,
+                                                              size: 26),
+                                                          onPressed: () {
+                                                            CommonPopups
+                                                                .showDeleteCustomPopup(
+                                                              context,
+                                                              "Are you sure you want to delete?",
+                                                              () {
+                                                                BlocProvider.of<
+                                                                            AllRequesterBloc>(
+                                                                        context)
+                                                                    .add(DeleteHandlers(data[index]
+                                                                            [
+                                                                            'id'] ??
+                                                                        'N/A'));
+                                                              },
+                                                            );
+                                                          },
+                                                        ),
+                                                      ],
+                                                    ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ).animateOnPageLoad(animationsMap[
+                                            'imageOnPageLoadAnimation2']!),
                                       ),
                                     ],
                                   ),
-
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text("Request Date: ", style: FTextStyle.listTitle),
-                                      Expanded(child: Text("${item["req_date"] ?? 'N/A'}", style: FTextStyle.listTitleSub,maxLines: 1,)),
-                                    ],
-                                  ),
-
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text("Unit: ", style: FTextStyle.listTitle),
-                                      Expanded(child: Text("${item["unit"] ?? 'N/A'}", style: FTextStyle.listTitleSub,maxLines: 1,)),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Expanded(child: DeliveryStatus(dlStatus: item["dl_status"].toString())),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Expanded(child: UnitHeadStatus(unitStatus: item["uh_status"].toString())),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      Expanded(child: PurchaseManager(pmStatus: item["pm_status"].toString())),
-                                    ],
-                                  ),
-                                  VendorStatus(
-                                    role: PrefUtils.getRole(), // Example role
-                                    deliveryStatus:  item["dl_status"], // Example delivery status
-                                    companyName: item['company']??"NA", // Example company name
-                                  ),
-
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-
-
-                                        Column(
-                                          children: [
-                                            if (PrefUtils.getRole() == "Purchase Manager")
-                                            Visibility(
-                                              visible: item['dl_status'] == 1,
-                                              child: Padding(
-                                                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                                child: ElevatedButton(
-                                                  onPressed: () async {
-                                                    _showMarkDeliveryDialog(-1);
-                                                  },
-                                                  style: ElevatedButton.styleFrom(
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius: BorderRadius.circular(26),
-                                                    ),
-                                                    backgroundColor: AppColors.yellow,
-                                                    minimumSize: const Size(80, 32),
-                                                  ),
-                                                  child: Text(
-                                                    "Mark Delivery",
-                                                    style: FTextStyle.emailProfile,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      if (item["uh_status"] == 1 && item['pm_status'] == 1) // Display edit and delete buttons if uh_status is 0
-                                        Row(
-                                          children: [
-                                            // IconButton(
-                                            //   icon: const Icon(Icons.edit, color: Colors.black),
-                                            //   onPressed: () {
-                                            //     Navigator.push(
-                                            //       context,
-                                            //       MaterialPageRoute(
-                                            //         builder: (context) => BlocProvider(
-                                            //           create: (context) => AllRequesterBloc(),
-                                            //           child: EditRequisition(id: item["id"].toString() ?? 'N/A'),
-                                            //         ),
-                                            //       ),
-                                            //     );
-                                            //   },
-                                            // ),
-                                            IconButton(
-                                              icon: const Icon(Icons.delete, color: Colors.red,size: 26,),
-                                              onPressed: () {
-                                                CommonPopups.showDeleteCustomPopup(
-                                                  context,
-                                                  "Are you sure you want to delete?",
-                                                      () {
-                                                    BlocProvider.of<AllRequesterBloc>(context)
-                                                        .add(DeleteHandlers(data[index]['id'] ?? 'N/A'));
-                                                  },
-                                                );
-                                              },
-                                            ),
-                                          ],
-                                        ),
-
-                                    ],
-                                  ),
-
-
-
-
-                                ],
-                              ),
-                            ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                } else {
-                  // This is the loading indicator
-                  return Center(
-                    child: isLoading
-                        ? const CircularProgressIndicator() // Show circular progress indicator
-                        : const Text("No more data.", style: FTextStyle.listTitle),
-                  );
-                }
-              },
-            )
-
-          ),
-
-          const SizedBox(height: 20),
-        ],
+                                ),
+                              );
+                            } else {
+                              return Center(
+                                child: isLoading
+                                    ? const CircularProgressIndicator()
+                                    : const Text("No more data.",
+                                        style: FTextStyle.listTitle),
+                              );
+                            }
+                          },
+                        ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
-       ),
     );
   }
 
@@ -748,206 +807,223 @@ class _AdminRequisitionState extends State<AdminRequisition> {
     });
   }
 
-  void _showBrandDialog(int index) {
+  Future<bool?> _showBrandDialog(
+      AllRequesterBloc of, BuildContext context, List<String> selectedIds) {
     final _formKey = GlobalKey<FormState>();
     final TextEditingController _editController = TextEditingController();
     String? selectedItem; // Initialize with null
     String? selectedBilling; // Initialize with null
     bool isButtonPartEnabled = false; // Initialize button state
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+    return showDialog<bool?>(
+        context: context,
+        builder: (BuildContext context) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
             // Helper function to check if the button should be enabled
             void _updateButtonState() {
               setState(() {
-                isButtonPartEnabled = (selectedItem != null && selectedItem!.isNotEmpty) &&
+                isButtonPartEnabled = (selectedItem != null &&
+                        selectedItem!.isNotEmpty) &&
                     (selectedBilling != null && selectedBilling!.isNotEmpty);
               });
             }
 
-            return AlertDialog(
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(26.0),
-              ),
-              title: Text(
-                "Vendor Assign",
-                style: FTextStyle.preHeading16BoldStyle,
-              ),
-              content: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.98,
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "Select Vendor",
-                        style: FTextStyle.preHeadingStyle,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0),
-                        child: Container(
-                          // Ensure the container width is constrained properly
-                          width: double.infinity,
-                          // Expand to full width of parent container
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0),
-                          decoration: BoxDecoration(
-                            borderRadius:
-                            BorderRadius.circular(28.0),
-                            border: Border.all(
-                                color: AppColors
-                                    .boarderColour),
-                            color: AppColors.formFieldBackColour,
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              key: _vendorNameKey,
-                              focusNode: _vendorNameNode,
-                              isExpanded: true,
-                              // Make the DropdownButton expand to fill the width of the container
-                              value: selectedItem,
-                              hint: const Text(
-                                "Select Vendor",
-                                style:
-                                FTextStyle.formhintTxtStyle,
+            return BlocProvider.value(
+              value: of, // Use the existing Bloc instance
+              child: AlertDialog(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(26.0),
+                ),
+                title: Text(
+                  "Vendor Assign",
+                  style: FTextStyle.preHeading16BoldStyle,
+                ),
+                content: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.98,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Select Vendor",
+                          style: FTextStyle.preHeadingStyle,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Container(
+                            width: double.infinity,
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(28.0),
+                              border:
+                                  Border.all(color: AppColors.boarderColour),
+                              color: AppColors.formFieldBackColour,
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                isExpanded: true,
+                                value: selectedItem,
+                                hint: const Text(
+                                  "Select Vendor",
+                                  style: FTextStyle.formhintTxtStyle,
+                                ),
+                                onChanged: (String? eventValue) {
+                                  setState(() {
+                                    selectedItem = eventValue;
+                                    _updateButtonState(); // Call the helper function
+                                  });
+                                },
+                                items: productNames
+                                    .map<DropdownMenuItem<String>>(
+                                        (String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
                               ),
-                              onChanged: (String? eventValue) {
-                                setState(() {
-                                  selectedItem =
-                                      eventValue;
-                                  // Update button enable state
-                                  isButtonPartEnabled =
-                                      eventValue != null &&
-                                          eventValue
-                                              .isNotEmpty;
-                                });
-                              },
-                              items: productNames.map<
-                                  DropdownMenuItem<String>>(
-                                      (String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value),
-                                    );
-                                  }).toList(),
                             ),
                           ),
                         ),
-                      ),
-
-
-                      Text(
-                        "Select Billing Name",
-                        style: FTextStyle.preHeadingStyle,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 8.0),
-                        child: Container(
-                          // Ensure the container width is constrained properly
-                          width: double.infinity,
-                          // Expand to full width of parent container
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16.0),
-                          decoration: BoxDecoration(
-                            borderRadius:
-                            BorderRadius.circular(28.0),
-                            border: Border.all(
-                                color: AppColors
-                                    .boarderColour),
-                            color: AppColors.formFieldBackColour,
-                          ),
-                          child: DropdownButtonHideUnderline(
-                            child: DropdownButton<String>(
-                              key: _billingNameKey,
-                              focusNode: _billingNameNode,
-                              isExpanded: true,
-                              // Make the DropdownButton expand to fill the width of the container
-                              value: selectedBilling,
-                              hint: const Text(
-                                "Select Billing Name",
-                                style:
-                                FTextStyle.formhintTxtStyle,
+                        Text(
+                          "Select Billing Name",
+                          style: FTextStyle.preHeadingStyle,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Container(
+                            width: double.infinity,
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(28.0),
+                              border:
+                                  Border.all(color: AppColors.boarderColour),
+                              color: AppColors.formFieldBackColour,
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                isExpanded: true,
+                                value: selectedBilling,
+                                hint: const Text(
+                                  "Select Billing Name",
+                                  style: FTextStyle.formhintTxtStyle,
+                                ),
+                                onChanged: (String? eventValue) {
+                                  setState(() {
+                                    selectedBilling = eventValue;
+                                    _updateButtonState(); // Call the helper function
+                                  });
+                                },
+                                items: billingNames
+                                    .map<DropdownMenuItem<String>>(
+                                        (String value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
                               ),
-                              onChanged: (String? eventValue) {
-                                setState(() {
-                                  selectedBilling =
-                                      eventValue;
-                                  // Update button enable state
-                                  isButtonPartEnabled =
-                                      eventValue != null &&
-                                          eventValue
-                                              .isNotEmpty;
-                                });
-                              },
-                              items: billingNames.map<
-                                  DropdownMenuItem<String>>(
-                                      (String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value),
-                                    );
-                                  }).toList(),
                             ),
                           ),
                         ),
-                      ),
-
-
-
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              actions: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.formFieldBackColour,
-                    borderRadius: BorderRadius.circular(25.0),
-                  ),
-                  child: TextButton(
-                    child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+                actions: [
+                  TextButton(
+                    child: const Text("Cancel",
+                        style: TextStyle(color: Colors.black)),
                     onPressed: () {
-                      Navigator.of(context).pop();
+                      Navigator.of(context).pop(false); // Return false
                     },
-                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                ),
-                const SizedBox(width: 10),
-                Container(
-                  width: isButtonPartEnabled ? 100 : 80, // Dynamic width based on button state
-                  height: 50, // Fixed height or can be dynamic
-                  decoration: BoxDecoration(
-                    color: isButtonPartEnabled ? AppColors.primaryColourDark : AppColors.dividerColor,
-                    borderRadius: BorderRadius.circular(25.0),
                   ),
-                  child: TextButton(
-                    onPressed: isButtonPartEnabled ? () {
-                      Navigator.of(context).pop();
-                    } : null,
-                    child: const Text("OK", style: TextStyle(color: Colors.white)),
-                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                ),
-              ],
-            ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation1']!);
-          },
-        );
-      },
-    );
+                  const SizedBox(width: 10),
+                  BlocListener<AllRequesterBloc, AllRequesterState>(
+                    listener: (context, state) {
+                      if (state is VendorAssignLoading) {
+                        setState(() {
+                          isLoading = true; // Set loading state
+                        });
+                      } else if (state is VendorAssignSuccess) {
+                        setState(() {
+                          isLoading = false; // Reset loading state
+                          Navigator.of(context).pop(); // Close dialog
+                          var successMessage = state.vendorList['message'];
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(successMessage),
+                              backgroundColor: AppColors.primaryColour,
+                            ),
+                          );
+                        });
+                      } else if (state is VendorAssignFailure) {
+                        setState(() {
+                          isLoading = false; // Reset loading state
+                          var errorMessage = state.vendorFailure['message'];
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(errorMessage),
+                              backgroundColor: AppColors.primaryColour,
+                            ),
+                          );
+                        });
+                        if (kDebugMode) {
+                          print("error>> ${state.vendorFailure}");
+                        }
+                      } else if (state is CheckNetworkConnection) {
+                        CommonPopups.showCustomPopup(
+                          context,
+                          'Internet is not connected.',
+                        );
+                      }
+                    },
+                    child: TextButton(
+                      onPressed: isButtonPartEnabled
+                          ? () {
+                              // Pass all selected IDs in allCount
+                              of.add(VendorActionHandler(
+                                userID: PrefUtils.getUserId().toString(),
+                                btnAssign: 'assign',
+                                vendor: selectedItem ?? '2',
+                                // Use selected vendor
+                                userRole: PrefUtils.getRole(),
+                                allCount: selectedIds,
+                                // Pass all selected IDs here
+                                billing: selectedBilling ?? '2',
+                                // Use selected billing
+                                count: selectedIds.length
+                                    .toString(), // Count of selected IDs
+                              ));
+                              Navigator.of(context).pop(
+                                  true); // Optionally return true after submission
+                            }
+                          : null,
+                      child: const Text("OK",
+                          style: TextStyle(color: Colors.white)),
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all(
+                            isButtonPartEnabled
+                                ? AppColors.primaryColourDark
+                                : AppColors.dividerColor),
+                        shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(25.0))),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          });
+        });
   }
-
-
-
-
-
-
 
   void _showRejectDialog(int index) {
     final _formKey = GlobalKey<FormState>();
@@ -997,17 +1073,24 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                             hintStyle: FTextStyle.formhintTxtStyle,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(23.0),
-                              borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
+                              borderSide: const BorderSide(
+                                  color: AppColors.formFieldHintColour,
+                                  width: 1.0),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(23.0),
-                              borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
+                              borderSide: const BorderSide(
+                                  color: AppColors.formFieldHintColour,
+                                  width: 1.0),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(23.0),
-                              borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
+                              borderSide: const BorderSide(
+                                  color: AppColors.primaryColourDark,
+                                  width: 1.0),
                             ),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 13.0, horizontal: 18.0),
                             fillColor: Colors.grey[100],
                             filled: true,
                           ),
@@ -1030,27 +1113,37 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                     borderRadius: BorderRadius.circular(25.0),
                   ),
                   child: TextButton(
-                    child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+                    child: const Text("Cancel",
+                        style: TextStyle(color: Colors.black)),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
-                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                  ).animateOnPageLoad(
+                      animationsMap['imageOnPageLoadAnimation2']!),
                 ),
                 const SizedBox(width: 10),
                 Container(
                   decoration: BoxDecoration(
-                    color: isButtonEnabled ? AppColors.primaryColourDark : AppColors.formFieldBorderColour,
+                    color: isButtonEnabled
+                        ? AppColors.primaryColourDark
+                        : AppColors.formFieldBorderColour,
                     borderRadius: BorderRadius.circular(25.0),
                   ),
                   child: TextButton(
-                    onPressed: isButtonEnabled ? () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        // Handle the reject action here
-                        Navigator.of(context).pop();
-                      }
-                    } : null,
-                    child:  Text("Reject", style: TextStyle(color:isButtonEnabled ? Colors.white:Colors.white)),
-                  ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                    onPressed: isButtonEnabled
+                        ? () {
+                            if (_formKey.currentState?.validate() ?? false) {
+                              // Handle the reject action here
+                              Navigator.of(context).pop();
+                            }
+                          }
+                        : null,
+                    child: Text("Reject",
+                        style: TextStyle(
+                            color:
+                                isButtonEnabled ? Colors.white : Colors.white)),
+                  ).animateOnPageLoad(
+                      animationsMap['imageOnPageLoadAnimation2']!),
                 ),
               ],
             ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation1']!);
@@ -1059,12 +1152,13 @@ class _AdminRequisitionState extends State<AdminRequisition> {
       },
     );
   }
+
   void _showMarkDeliveryDialog(int index) {
     final _formKey = GlobalKey<FormState>();
     final TextEditingController _editController = TextEditingController();
     bool isButtonEnabled = false; // Initialize button state
     late final GlobalKey<FormFieldState<String>> _uploadNameKey =
-    GlobalKey<FormFieldState<String>>();
+        GlobalKey<FormFieldState<String>>();
     late final TextEditingController uploadName = TextEditingController();
     late final FocusNode _uploadNameNode = FocusNode();
     bool isUploadFocused = false;
@@ -1106,7 +1200,6 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                         style: FTextStyle.preHeading16BoldStyle,
                       ),
                       const SizedBox(height: 10),
-
                       TextFormField(
                         controller: _editController,
                         decoration: InputDecoration(
@@ -1114,17 +1207,23 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                           hintStyle: FTextStyle.formhintTxtStyle,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(23.0),
-                            borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
+                            borderSide: const BorderSide(
+                                color: AppColors.formFieldHintColour,
+                                width: 1.0),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(23.0),
-                            borderSide: const BorderSide(color: AppColors.formFieldHintColour, width: 1.0),
+                            borderSide: const BorderSide(
+                                color: AppColors.formFieldHintColour,
+                                width: 1.0),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(23.0),
-                            borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
+                            borderSide: const BorderSide(
+                                color: AppColors.primaryColourDark, width: 1.0),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 13.0, horizontal: 18.0),
                           fillColor: Colors.grey[100],
                           filled: true,
                         ),
@@ -1136,7 +1235,6 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                         },
                       ),
                       const SizedBox(height: 10),
-
                       Text(
                         "Upload",
                         style: FTextStyle.formLabelTxtStyle,
@@ -1148,23 +1246,19 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                         readOnly: true,
                         key: _uploadNameKey,
                         focusNode: _uploadNameNode,
-                        decoration: FormFieldStyle
-                            .defaultInputDecoration
-                            .copyWith(
+                        decoration:
+                            FormFieldStyle.defaultInputDecoration.copyWith(
                           fillColor: AppColors.formFieldBackColour,
                           hintText: "Upload File",
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.attach_file),
                             onPressed: () async {
-                              final result = await FilePicker.platform
-                                  .pickFiles();
-                              if (result != null &&
-                                  result.files.isNotEmpty) {
+                              final result =
+                                  await FilePicker.platform.pickFiles();
+                              if (result != null && result.files.isNotEmpty) {
                                 setState(() {
-                                  fileName1 =
-                                      result.files.single.name;
-                                  imagesId =
-                                      File(result.files.single.path!);
+                                  fileName1 = result.files.single.name;
+                                  imagesId = File(result.files.single.path!);
                                   isImageUploaded = true;
                                   uploadName.text = fileName1!;
                                 });
@@ -1176,8 +1270,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                         validator: ValidatorUtils.uploadValidator,
                         onChanged: (text) {
                           setState(() {
-                            isButtonPartEnabled = selectedItem !=
-                                null &&
+                            isButtonPartEnabled = selectedItem != null &&
                                 selectedItem!.isNotEmpty &&
                                 ValidatorUtils.isValidCommon(text);
                           });
@@ -1201,7 +1294,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
               ),
               actions: [
                 ElevatedButton(
-                  onPressed: (){
+                  onPressed: () {
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
@@ -1223,27 +1316,23 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                         color: Colors.white,
                         fontWeight: FontWeight.w300),
                   ),
-                ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                ).animateOnPageLoad(
+                    animationsMap['imageOnPageLoadAnimation2']!),
 
                 const SizedBox(width: 10),
 
                 ElevatedButton(
-                  onPressed:  isButtonEnabled ? () {
-                    if (_formKey.currentState?.validate() ?? false) {
+                  onPressed: isButtonEnabled
+                      ? () {
+                          if (_formKey.currentState?.validate() ?? false) {
+                            BlocProvider.of<AllRequesterBloc>(context).add(
+                              RejectHandler(_editController.text.toString()),
+                            );
 
-                      BlocProvider.of<AllRequesterBloc>(context)
-                          .add(
-                        RejectHandler(
-                            _editController.text.toString()
-
-
-                        ),
-                      );
-
-                      // Handle the reject action here
-
-                    }
-                  } : null,
+                            // Handle the reject action here
+                          }
+                        }
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryColourDark,
                     textStyle: FTextStyle.loginBtnStyle,
@@ -1263,32 +1352,9 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                         color: Colors.white,
                         fontWeight: FontWeight.w300),
                   ),
-                ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                // Container(
-                //   decoration: BoxDecoration(
-                //     color: isButtonEnabled ? AppColors.primaryColourDark : AppColors.formFieldBorderColour,
-                //     borderRadius: BorderRadius.circular(25.0),
-                //   ),
-                //   child: TextButton(
-                //     onPressed: isButtonEnabled ? () {
-                //       if (_formKey.currentState?.validate() ?? false) {
-                //
-                //         BlocProvider.of<AllRequesterBloc>(context)
-                //             .add(
-                //           RejectHandler(
-                //               _editController.text.toString()
-                //
-                //
-                //           ),
-                //         );
-                //
-                //         // Handle the reject action here
-                //
-                //       }
-                //     } : null,
-                //     child:isLoadingApprove? CircularProgressIndicator(color: Colors.white,): Text("Reject", style: TextStyle(color:isButtonEnabled ? Colors.white:Colors.white)),
-                //   ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                // ),
+                ).animateOnPageLoad(
+                    animationsMap['imageOnPageLoadAnimation2']!),
+
               ],
             ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation1']!);
           },
@@ -1297,8 +1363,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
     );
   }
 
-
-
-
-
+  List<int> _getSelectedIds() {
+    return selectedIndices.map((index) => data[index]['id'] as int).toList();
+  }
 }

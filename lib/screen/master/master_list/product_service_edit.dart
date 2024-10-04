@@ -123,9 +123,7 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
     if (widget.screenflag.isNotEmpty && widget.screenflag == "Edit") {
       BlocProvider.of<AllRequesterBloc>(context)
           .add(ProductEditDetailUserHandler(widget.id));
-      // editController.text = widget.name;
-      // descriptionController.text = widget.billingAddress;
-      // addressController.text = widget.address;
+
     }
     else{
       BlocProvider.of<AllRequesterBloc>(context)
@@ -227,7 +225,7 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
             }
           }
 
-          if (state is ProductEditListLoading) {
+        else if (state is ProductEditListLoading) {
             setState(() {
               isLoadingEdit = true;
             });
@@ -261,6 +259,12 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
               print("error>> ${state.deleteEditFailure}");
             }
           }
+          else if (state is CheckNetworkConnection) {
+            CommonPopups.showCustomPopup(
+              context,
+              'Internet is not connected.',
+            );
+          }
           else if (state is CreateProductSuccess) {
             setState(() {
               isLoadingEdit = false;
@@ -282,12 +286,7 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
 
             CommonPopups.showCustomPopup(context, state.createFailure.toString());
           }
-          else if (state is CheckNetworkConnection) {
-            CommonPopups.showCustomPopup(
-              context,
-              'Internet is not connected.',
-            );
-          }
+
           else if (state is UpdateProductSuccess) {
             setState(() {
               isLoadingEdit = false;

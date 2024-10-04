@@ -1457,7 +1457,6 @@ print("RequestData>>>>>>>>>>$request");
     });
 
     //product update
-
     on<ProductUpdateEventHandler>((event, emit) async {
       // Check for internet connectivity
       if (await ConnectivityService.isConnected()) {
@@ -1515,5 +1514,204 @@ print("RequestData>>>>>>>>>>$request");
         emit(CheckNetworkConnection("No internet connection"));
       }
     });
+
+    //status product
+
+
+    on<ProductStatusHandler>((event, emit) async {
+      // Check for internet connectivity
+      if (await ConnectivityService.isConnected()) {
+        emit(StatusLoading());
+
+        try {
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            'Authorization': 'Bearer $authToken',
+          };
+
+          var request = http.MultipartRequest(
+            'POST',
+            Uri.parse(APIEndPoints.getStatusProductList),
+          );
+
+          // Log the request details for debugging
+          developer.log("Request Data: ${request.toString()}");
+
+          // Add fields to the request
+          request.fields.addAll({
+            'id': event.id,
+
+
+          });
+
+          // Add headers to the request
+          request.headers.addAll(headers);
+
+          // Send the request
+          final response = await request.send();
+          final responseData = await response.stream.bytesToString();
+
+          // Log the response status and data
+          developer.log("Response status: ${response.statusCode}");
+          developer.log("Update response: $responseData");
+
+          // Handle the response based on status code
+          if (response.statusCode == 200) {
+            emit(StatusSuccess(jsonDecode(responseData)));
+          } else {
+            // Assuming the error response format is JSON
+            final responseError = jsonDecode(responseData);
+            emit(StatusFailure(responseError));
+            developer.log("Update failure: ${response.statusCode} - ${responseError['message'] ?? responseData}");
+          }
+        } catch (e) {
+          emit(AuthFlowServerFailure(e.toString()));
+          developer.log("Error during user update: ${e.toString()}");
+        }
+      } else {
+        emit(CheckNetworkConnection("No internet connection"));
+      }
+    });
+//status change
+
+
+    on<ProductStatusChangeHandler>((event, emit) async {
+      // Check for internet connectivity
+      if (await ConnectivityService.isConnected()) {
+        emit(StatusChangeLoading());
+
+        try {
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            'Authorization': 'Bearer $authToken',
+          };
+
+          var request = http.MultipartRequest(
+            'POST',
+            Uri.parse(APIEndPoints.getStatusChangeProductList),
+          );
+
+          // Log the request details for debugging
+          developer.log("Request Data: ${request.toString()}");
+
+          // Add fields to the request
+          request.fields.addAll({
+            'id': event.id,
+            'user_id':event.userID,
+            'status':event.status
+          });
+
+          // Add headers to the request
+          request.headers.addAll(headers);
+
+          // Send the request
+          final response = await request.send();
+          final responseData = await response.stream.bytesToString();
+
+          // Log the response status and data
+          developer.log("Response status: ${response.statusCode}");
+          developer.log("Update response: $responseData");
+
+          // Handle the response based on status code
+          if (response.statusCode == 200) {
+            emit(StatusChangeSuccess(jsonDecode(responseData)));
+          } else {
+            // Assuming the error response format is JSON
+            final responseError = jsonDecode(responseData);
+            emit(StatusChangeFailure(responseError));
+            developer.log("Update failure: ${response.statusCode} - ${responseError['message'] ?? responseData}");
+          }
+        } catch (e) {
+          emit(AuthFlowServerFailure(e.toString()));
+          developer.log("Error during user update: ${e.toString()}");
+        }
+      } else {
+        emit(CheckNetworkConnection("No internet connection"));
+      }
+    });
+
+    //vendor action
+    on<VendorActionHandler>((event, emit) async {
+      // Check for internet connectivity
+      if (await ConnectivityService.isConnected()) {
+        emit(VendorAssignLoading());
+
+        try {
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            'Authorization': 'Bearer $authToken',
+          };
+
+          var request = http.MultipartRequest(
+            'POST',
+            Uri.parse(APIEndPoints.actionVendor),
+          );
+
+          // Log the request details for debugging
+          developer.log("Request URL: ${request.url}");
+          developer.log("Request Method: ${request.method}");
+
+          // Prepare fields to add to the request
+          var fields = {
+            'userRole': event.userRole,
+            'user_id': event.userID,
+            'count': event.count,
+            'btnAssign': event.btnAssign,
+            'vendor': event.vendor,
+            'billing': event.billing,
+          };
+
+          // Check if event.allCount is not empty
+          if (event.allCount.isNotEmpty) {
+            for (int i = 0; i < event.allCount.length; i++) {
+              fields['allCount[$i]'] = event.allCount[i].toString();
+            }
+          } else {
+            developer.log("Warning: event.allCount is empty.");
+          }
+
+          // Add fields to the request
+          request.fields.addAll(fields);
+
+          // Add headers to the request
+          request.headers.addAll(headers);
+
+          // Log the complete request details
+          developer.log("Request Fields: ${request.fields}");
+          developer.log("Request Headers: ${request.headers}");
+
+          // Send the request
+          final response = await request.send();
+          final responseData = await response.stream.bytesToString();
+
+          // Log the response status and data
+          developer.log("Response status: ${response.statusCode}");
+          developer.log("Response data: $responseData");
+
+          // Handle the response based on status code
+          if (response.statusCode == 200) {
+            emit(VendorAssignSuccess(jsonDecode(responseData)));
+          } else {
+            // Handle error responses
+            try {
+              final responseError = jsonDecode(responseData);
+              emit(VendorAssignFailure(responseError));
+              developer.log("Update failure: ${response.statusCode} - ${responseError['message'] ?? responseData}");
+            } catch (e) {
+              emit(VendorAssignFailure({'message': 'Failed to process server response.'}));
+              developer.log("Failed to decode error response: ${e.toString()} - Response data: $responseData");
+            }
+          }
+        } catch (e) {
+          emit(AuthFlowServerFailure(e.toString()));
+          developer.log("Error during user update: ${e.toString()}");
+        }
+      } else {
+        emit(CheckNetworkConnection("No internet connection"));
+      }
+    });
+
+
+
   }
 }
