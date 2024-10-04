@@ -10,7 +10,7 @@ import 'package:shef_erp/utils/connectivity_service.dart';
 import 'package:shef_erp/utils/pref_utils.dart';
 import 'package:http/http.dart' as http;
 import 'dart:developer' as developer;
-import 'package:path/path.dart' as path;
+
 part 'all_requester_event.dart';
 part 'all_requester_state.dart';
 
@@ -287,7 +287,7 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
                 return;
               }
             } else {
-              emit(AddCartFailure({'error': 'Invalid file path'}));
+              emit(AddCartFailure(const {'error': 'Invalid file path'}));
               return;
             }
           }
@@ -306,7 +306,7 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
             emit(AddCartFailure(response.data));
             print(">>>>> Response: ${response.data}");
           }  else {
-            emit(AddCartFailure({'error': 'Failed to upload requisition'}));
+            emit(AddCartFailure(const {'error': 'Failed to upload requisition'}));
           } // Print request details
 
         } catch (e) {
@@ -316,7 +316,7 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
           emit(AddCartFailure({'error': 'Exception occurred: ${e.toString()}'}));
         }
       } else {
-        emit(AddCartFailure({'error': 'No internet connection'}));
+        emit(AddCartFailure(const {'error': 'No internet connection'}));
       }
     });
     //Delete Requisition
@@ -355,7 +355,7 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
         }
       } else {
         print('Network error');
-        emit(DeleteFailure( {'error': 'Network error'}));
+        emit(DeleteFailure( const {'error': 'Network error'}));
       }
     });
 
@@ -438,7 +438,7 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
           emit(UpdateFailure({'error': 'Exception occurred: $e'}));
         }
       } else {
-        emit(UpdateFailure({'error': 'No internet connection'}));
+        emit(UpdateFailure(const {'error': 'No internet connection'}));
       }
     });
 
@@ -515,7 +515,7 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
         }
       } else {
         print('Network error');
-        emit(UnitDeleteFailure( {'error': 'Network error'}));
+        emit(UnitDeleteFailure( const {'error': 'Network error'}));
       }
     });
 
@@ -695,7 +695,7 @@ print("RequestData>>>>>>>>>>$request");
         }
       } else {
         print('Network error');
-        emit(DeleteEventCategoryFailure({'error': 'Network error'}));
+        emit(DeleteEventCategoryFailure(const {'error': 'Network error'}));
       }
     });
 
@@ -788,7 +788,7 @@ print("RequestData>>>>>>>>>>$request");
             final responseError = jsonDecode(response.body);
             emit(UpdateCategoryFailure(responseError));
           } else {
-            emit(UpdateCategoryFailure({'error': 'Exception occurred: '}));
+            emit(UpdateCategoryFailure(const {'error': 'Exception occurred: '}));
           } // Print request details
 
         } catch (e) {
@@ -798,7 +798,7 @@ print("RequestData>>>>>>>>>>$request");
           emit(UpdateCategoryFailure({'error': 'Exception occurred: $e'}));
         }
       } else {
-        emit(UpdateCategoryFailure({'error':'No internet connection'}));
+        emit(UpdateCategoryFailure(const {'error':'No internet connection'}));
       }
 
     });
@@ -878,7 +878,7 @@ print("RequestData>>>>>>>>>>$request");
         }
       } else {
         print('Network error');
-        emit(UserDeleteFailure( {'error': 'Network error'}));
+        emit(UserDeleteFailure( const {'error': 'Network error'}));
       }
     });
 
@@ -889,7 +889,7 @@ print("RequestData>>>>>>>>>>$request");
         emit(UserEditDetailsLoading());
         try {
           String authToken = PrefUtils.getToken();
-          int userId = PrefUtils.getUserId();
+
           final APIEndpoint = Uri.parse("${APIEndPoints.editDetailsUserList}${event.id}");
           var response = await http.get(
             APIEndpoint,
@@ -1129,7 +1129,7 @@ print("RequestData>>>>>>>>>>$request");
         }
       } else {
         print('Network error');
-        emit(UserBillingDeleteFailure( {'error': 'Network error'}));
+        emit(UserBillingDeleteFailure( const {'error': 'Network error'}));
       }
     });
 
@@ -1316,7 +1316,7 @@ print("RequestData>>>>>>>>>>$request");
         }
       } else {
         print('Network error');
-        emit(DeleteEventServiceFailure( {'error': 'Network error'}));
+        emit(DeleteEventServiceFailure( const {'error': 'Network error'}));
       }
     });
 
@@ -1698,7 +1698,7 @@ print("RequestData>>>>>>>>>>$request");
               emit(VendorAssignFailure(responseError));
               developer.log("Update failure: ${response.statusCode} - ${responseError['message'] ?? responseData}");
             } catch (e) {
-              emit(VendorAssignFailure({'message': 'Failed to process server response.'}));
+              emit(VendorAssignFailure(const {'message': 'Failed to process server response.'}));
               developer.log("Failed to decode error response: ${e.toString()} - Response data: $responseData");
             }
           }
@@ -1710,6 +1710,196 @@ print("RequestData>>>>>>>>>>$request");
         emit(CheckNetworkConnection("No internet connection"));
       }
     });
+    //Event list
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//Get event
+    on<EventListHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(EventListLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.getEventsList}$userId?page=${event.page}&per_page=${event.size}");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(EventListSuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(EventListFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(EventListFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(EventListFailure(const {'error': 'Network error'}));
+      }
+    });
+
+//delete event
+
+    on<DeleteEventHandlers>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        int userId = PrefUtils.getUserId();
+        emit(EventDeleteLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+
+          final APIEndpoint = Uri.parse("${APIEndPoints.deleteEventList}${event.id}/$userId");
+          developer.log("Making DELETE request to: $APIEndpoint");
+          developer.log("Authorization Token: $authToken");
+
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+            },
+          );
+
+          // Log response details
+          developer.log("Response status: ${response.statusCode}");
+          developer.log("Response body: ${response.body}");
+
+          if (response.statusCode == 200) {
+            print('Response successful: ${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(EventDeleteSuccess(responseData));
+          }
+
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(EventDeleteFailure(responseError));
+            developer.log("Error response: ${responseError}");
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(EventDeleteFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(EventDeleteFailure(const {'error': 'Network error'}));
+      }
+    });
+
+//create event
+
+    on<CreateEventHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        String authToken = PrefUtils.getToken();
+        emit(EventCreateLoading());
+
+        try {
+          final requestData = json.encode({
+            "cate_name": event.category,
+          });
+
+          developer.log(
+              "Requesting create: ${Uri.parse(APIEndPoints.createEventList)}");
+
+          final response = await http.post(
+            Uri.parse(APIEndPoints.createEventList),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+            },
+            body: requestData,
+          );
+
+          if (response.statusCode == 200) {
+            final responseData = jsonDecode(response.body);
+            emit(EventCreateSuccess(responseData));
+          } else if (response.statusCode == 401) {
+            final responseError = jsonDecode(response.body);
+            emit(EventCreateFailure(responseError));
+          }
+          else if (response.statusCode == 500) {
+            final responseError = jsonDecode(response.body);
+            emit(EventCreateFailure(responseError));
+          } else {
+            emit(EventCreateFailure('Failed to upload requisition'));
+          } // Print request details
+
+        } catch (e) {
+          if (kDebugMode) {
+            developer.log(e.toString());
+          }
+          emit(EventCreateFailure('Exception occurred: ${e.toString()}'));
+        }
+      } else {
+        emit(EventCreateFailure('No internet connection'));
+      }
+
+    });
+
+//Edit event
+
+    on<UpdateEventHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        String authToken = PrefUtils.getToken();
+        emit(UpdateEventsLoading());
+
+        try {
+          final requestData = json.encode({
+            "cate_name": event.category,
+            "user_id": event.userId,
+            "id": event.id,
+          });
+
+          developer.log(
+              "Requesting update: ${Uri.parse(APIEndPoints.updateEventList)}");
+
+
+          print("requestData>>>>>${requestData}");
+          final response = await http.post(
+            Uri.parse(APIEndPoints.updateEventList),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+            },
+            body: requestData,
+          );
+
+          if (response.statusCode == 200) {
+            final responseData = jsonDecode(response.body);
+            emit(UpdateEventsSuccess(responseData));
+          } else if (response.statusCode == 401) {
+            final responseError = jsonDecode(response.body);
+            emit(UpdateEventsFailure(responseError));
+          }
+          else if (response.statusCode == 500) {
+            final responseError = jsonDecode(response.body);
+            emit(UpdateEventsFailure(responseError));
+          } else {
+            emit(UpdateEventsFailure(const {'error': 'Exception occurred: '}));
+          } // Print request details
+
+        } catch (e) {
+          if (kDebugMode) {
+            developer.log(e.toString());
+          }
+          emit(UpdateEventsFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        emit(UpdateEventsFailure(const {'error':'No internet connection'}));
+      }
+
+    });
+
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 

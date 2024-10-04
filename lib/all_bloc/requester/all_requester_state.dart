@@ -216,47 +216,12 @@ final class EditSuccessEventCategoryFailure extends AllRequesterState{
 
 
 
-
-
-
-//Events  From Event list
-
-final class EventLoading extends AllRequesterState{}
-final class EventSuccess extends AllRequesterState{
-  final Map<String, dynamic> eventList;
-  EventSuccess(this.eventList);
-
-}
-
-
 final class  EventFailure extends AllRequesterState{
   final Map<String, dynamic> eventFailure;
   EventFailure(this.eventFailure);
 
 }
-//Delete Event From List
-final class DeleteEventLoading extends AllRequesterState{}
-final class DeleteEventSuccess extends AllRequesterState{
-  final Map<String, dynamic> deleteEventList;
-  DeleteEventSuccess(this.deleteEventList);
 
-}
-
-
-//  Edit Event
-final class EditEventLoading extends AllRequesterState{}
-final class EditEventSuccess extends AllRequesterState{
-  final Map<String, dynamic> editEventList;
-  EditEventSuccess(this.editEventList);
-
-}
-
-
-final class EditSuccessEventFailure extends AllRequesterState{
-  final Map<String, dynamic> deleteEventFailure;
-  EditSuccessEventFailure(this.deleteEventFailure);
-
-}
 
 
 //Get UNit
@@ -623,3 +588,127 @@ final class StatusChangeFailure extends AllRequesterState{
   StatusChangeFailure(this.statusChangeFailure);
 
 }
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//event list
+
+final class EventListLoading extends AllRequesterState{}
+final class EventListSuccess extends AllRequesterState{
+  final Map<String, dynamic> eventList;
+  EventListSuccess(this.eventList);
+
+}
+
+
+final class EventListFailure extends AllRequesterState{
+  final Map<String, dynamic> eventFailure;
+  EventListFailure(this.eventFailure);
+
+}
+
+//event delete state
+
+final class EventDeleteLoading extends AllRequesterState{}
+final class EventDeleteSuccess extends AllRequesterState{
+  final Map<String, dynamic> deleteEventList;
+  EventDeleteSuccess(this.deleteEventList);
+
+}
+
+
+final class  EventDeleteFailure extends AllRequesterState{
+  final Map<String, dynamic>  deleteEventFailure;
+  EventDeleteFailure(this. deleteEventFailure);
+
+}
+
+//event create state
+
+final class EventCreateLoading extends AllRequesterState{}
+final class  EventCreateSuccess extends AllRequesterState {
+  final Map<String ,dynamic> createResponse;
+  EventCreateSuccess(this.createResponse);
+
+}
+final class EventCreateFailure extends AllRequesterState {
+
+  final String failureMessage;
+EventCreateFailure(this.failureMessage);
+
+}
+
+//Update events state
+final class UpdateEventsLoading extends AllRequesterState{}
+final class UpdateEventsSuccess extends AllRequesterState {
+  final Map<String, dynamic> updateResponse;
+  UpdateEventsSuccess(this.updateResponse);
+
+}
+final class UpdateEventsFailure extends AllRequesterState {
+
+  final Map<String, dynamic> failureUpdateMessage;
+  UpdateEventsFailure(this.failureUpdateMessage);
+
+}
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//+++++++++++++++++++++++++++++++++++++++vendor list++++++++++++++++++++
+
+final class VendorListLoading extends AllRequesterState{}
+final class VendorListSuccess extends AllRequesterState{
+  final Map<String, dynamic> eventList;
+  VendorListSuccess(this.eventList);
+
+}
+
+
+final class VendorListFailure extends AllRequesterState{
+  final Map<String, dynamic> eventFailure;
+  VendorListFailure(this.eventFailure);
+
+}
+
+//vendor delete state
+
+final class VendorDeleteLoading extends AllRequesterState{}
+final class VendorDeleteSuccess extends AllRequesterState{
+  final Map<String, dynamic> deleteEventList;
+  VendorDeleteSuccess(this.deleteEventList);
+
+}
+
+
+final class  VendorDeleteFailure extends AllRequesterState{
+  final Map<String, dynamic>  deleteEventFailure;
+  VendorDeleteFailure(this. deleteEventFailure);
+
+}
+
+//vendor create state
+
+final class VendorCreateLoading extends AllRequesterState{}
+final class  VendorCreateSuccess extends AllRequesterState {
+  final Map<String ,dynamic> createResponse;
+  VendorCreateSuccess(this.createResponse);
+
+}
+final class VendorCreateFailure extends AllRequesterState {
+
+  final String failureMessage;
+  VendorCreateFailure(this.failureMessage);
+
+}
+
+//Update vendor state
+final class UpdateVendorLoading extends AllRequesterState{}
+final class  UpdateVendorSuccess extends AllRequesterState {
+  final Map<String, dynamic> updateResponse;
+  UpdateVendorSuccess(this.updateResponse);
+
+}
+final class  UpdateVendorFailure extends AllRequesterState {
+
+  final Map<String, dynamic> failureUpdateMessage;
+  UpdateVendorFailure(this.failureUpdateMessage);
+
+}
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

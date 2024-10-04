@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -39,15 +38,9 @@ class _AdminRequisitionState extends State<AdminRequisition> {
   Map<String, String>? selectedItemForEditing;
   Map<String, int> productMap = {};
   Map<String, int> billingMap = {};
-  late final GlobalKey<FormFieldState<String>> _vendorNameKey =
-      GlobalKey<FormFieldState<String>>();
-  late final GlobalKey<FormFieldState<String>> _billingNameKey =
-      GlobalKey<FormFieldState<String>>();
   late final TextEditingController vendorName = TextEditingController();
   late final TextEditingController billingName = TextEditingController();
-  late final FocusNode _vendorNameNode = FocusNode();
-  late final FocusNode _billingNameNode = FocusNode();
-  TextEditingController _editController = TextEditingController();
+
   final TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
   String? selectedItem;
@@ -152,7 +145,6 @@ class _AdminRequisitionState extends State<AdminRequisition> {
         _isTextEmpty = _controller.text.isEmpty;
       });
     });
-    _editController = TextEditingController();
     BlocProvider.of<AllRequesterBloc>(context)
         .add(AddCartDetailHandler("", pageNo, pageSize));
     paginationCall();
@@ -524,10 +516,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                         product: item["product_name"] ?? "N/A",
                                         specification:
                                             item["specification"] ?? "N/A",
-                                        quantity: item["quantity"].toString() ??
-                                            "N/A",
-                                        unitHead: item["unitHead"].toString() ??
-                                            "N/A",
+                                        quantity: item["quantity"].toString(),
+                                        unitHead: item["unitHead"].toString(),
                                         purchase: item["purchase"].toString() ??
                                             "N/A",
                                         delivery:
@@ -809,8 +799,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
 
   Future<bool?> _showBrandDialog(
       AllRequesterBloc of, BuildContext context, List<String> selectedIds) {
-    final _formKey = GlobalKey<FormState>();
-    final TextEditingController _editController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
     String? selectedItem; // Initialize with null
     String? selectedBilling; // Initialize with null
     bool isButtonPartEnabled = false; // Initialize button state
@@ -821,7 +810,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
             // Helper function to check if the button should be enabled
-            void _updateButtonState() {
+            void updateButtonState() {
               setState(() {
                 isButtonPartEnabled = (selectedItem != null &&
                         selectedItem!.isNotEmpty) &&
@@ -843,7 +832,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                 content: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.98,
                   child: Form(
-                    key: _formKey,
+                    key: formKey,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -876,7 +865,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                 onChanged: (String? eventValue) {
                                   setState(() {
                                     selectedItem = eventValue;
-                                    _updateButtonState(); // Call the helper function
+                                    updateButtonState(); // Call the helper function
                                   });
                                 },
                                 items: productNames
@@ -918,7 +907,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                 onChanged: (String? eventValue) {
                                   setState(() {
                                     selectedBilling = eventValue;
-                                    _updateButtonState(); // Call the helper function
+                                    updateButtonState(); // Call the helper function
                                   });
                                 },
                                 items: billingNames
@@ -1006,16 +995,16 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                   true); // Optionally return true after submission
                             }
                           : null,
-                      child: const Text("OK",
-                          style: TextStyle(color: Colors.white)),
                       style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all(
+                        backgroundColor: WidgetStateProperty.all(
                             isButtonPartEnabled
                                 ? AppColors.primaryColourDark
                                 : AppColors.dividerColor),
-                        shape: MaterialStateProperty.all(RoundedRectangleBorder(
+                        shape: WidgetStateProperty.all(RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(25.0))),
                       ),
+                      child: const Text("OK",
+                          style: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ],
@@ -1026,8 +1015,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
   }
 
   void _showRejectDialog(int index) {
-    final _formKey = GlobalKey<FormState>();
-    final TextEditingController _editController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    final TextEditingController editController = TextEditingController();
     bool isButtonEnabled = false; // Initialize button state
 
     showDialog(
@@ -1036,9 +1025,9 @@ class _AdminRequisitionState extends State<AdminRequisition> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             // Add listener to the TextEditingController to monitor text changes
-            _editController.addListener(() {
+            editController.addListener(() {
               setState(() {
-                isButtonEnabled = _editController.text.isNotEmpty;
+                isButtonEnabled = editController.text.isNotEmpty;
               });
             });
 
@@ -1054,7 +1043,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
               content: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.7,
                 child: Form(
-                  key: _formKey,
+                  key: formKey,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1067,7 +1056,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: TextFormField(
-                          controller: _editController,
+                          controller: editController,
                           decoration: InputDecoration(
                             hintText: "Enter Purchase Manager Remark",
                             hintStyle: FTextStyle.formhintTxtStyle,
@@ -1132,7 +1121,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                   child: TextButton(
                     onPressed: isButtonEnabled
                         ? () {
-                            if (_formKey.currentState?.validate() ?? false) {
+                            if (formKey.currentState?.validate() ?? false) {
                               // Handle the reject action here
                               Navigator.of(context).pop();
                             }
@@ -1154,26 +1143,23 @@ class _AdminRequisitionState extends State<AdminRequisition> {
   }
 
   void _showMarkDeliveryDialog(int index) {
-    final _formKey = GlobalKey<FormState>();
-    final TextEditingController _editController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    final TextEditingController editController = TextEditingController();
     bool isButtonEnabled = false; // Initialize button state
-    late final GlobalKey<FormFieldState<String>> _uploadNameKey =
+    late final GlobalKey<FormFieldState<String>> uploadNameKey =
         GlobalKey<FormFieldState<String>>();
     late final TextEditingController uploadName = TextEditingController();
-    late final FocusNode _uploadNameNode = FocusNode();
-    bool isUploadFocused = false;
-    bool isImageUploaded = false;
+    late final FocusNode uploadNameNode = FocusNode();
     String? fileName1;
-    File? imagesId;
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             // Add listener to the TextEditingController to monitor text changes
-            _editController.addListener(() {
+            editController.addListener(() {
               setState(() {
-                isButtonEnabled = _editController.text.isNotEmpty;
+                isButtonEnabled = editController.text.isNotEmpty;
               });
             });
 
@@ -1189,7 +1175,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
               content: SizedBox(
                 width: MediaQuery.of(context).size.width * 0.7,
                 child: Form(
-                  key: _formKey,
+                  key: formKey,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1201,7 +1187,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                       ),
                       const SizedBox(height: 10),
                       TextFormField(
-                        controller: _editController,
+                        controller: editController,
                         decoration: InputDecoration(
                           hintText: "Enter Purchase Manager Remark",
                           hintStyle: FTextStyle.formhintTxtStyle,
@@ -1244,8 +1230,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                       const SizedBox(height: 10),
                       TextFormField(
                         readOnly: true,
-                        key: _uploadNameKey,
-                        focusNode: _uploadNameNode,
+                        key: uploadNameKey,
+                        focusNode: uploadNameNode,
                         decoration:
                             FormFieldStyle.defaultInputDecoration.copyWith(
                           fillColor: AppColors.formFieldBackColour,
@@ -1258,8 +1244,6 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                               if (result != null && result.files.isNotEmpty) {
                                 setState(() {
                                   fileName1 = result.files.single.name;
-                                  imagesId = File(result.files.single.path!);
-                                  isImageUploaded = true;
                                   uploadName.text = fileName1!;
                                 });
                               }
@@ -1277,12 +1261,10 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                         },
                         onTap: () {
                           setState(() {
-                            isUploadFocused = true;
                           });
                         },
                         onEditingComplete: () {
                           setState(() {
-                            isUploadFocused = false;
                           });
                         },
                       ).animateOnPageLoad(
@@ -1324,9 +1306,9 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                 ElevatedButton(
                   onPressed: isButtonEnabled
                       ? () {
-                          if (_formKey.currentState?.validate() ?? false) {
+                          if (formKey.currentState?.validate() ?? false) {
                             BlocProvider.of<AllRequesterBloc>(context).add(
-                              RejectHandler(_editController.text.toString()),
+                              RejectHandler(editController.text.toString()),
                             );
 
                             // Handle the reject action here

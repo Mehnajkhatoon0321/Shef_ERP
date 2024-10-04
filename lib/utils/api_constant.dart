@@ -18,6 +18,8 @@ class  APIEndPoints{
   static const String deleteUnits= '${baseUrl}unit/delete/';
   static const String createUnits= '${baseUrl}unit/create';
   static const String updateUnits= '${baseUrl}unit/update';
+
+  //product
   static const String productGetCategory= '${baseUrl}category/';
   static const String productGetCategoryDelete= '${baseUrl}category/delete/';
   static const String productGetCategoryCreate= '${baseUrl}category/create';
@@ -58,5 +60,21 @@ class  APIEndPoints{
   static const String createEventList= '${baseUrl}event/create';
   static const String updateEventList= '${baseUrl}event/update';
   static const String   editEventList= '${baseUrl}event/edit';
+
+
+
+  //vendor data
+
+
+
+  static const String getVendorList= '${baseUrl}event/';
+  static const String deleteVendorList= '${baseUrl}event/delete/';
+  static const String createVendorList= '${baseUrl}event/create';
+  static const String updateVendorList= '${baseUrl}event/update';
+  static const String   editVendorList= '${baseUrl}event/edit';
+  static const String   createList= '${baseUrl}event/edit';
+
+
+
 
 }
