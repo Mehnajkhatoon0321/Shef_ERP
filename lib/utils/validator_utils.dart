@@ -59,28 +59,7 @@ class ValidatorUtils {
 
     return null;
   }
-  static String? validateQuantity(String? value) {
-    // Check if value is null or empty
-    if (value == null || value.isEmpty) {
-      return 'Please fill the field.';
-    }
 
-    // Check if value is a valid number
-    final intValue = int.tryParse(value);
-    if (intValue == null) {
-      return 'Please enter a valid number.';
-    }
-
-    // Check if value is within the desired range
-    if (intValue <= 0) {
-      return 'Please enter a number greater than 0.';
-    } else if (intValue > 1000) {
-      return 'Please enter a number less than or equal to 1000.';
-    }
-
-    // Input is valid
-    return null;
-  }
   static String? dateValidator(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter a date.';
@@ -124,6 +103,20 @@ class ValidatorUtils {
     }
     return null;
   }
+  static String? simpleNameValidator(String? value) {
+    // Check if the value is null or empty
+    if (value == null || value.trim().isEmpty) {
+      return Constants.nameRequired; // Error message for empty name
+    }
+
+    // Check if the length of the name is between 1 and 60 characters
+    if (value.length < 1 || value.length > 60) {
+      return Constants.nameLength; // Error message for invalid length
+    }
+
+    // The name is valid
+    return null;
+  }
 
 
   static String? nameValidator(String? value) {
@@ -145,15 +138,29 @@ class ValidatorUtils {
   }
 
 
-
+  //
+  // static String? addressValidator(String? value) {
+  //   if (value == null || value.isEmpty) {
+  //     return Constants.nullAddressField;
+  //   } else if (value.length < 10 || value.length > 200) {
+  //     return Constants.lengthAddressField;
+  //   } else {
+  //     return null;
+  //   }
+  // }
   static String? addressValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return Constants.nullAddressField;
-    } else if (value.length < 10 || value.length > 200) {
-      return Constants.lengthAddressField;
-    } else {
-      return null;
+    // Check if the value is null or empty
+    if (value == null || value.trim().isEmpty) {
+      return Constants.nullAddressField; // Error message for empty address
     }
+
+    // Check if the length of the address is between 5 and 100 characters
+    if (value.length < 5 || value.length > 100) {
+      return Constants.lengthAddressField; // Error message for invalid length
+    }
+
+    // The address is valid
+    return null;
   }
 
   static String confirmPassValidator(String pass, String confirmPass) {
@@ -215,35 +222,26 @@ class ValidatorUtils {
     return null;
   }
 
-  static String? lastNameValidator(String? value) {
+
+
+  static String? mobileNumberValidator(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return Constants.lastNameRequired;
-    }
-    if (value.length < 3 || value.length > 60) {
-      return Constants.lastNameLength;
-    }
-    if (!_isValidNameFormat(value)) {
-      return Constants.lastNameInvalid;
-    }
-    return null;
-  }
-static  String? pincodeValidator(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return Constants.pincodeRequired;
+      return Constants.mobileNumberRequired; // Adjust this constant as needed
     }
 
-    // Check if the pin code contains only digits
+    // Check if the mobile number contains only digits
     if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-      return Constants.pincodeInvalid;
+      return Constants.mobileNumberInvalid; // Adjust this constant as needed
     }
 
-    if (value.length < 4 || value.length > 8) {
-      return Constants.pincodeLength;
+    if (value.length < 10 || value.length > 15) {
+      return Constants.mobileNumberLength; // Adjust this constant as needed
     }
 
-    // The pin code is valid
+    // The mobile number is valid
     return null;
   }
+
 
   //>>>>>>>>>>>>>>>>>>isValid
 //first name
@@ -264,6 +262,22 @@ static  String? pincodeValidator(String? value) {
     // The first name is valid
     return true;
   }
+  // static bool isValidAddress(String value) {
+  //   // Check if the value is null or empty
+  //   if (value.isEmpty) {
+  //     return false;
+  //   }
+  //
+  //   // Check if the length of the address is between 5 and 100 characters
+  //   if (value.length < 5 || value.length > 100) {
+  //     return false;
+  //   }
+
+
+
+    // The address is valid
+  //   return true;
+  // }
 
   static bool isValidLastName(String value) {
     // Check if the value is null or empty
@@ -309,6 +323,20 @@ static  String? pincodeValidator(String? value) {
     // Password meets all criteria
     return true;
   }
+  static bool isValidSimpleName(String value) {
+    // Check if the value is null or empty
+    if (value.isEmpty) {
+      return false;
+    }
+
+    // Check if the length of the name is between 1 and 60 characters
+    if (value.length < 1 || value.length > 60) {
+      return false;
+    }
+
+    // The name is valid
+    return true;
+  }
 
   static bool isValidName(String value) {
     // Check if the value is null or empty
@@ -340,6 +368,20 @@ static  bool isValidAddress(String value) {
 
     // The address is valid
     return true;
+  }
+  static String? panCardValidator(String? value) {
+    // Check if the value is null or empty
+    if (value == null || value.trim().isEmpty) {
+      return Constants.panCardRequired; // Error message for empty PAN card
+    }
+
+    // Check if the value matches the PAN card format
+    if (!RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$').hasMatch(value)) {
+      return Constants.panCardInvalid; // Error message for invalid PAN card format
+    }
+
+    // The PAN card is valid
+    return null;
   }
 
   static bool isValidPincode(String value) {
@@ -425,164 +467,9 @@ static  bool isValidAddress(String value) {
 
 
 
-  static Future<DateTime?> selectDate(
-      BuildContext context, DateTime? selectedDate) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: selectedDate ?? DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-    );
 
-    if (picked != null && picked != selectedDate) {
-      return picked;
-    }
-    return null;
+
+
+
+
   }
-
-  //Contact us validation
-  static String? messageValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return "Message field cannot be empty";
-    }
-    if (value.length > 60) {
-      return "Message length cannot more then 60";
-    }
-    return null;
-  }
-
-  static bool isValidMessage(String message) {
-    if (message.isEmpty) {
-      return false;
-    }
-    if (message.length > 60) {
-      return false;
-    }
-
-    return true;
-  }
-
-  static int calculateAge(DateTime birthDate) {
-    DateTime currentDate = DateTime.now();
-    int age = currentDate.year - birthDate.year;
-    int month1 = currentDate.month;
-    int month2 = birthDate.month;
-    if (month2 > month1) {
-      age--;
-    } else if (month1 == month2) {
-      int day1 = currentDate.day;
-      int day2 = birthDate.day;
-      if (day2 > day1) {
-        age--;
-      }
-    }
-    return age;
-  }
-
-  // Widget _buildCategoryShimmer() {
-  //   return Shimmer.fromColors(
-  //     baseColor: Colors.grey[300]!,
-  //     highlightColor: Colors.grey[100]!,
-  //     child: Row(
-  //       children: List.generate(6, (index) {
-  //         return Column(
-  //           crossAxisAlignment: CrossAxisAlignment.center,
-  //           children: [
-  //             Container(
-  //               width: 60,
-  //               height: 60,
-  //               margin: const EdgeInsets.only(top: 5, bottom: 5, right: 5),
-  //               decoration: const BoxDecoration(
-  //                 color: Colors.white,
-  //                 shape: BoxShape.circle,
-  //               ),
-  //             ),
-  //             const SizedBox(height: 5, width: 75),
-  //             Container(
-  //               width: 60,
-  //               height: 15,
-  //               color: Colors.white,
-  //             ),
-  //           ],
-  //         );
-  //       }),
-  //     ),
-  //   );
-  // }
-  //
-  // Widget _buildProductShimmer() {
-  //   return Shimmer.fromColors(
-  //     baseColor: Colors.grey[300]!,
-  //     highlightColor: Colors.grey[100]!,
-  //     child: GridView.builder(
-  //       shrinkWrap: true,
-  //       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-  //         crossAxisCount: 2,
-  //         crossAxisSpacing: 10,
-  //         mainAxisSpacing: 10,
-  //         childAspectRatio: 0.60,
-  //       ),
-  //       itemCount: 6,
-  //       itemBuilder: (context, index) {
-  //         return Card(
-  //           elevation: 3,
-  //           shape: RoundedRectangleBorder(
-  //             borderRadius: BorderRadius.circular(8),
-  //           ),
-  //           child: Column(
-  //             crossAxisAlignment: CrossAxisAlignment.start,
-  //             children: [
-  //               Container(
-  //                 height: 140,
-  //                 decoration: const BoxDecoration(
-  //                   color: Colors.white,
-  //                   borderRadius: BorderRadius.only(
-  //                     topLeft: Radius.circular(8),
-  //                     topRight: Radius.circular(8),
-  //                   ),
-  //                 ),
-  //               ),
-  //               Padding(
-  //                 padding:
-  //                     const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-  //                 child: Column(
-  //                   crossAxisAlignment: CrossAxisAlignment.start,
-  //                   children: [
-  //                     Container(
-  //                       width: double.infinity,
-  //                       height: 20,
-  //                       color: Colors.white,
-  //                     ),
-  //                     const SizedBox(height: 5),
-  //                     Container(
-  //                       width: double.infinity,
-  //                       height: 15,
-  //                       color: Colors.white,
-  //                     ),
-  //                     const SizedBox(height: 5),
-  //                     Container(
-  //                       width: 80,
-  //                       height: 20,
-  //                       color: Colors.white,
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //             ],
-  //           ),
-  //         );
-  //       },
-  //     ),
-  //   );
-  // }
-
-  // doctor
-  static String? weightValidatorDoc(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your weight';
-    } else if (double.tryParse(value) == null || double.parse(value) <= 0) {
-      return 'Please enter a valid weight';
-    }
-    return null;
-  }
-}

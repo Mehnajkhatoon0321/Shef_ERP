@@ -176,8 +176,95 @@ class FormFieldStyle {
     fillColor: AppColors.formFieldBackColour,
     contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
   );
+  static InputDecoration defaultInputEditDecoration =
+  const
+  InputDecoration(
+    enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(28),
+        ),
+        borderSide: BorderSide(
+          color: AppColors.formFieldHintColour,
+        )),
+    disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(28),
+        ),
+        borderSide: BorderSide(
+          color: AppColors.formFieldHintColour,
+        )),
+    focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(28),
+        ),
+        borderSide: BorderSide(
+          color: AppColors.formFieldHintColour,
+        )),
+    errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(28),
+        ),
+        borderSide: BorderSide(
+          color: AppColors.formFieldHintColour,
+        )),
+    focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(28),
+        ),
+        borderSide: BorderSide(
+          color: AppColors.formFieldHintColour,
+        )),
+    hintText: Constants.addressHint,
+    hintStyle: FTextStyle.formhintTxtStyle,
+    filled: true,
+    fillColor: AppColors.formFieldBackColour,
+    contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+  );
 
-
+  static InputDecoration defaultInputEditAddressDecoration =
+  const
+  InputDecoration(
+    enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(15),
+        ),
+        borderSide: BorderSide(
+          color: AppColors.formFieldHintColour,
+        )),
+    disabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(15),
+        ),
+        borderSide: BorderSide(
+          color: AppColors.formFieldHintColour,
+        )),
+    focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(15),
+        ),
+        borderSide: BorderSide(
+          color: AppColors.formFieldHintColour,
+        )),
+    errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(15),
+        ),
+        borderSide: BorderSide(
+          color: AppColors.formFieldHintColour,
+        )),
+    focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(15),
+        ),
+        borderSide: BorderSide(
+          color: AppColors.formFieldHintColour,
+        )),
+    hintText: Constants.addressHint,
+    hintStyle: FTextStyle.formhintTxtStyle,
+    filled: true,
+    fillColor: AppColors.formFieldBackColour,
+    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+  );
 
   static InputDecoration defaultInputDecoration =
   const InputDecoration(

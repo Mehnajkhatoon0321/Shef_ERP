@@ -53,7 +53,7 @@ class Constants {
   static const wrongEmailFormat = "*Please enter valid email format.";
   static const nullEmailField = "*Please enter email.";
   static const nullField = "*Please enter password.";
-  static const nullAddressField = "*Please enter address.";
+  static const nullAddressField = "Please enter address.";
   static const lengthAddressField = "*Please enter address min length 10 and max 200.";
 
   static const lengtherror = "*Password must be at least 8 characters long.";
@@ -86,32 +86,23 @@ class Constants {
 //
 
   static const weight = "*Field cannot be empty.";
-//
 
-  static const pinCode = "*Please enter your pincode.";
 
-  //phone number error validation
-  static const emptyPhoneFieldError = "*Please enter your phone number.";
-  static const minLengthVoilationPhoneFieldError =
-      "*Phone number must be of 8-15 digit.";
-  static const maxLengthexceedPhoneFieldError =
-      "*Phone number can not be more than 15 digits.";
 
-  static const tnc1 = "I agree to the ";
-  static const tnc2 = "Terms & Condition";
-  static const tnc3 = " and ";
-  static const tnc4 = "Privacy Policy.";
   static const rememberMeTxt = "Remember me";
 
+
+
+  static const String mobileNumberRequired = "Please enter the mobile number is required.";
+  static const String mobileNumberInvalid = "Mobile number must contain only digits.";
+  static const String mobileNumberLength = "Mobile number must be between 10 and 15 digits.";
+  static const String nameRequired = "Please enter the name is required.";
+  static const String nameLength = "Name must be between 1 and 60 characters.";
   //contact us error
-  static const messageErrorTxt = "*Please enter your message";
-
-  
-
-  //contact us error
 
 
-  
+  static const String panCardRequired = "Please enter PAN card is required.";
+  static const String panCardInvalid = "Invalid PAN card format.";
 
 
 }
