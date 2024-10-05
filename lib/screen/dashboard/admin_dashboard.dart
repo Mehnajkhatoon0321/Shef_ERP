@@ -18,6 +18,7 @@ import 'package:shef_erp/screen/master/master_list/product_category.dart';
 import 'package:shef_erp/screen/master/master_list/product_service.dart';
 import 'package:shef_erp/screen/master/master_list/units.dart';
 import 'package:shef_erp/screen/master/master_list/user_list.dart';
+import 'package:shef_erp/screen/master/master_list/vendor.dart';
 import 'package:shef_erp/screen/reports/reports.dart';
 import 'package:shef_erp/screen/requisition/admin/admin_requisition.dart';
 import 'package:shef_erp/screen/requisition/requester/requisition_requester.dart';
@@ -77,7 +78,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
       {
         'icon': Icons.event,
         "title": 'Events',
-      },],},
+      },
+      {
+        'icon': Icons.vertical_shades,
+        "title": 'Vendor',
+      },
+
+
+    ],},
     {'subtitle': 'Reports', 'icon': Icons.request_page_outlined},
     {'subtitle': 'My Profile', 'icon': Icons.person},
     {'subtitle': 'Logout', 'icon': Icons.logout},
@@ -741,6 +749,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
           MaterialPageRoute(builder: (context) =>  BlocProvider(
             create: (context) => AllRequesterBloc(),
             child:  UserList(),
+          )),
+        );
+        break;  case 'Vendor':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) =>  BlocProvider(
+            create: (context) => AllRequesterBloc(),
+            child:  Vendor(),
           )),
         );
         break;

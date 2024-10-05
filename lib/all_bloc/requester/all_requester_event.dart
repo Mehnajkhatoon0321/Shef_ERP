@@ -356,14 +356,6 @@ class VendorActionHandler extends AllRequesterEvent {
   List<dynamic> allCount;
   VendorActionHandler({required this.userID, required this.btnAssign,required this.userRole,required this.vendor,required this.billing,required this.allCount,required this.count});
 }
-//vendor in master
-
-class VendorListHandler extends AllRequesterEvent {
-  String search;
-  int page;
-  int size;
-  VendorListHandler(this.search,this.page,this.size);
-}
 
 
 //Events list
@@ -396,4 +388,19 @@ class UpdateEventHandler extends AllRequesterEvent {
   int userId;
   int id;
   UpdateEventHandler({required this.category,required this.userId,required this.id,});
+}
+//
+//vendor in master
+
+class VendorListHandler extends AllRequesterEvent {
+  String search;
+  int page;
+  int size;
+  VendorListHandler(this.search,this.page,this.size);
+}
+class DeleteVendorHandlers extends AllRequesterEvent {
+  int id;
+
+
+  DeleteVendorHandlers(this.id);
 }

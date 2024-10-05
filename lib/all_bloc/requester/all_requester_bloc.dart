@@ -1900,7 +1900,87 @@ print("RequestData>>>>>>>>>>$request");
     });
 
 //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//vendor
+    on<VendorListHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(VendorListLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.getUserList}$userId?page=${event.page}&per_page=${event.size}");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
 
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(VendorListSuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(VendorListFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(GetUserListFailure('Exception occurred'));
+        }
+      } else {
+        print('Network error');
+        emit(UnitFailure(const {'error': 'Network error'}));
+      }
+    });
+  //vendor delete
+
+    on<DeleteVendorHandlers>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        int userId = PrefUtils.getUserId();
+        emit(VendorDeleteLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+
+          final APIEndpoint = Uri.parse("${APIEndPoints.deleteEventList}${event.id}/$userId");
+          developer.log("Making DELETE request to: $APIEndpoint");
+          developer.log("Authorization Token: $authToken");
+
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+            },
+          );
+
+          // Log response details
+          developer.log("Response status: ${response.statusCode}");
+          developer.log("Response body: ${response.body}");
+
+          if (response.statusCode == 200) {
+            print('Response successful: ${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(VendorDeleteSuccess(responseData));
+          }
+
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(VendorDeleteFailure(responseError));
+            developer.log("Error response: ${responseError}");
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(VendorDeleteFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(VendorDeleteFailure(const {'error': 'Network error'}));
+      }
+    });
 
 
   }

@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 import 'package:shef_erp/screen/master/master_list/vendor_edit.dart';
+import 'package:shef_erp/screen/master/master_list/vendor_view.dart';
 import 'package:shef_erp/utils/DeletePopupManager.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
@@ -158,7 +159,7 @@ class _VendorState extends State<Vendor> {
         centerTitle: true,
         automaticallyImplyLeading: false,
         title: Text(
-          'User',
+          'Vendor',
           style: FTextStyle.HeadingTxtWhiteStyle,
           textAlign: TextAlign.center,
         ),
@@ -176,7 +177,7 @@ class _VendorState extends State<Vendor> {
                       create: (context) => AllRequesterBloc(),
                       child:  VendorEdit(
 
-                        screenflag:"",
+                        screenFlag:"",
                         id:"",
                       ),
                     )),
@@ -211,13 +212,13 @@ class _VendorState extends State<Vendor> {
       ),
       body: BlocListener<AllRequesterBloc, AllRequesterState>(
         listener: (context, state) {
-          if (state is UnitLoading) {
+          if (state is VendorListLoading) {
             setState(() {
               isLoading = true;
             });
-          } else if (state is GetUserListSuccess) {
+          } else if (state is VendorListSuccess) {
             setState(() {
-              var responseData = state.userResponse['list'];
+              var responseData = state.eventList['list'];
 
 
 
@@ -238,17 +239,55 @@ class _VendorState extends State<Vendor> {
                 }
               });
             });
-          } else if (state is GetUserListFailure) {
+          } else if (state is VendorListFailure) {
             setState(() {
               isLoading = false;
             });
-            print("error>> ${state.failureMessage}");
-          }  else if (state is UserDeleteLoading) {
+            print("error>> ${state.eventFailure}");
+            var serverFail = state.eventFailure['message'];
+            print(">>>>>>>>>>>ALLDATADelete$serverFail");
+            BlocProvider.of<AllRequesterBloc>(context)
+                .add(GetUnitHandler("", pageNo, pageSize));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(serverFail),
+                backgroundColor: AppColors.primaryColour,
+              ),
+            );
+
+            Future.delayed(const Duration(milliseconds: 500), () {
+              Navigator.pop(context);
+            });
+          }
+          else if (state is GetUserListFailure) {
+            setState(() {
+              isLoading = false;
+            });
+            var serverFail = state.failureMessage;
+            print(">>>>>>>>>>>ALLDATADelete$serverFail");
+            BlocProvider.of<AllRequesterBloc>(context)
+                .add(GetUnitHandler("", pageNo, pageSize));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(serverFail),
+                backgroundColor: AppColors.primaryColour,
+              ),
+            );
+
+            Future.delayed(const Duration(milliseconds: 500), () {
+              Navigator.pop(context);
+            });
+          }
+
+
+
+
+          else if (state is UserDeleteLoading) {
             DeletePopupManager.playLoader();
-          } else if (state is UserDeleteSuccess) {
+          } else if (state is VendorDeleteSuccess) {
             DeletePopupManager.stopLoader();
 
-            var deleteMessage = state.userDeleteList['message'];
+            var deleteMessage = state.deleteEventList['message'];
             print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
             BlocProvider.of<AllRequesterBloc>(context)
                 .add(GetUnitHandler("", pageNo, pageSize));
@@ -263,9 +302,9 @@ class _VendorState extends State<Vendor> {
               Navigator.pop(context);
             });
           }
-          else if (state is UserDeleteFailure) {
+          else if (state is VendorDeleteFailure) {
 
-            var deleteMessage = state.deleteFailure['message'];
+            var deleteMessage = state.deleteEventFailure['message'];
 
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -280,7 +319,7 @@ class _VendorState extends State<Vendor> {
             setState(() {
               isLoading = false;
             });
-            print("error>> ${state.deleteFailure}");
+            print("error>> ${state.deleteEventFailure}");
           }
 
 
@@ -466,14 +505,31 @@ class _VendorState extends State<Vendor> {
                                           ],
                                         ),
 
+
+
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.start,
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            const Text("Role: ", style: FTextStyle.listTitle),
+                                            const Text("Contact No. : ", style: FTextStyle.listTitle),
                                             Expanded(
                                               child: Text(
-                                                "${item['roles'].map((role) => role['name']).join(', ')}",
+                                                  "${item["contact"]}",
+                                                style: FTextStyle.listTitleSub,
+                                                maxLines: 2,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const Text("Address : ", style: FTextStyle.listTitle),
+                                            Expanded(
+                                              child: Text(
+                                                "${item["address"]}",
                                                 style: FTextStyle.listTitleSub,
                                                 maxLines: 2,
                                               ),
@@ -486,6 +542,21 @@ class _VendorState extends State<Vendor> {
                                           crossAxisAlignment: CrossAxisAlignment.end,
                                           children: [
                                             IconButton(
+                                              icon: const Icon(Icons.remove_red_eye, color: Colors.black),
+                                              onPressed: () => {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(builder: (context) =>  BlocProvider(
+                                                    create: (context) => AllRequesterBloc(),
+                                                    child:  VendorView(
+                                                      id:item["id"].toString(),
+
+                                                    ),
+                                                  )),
+                                                )
+                                              },
+                                            ),
+                                            IconButton(
                                               icon: const Icon(Icons.edit, color: Colors.black),
                                               onPressed: () => {
                                                 Navigator.push(
@@ -493,7 +564,7 @@ class _VendorState extends State<Vendor> {
                                                   MaterialPageRoute(builder: (context) =>  BlocProvider(
                                                     create: (context) => AllRequesterBloc(),
                                                     child:  VendorEdit(
-                                                      screenflag:"Edit",
+                                                      screenFlag:"Edit",
                                                       id:item["id"].toString(),
 
                                                     ),

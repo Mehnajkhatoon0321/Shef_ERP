@@ -67,12 +67,12 @@ class  APIEndPoints{
 
 
 
-  static const String getVendorList= '${baseUrl}event/';
-  static const String deleteVendorList= '${baseUrl}event/delete/';
-  static const String createVendorList= '${baseUrl}event/create';
-  static const String updateVendorList= '${baseUrl}event/update';
-  static const String   editVendorList= '${baseUrl}event/edit';
-  static const String   createList= '${baseUrl}event/edit';
+  static const String getVendorList= '${baseUrl}vendor/';
+  static const String deleteVendorList= '${baseUrl}vendor/delete/';
+  static const String createVendorList= '${baseUrl}vendor/create';
+  static const String updateVendorList= '${baseUrl}vendor/update';
+  static const String   editVendorList= '${baseUrl}vendor/edit';
+  static const String   createPost= '${baseUrl}vendor/edit';
 
 
 
