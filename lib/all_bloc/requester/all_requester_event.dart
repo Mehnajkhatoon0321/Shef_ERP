@@ -404,3 +404,13 @@ class DeleteVendorHandlers extends AllRequesterEvent {
 
   DeleteVendorHandlers(this.id);
 }
+
+class VendorUserHandler extends AllRequesterEvent {
+  String id;
+  VendorUserHandler(this.id);
+}
+
+class VendorViewHandler extends AllRequesterEvent {
+  String id;
+  VendorViewHandler(this.id);
+}

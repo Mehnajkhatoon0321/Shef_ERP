@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,24 +36,57 @@ class _VendorEditState extends State<VendorEdit> {
   String? cancelledNameFile;
   File? imagesIdPan;
   File? imagesIdGST;
+  int? selectedCategoryId;
   File? imagesIdCancelled;
-
+  bool passwordVisible = true;
   late final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
+  Map<String, int> categoryMap = {};
   late final TextEditingController gstName = TextEditingController();
   late final TextEditingController panName = TextEditingController();
   late final TextEditingController cancelledName = TextEditingController();
   late final TextEditingController nameController = TextEditingController();
-  late final TextEditingController companyNameController = TextEditingController();
+  late final TextEditingController companyNameController =
+      TextEditingController();
   late final TextEditingController roleController = TextEditingController();
   late final TextEditingController emailController = TextEditingController();
   late final TextEditingController contactController = TextEditingController();
   late final TextEditingController whatsAppController = TextEditingController();
   late final TextEditingController addressController = TextEditingController();
-  late final TextEditingController addressCompanyController = TextEditingController();
+  late final TextEditingController addressCompanyController =
+      TextEditingController();
   late final TextEditingController panCardController = TextEditingController();
   late final TextEditingController gstCardController = TextEditingController();
   late final TextEditingController tanCardController = TextEditingController();
+  late final TextEditingController accountNameController =
+      TextEditingController();
+  late final TextEditingController accountNumberController =
+      TextEditingController();
+  late final TextEditingController accountIFCIController =
+      TextEditingController();
+  late final TextEditingController bankNameController = TextEditingController();
+  late final TextEditingController bankBranchController =
+      TextEditingController();
+  late final TextEditingController passwordController = TextEditingController();
+
+  //
+  final GlobalKey<FormFieldState<String>> _accountNameKey =
+      GlobalKey<FormFieldState<String>>();
+
+  final GlobalKey<FormFieldState<String>> _accountNumberKey =
+      GlobalKey<FormFieldState<String>>();
+
+  final GlobalKey<FormFieldState<String>> _accountIFSIKey =
+      GlobalKey<FormFieldState<String>>();
+
+  final GlobalKey<FormFieldState<String>> _branchNAmeKey =
+      GlobalKey<FormFieldState<String>>();
+
+  final GlobalKey<FormFieldState<String>> _bankNameKey =
+      GlobalKey<FormFieldState<String>>();
+
+  final GlobalKey<FormFieldState<String>> _passwordKey =
+      GlobalKey<FormFieldState<String>>();
+
   final GlobalKey<FormFieldState<String>> _panKey =
       GlobalKey<FormFieldState<String>>();
   final GlobalKey<FormFieldState<String>> _gstKey =
@@ -65,15 +99,24 @@ class _VendorEditState extends State<VendorEdit> {
       GlobalKey<FormFieldState<String>>();
   final GlobalKey<FormFieldState<String>> _emailKey =
       GlobalKey<FormFieldState<String>>();
-      final GlobalKey<FormFieldState<String>> _contactKey = GlobalKey<FormFieldState<String>>();
-      final GlobalKey<FormFieldState<String>> _whatsAppKey = GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _contactKey =
+      GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _whatsAppKey =
+      GlobalKey<FormFieldState<String>>();
 
-      final GlobalKey<FormFieldState<String>> _addressKey = GlobalKey<FormFieldState<String>>();
-      final GlobalKey<FormFieldState<String>> _addressCompanyKey = GlobalKey<FormFieldState<String>>();
-      final GlobalKey<FormFieldState<String>> _companyNameKey = GlobalKey<FormFieldState<String>>();
-      final GlobalKey<FormFieldState<String>> _panCardNameKey = GlobalKey<FormFieldState<String>>();
-      final GlobalKey<FormFieldState<String>> _gstNameKey = GlobalKey<FormFieldState<String>>();
-      final GlobalKey<FormFieldState<String>> _tanNameKey = GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _addressKey =
+      GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _addressCompanyKey =
+      GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _companyNameKey =
+      GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _panCardNameKey =
+      GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _gstNameKey =
+      GlobalKey<FormFieldState<String>>();
+  final GlobalKey<FormFieldState<String>> _tanNameKey =
+      GlobalKey<FormFieldState<String>>();  final GlobalKey<FormFieldState<String>> _typeKey =
+      GlobalKey<FormFieldState<String>>();
   final FocusNode _gstFocusNode = FocusNode();
   final FocusNode _panFocusNode = FocusNode();
   final FocusNode _cancelledFocusNode = FocusNode();
@@ -87,14 +130,26 @@ class _VendorEditState extends State<VendorEdit> {
   final FocusNode _companyNameFocusNode = FocusNode();
   final FocusNode _panCardNameFocusNode = FocusNode();
   final FocusNode _tanCardNameFocusNode = FocusNode();
+  final FocusNode _typeFocusNode = FocusNode();
 
+  final FocusNode _accountNameNameFocusNode = FocusNode();
+
+  final FocusNode _accountNumberNameFocusNode = FocusNode();
+  final FocusNode _accountIFSIFocusNode = FocusNode();
+
+  final FocusNode _bankNameFocusNode = FocusNode();
+  final FocusNode _bankBranchFocusNode = FocusNode();
+
+  final FocusNode _passwordFocusNode = FocusNode();
+  String? selectedCategoryItem;
   bool isLoading = false;
-
+  bool isLoadingADD = false;
+  List<String> categoryNames = [];
   @override
   void initState() {
     super.initState();
     BlocProvider.of<AllRequesterBloc>(context)
-        .add(EditDetailHandler(widget.id));
+        .add(VendorUserHandler(widget.id));
   }
 
   String? fileUploadValidator(String? value) {
@@ -111,11 +166,14 @@ class _VendorEditState extends State<VendorEdit> {
 
     return null; // Return null if validation passes
   }
-
+  Map<String, dynamic> responseData = {};
   bool isPanFieldFocused = false;
   bool isPanCardFieldFocused = false;
   bool isGSTFieldFocused = false;
+  bool isGSTNameFieldFocused = false;
+
   bool isCancelledFieldFocused = false;
+  bool isCancelledNameFieldFocused = false;
   bool isNameFieldFocused = false;
   bool isEmailFieldFocused = false;
   bool isContactFieldFocused = false;
@@ -123,6 +181,15 @@ class _VendorEditState extends State<VendorEdit> {
   bool isCompanyFieldFocused = false;
   bool isWhatsAppFieldFocused = false;
   bool isCompanyNameFieldFocused = false;
+
+  bool isAccountNameFieldFocused = false;
+
+  bool isAccountNumberFieldFocused = false;
+  bool isAccountIFSIFieldFocused = false;
+  bool isBankNameFocused = false;
+  bool isBankBranchFocused = false;
+  bool isCompanyAddressFocused = false;
+  bool isPasswordFieldFocused = false;
 
   void _updateButtonState() {
     setState(() {
@@ -134,16 +201,20 @@ class _VendorEditState extends State<VendorEdit> {
           fileUploadValidator(cancelledName.text) == null &&
           ValidatorUtils.isValidEmail(emailController.text) &&
           ValidatorUtils.isValidSimpleName(nameController.text) &&
-          ValidatorUtils.isValidSimpleName(companyNameController.text)&&
-          ValidatorUtils.isValidPhone(contactController.text)&&
-          ValidatorUtils.isValidPhone(whatsAppController.text)
-      &&
-          ValidatorUtils.isValidAddress(addressController.text)   &&
-          ValidatorUtils.isValidAddress(addressCompanyController.text)
-          &&
-          ValidatorUtils.isValidPincode(panCardController.text)
-      
-      ) {
+          ValidatorUtils.isValidCompanyName(companyNameController.text) &&
+          ValidatorUtils.isValidPhone(contactController.text) &&
+          ValidatorUtils.isValidPhone(whatsAppController.text) &&
+          ValidatorUtils.isValidAddress(addressController.text) &&
+          ValidatorUtils.isValidAddress(addressCompanyController.text) &&
+          ValidatorUtils.isValidPincode(panCardController.text) &&
+          ValidatorUtils.isValidGst(gstCardController.text) &&
+          ValidatorUtils.isValidTan(tanCardController.text) &&
+          ValidatorUtils.isValidAccountName(accountNameController.text) &&
+          ValidatorUtils.isValidAccountNumber(accountNumberController.text) &&
+          ValidatorUtils.isValidIfsc(accountIFCIController.text) &&
+          ValidatorUtils.isValidBankName(bankNameController.text) &&
+          ValidatorUtils.isValidPassword(passwordController.text) &&
+          ValidatorUtils.isValidBankName(bankBranchController.text)) {
         isButtonPartEnabled = true;
       } else {
         isButtonPartEnabled = false;
@@ -151,22 +222,25 @@ class _VendorEditState extends State<VendorEdit> {
 
       if (isNameFieldFocused == true) {
         _nameKey.currentState!.validate();
-      }  if (isNameFieldFocused == true) {
-        _companyNameKey.currentState!.validate();
-      } if (isEmailFieldFocused == true) {
+      }
+
+      if (isEmailFieldFocused == true) {
         _emailKey.currentState!.validate();
-      } if (isContactFieldFocused == true) {
+      }
+      if (isContactFieldFocused == true) {
         _contactKey.currentState!.validate();
-      }if (isWhatsAppFieldFocused == true) {
+      }
+      if (isWhatsAppFieldFocused == true) {
         _whatsAppKey.currentState!.validate();
-      } if (isAddressFieldFocused == true) {
+      }
+      if (isAddressFieldFocused == true) {
         _addressKey.currentState!.validate();
-      } if (isCompanyFieldFocused == true) {
+      }
+      if (isCompanyFieldFocused == true) {
         _addressCompanyKey.currentState!.validate();
-      } if (isEmailFieldFocused == true) {
+      }
+      if (isEmailFieldFocused == true) {
         _emailKey.currentState!.validate();
-      } if (isGSTFieldFocused == true) {
-        _gstKey.currentState!.validate();
       }
       if (isPanFieldFocused == true) {
         _panKey.currentState!.validate();
@@ -174,12 +248,54 @@ class _VendorEditState extends State<VendorEdit> {
       if (isPanCardFieldFocused == true) {
         _panCardNameKey.currentState!.validate();
       }
+
+      if (isGSTFieldFocused == true) {
+        _gstKey.currentState!.validate();
+      }
+      if (isGSTNameFieldFocused == true) {
+        _gstNameKey.currentState!.validate();
+      }
       if (isCancelledFieldFocused == true) {
         _cancelledKey.currentState!.validate();
       }
+      if (isCancelledNameFieldFocused == true) {
+        _tanNameKey.currentState!.validate();
+      }
+
+      if (isAccountNameFieldFocused == true) {
+        _accountNameKey.currentState!.validate();
+      }
+      if (isAccountNumberFieldFocused == true) {
+        _accountNumberKey.currentState!.validate();
+      }
+      if (isAccountIFSIFieldFocused == true) {
+        _accountIFSIKey.currentState!.validate();
+      }
+      if (isBankNameFocused == true) {
+        _bankNameKey.currentState!.validate();
+      }
+      if (isBankBranchFocused == true) {
+        _branchNAmeKey.currentState!.validate();
+      }
+
+      if (isCompanyAddressFocused == true) {
+        _addressCompanyKey.currentState!.validate();
+      }
+      if (isCompanyNameFieldFocused == true) {
+        _companyNameKey.currentState!.validate();
+      }
+      if (isPasswordFieldFocused == true) {
+        _passwordKey.currentState!.validate();
+      }
     });
   }
+  Map<String, dynamic> personalData = {
 
+  };
+  Map<String, dynamic> bankData = {
+
+  };
+  List<dynamic> types = ["Proprietorship", "Partnership","Private limited","LLP","Public Limited","Society"];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -187,8 +303,8 @@ class _VendorEditState extends State<VendorEdit> {
       appBar: AppBar(
         centerTitle: true,
         automaticallyImplyLeading: false,
-        title: Text(
-          'Edit Requisition',
+        title: Text( widget.screenFlag.isEmpty ? 'Create Vendor' : "Edit Vendor",
+
           style: FTextStyle.HeadingTxtWhiteStyle,
           textAlign: TextAlign.center,
         ),
@@ -207,7 +323,48 @@ class _VendorEditState extends State<VendorEdit> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
+      body: BlocListener<AllRequesterBloc, AllRequesterState>(
+  listener: (context, state) {
+    if (state is VendorDetailsLoading) {
+      setState(() {
+        isLoading = true;
+      });
+    } else if (state is VendorDetailsSuccess) {
+      setState(() {
+
+        responseData = state.vendorDetailsList;
+
+
+
+
+
+
+
+
+        // Access personal data from Alldata
+        personalData = responseData['user'] ;
+        bankData = responseData['vendor'] ;
+        print(">>>>>>>>>>>personaldata$personalData");
+        print(">>>>>>>>>>>bankData$bankData");
+
+
+
+
+      });
+    } else if (state is VendorDetailsFailure) {
+      setState(() {
+        isLoading = false;
+      });
+      if (kDebugMode) {
+        print("error>> ${state.vendorEditFailure}");
+      }
+    }
+
+
+
+    // TODO: implement listener
+  },
+  child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(18.0),
           child: Form(
@@ -217,9 +374,6 @@ class _VendorEditState extends State<VendorEdit> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
-
-
                 Text("Personal Details:",
                     style: FTextStyle.formLabelTxtStyle.copyWith(fontSize: 19)),
                 const SizedBox(height: 10),
@@ -229,48 +383,51 @@ class _VendorEditState extends State<VendorEdit> {
                 ),
                 TextFormField(
                   controller: roleController,
-                  key :_roleKey,
+                  key: _roleKey,
                   focusNode: _roleFocusNode,
                   readOnly: true,
-                  decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
-                    fillColor: Colors.grey[100],
-                    filled: true,
-
-                    hintText: "Vendor",hintStyle: FTextStyle.preHeadingStyle),
-                  validator:ValidatorUtils.simpleNameValidator,
-                  onTap: (){
+                  decoration: FormFieldStyle.defaultInputEditDecoration
+                      .copyWith(
+                          fillColor: Colors.grey[100],
+                          filled: true,
+                          hintText: "Vendor",
+                          hintStyle: FTextStyle.preHeadingStyle),
+                  // validator:ValidatorUtils.simpleNameValidator,
+                  onTap: () {
                     isPanFieldFocused = false;
                     isGSTFieldFocused = false;
                     isCancelledFieldFocused = false;
-                    isNameFieldFocused=true;
-                    isEmailFieldFocused=false;
-                    isContactFieldFocused=false;
-                    isAddressFieldFocused=false;
+                    isNameFieldFocused = true;
+                    isEmailFieldFocused = false;
+                    isContactFieldFocused = false;
+                    isAddressFieldFocused = false;
                   },
                 ),
-
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text("Contact Person Name", style: FTextStyle.preHeadingStyle),
+                  child: Text("Contact Person Name",
+                      style: FTextStyle.preHeadingStyle),
                 ),
                 TextFormField(
                   controller: nameController,
-                  key :_nameKey,
-                  keyboardType:TextInputType.name,
+                  key: _nameKey,
+                  keyboardType: TextInputType.name,
                   focusNode: _nameFocusNode,
-                  decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
+                  decoration:
+                      FormFieldStyle.defaultInputEditDecoration.copyWith(
                     fillColor: Colors.grey[100],
                     filled: true,
-                    hintText: "Enter Name",),
-                  validator:ValidatorUtils.simpleNameValidator,
-                  onTap: (){
+                    hintText: "Enter Name",
+                  ),
+                  validator: ValidatorUtils.simpleNameValidator,
+                  onTap: () {
                     isPanFieldFocused = false;
                     isGSTFieldFocused = false;
                     isCancelledFieldFocused = false;
-                    isNameFieldFocused=true;
-                    isEmailFieldFocused=false;
-                    isContactFieldFocused=false;
-                    isAddressFieldFocused=false;
+                    isNameFieldFocused = true;
+                    isEmailFieldFocused = false;
+                    isContactFieldFocused = false;
+                    isAddressFieldFocused = false;
                   },
                 ),
                 Text(
@@ -282,48 +439,51 @@ class _VendorEditState extends State<VendorEdit> {
                   key: _emailKey,
                   focusNode: _emailFocusNode,
                   keyboardType: TextInputType.emailAddress,
-                  decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
+                  decoration:
+                      FormFieldStyle.defaultInputEditDecoration.copyWith(
                     fillColor: Colors.grey[100],
                     filled: true,
-                    hintText: "Enter Email",),
+                    hintText: "Enter Email",
+                  ),
                   inputFormatters: [NoSpaceFormatter()],
                   controller: emailController,
                   validator: ValidatorUtils.emailValidator,
-                  onTap: (){
+                  onTap: () {
                     isPanFieldFocused = false;
                     isGSTFieldFocused = false;
                     isCancelledFieldFocused = false;
-                    isNameFieldFocused=false;
-                    isEmailFieldFocused=true;
-                    isContactFieldFocused=false;
-                    isAddressFieldFocused=false;
+                    isNameFieldFocused = false;
+                    isEmailFieldFocused = true;
+                    isContactFieldFocused = false;
+                    isAddressFieldFocused = false;
                   },
                 ),
                 Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text("Contact No.",
-                        style: FTextStyle.preHeadingStyle)),
+                    child:
+                        Text("Contact No.", style: FTextStyle.preHeadingStyle)),
                 TextFormField(
                   controller: contactController,
                   key: _contactKey,
-                  keyboardType:TextInputType.number,
+                  keyboardType: TextInputType.number,
                   focusNode: _contactFocusNode,
-                  decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
-                      fillColor: Colors.grey[100],
-                      filled: true,
-                      hintText: "Enter Contact",),
-                  validator:ValidatorUtils.mobileNumberValidator,
-                  onTap: (){
+                  decoration:
+                      FormFieldStyle.defaultInputEditDecoration.copyWith(
+                    fillColor: Colors.grey[100],
+                    filled: true,
+                    hintText: "Enter Contact",
+                  ),
+                  validator: ValidatorUtils.mobileNumberValidator,
+                  onTap: () {
                     isPanFieldFocused = false;
                     isGSTFieldFocused = false;
                     isCancelledFieldFocused = false;
-                    isNameFieldFocused=false;
-                    isEmailFieldFocused=false;
-                    isContactFieldFocused=true;
-                    isAddressFieldFocused=false;
+                    isNameFieldFocused = false;
+                    isEmailFieldFocused = false;
+                    isContactFieldFocused = true;
+                    isAddressFieldFocused = false;
                   },
                 ),
-
                 Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text("Whatsapp No.",
@@ -331,139 +491,188 @@ class _VendorEditState extends State<VendorEdit> {
                 TextFormField(
                   controller: whatsAppController,
                   key: _whatsAppKey,
-                  keyboardType:TextInputType.number,
+                  keyboardType: TextInputType.number,
                   focusNode: _whatsAppFocusNode,
-                  decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
+                  decoration:
+                      FormFieldStyle.defaultInputEditDecoration.copyWith(
                     fillColor: Colors.grey[100],
                     filled: true,
-
-                    hintText: "Enter Whatsapp",),
-                  validator:ValidatorUtils.mobileNumberValidator,
-                  onTap: (){
+                    hintText: "Enter Whatsapp",
+                  ),
+                  validator: ValidatorUtils.mobileNumberValidator,
+                  onTap: () {
                     isPanFieldFocused = false;
                     isGSTFieldFocused = false;
                     isCancelledFieldFocused = false;
-                    isNameFieldFocused=false;
-                    isWhatsAppFieldFocused=true;
-                    isEmailFieldFocused=false;
-                    isContactFieldFocused=false;
-                    isAddressFieldFocused=false;
+                    isNameFieldFocused = false;
+                    isWhatsAppFieldFocused = true;
+                    isEmailFieldFocused = false;
+                    isContactFieldFocused = false;
+                    isAddressFieldFocused = false;
                   },
                 ),
                 Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child:
-                    Text("Address", style: FTextStyle.preHeadingStyle)),
+                    child: Text("Address", style: FTextStyle.preHeadingStyle)),
                 TextFormField(
                   controller: addressController,
                   key: _addressKey,
-                  keyboardType:TextInputType.streetAddress,
+                  keyboardType: TextInputType.streetAddress,
                   focusNode: _addressFocusNode,
                   maxLines: 4,
-                  decoration: FormFieldStyle.defaultInputEditAddressDecoration.copyWith(),
-                  onTap: (){
+                  decoration: FormFieldStyle.defaultInputEditAddressDecoration
+                      .copyWith(),
+                  onTap: () {
                     isPanFieldFocused = false;
                     isGSTFieldFocused = false;
                     isCancelledFieldFocused = false;
-                    isNameFieldFocused=false;
-                    isEmailFieldFocused=false;
-                    isContactFieldFocused=false;
-                    isAddressFieldFocused=true;
+                    isNameFieldFocused = false;
+                    isEmailFieldFocused = false;
+                    isContactFieldFocused = false;
+                    isAddressFieldFocused = true;
                   },
-                  validator:ValidatorUtils.addressValidator,
+                  validator: ValidatorUtils.addressValidator,
                 ),
-
-
                 const SizedBox(height: 10),
                 Text("Company Details:",
                     style: FTextStyle.formLabelTxtStyle.copyWith(fontSize: 19)),
                 const SizedBox(height: 5),
+
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text("Company Name", style: FTextStyle.preHeadingStyle),
+                  child:
+                  Text("Type", style: FTextStyle.preHeadingStyle),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(28.0),
+                      border: Border.all(color: AppColors.primaryColourDark),
+                      color: Colors.grey[100],
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String?>(
+                        key: _typeKey,
+                        focusNode: _typeFocusNode,
+                        value: selectedCategoryItem,
+                        hint: const Text(
+                          "Select Type",
+                          style: FTextStyle.formhintTxtStyle,
+                        ),
+                        onChanged: (String? categoryValue) {
+                          if (categoryValue != null) {
+                            setState(() {
+                              selectedCategoryItem = categoryValue;
+                              selectedCategoryId = categoryMap[categoryValue]; // This can be null
+
+                              isButtonPartEnabled = categoryValue.isNotEmpty;
+
+                            });
+                          }
+                        },
+                        items: types.map<DropdownMenuItem<String?>>((dynamic value) {
+                          return DropdownMenuItem<String?>(
+                            value: value as String?, // Ensure type safety
+                            child: Text(value as String),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child:
+                      Text("Company Name", style: FTextStyle.preHeadingStyle),
                 ),
                 TextFormField(
                   controller: companyNameController,
-                  key :_companyNameKey,
-                  keyboardType:TextInputType.name,
+                  key: _companyNameKey,
+                  keyboardType: TextInputType.name,
                   focusNode: _companyNameFocusNode,
-                  decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
+                  decoration:
+                      FormFieldStyle.defaultInputEditDecoration.copyWith(
                     fillColor: Colors.grey[100],
                     filled: true,
-                    hintText: "Enter Company Name",),
-                  validator:ValidatorUtils.simpleNameValidator,
-                  onTap: (){
+                    hintText: "Enter Company Name",
+                  ),
+                  validator: ValidatorUtils.companyNameValidator,
+                  onTap: () {
                     isPanFieldFocused = false;
                     isGSTFieldFocused = false;
                     isCancelledFieldFocused = false;
-                    isNameFieldFocused=true;
-                    isEmailFieldFocused=false;
-                    isContactFieldFocused=false;
-                    isAddressFieldFocused=false;
+                    isCompanyNameFieldFocused = true;
+                    isNameFieldFocused = false;
+                    isEmailFieldFocused = false;
+                    isContactFieldFocused = false;
+                    isAddressFieldFocused = false;
                   },
                 ),
-
-
                 Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child:
-                    Text("Company Address", style: FTextStyle.preHeadingStyle)),
+                    child: Text("Company Address",
+                        style: FTextStyle.preHeadingStyle)),
                 TextFormField(
                   controller: addressCompanyController,
                   key: _addressCompanyKey,
-                  keyboardType:TextInputType.streetAddress,
+                  keyboardType: TextInputType.streetAddress,
                   focusNode: _addressCompanyFocusNode,
                   maxLines: 4,
-                  decoration: FormFieldStyle.defaultInputEditAddressDecoration.copyWith(),
-                  onTap: (){
+                  decoration: FormFieldStyle.defaultInputEditAddressDecoration
+                      .copyWith(),
+                  onTap: () {
                     isPanFieldFocused = false;
                     isGSTFieldFocused = false;
                     isCancelledFieldFocused = false;
-                    isNameFieldFocused=false;
-                    isEmailFieldFocused=false;
-                    isContactFieldFocused=false;
-                    isAddressFieldFocused=true;
+                    isNameFieldFocused = false;
+                    isEmailFieldFocused = false;
+                    isCompanyAddressFocused = true;
+                    isContactFieldFocused = false;
+                    isAddressFieldFocused = false;
                   },
-                  validator:ValidatorUtils.addressValidator,
+                  validator: ValidatorUtils.addressValidator,
                 ),
-
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Text("PanCard", style: FTextStyle.preHeadingStyle),
                 ),
                 TextFormField(
                   controller: panCardController,
-                  key :_panCardNameKey,
-                  keyboardType:TextInputType.name,
+                  key: _panCardNameKey,
+                  keyboardType: TextInputType.name,
                   focusNode: _panCardNameFocusNode,
-                  decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
+                  decoration:
+                      FormFieldStyle.defaultInputEditDecoration.copyWith(
                     fillColor: Colors.grey[100],
                     filled: true,
-                    hintText: "Enter Pan Name",),
-                  validator:ValidatorUtils.panCardValidator,
-                  onTap: (){
+                    hintText: "Enter Pan Name",
+                  ),
+                  validator: ValidatorUtils.panCardValidator,
+                  onTap: () {
                     isPanFieldFocused = false;
                     isGSTFieldFocused = false;
                     isCancelledFieldFocused = false;
-                    isNameFieldFocused=false;
-                    isEmailFieldFocused=false;
-                    isContactFieldFocused=false;
-                    isAddressFieldFocused=false;
-                    isPanCardFieldFocused=true;
+                    isNameFieldFocused = false;
+                    isEmailFieldFocused = false;
+                    isContactFieldFocused = false;
+                    isAddressFieldFocused = false;
+                    isPanCardFieldFocused = true;
                   },
                 ),
-
                 Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child:
-                    Text("PAN Upload (only pdf,jpeg,png,jpg|max:2 MB)", style: FTextStyle.preHeadingStyle)),
-
+                    child: Text("PAN Upload (only pdf,jpeg,png,jpg|max:2 MB)",
+                        style: FTextStyle.preHeadingStyle)),
                 const SizedBox(height: 10),
                 TextFormField(
                   focusNode: _panFocusNode,
                   key: _panKey,
-
-                  decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
+                  decoration:
+                      FormFieldStyle.defaultInputEditDecoration.copyWith(
                     fillColor: Colors.grey[100],
                     filled: true,
                     hintText: "PAN File Upload",
@@ -515,36 +724,38 @@ class _VendorEditState extends State<VendorEdit> {
                 ),
                 TextFormField(
                   controller: gstCardController,
-                  key :_gstNameKey,
-                  keyboardType:TextInputType.name,
+                  key: _gstNameKey,
+                  keyboardType: TextInputType.name,
                   focusNode: _panCardNameFocusNode,
-                  decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
+                  decoration:
+                      FormFieldStyle.defaultInputEditDecoration.copyWith(
                     fillColor: Colors.grey[100],
                     filled: true,
-                    hintText: "Enter GST",),
-                  validator:ValidatorUtils.simpleNameValidator,
-                  onTap: (){
+                    hintText: "Enter GST",
+                  ),
+                  validator: ValidatorUtils.gstValidator,
+                  onTap: () {
                     isPanFieldFocused = false;
                     isGSTFieldFocused = false;
                     isCancelledFieldFocused = false;
-                    isNameFieldFocused=false;
-                    isEmailFieldFocused=false;
-                    isContactFieldFocused=false;
-                    isAddressFieldFocused=false;
-                    isPanFieldFocused=true;
+                    isNameFieldFocused = false;
+                    isEmailFieldFocused = false;
+                    isContactFieldFocused = false;
+                    isAddressFieldFocused = false;
+                    isGSTNameFieldFocused = true;
+                    isPanFieldFocused = false;
                   },
                 ),
-
-
                 Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child:
-                    Text("GST Upload (only pdf,jpeg,png,jpg|max:2 MB)", style: FTextStyle.preHeadingStyle)),
+                    child: Text("GST Upload (only pdf,jpeg,png,jpg|max:2 MB)",
+                        style: FTextStyle.preHeadingStyle)),
                 const SizedBox(height: 10),
                 TextFormField(
                   focusNode: _gstFocusNode,
                   key: _gstKey,
-                  decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
+                  decoration:
+                      FormFieldStyle.defaultInputEditDecoration.copyWith(
                     fillColor: Colors.grey[100],
                     filled: true,
                     hintText: "Upload GST",
@@ -591,41 +802,42 @@ class _VendorEditState extends State<VendorEdit> {
                 ),
                 TextFormField(
                   controller: tanCardController,
-                  key :_tanNameKey,
-                  keyboardType:TextInputType.name,
+                  key: _tanNameKey,
+                  keyboardType: TextInputType.name,
                   focusNode: _tanCardNameFocusNode,
-                  decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
+                  decoration:
+                      FormFieldStyle.defaultInputEditDecoration.copyWith(
                     fillColor: Colors.grey[100],
                     filled: true,
-                    hintText: "Enter TAN",),
-                  validator:ValidatorUtils.simpleNameValidator,
-                  onTap: (){
+                    hintText: "Enter TAN",
+                  ),
+                  validator: ValidatorUtils.tanValidator,
+                  onTap: () {
                     isPanFieldFocused = false;
                     isGSTFieldFocused = false;
                     isCancelledFieldFocused = false;
-                    isNameFieldFocused=false;
-                    isEmailFieldFocused=false;
-                    isContactFieldFocused=false;
-                    isAddressFieldFocused=false;
-                    isPanFieldFocused=true;
+                    isNameFieldFocused = false;
+                    isEmailFieldFocused = false;
+                    isContactFieldFocused = false;
+                    isCancelledNameFieldFocused = true;
+                    isAddressFieldFocused = false;
+                    isPanFieldFocused = false;
                   },
                 ),
-
                 Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child:
-                    Text("Cancelled Cheque (only pdf,jpeg,png,jpg|max:2 MB)", style: FTextStyle.preHeadingStyle)),
-
+                    child: Text(
+                        "Cancelled Cheque (only pdf,jpeg,png,jpg|max:2 MB)",
+                        style: FTextStyle.preHeadingStyle)),
                 const SizedBox(height: 10),
                 TextFormField(
                   focusNode: _cancelledFocusNode,
                   key: _cancelledKey,
-
-                  decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
+                  decoration:
+                      FormFieldStyle.defaultInputEditDecoration.copyWith(
                     fillColor: Colors.grey[100],
                     filled: true,
                     hintText: "Upload Cancelled",
-
                     suffixIcon: IconButton(
                       icon: const Icon(Icons.attach_file),
                       onPressed: () async {
@@ -648,7 +860,6 @@ class _VendorEditState extends State<VendorEdit> {
                         }
                       },
                     ),
-
                   ),
                   controller: cancelledName,
                   validator: fileUploadValidator,
@@ -668,9 +879,191 @@ class _VendorEditState extends State<VendorEdit> {
                     _updateButtonState(); // Update button state on change
                   },
                 ),
+                Text("Bank Details:",
+                    style: FTextStyle.formLabelTxtStyle.copyWith(fontSize: 19)),
+                const SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child:
+                      Text("Account Name", style: FTextStyle.preHeadingStyle),
+                ),
+                TextFormField(
+                  controller: accountNameController,
+                  key: _accountNameKey,
+                  keyboardType: TextInputType.name,
+                  focusNode: _accountNameNameFocusNode,
+                  decoration:
+                      FormFieldStyle.defaultInputEditDecoration.copyWith(
+                    fillColor: Colors.grey[100],
+                    filled: true,
+                    hintText: "Enter Account Name",
+                  ),
+                  validator: ValidatorUtils.accountNameValidator,
+                  onTap: () {
+                    isPanFieldFocused = false;
+                    isGSTFieldFocused = false;
+                    isCancelledFieldFocused = false;
+                    isNameFieldFocused = false;
+                    isAccountNameFieldFocused = true;
+                    isEmailFieldFocused = false;
+                    isContactFieldFocused = false;
+                    isAddressFieldFocused = false;
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child:
+                      Text("Account Number", style: FTextStyle.preHeadingStyle),
+                ),
+                TextFormField(
+                  controller: accountNumberController,
+                  key: _accountNumberKey,
+                  keyboardType: TextInputType.name,
+                  focusNode: _accountNumberNameFocusNode,
+                  decoration:
+                      FormFieldStyle.defaultInputEditDecoration.copyWith(
+                    fillColor: Colors.grey[100],
+                    filled: true,
+                    hintText: "Enter Account Number",
+                  ),
+                  validator: ValidatorUtils.accountNumberValidator,
+                  onTap: () {
+                    isPanFieldFocused = false;
+                    isGSTFieldFocused = false;
+                    isCancelledFieldFocused = false;
+                    isNameFieldFocused = false;
+                    isAccountNameFieldFocused = false;
+                    isAccountNumberFieldFocused = true;
+                    isEmailFieldFocused = false;
+                    isContactFieldFocused = false;
+                    isAddressFieldFocused = false;
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text("IFSC", style: FTextStyle.preHeadingStyle),
+                ),
+                TextFormField(
+                  controller: accountIFCIController,
+                  key: _accountIFSIKey,
+                  keyboardType: TextInputType.name,
+                  focusNode: _accountIFSIFocusNode,
+                  decoration:
+                      FormFieldStyle.defaultInputEditDecoration.copyWith(
+                    fillColor: Colors.grey[100],
+                    filled: true,
+                    hintText: "Enter IFSC",
+                  ),
+                  validator: ValidatorUtils.ifscValidator,
+                  onTap: () {
+                    isPanFieldFocused = false;
+                    isGSTFieldFocused = false;
+                    isCancelledFieldFocused = false;
+                    isNameFieldFocused = false;
+                    isAccountNameFieldFocused = false;
+                    isAccountIFSIFieldFocused = true;
+                    isEmailFieldFocused = false;
+                    isContactFieldFocused = false;
+                    isAddressFieldFocused = false;
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text("Bank Name", style: FTextStyle.preHeadingStyle),
+                ),
+                TextFormField(
+                  controller: bankNameController,
+                  key: _bankNameKey,
+                  keyboardType: TextInputType.name,
+                  focusNode: _bankNameFocusNode,
+                  decoration:
+                      FormFieldStyle.defaultInputEditDecoration.copyWith(
+                    fillColor: Colors.grey[100],
+                    filled: true,
+                    hintText: "Enter Bank Name",
+                  ),
+                  validator: ValidatorUtils.bankNameValidator,
+                  onTap: () {
+                    isPanFieldFocused = false;
+                    isGSTFieldFocused = false;
+                    isCancelledFieldFocused = false;
+                    isNameFieldFocused = false;
+                    isAccountNameFieldFocused = false;
+                    isBankNameFocused = true;
+                    isEmailFieldFocused = false;
+                    isContactFieldFocused = false;
+                    isAddressFieldFocused = false;
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text("Branch", style: FTextStyle.preHeadingStyle),
+                ),
+                TextFormField(
+                  controller: bankBranchController,
+                  key: _branchNAmeKey,
+                  keyboardType: TextInputType.name,
+                  focusNode: _bankBranchFocusNode,
+                  decoration:
+                      FormFieldStyle.defaultInputEditDecoration.copyWith(
+                    fillColor: Colors.grey[100],
+                    filled: true,
+                    hintText: "Enter Branch",
+                  ),
+                  validator: ValidatorUtils.bankBranchValidator,
+                  onTap: () {
+                    isPanFieldFocused = false;
+                    isGSTFieldFocused = false;
+                    isCancelledFieldFocused = false;
+                    isNameFieldFocused = false;
+                    isAccountNameFieldFocused = false;
+                    isBankBranchFocused = true;
+                    isEmailFieldFocused = false;
+                    isContactFieldFocused = false;
+                    isAddressFieldFocused = false;
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text("Password", style: FTextStyle.preHeadingStyle),
+                ),
 
+                 SizedBox(height: 5),
+                TextFormField(
+                  keyboardType: TextInputType.visiblePassword,
+                  key: _passwordKey,
+                  focusNode: _passwordFocusNode,
+                  decoration: FormFieldStyle
+                      .defaultInputEditDecoration
+                      .copyWith(
+                    suffixIcon: IconButton(
+                      icon: Icon(
 
-
+                        passwordVisible
+                            ?   Icons.visibility:Icons.visibility_off
+                           ,
+                        color: Colors.black,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          passwordVisible = !passwordVisible;
+                        });
+                      },
+                    ),
+                    filled: true,
+                    fillColor: AppColors.formFieldBackColour,
+                  ),
+                  controller: passwordController,
+                  obscureText: !passwordVisible,
+                  inputFormatters: [NoSpaceFormatter()],
+                  validator: ValidatorUtils.passwordValidator,
+                  onTap: () {
+                    setState(() {
+                      isPasswordFieldFocused = true;
+                      isEmailFieldFocused = false;
+                    });
+                  },
+                ),
                 const SizedBox(height: 15),
                 Center(
                   child: Padding(
@@ -683,7 +1076,7 @@ class _VendorEditState extends State<VendorEdit> {
                           if (_formKey.currentState!.validate()) {
                             // All fields are valid, proceed with submission
                             setState(() {
-                              isLoading = true; // Start loading
+                              isLoadingADD = true; // Start loading
                             });
                             // Your submission logic here
                           } else {
@@ -699,7 +1092,7 @@ class _VendorEditState extends State<VendorEdit> {
                               ? AppColors.primaryColourDark
                               : AppColors.formFieldBorderColour,
                         ),
-                        child: isLoading
+                        child: isLoadingADD
                             ? CircularProgressIndicator(color: Colors.blue)
                             : Text("Update", style: FTextStyle.loginBtnStyle),
                       ),
@@ -711,6 +1104,7 @@ class _VendorEditState extends State<VendorEdit> {
           ),
         ),
       ),
+),
     );
   }
 }

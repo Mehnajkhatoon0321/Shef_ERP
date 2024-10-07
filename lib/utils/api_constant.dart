@@ -72,7 +72,8 @@ class  APIEndPoints{
   static const String createVendorList= '${baseUrl}vendor/create';
   static const String updateVendorList= '${baseUrl}vendor/update';
   static const String   editVendorList= '${baseUrl}vendor/edit';
-  static const String   createPost= '${baseUrl}vendor/edit';
+
+  static const String   viewPost= '${baseUrl}vendor/view/';
 
 
 

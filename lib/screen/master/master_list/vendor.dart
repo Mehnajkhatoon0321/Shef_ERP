@@ -129,7 +129,7 @@ class _VendorState extends State<Vendor> {
       });
     });
     BlocProvider.of<AllRequesterBloc>(context)
-        .add(GetUserListHandler("", pageNo, pageSize));
+        .add(VendorListHandler("", pageNo, pageSize));
     paginationCall();
   }
 
@@ -246,27 +246,7 @@ class _VendorState extends State<Vendor> {
             print("error>> ${state.eventFailure}");
             var serverFail = state.eventFailure['message'];
             print(">>>>>>>>>>>ALLDATADelete$serverFail");
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetUnitHandler("", pageNo, pageSize));
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(serverFail),
-                backgroundColor: AppColors.primaryColour,
-              ),
-            );
 
-            Future.delayed(const Duration(milliseconds: 500), () {
-              Navigator.pop(context);
-            });
-          }
-          else if (state is GetUserListFailure) {
-            setState(() {
-              isLoading = false;
-            });
-            var serverFail = state.failureMessage;
-            print(">>>>>>>>>>>ALLDATADelete$serverFail");
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetUnitHandler("", pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(serverFail),
@@ -280,17 +260,14 @@ class _VendorState extends State<Vendor> {
           }
 
 
-
-
-          else if (state is UserDeleteLoading) {
+          else if (state is VendorDeleteLoading) {
             DeletePopupManager.playLoader();
           } else if (state is VendorDeleteSuccess) {
             DeletePopupManager.stopLoader();
 
             var deleteMessage = state.deleteEventList['message'];
-            print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetUnitHandler("", pageNo, pageSize));
+
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(deleteMessage),
@@ -583,7 +560,7 @@ class _VendorState extends State<Vendor> {
                                                     BlocProvider.of<
                                                         AllRequesterBloc>(
                                                         context)
-                                                        .add(DeleteUserIDHandlers(
+                                                        .add(DeleteVendorHandlers(
                                                         data[index][
                                                         'id']));
                                                   },

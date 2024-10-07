@@ -1907,7 +1907,7 @@ print("RequestData>>>>>>>>>>$request");
         try {
           String authToken = PrefUtils.getToken();
           int userId = PrefUtils.getUserId();
-          final APIEndpoint = Uri.parse("${APIEndPoints.getUserList}$userId?page=${event.page}&per_page=${event.size}");
+          final APIEndpoint = Uri.parse("${APIEndPoints.getVendorList}$userId?page=${event.page}&per_page=${event.size}");
           var response = await http.get(
             APIEndpoint,
             headers: {
@@ -1945,7 +1945,7 @@ print("RequestData>>>>>>>>>>$request");
         try {
           String authToken = PrefUtils.getToken();
 
-          final APIEndpoint = Uri.parse("${APIEndPoints.deleteEventList}${event.id}/$userId");
+          final APIEndpoint = Uri.parse("${APIEndPoints.deleteVendorList}${event.id}");
           developer.log("Making DELETE request to: $APIEndpoint");
           developer.log("Authorization Token: $authToken");
 
@@ -1956,7 +1956,7 @@ print("RequestData>>>>>>>>>>$request");
               'Authorization': 'Bearer $authToken',
             },
           );
-
+          developer.log("URL: $APIEndpoint");
           // Log response details
           developer.log("Response status: ${response.statusCode}");
           developer.log("Response body: ${response.body}");
@@ -1979,6 +1979,78 @@ print("RequestData>>>>>>>>>>$request");
       } else {
         print('Network error');
         emit(VendorDeleteFailure(const {'error': 'Network error'}));
+      }
+    });
+    //vendor details edit
+    on<VendorUserHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(VendorDetailsLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+
+          final APIEndpoint = Uri.parse("${APIEndPoints.editVendorList}/${event.id}");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(VendorDetailsSuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(VendorDetailsFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(VendorDetailsFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(VendorDetailsFailure(const {'error': 'Network error'}));
+      }
+    });
+//vendor view details
+    on<VendorViewHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(VendorViewLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+
+          final APIEndpoint = Uri.parse("${APIEndPoints.viewPost}${event.id}");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(VendorViewSuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(VendorViewFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(VendorViewFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(VendorViewFailure(const {'error': 'Network error'}));
       }
     });
 

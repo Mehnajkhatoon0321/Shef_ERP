@@ -711,4 +711,35 @@ final class  UpdateVendorFailure extends AllRequesterState {
   UpdateVendorFailure(this.failureUpdateMessage);
 
 }
+//Edit Details
+final class VendorDetailsLoading extends AllRequesterState{}
+final class VendorDetailsSuccess extends AllRequesterState{
+  final Map<String, dynamic> vendorDetailsList;
+  VendorDetailsSuccess(this.vendorDetailsList);
+
+}
+
+
+final class  VendorDetailsFailure extends AllRequesterState{
+  final Map<String, dynamic> vendorEditFailure;
+  VendorDetailsFailure(this.vendorEditFailure);
+
+}
+
+//View Details
+final class VendorViewLoading extends AllRequesterState{}
+final class VendorViewSuccess extends AllRequesterState{
+  final Map<String, dynamic> vendorViewList;
+  VendorViewSuccess(this.vendorViewList);
+
+}
+
+
+final class  VendorViewFailure extends AllRequesterState{
+  final Map<String, dynamic> vendorEditFailure;
+  VendorViewFailure(this.vendorEditFailure);
+
+}
+
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
