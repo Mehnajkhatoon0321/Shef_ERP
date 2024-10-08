@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
-import 'package:shef_erp/screen/master/master_list/units.dart';
+
 import 'package:shef_erp/utils/colours.dart';
-import 'package:shef_erp/utils/common_function.dart';
+
 import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shef_erp/utils/form_field_style.dart';
+import 'package:shef_erp/utils/validator_utils.dart';
 
 class UnitEdit extends StatefulWidget {
   String id;
@@ -108,31 +110,50 @@ class _UnitEditState extends State<UnitEdit> {
       ],
     ),
   };
-  bool isButtonEnabled = true;
+  bool isButtonEnabled = false;
   bool isLoadingEdit = false;
-
-  final formKey = GlobalKey<FormState>();
-  late final TextEditingController editController = TextEditingController();
-  late final TextEditingController descriptionController =
+  late final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  late final TextEditingController eventNameController =
+      TextEditingController();
+  late final TextEditingController billingAddressController =
       TextEditingController();
   late final TextEditingController addressController = TextEditingController();
+
+  final GlobalKey<FormFieldState<String>> _eventNameKey =
+      GlobalKey<FormFieldState<String>>();
+
+  final GlobalKey<FormFieldState<String>> _billingAddressKey =
+      GlobalKey<FormFieldState<String>>();
+
+  final GlobalKey<FormFieldState<String>> _addressKey =
+      GlobalKey<FormFieldState<String>>();
+  final FocusNode _eventFocusNode = FocusNode();
+  final FocusNode _billingFocusNode = FocusNode();
+  final FocusNode _addressFocusNode = FocusNode();
+  bool isEventFieldFocused = false;
+  bool isBillingAddressFieldFocused = false;
+  bool isAddressFieldFocused = false;
+
+
 
   void initState() {
     super.initState();
     if (widget.screenflag.isNotEmpty && widget.screenflag == "Edit") {
-      editController.text = widget.name;
-      descriptionController.text = widget.billingAddress;
+      eventNameController.text = widget.name;
+      billingAddressController.text = widget.billingAddress;
       addressController.text = widget.address;
+
+      isButtonEnabled = eventNameController.text.isNotEmpty &&
+          billingAddressController.text.isNotEmpty &&
+          addressController.text.isNotEmpty;
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
-    var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
-    var displayType = valueType.toString().split('.').last;
-
     return Scaffold(
-      backgroundColor: AppColors.formFieldBorderColour,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         centerTitle: true,
         automaticallyImplyLeading: false,
@@ -161,16 +182,28 @@ class _UnitEditState extends State<UnitEdit> {
               isLoadingEdit = true;
             });
           } else if (state is UnitCreateSuccess) {
-            setState(() {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => BlocProvider(
-                          create: (context) => AllRequesterBloc(),
-                          child: Units(),
-                        )),
+            isLoadingEdit = false;
+
+            if (state.createResponse is Map &&
+                state.createResponse.containsKey('message')) {
+              var deleteMessage =
+              state.createResponse['message'];
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(deleteMessage),
+                  backgroundColor: AppColors.primaryColour,
+                ),
               );
-            });
+            }
+
+            Future.delayed(const Duration(milliseconds: 500),
+                    () {
+                  Navigator.pop(context);
+                });
+
+
+
+
           } else if (state is UnitCreateFailure) {
             setState(() {
               isLoadingEdit = false;
@@ -183,16 +216,25 @@ class _UnitEditState extends State<UnitEdit> {
               'Internet is not connected.',
             );
           } else if (state is UnitUpdateSuccess) {
-            setState(() {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => BlocProvider(
-                          create: (context) => AllRequesterBloc(),
-                          child: Units(),
-                        )),
+            isLoadingEdit = false;
+
+            if (state.updateResponse is Map &&
+                state.updateResponse.containsKey('message')) {
+              var deleteMessage =
+              state.updateResponse['message'];
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(deleteMessage),
+                  backgroundColor: AppColors.primaryColour,
+                ),
               );
-            });
+            }
+
+            Future.delayed(const Duration(milliseconds: 500),
+                    () {
+                  Navigator.pop(context);
+                });
+
           } else if (state is UnitUpdateFailure) {
             setState(() {
               isLoadingEdit = false;
@@ -201,188 +243,176 @@ class _UnitEditState extends State<UnitEdit> {
             CommonPopups.showCustomPopup(context, state.failureMessage);
           }
         },
-        child: Padding(
-          padding: const EdgeInsets.all(18.0),
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text("Event Name", style: FTextStyle.preHeadingStyle),
-                ),
-                TextFormField(
-                  controller: editController,
-                  decoration: InputDecoration(
-                    hintText: "Enter Event",
-                    hintStyle: FTextStyle.formhintTxtStyle,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.formFieldHintColour, width: 1.0),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.formFieldHintColour, width: 1.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.primaryColourDark, width: 1.0),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 13.0, horizontal: 18.0),
-                    fillColor: Colors.grey[100],
-                    filled: true,
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter an event';
-                    }
-                    return null;
-                  },
-                ),
-                Padding(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(18.0),
+            child: Form(
+              key: formKey,
+              onChanged: _updateButtonState,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text("Event Billing Address",
-                        style: FTextStyle.preHeadingStyle)),
-                TextFormField(
-                  controller: descriptionController,
-                  decoration: InputDecoration(
-                    hintText: "Enter Billing Address",
-                    hintStyle: FTextStyle.formhintTxtStyle,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.formFieldHintColour, width: 1.0),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.formFieldHintColour, width: 1.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.primaryColourDark, width: 1.0),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 13.0, horizontal: 18.0),
-                    fillColor: Colors.grey[100],
-                    filled: true,
+                    child: Text("Event Name", style: FTextStyle.preHeadingStyle),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a description';
-                    }
-                    return null;
-                  },
-                ),
-                Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text("Address", style: FTextStyle.preHeadingStyle)),
-                TextFormField(
-                  controller: addressController,
-                  decoration: InputDecoration(
-                    hintText: "Enter Address",
-                    hintStyle: FTextStyle.formhintTxtStyle,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.formFieldHintColour, width: 1.0),
+                  TextFormField(
+                    key: _eventNameKey,
+                    focusNode: _eventFocusNode,
+                    controller: eventNameController,
+                    decoration:
+                        FormFieldStyle.defaultInputEditDecoration.copyWith(
+                      fillColor: Colors.grey[100],
+                      filled: true,
+                      hintText: "Enter Event Name",
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.formFieldHintColour, width: 1.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.primaryColourDark, width: 1.0),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 13.0, horizontal: 18.0),
-                    fillColor: Colors.grey[100],
-                    filled: true,
+                    onTap: () {
+                      isEventFieldFocused = true;
+                      isBillingAddressFieldFocused = false;
+                      isAddressFieldFocused = false;
+                    },
+                    validator: ValidatorUtils.simpleNameValidator,
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a description';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 40),
-                Center(
-                  child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text("Event Billing Address",
+                          style: FTextStyle.preHeadingStyle)),
+                  TextFormField(
+                    key: _billingAddressKey,
+                    focusNode: _billingFocusNode,
+                    controller: billingAddressController,
+                    decoration:
+                        FormFieldStyle.defaultInputEditDecoration.copyWith(
+                      fillColor: Colors.grey[100],
+                      filled: true,
+                      hintText: "Enter Billing Address",
+                    ),
+                    onTap: () {
+                      isEventFieldFocused = false;
+                      isBillingAddressFieldFocused = true;
+                      isAddressFieldFocused = false;
+                    },
+                    validator: ValidatorUtils.billingAddressValidator,
+                  ),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text("Address", style: FTextStyle.preHeadingStyle)),
+                  TextFormField(
+                    key: _addressKey,
+                    focusNode: _addressFocusNode,
+                    controller: addressController,
+                    decoration:
+                        FormFieldStyle.defaultInputEditDecoration.copyWith(
+                      fillColor: Colors.grey[100],
+                      filled: true,
+                      hintText: "Enter Address",
+                    ),
+                    onTap: () {
+                      isEventFieldFocused = false;
+                      isBillingAddressFieldFocused = false;
+                      isAddressFieldFocused = true;
+                    },
+                    validator: ValidatorUtils.addressValidator,
+                  ),
+                  const SizedBox(height: 40),
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(18.0),
                       child: SizedBox(
-                        height: (displayType == 'desktop' ||
-                                displayType == 'tablet')
-                            ? 70
-                            : 40,
+                        width: MediaQuery.of(context).size.width,
+                        height: 48,
                         child: ElevatedButton(
-                            onPressed: isButtonEnabled
-                                ? () async {
-                                    setState(() {
-                                      isLoadingEdit = true;
-                                    });
-                                    if (widget.screenflag.isNotEmpty) {
-                                      BlocProvider.of<AllRequesterBloc>(context)
-                                          .add(
-                                        UnitUpdateEventHandler(
-                                          id: widget.id.toString(),
-                                          name: editController.text.toString(),
-                                          billingAddress: descriptionController
-                                              .text
-                                              .toString(),
-                                          address:
-                                              addressController.text.toString(),
-                                        ),
-                                      );
-                                    } else {
-                                      BlocProvider.of<AllRequesterBloc>(context)
-                                          .add(
-                                        UnitCreateEventHandler(
-                                          name: editController.text.toString(),
-                                          billingAddress: descriptionController
-                                              .text
-                                              .toString(),
-                                          address:
-                                              addressController.text.toString(),
-                                        ),
-                                      );
-                                    }
-                                  }
-                                : null,
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(26),
-                              ),
-                              backgroundColor: isButtonEnabled
-                                  ? AppColors.primaryColourDark
-                                  : AppColors.disableButtonColor,
+                          onPressed: isButtonEnabled ? () {
+                            if (formKey.currentState!.validate()) {
+                              // All fields are valid, proceed with submission
+                              setState(() {
+                                isLoadingEdit = true; // Start loading
+                              });
+
+
+
+                              // Determine whether to update or create a vendor
+                              if (widget.screenflag.isNotEmpty) {
+                                BlocProvider.of<AllRequesterBloc>(
+                                    context)
+                                    .add(
+                                  UnitUpdateEventHandler(
+                                    id: widget.id.toString(),
+                                    name: eventNameController.text
+                                        .toString(),
+                                    billingAddress:
+                                    billingAddressController.text
+                                        .toString(),
+                                    address: addressController.text
+                                        .toString(),
+                                  ),
+                                );
+                              } else {
+                                BlocProvider.of<AllRequesterBloc>(
+                                    context)
+                                    .add(
+                                  UnitCreateEventHandler(
+                                    name: eventNameController.text
+                                        .toString(),
+                                    billingAddress:
+                                    billingAddressController.text
+                                        .toString(),
+                                    address: addressController.text
+                                        .toString(),
+                                  ),
+                                );
+                              }
+
+                              // Note: Your submission logic is handled in the Bloc event
+                            } else {
+                              // If any field is invalid, trigger validation error display
+                              formKey.currentState!.validate();
+                            }
+                          }: null,
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(26),
                             ),
-                            child: isLoadingEdit
-                                ? const CircularProgressIndicator(
-                                    color: Colors.white,
-                                  )
-                                : Text(
-                                    "Save",
-                                    style: FTextStyle.loginBtnStyle,
-                                  )),
-                      )),
-                ),
-                const SizedBox(height: 20),
-              ],
+                            backgroundColor: isButtonEnabled
+                                ? AppColors.primaryColourDark
+                                : AppColors.formFieldBorderColour,
+                          ),
+                          child:  isLoadingEdit
+                              ? CircularProgressIndicator(color: Colors.blue)
+                              : Text("Save", style: FTextStyle.loginBtnStyle),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+  void _updateButtonState() {
+    setState(() {
+      isButtonEnabled = ValidatorUtils.isValidAddress(addressController.text) &&
+          ValidatorUtils.isValidAddress(billingAddressController.text) &&
+          ValidatorUtils.isValidSimpleName(eventNameController.text);
+
+
+
+      if (isEventFieldFocused == true) {
+        _eventNameKey.currentState!.validate();
+      }
+
+      if (isBillingAddressFieldFocused == true) {
+        _billingAddressKey.currentState!.validate();
+      }
+      if (isAddressFieldFocused == true) {
+        _addressKey.currentState!.validate();
+      }
+    });
   }
 }

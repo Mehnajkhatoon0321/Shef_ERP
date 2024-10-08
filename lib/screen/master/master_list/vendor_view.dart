@@ -17,38 +17,7 @@ class VendorView extends StatefulWidget {
 }
 
 class _VendorViewState extends State<VendorView> {
-  // // Corrected map definition
-  // Map<String, dynamic> Alldata = {
-  //   "personalData": {
-  //     "role": "Vendor",
-  //     "email": "mehnaj04@gmail.com",
-  //     "personeName": "John Doe",
-  //     "contactNo": "12356789",
-  //     "whatsapp": "9876543213",
-  //     "address": "315/41, Bagh Maha Narain, Chowk, Lucknow-226003"
-  //   },
-  //   "companyDetails": {
-  //     "Type":"Private Limikted",
-  //     "companyname": "webgrade",
-  //     "companyDetails": "asdsfsfdsf",
-  //     "address": "315/41, Bagh Maha Narain, Chowk, Lucknow-226003",
-  //     "PAN": "AACCW6534C",
-  //     "PANUpload": "image.jpeg",
-  //     "GST ": "09AACCW6534C1ZD",
-  //     "GSTUpload": "gst.png",
-  //     "TAN": "AACCW6534C",
-  //     "TANUpload": "image.pdf",
-  //
-  //   },
-  //   "bankDetails": {
-  //     "accountName":"Webgrade Technologies Private Limited",
-  //     "accountNumber":"502000878548",
-  //     "accountIFSC":"HDFC0000078",
-  //     "bankName":"HDFC Bank",
-  //     "Branch ":"M G Road, Hazratganj, Lucknow"
-  //
-  //   }
-  // };
+
   Map<String, dynamic> personalData = {
 
   };   Map<String, dynamic> responseData = {
@@ -213,6 +182,7 @@ class _VendorViewState extends State<VendorView> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 10),//
               Text(
                 "Personal Details:",
                 style: FTextStyle.formLabelTxtStyle.copyWith(fontSize: 19),

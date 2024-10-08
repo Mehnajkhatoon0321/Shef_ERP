@@ -631,7 +631,7 @@ final class  EventCreateSuccess extends AllRequesterState {
 }
 final class EventCreateFailure extends AllRequesterState {
 
-  final String failureMessage;
+  final Map<String, dynamic> failureMessage;
 EventCreateFailure(this.failureMessage);
 
 }

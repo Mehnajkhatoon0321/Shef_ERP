@@ -179,68 +179,7 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
       }
     });
 
-//     on<AddRequisitionHandler>((event, emit) async {
-//       if (await ConnectivityService.isConnected()) {
-//         emit(AddRequisitionLoading());
-//         try {
-//           Dio dio = Dio();
-//           String authToken = PrefUtils.getToken();
-//           dio.options.headers["Authorization"] = 'Bearer $authToken';
-//
-//           // Prepare the list of files
-//           List<MultipartFile> files = [];
-//           for (var item in event.requisitionList) {
-//             String filePath = item['image']!.path;
-//             String fileName = basename(filePath);
-//             files.add(await MultipartFile.fromFile(filePath, filename: fileName));
-//           }
-//
-//           // Prepare FormData
-//           Map<String, dynamic> formDataMap = {
-//             'files': files,
-//             'date': event.date,
-//             'unit': event.unit,
-//             'time': event.time,
-//             'user_id': PrefUtils.getUserId(),
-//           };
-//
-//           // Add requisition list items to formDataMap
-//           for (int i = 0; i < event.requisitionList.length; i++) {
-//             formDataMap['requisition_list[$i][product]'] = event.requisitionList[i]['product'];
-//             formDataMap['requisition_list[$i][specification]'] = event.requisitionList[i]['specification'];
-//             formDataMap['requisition_list[$i][event]'] = event.requisitionList[i]['event'];
-//             formDataMap['requisition_list[$i][additional]'] = event.requisitionList[i]['additional'];
-//             formDataMap['requisition_list[$i][quantity]'] = event.requisitionList[i]['quantity'];
-//             formDataMap['requisition_list[$i][user_id]'] = event.requisitionList[i]['user_id'];
-//           }
-//
-//           FormData requestbody = FormData.fromMap(formDataMap);
-//           var response = await dio.post(APIEndPoints.postRequisition, data: requestbody);
-//
-//           if (response.statusCode == 200) {
-//             emit(AddRequisitionSuccess(response.data));
-// print(">>>>>ALl${response.data}");
-//           } else {
-//             emit(AddCartFailure(const {'error': 'Exception occurred:'}));
-//           }
-//         } on DioException catch (e) {
-//           if (e.response != null) {
-//             emit(AddCartFailure(const {'error': 'Exception occurred:'}));
-//           } else {
-//             emit(AddCartFailure(const {'error': 'Exception occurred:'}));
-//           }
-//           if (kDebugMode) {
-//             developer.log(e.toString());
-//           }
-//         } catch (e) {
-//           if (kDebugMode) {
-//             developer.log(e.toString());
-//           }
-//         }
-//       } else {
-//         emit(AddCartFailure(const {'error': 'Exception occurred:'}));
-//       }
-//     });
+
     on<AddRequisitionHandler>((event, emit) async {
       if (await ConnectivityService.isConnected()) {
         emit(AddRequisitionLoading());
@@ -1758,7 +1697,7 @@ print("RequestData>>>>>>>>>>$request");
         try {
           String authToken = PrefUtils.getToken();
 
-          final APIEndpoint = Uri.parse("${APIEndPoints.deleteEventList}${event.id}/$userId");
+          final APIEndpoint = Uri.parse("${APIEndPoints.deleteEventList}${event.id}");
           developer.log("Making DELETE request to: $APIEndpoint");
           developer.log("Authorization Token: $authToken");
 
@@ -1804,7 +1743,7 @@ print("RequestData>>>>>>>>>>$request");
 
         try {
           final requestData = json.encode({
-            "cate_name": event.category,
+            "name": event.category,
           });
 
           developer.log(
@@ -1830,17 +1769,17 @@ print("RequestData>>>>>>>>>>$request");
             final responseError = jsonDecode(response.body);
             emit(EventCreateFailure(responseError));
           } else {
-            emit(EventCreateFailure('Failed to upload requisition'));
+            emit(EventCreateFailure({'error': 'Exception occurred: '}));
           } // Print request details
 
         } catch (e) {
           if (kDebugMode) {
             developer.log(e.toString());
           }
-          emit(EventCreateFailure('Exception occurred: ${e.toString()}'));
+          emit(EventCreateFailure({'error': 'Exception occurred: $e'}));
         }
       } else {
-        emit(EventCreateFailure('No internet connection'));
+        emit(EventCreateFailure(const {'error':'No internet connection'}));
       }
 
     });
@@ -1854,9 +1793,8 @@ print("RequestData>>>>>>>>>>$request");
 
         try {
           final requestData = json.encode({
-            "cate_name": event.category,
-            "user_id": event.userId,
-            "id": event.id,
+            "name": event.name,
+            "event_id": event.id,
           });
 
           developer.log(
@@ -2053,6 +1991,145 @@ print("RequestData>>>>>>>>>>$request");
         emit(VendorViewFailure(const {'error': 'Network error'}));
       }
     });
+//vendor update
+
+    on<VendorUpdateHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(UpdateVendorLoading());
+        try {
+          Dio dio = Dio();
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            "Authorization": 'Bearer $authToken',
+          };
+
+          var formData = FormData.fromMap({
+            'name': event.name,
+            'contact': event.contact,
+            'email': event.email,
+            'password': event.password,
+            'address': event.address,
+            'whatsapp': event.whatsapp,
+            'company_type': event.companyType,
+            'company_name': event.companyName,
+            'caddress': event.caddress,
+            'pan': event.pan,
+            'gst': event.gst,
+            'tan': event.tan,
+            'comapny_email': event.companyEmail,
+            'account_name': event.accountName,
+
+            'account_no': event.accountNo,
+            'ifsc': event.ifsc,
+            'vendor_id': event.vendorId,
+
+            'bank_name': event.bankName,
+            'branch': event.branch,
+            if (event.panImage != null)
+              'pan_upl': await MultipartFile.fromFile(event.panImage!.path),
+            if (event.gstImage != null)
+              'gst_upl': await MultipartFile.fromFile(event.gstImage!.path),
+            if (event.cancelledImage != null)
+              'gst_upl': await MultipartFile.fromFile(event.cancelledImage!.path)
+          });
+
+          var response = await dio.post(APIEndPoints.updateVendorList,
+              data: formData,
+              options: Options(headers: headers)
+          );
+          print(">>>>RequestData>>>>${formData}");
+
+          print(">>>>Response>>>>${response}");
+
+          if (response.statusCode == 200) {
+            emit(UpdateVendorSuccess(response.data));
+          } else {
+            emit(UpdateVendorFailure(response.data));
+          }
+        } catch (e) {
+          emit(UpdateVendorFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        emit(UpdateVendorFailure(const {'error': 'No internet connection'}));
+      }
+    });
+//vendor create
+    on<VendorCreateHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(VendorCreateLoading());
+        try {
+          Dio dio = Dio();
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            "Authorization": 'Bearer $authToken',
+          };
+
+          var formData = FormData.fromMap({
+            'name': event.name,
+            'contact': event.contact,
+            'email': event.email,
+            'password': event.password,
+            'address': event.address,
+            'roles': event.roles,
+            'whatsapp': event.whatsapp,
+            'company_type': event.companyType,
+            'company_name': event.companyName,
+            'caddress': event.caddress,
+            'pan': event.pan,
+            'gst': event.gst,
+            'tan': event.tan,
+            'account_name': event.accountName,
+            'account_no': event.accountNo,
+            'ifsc': event.ifsc,
+
+            'bank_name': event.bankName,
+            'branch': event.branch,
+            if (event.panImage != null)
+              'pan_upl': await MultipartFile.fromFile(event.panImage!.path),
+            if (event.gstImage != null)
+              'gst_upl': await MultipartFile.fromFile(event.gstImage!.path),
+            if (event.cancelledImage != null)
+              'cancelled_upl': await MultipartFile.fromFile(event.cancelledImage!.path),
+          });
+
+          // Log the request data
+          print(">>>>RequestData>>>>${formData.fields.map((field) => '${field.key}: ${field.value}').join(', ')}");
+
+          var response = await dio.post(
+            APIEndPoints.createVendorList,
+            data: formData,
+            options: Options(headers: headers),
+          );
+
+          // Log the response
+          print(">>>>Response>>>>${response.data}");
+
+          if (response.statusCode == 200) {
+            emit(VendorCreateSuccess(response.data));
+          } else {
+            emit(VendorCreateFailure('Error: ${response.statusCode} - ${response.data}'));
+          }
+        } catch (e) {
+          if (e is DioException) {
+            // Specific handling for DioExceptions
+            emit(VendorCreateFailure('Request failed: ${e.message}'));
+            if (e.response != null) {
+              print(">>>>Response Data>>>> ${e.response?.data}");
+              print(">>>>Response Status Code>>>> ${e.response?.statusCode}");
+            } else {
+              print(">>>>Error Details>>>> ${e.message}");
+            }
+          } else {
+            // Handle other types of exceptions
+            emit(VendorCreateFailure('Exception occurred: $e'));
+          }
+        }
+      } else {
+        emit(VendorCreateFailure('No internet connection'));
+      }
+    });
+
+
 
 
   }

@@ -384,10 +384,10 @@ class CreateEventHandler extends AllRequesterEvent {
 }
 
 class UpdateEventHandler extends AllRequesterEvent {
-  final String category;
-  int userId;
+  final String name;
+
   int id;
-  UpdateEventHandler({required this.category,required this.userId,required this.id,});
+  UpdateEventHandler({required this.name,required this.id,});
 }
 //
 //vendor in master
@@ -413,4 +413,106 @@ class VendorUserHandler extends AllRequesterEvent {
 class VendorViewHandler extends AllRequesterEvent {
   String id;
   VendorViewHandler(this.id);
+}
+//vendor update
+
+class VendorUpdateHandler extends AllRequesterEvent {
+  final String name;
+  final String contact;
+  final String address;
+  final String whatsapp;
+  final String companyType;
+  final String email;
+  final String password;
+  final String companyName;
+  final String caddress;
+  final String pan;
+  final String gst;
+  final String tan;
+  final String companyEmail;
+  final String accountName;
+  final String accountNo;
+  final String ifsc;
+  final String bankName;
+  final String branch; // Now required
+  final String vendorId;
+  final File? panImage;
+  final File? gstImage;
+  final File? cancelledImage;
+
+  VendorUpdateHandler({
+    required this.name,
+    required this.contact,
+    required this.address,
+    required this.whatsapp,
+    required this.companyType,
+    required this.companyName,
+    required this.caddress,
+    required this.pan,
+    required this.gst,
+    required this.email,
+    required this.password,
+    required this.tan,
+    required this.companyEmail,
+    required this.accountName,
+    required this.accountNo,
+    required this.ifsc,
+    required this.bankName,
+    required this.branch, // Added here
+    required this.vendorId,
+    required this.panImage,
+    required this.gstImage,
+    required this.cancelledImage,
+  });
+}
+//vendor create
+
+class VendorCreateHandler extends AllRequesterEvent {
+  final String name;
+  final String contact;
+  final String address;
+  final String email;
+  final String password;
+  final String whatsapp;
+  final String companyType;
+  final String companyName;
+  final String caddress;
+  final String pan;
+  final String gst;
+  final String tan;
+
+  final String accountName;
+  final String accountNo;
+  final String ifsc;
+  final String bankName;
+  final String branch; // Now required
+  final String roles;
+  final File? panImage;
+  final File? gstImage;
+  final File? cancelledImage;
+
+  VendorCreateHandler({
+    required this.name,
+    required this.email,
+    required this.password,
+    required this.contact,
+    required this.address,
+    required this.whatsapp,
+    required this.companyType,
+    required this.companyName,
+    required this.caddress,
+    required this.pan,
+    required this.gst,
+    required this.tan,
+
+    required this.accountName,
+    required this.accountNo,
+    required this.ifsc,
+    required this.bankName,
+    required this.branch, // Added here
+    required this.roles,
+    required this.panImage,
+    required this.gstImage,
+    required this.cancelledImage,
+  });
 }

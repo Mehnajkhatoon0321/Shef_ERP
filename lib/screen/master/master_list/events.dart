@@ -106,21 +106,7 @@ class _EventScreenState extends State<EventScreen> {
   int pageSize = 5;
   bool hasMoreData = true;
   List<dynamic> data = [
-    {
-      "name": "Event1",
-    },
-    {
-      "name": "Event2",
-    },
-    {
-      "name": "Event3",
-    },
-    {
-      "name": "Event4",
-    },
-    {
-      "name": "Event5",
-    },
+
   ];
   final controller = ScrollController();
   final controllerI = ScrollController();
@@ -142,7 +128,7 @@ class _EventScreenState extends State<EventScreen> {
       });
     });
     BlocProvider.of<AllRequesterBloc>(context)
-        .add(MasterDetailHandler("", pageNo, pageSize));
+        .add(EventListHandler("", pageNo, pageSize));
     paginationCall();
   }
 
@@ -153,7 +139,7 @@ class _EventScreenState extends State<EventScreen> {
           if (hasMoreData) {
             pageNo++;
             BlocProvider.of<AllRequesterBloc>(context)
-                .add(MasterDetailHandler("", pageNo, pageSize));
+                .add(EventListHandler("", pageNo, pageSize));
           }
         }
       }
@@ -223,7 +209,7 @@ class _EventScreenState extends State<EventScreen> {
             });
           } else if (state is EventListSuccess) {
             setState(() {
-              var responseData = state.eventList['list']['requisitions'];
+              var responseData = state.eventList['list'];
               print(">>>>>>>>>>>ALLDATA$responseData");
               totalPages = responseData["total"];
 
@@ -265,8 +251,6 @@ class _EventScreenState extends State<EventScreen> {
 
             var deleteMessage = state.deleteEventList['message'];
 
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(AddCartDetailHandler("", pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(deleteMessage),
@@ -731,7 +715,7 @@ class _EventScreenState extends State<EventScreen> {
 
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(deleteMessage),
+                                content: Text(deleteMessage['message']),
                                 backgroundColor: AppColors.primaryColour,
                               ),
                             );
@@ -800,8 +784,8 @@ class _EventScreenState extends State<EventScreen> {
                                       // Check if the widget is still mounted
                                       if (isEditing) {
                                         of.add(UpdateEventHandler(
-                                          category: _editController.text,
-                                          userId: PrefUtils.getUserId(),
+                                          name: _editController.text,
+
                                           id: data[index!]["id"],
                                         ));
                                       } else {

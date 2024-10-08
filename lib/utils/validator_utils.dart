@@ -494,13 +494,29 @@ class ValidatorUtils {
     }
 
     // Check if the length of the address is between 5 and 100 characters
-    if (value.length < 5 || value.length > 100) {
+    if (value.length < 10 || value.length > 100) {
       return Constants.lengthAddressField; // Error message for invalid length
     }
 
     // The address is valid
     return null;
   }
+
+  static String? billingAddressValidator(String? value) {
+    // Check if the value is null or empty
+    if (value == null || value.trim().isEmpty) {
+      return Constants.nullAddressField; // Error message for empty address
+    }
+
+    // Check if the length of the address is between 5 and 100 characters
+    if (value.length < 10 || value.length > 100) {
+      return Constants.lengthAddressField; // Error message for invalid length
+    }
+
+    // The address is valid
+    return null;
+  }
+
 
   static String confirmPassValidator(String pass, String confirmPass) {
     if (confirmPass.isEmpty) {
