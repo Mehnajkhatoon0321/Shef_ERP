@@ -1160,6 +1160,7 @@ class _VendorEditState extends State<VendorEdit> {
                     focusNode: _passwordFocusNode,
                     decoration:
                         FormFieldStyle.defaultInputEditDecoration.copyWith(
+                          hintText: "Enter Password",
                       suffixIcon: IconButton(
                         icon: Icon(
                           passwordVisible

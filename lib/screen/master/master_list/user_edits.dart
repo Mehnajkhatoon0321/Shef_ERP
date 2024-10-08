@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
-import 'package:shef_erp/screen/master/master_list/user_list.dart';
+
 import 'package:shef_erp/utils/colours.dart';
-import 'package:shef_erp/utils/common_function.dart';
+
 import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/constant.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shef_erp/utils/form_field_style.dart';
 import 'package:shef_erp/utils/no_space_input_formatter_class.dart';
 import 'package:shef_erp/utils/validator_utils.dart';
 
@@ -103,70 +104,117 @@ class _UserEditsState extends State<UserEdits> {
       ],
     ),
   };
-  bool isButtonEnabled = true;
+  bool isButtonEnabled = false;
   bool isLoadingEdit = false;
   String? selectedUnitItem;
   String? selectedRoleItem;
-  bool isEmailFieldFocused = false;
-  bool isPasswordFieldFocused = false;
+
   String? selectedRoleId;
-  final GlobalKey<FormFieldState<String>> _passwordKey =
-      GlobalKey<FormFieldState<String>>();
   final formKey = GlobalKey<FormState>();
-  late final TextEditingController editController = TextEditingController();
-  late final TextEditingController descriptionController =
-      TextEditingController();
+  bool passwordVisible = true;
+
+  late final TextEditingController nameController = TextEditingController();
+  late final TextEditingController contactController = TextEditingController();
   late final TextEditingController addressController = TextEditingController();
   late final TextEditingController emailController = TextEditingController();
   late final TextEditingController designationController =
       TextEditingController();
-  late final TextEditingController passwsordController =
-      TextEditingController();
+  late final TextEditingController passwordController = TextEditingController();
   late final GlobalKey<FormFieldState<String>> _unitNameKey =
       GlobalKey<FormFieldState<String>>();
   late final GlobalKey<FormFieldState<String>> _roleNameKey =
       GlobalKey<FormFieldState<String>>();
+  late final GlobalKey<FormFieldState<String>> _nameKey =
+      GlobalKey<FormFieldState<String>>();
+  late final GlobalKey<FormFieldState<String>> _emailKey =
+      GlobalKey<FormFieldState<String>>();
+  late final GlobalKey<FormFieldState<String>> _contactKey =
+      GlobalKey<FormFieldState<String>>();
+  late final GlobalKey<FormFieldState<String>> _addressKey =
+      GlobalKey<FormFieldState<String>>();
+  late final GlobalKey<FormFieldState<String>> _designationKey =
+      GlobalKey<FormFieldState<String>>();
+  late final GlobalKey<FormFieldState<String>> _passwordKey =
+      GlobalKey<FormFieldState<String>>();
   Map<String, dynamic> responseData = {};
   final FocusNode _passwordFocusNode = FocusNode();
   final FocusNode _emailFocusNode = FocusNode();
-  String? unitFromList;
-  List<dynamic> listData = [];
-  final GlobalKey<FormFieldState<String>> _emailKey =
-      GlobalKey<FormFieldState<String>>();
 
-  bool isValidPass(String pass) {
-    if (pass.isEmpty) {
-      return false;
-    }
-    return true;
+  final FocusNode _unitNameNode = FocusNode();
+  final FocusNode _roleNameNode = FocusNode();
+  final FocusNode _contactFocusedNode = FocusNode();
+  final FocusNode _addressFocusedNode = FocusNode();
+  final FocusNode _designationFocusedNode = FocusNode();
+  final FocusNode _nameFocusedNode = FocusNode();
+
+  bool isEmailFieldFocused = false;
+  bool isPasswordFieldFocused = false;
+  bool isUnitNameFieldFocused = false;
+  bool isRoleNameFieldFocused = false;
+  bool isContactFieldFocused = false;
+  bool isAddressFieldFocused = false;
+  bool isDesignationFieldFocused = false;
+  bool isNameFieldFocused = false;
+  void _updateButtonState() {
+    setState(() {
+      isButtonEnabled = selectedUnitItem != null &&
+          selectedUnitItem!.isNotEmpty &&
+          selectedRoleItem != null &&
+          selectedRoleItem!.isNotEmpty &&
+          nameController.text.isNotEmpty &&
+          emailController.text.isNotEmpty &&
+          passwordController.text.isNotEmpty &&
+          contactController.text.isNotEmpty &&
+          addressController.text.isNotEmpty &&
+          designationController.text.isNotEmpty;
+
+      // Validate fields
+      if (isEmailFieldFocused) {
+        _emailKey.currentState!.validate();
+      }
+      if (isPasswordFieldFocused) {
+        _passwordKey.currentState!.validate();
+      }
+      if (isUnitNameFieldFocused) {
+        _unitNameKey.currentState!.validate();
+      }
+      if (isRoleNameFieldFocused) {
+        _roleNameKey.currentState!.validate();
+      }
+      if (isContactFieldFocused) {
+        _contactKey.currentState!.validate();
+      }
+      if (isAddressFieldFocused) {
+        _addressKey.currentState!.validate();
+      }
+      if (isDesignationFieldFocused) {
+        _designationKey.currentState!.validate();
+      }
+      if (isNameFieldFocused) {
+        _nameKey.currentState!.validate();
+      }
+    });
   }
 
-  void initState() {
-    if (widget.screenflag.isNotEmpty) {
-      // emailController.text=widget.email;
-      // editController.text=widget.name;
-    }
+  
+  
+  String? unitFromList;
+  List<dynamic> listData = [];
 
+  void initState() {
     BlocProvider.of<AllRequesterBloc>(context)
         .add(EditDetailUserHandler(widget.id));
     super.initState();
   }
 
-  late final FocusNode _unitNameNode = FocusNode();
-  late final FocusNode _roleNameNode = FocusNode();
   List<String> UnitNames = [];
   List<String> RolesNames = [];
   List<dynamic> RoleDataList = [];
   List<dynamic> UnitsDataList = [];
   String? selectedUnitId;
-  late final FocusNode _specificationNameNode = FocusNode();
-  late final TextEditingController specificationName = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
-    var displayType = valueType.toString().split('.').last;
-
     return Scaffold(
       backgroundColor: AppColors.formFieldBorderColour,
       appBar: AppBar(
@@ -215,10 +263,10 @@ class _UserEditsState extends State<UserEdits> {
               if (user.isNotEmpty && widget.screenflag.isNotEmpty) {
                 // Set user details
                 emailController.text = user["email"] ?? '';
-                editController.text = user["name"] ?? '';
+                nameController.text = user["name"] ?? '';
                 addressController.text = user["address"] ?? '';
                 designationController.text = user["designation"] ?? '';
-                descriptionController.text = user["contact"] ?? '';
+                contactController.text = user["contact"] ?? '';
 
                 // Set role
                 selectedRoleItem = (user['roles']?.isNotEmpty ?? false)
@@ -260,47 +308,56 @@ class _UserEditsState extends State<UserEdits> {
               isLoadingEdit = true;
             });
           } else if (state is UserCreateSuccess) {
-            setState(() {
-              isLoadingEdit = false;
+            isLoadingEdit = false;
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => BlocProvider(
-                          create: (context) => AllRequesterBloc(),
-                          child: const UserList(),
-                        )),
+            if (state.createResponse.containsKey('message')) {
+              var deleteMessage = state.createResponse['message'];
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(deleteMessage),
+                  backgroundColor: AppColors.primaryColour,
+                ),
               );
+            }
+
+            Future.delayed(const Duration(milliseconds: 500), () {
+              Navigator.pop(context);
             });
           } else if (state is UserCreateFailure) {
             setState(() {
               isLoadingEdit = false;
             });
 
-            CommonPopups.showCustomPopup(context, state.failureMessage.toString());
+            CommonPopups.showCustomPopup(
+                context, state.failureMessage.toString());
           } else if (state is CheckNetworkConnection) {
             CommonPopups.showCustomPopup(
               context,
               'Internet is not connected.',
             );
           } else if (state is UserUpdateSuccess) {
-            setState(() {
-              isLoadingEdit = false;
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => BlocProvider(
-                          create: (context) => AllRequesterBloc(),
-                          child: const UserList(),
-                        )),
+            isLoadingEdit = false;
+
+            if (state.updateResponse.containsKey('message')) {
+              var deleteMessage = state.updateResponse['message'];
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(deleteMessage),
+                  backgroundColor: AppColors.primaryColour,
+                ),
               );
+            }
+
+            Future.delayed(const Duration(milliseconds: 500), () {
+              Navigator.pop(context);
             });
           } else if (state is UserUpdateFailure) {
             setState(() {
               isLoadingEdit = false;
             });
 
-            CommonPopups.showCustomPopup(context, state.failureMessage.toString());
+            CommonPopups.showCustomPopup(
+                context, state.failureMessage.toString());
           }
         },
         child: SingleChildScrollView(
@@ -308,24 +365,7 @@ class _UserEditsState extends State<UserEdits> {
             padding: const EdgeInsets.all(18.0),
             child: Form(
               key: formKey,
-              onChanged: () {
-                // Update button enable state based on field validity
-                setState(() {
-                  isButtonEnabled = selectedUnitItem != null &&
-                      selectedUnitItem!.isNotEmpty &&
-                      selectedRoleItem != null &&
-                      selectedRoleItem!.isNotEmpty &&
-                      ValidatorUtils.isValidEmail(emailController.text) &&
-                      isValidPass(passwsordController.text);
-
-                  if (isEmailFieldFocused == true) {
-                    _emailKey.currentState!.validate();
-                  }
-                  if (isPasswordFieldFocused == true) {
-                    _passwordKey.currentState!.validate();
-                  }
-                });
-              },
+              onChanged: _updateButtonState,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -361,10 +401,11 @@ class _UserEditsState extends State<UserEdits> {
                         ),
                         onChanged: (String? eventValue) {
                           setState(() {
-                            selectedRoleItem =
-                                eventValue; // Update the selected role
-                            isButtonEnabled =
-                                eventValue != null && eventValue.isNotEmpty;
+                            selectedRoleItem = eventValue;
+
+                            _updateButtonState();// Update the selected role
+                            // isButtonEnabled =
+                            //     eventValue != null && eventValue.isNotEmpty;
                           });
                         },
                         items: RolesNames.map<DropdownMenuItem<String>>(
@@ -410,7 +451,7 @@ class _UserEditsState extends State<UserEdits> {
                           setState(() {
                             selectedUnitItem =
                                 eventValue; // Update the selected unit
-
+                            _updateButtonState();
                             // Update the selectedUnitId based on the selected unit
                             selectedUnitId = UnitsDataList.firstWhere(
                               (unit) => unit['name'] == eventValue,
@@ -418,15 +459,16 @@ class _UserEditsState extends State<UserEdits> {
                             )['id']
                                 as String; // Ensure we safely cast to String
 
-                            // Update button enabled state
-                            isButtonEnabled =
-                                eventValue != null && eventValue.isNotEmpty;
+                            // // Update button enabled state
+                            // isButtonEnabled =
+                            //     eventValue != null && eventValue.isNotEmpty;
                           });
                         },
                         items: UnitNames.map<DropdownMenuItem<String>>(
                             (String unitName) {
                           return DropdownMenuItem<String>(
-                            value: unitName, // Use the unit name as the value
+                            value: unitName,
+                            // Use the unit name as the value
                             child: Text(unitName),
                           );
                         }).toList(),
@@ -438,36 +480,28 @@ class _UserEditsState extends State<UserEdits> {
                     child: Text("Name", style: FTextStyle.preHeadingStyle),
                   ),
                   TextFormField(
-                    controller: editController,
-                    decoration: InputDecoration(
-                      hintText: "Name",
-                      hintStyle: FTextStyle.formhintTxtStyle,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.formFieldHintColour, width: 1.0),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.formFieldHintColour, width: 1.0),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.primaryColourDark, width: 1.0),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 13.0, horizontal: 18.0),
+                    key: _nameKey,
+                    focusNode: _nameFocusedNode,
+                    controller: nameController,
+                    decoration:
+                        FormFieldStyle.defaultInputEditDecoration.copyWith(
                       fillColor: Colors.grey[100],
                       filled: true,
+                      hintText: "Enter Name",
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter an Name';
-                      }
-                      return null;
+                      onChanged: (value) => _updateButtonState(),
+                      onTap: (){
+
+                       isEmailFieldFocused = false;
+                       isPasswordFieldFocused = false;
+                       isUnitNameFieldFocused = false;
+                       isRoleNameFieldFocused = false;
+                       isContactFieldFocused = false;
+                       isAddressFieldFocused = false;
+                       isDesignationFieldFocused = false;
+                       isNameFieldFocused = true;
                     },
+                    validator: ValidatorUtils.simpleNameValidator
                   ),
                   Text(
                     Constants.emailLabel,
@@ -477,30 +511,14 @@ class _UserEditsState extends State<UserEdits> {
                   const SizedBox(height: 5),
                   TextFormField(
                     key: _emailKey,
+                    onChanged: (value) => _updateButtonState(),
                     focusNode: _emailFocusNode,
                     keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      hintText: "Email",
-                      hintStyle: FTextStyle.formhintTxtStyle,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.formFieldHintColour, width: 1.0),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.formFieldHintColour, width: 1.0),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.primaryColourDark, width: 1.0),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 13.0, horizontal: 18.0),
+                    decoration:
+                        FormFieldStyle.defaultInputEditDecoration.copyWith(
                       fillColor: Colors.grey[100],
                       filled: true,
+                      hintText: "Enter Email",
                     ),
                     inputFormatters: [NoSpaceFormatter()],
                     controller: emailController,
@@ -509,6 +527,12 @@ class _UserEditsState extends State<UserEdits> {
                       setState(() {
                         isPasswordFieldFocused = false;
                         isEmailFieldFocused = true;
+                        isUnitNameFieldFocused = false;
+                        isRoleNameFieldFocused = false;
+                        isContactFieldFocused = false;
+                        isAddressFieldFocused = false;
+                        isDesignationFieldFocused = false;
+                        isNameFieldFocused = true;
                       });
                     },
                   ).animateOnPageLoad(
@@ -518,102 +542,82 @@ class _UserEditsState extends State<UserEdits> {
                       child: Text("Event Contact",
                           style: FTextStyle.preHeadingStyle)),
                   TextFormField(
-                    controller: descriptionController,
-                    decoration: InputDecoration(
-                      hintText: "Enter Contact",
-                      hintStyle: FTextStyle.formhintTxtStyle,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.formFieldHintColour, width: 1.0),
+                      key: _contactKey,
+                      onChanged: (value) => _updateButtonState(),
+                      focusNode: _contactFocusedNode,
+                      controller: contactController,
+                      keyboardType: TextInputType.number,
+                      decoration:
+                          FormFieldStyle.defaultInputEditDecoration.copyWith(
+                        fillColor: Colors.grey[100],
+                        filled: true,
+                        hintText: "Enter Contact",
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.formFieldHintColour, width: 1.0),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.primaryColourDark, width: 1.0),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 13.0, horizontal: 18.0),
-                      fillColor: Colors.grey[100],
-                      filled: true,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a description';
-                      }
-                      return null;
-                    },
-                  ),
+                      onTap: (){
+
+                        isEmailFieldFocused = false;
+                        isPasswordFieldFocused = false;
+                        isUnitNameFieldFocused = false;
+                        isRoleNameFieldFocused = false;
+                        isContactFieldFocused = true;
+                        isAddressFieldFocused = false;
+                        isDesignationFieldFocused = false;
+                        isNameFieldFocused = false;
+                      },
+                      validator: ValidatorUtils.mobileNumberValidator),
                   Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child:
                           Text("Address", style: FTextStyle.preHeadingStyle)),
                   TextFormField(
-                    controller: addressController,
-                    decoration: InputDecoration(
-                      hintText: "Enter Address",
-                      hintStyle: FTextStyle.formhintTxtStyle,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.formFieldHintColour, width: 1.0),
+                      key: _addressKey,
+                      focusNode: _addressFocusedNode,
+                      onChanged: (value) => _updateButtonState(),
+                      controller: addressController,
+                      decoration:
+                          FormFieldStyle.defaultInputEditDecoration.copyWith(
+                        fillColor: Colors.grey[100],
+                        filled: true,
+                        hintText: "Enter Address",
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.formFieldHintColour, width: 1.0),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.primaryColourDark, width: 1.0),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 13.0, horizontal: 18.0),
-                      fillColor: Colors.grey[100],
-                      filled: true,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a address';
-                      }
-                      return null;
-                    },
-                  ),
+                      onTap: (){
+
+                        isEmailFieldFocused = false;
+                        isPasswordFieldFocused = false;
+                        isUnitNameFieldFocused = false;
+                        isRoleNameFieldFocused = false;
+                        isContactFieldFocused = false;
+                        isAddressFieldFocused = true;
+                        isDesignationFieldFocused = false;
+                        isNameFieldFocused = false;
+                      },
+                      validator: ValidatorUtils.addressValidator),
                   Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Text("Designation",
                           style: FTextStyle.preHeadingStyle)),
                   TextFormField(
+                    key: _designationKey,
+                    focusNode: _designationFocusedNode,
                     controller: designationController,
-                    decoration: InputDecoration(
-                      hintText: "Enter Designation",
-                      hintStyle: FTextStyle.formhintTxtStyle,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.formFieldHintColour, width: 1.0),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.formFieldHintColour, width: 1.0),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.primaryColourDark, width: 1.0),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 13.0, horizontal: 18.0),
+                    onChanged: (value) => _updateButtonState(),
+                    decoration:
+                        FormFieldStyle.defaultInputEditDecoration.copyWith(
                       fillColor: Colors.grey[100],
                       filled: true,
+                      hintText: "Enter Designation",
                     ),
+                    onTap: (){
+
+                      isEmailFieldFocused = false;
+                      isPasswordFieldFocused = false;
+                      isUnitNameFieldFocused = false;
+                      isRoleNameFieldFocused = false;
+                      isContactFieldFocused = false;
+                      isAddressFieldFocused = false;
+                      isDesignationFieldFocused = true;
+                      isNameFieldFocused = false;
+                    },
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter a designation';
@@ -629,140 +633,141 @@ class _UserEditsState extends State<UserEdits> {
                     keyboardType: TextInputType.visiblePassword,
                     key: _passwordKey,
                     focusNode: _passwordFocusNode,
-                    controller: passwsordController,
-                    decoration: InputDecoration(
+                    controller: passwordController,
+                    onChanged: (value) => _updateButtonState(),
+                    decoration:
+                        FormFieldStyle.defaultInputEditDecoration.copyWith(
                       hintText: "Enter Password",
-                      hintStyle: FTextStyle.formhintTxtStyle,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.formFieldHintColour, width: 1.0),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          passwordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: Colors.black,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            passwordVisible = !passwordVisible;
+                          });
+                        },
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.formFieldHintColour, width: 1.0),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(23.0),
-                        borderSide: const BorderSide(
-                            color: AppColors.primaryColourDark, width: 1.0),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 13.0, horizontal: 18.0),
-                      fillColor: Colors.grey[100],
                       filled: true,
+                      fillColor: AppColors.formFieldBackColour,
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter a password';
-                      }
-                      return null;
-                    },
+                    validator: ValidatorUtils.passwordValidator,
+                    obscureText: !passwordVisible,
+                    inputFormatters: [NoSpaceFormatter()],
                     onTap: () {
                       setState(() {
                         isPasswordFieldFocused = true;
                         isEmailFieldFocused = false;
+                        isUnitNameFieldFocused = false;
+                        isRoleNameFieldFocused = false;
+                        isContactFieldFocused = false;
+                        isAddressFieldFocused = false;
+                        isDesignationFieldFocused = true;
+                        isNameFieldFocused = false;
                       });
                     },
                   ),
                   const SizedBox(height: 40),
                   Center(
                     child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: SizedBox(
-                          height: (displayType == 'desktop' ||
-                                  displayType == 'tablet')
-                              ? 70
-                              : 40,
-                          child: ElevatedButton(
-                              onPressed: isButtonEnabled
-                                  ? () async {
-                                      setState(() {
-                                        isLoadingEdit = true;
-                                      });
-                                      if (widget.screenflag.isNotEmpty) {
-                                        BlocProvider.of<AllRequesterBloc>(
-                                                context)
-                                            .add(
-                                          UserUpdateEventHandler(
-                                            id: widget.id.toString(),
-                                            name:
-                                                editController.text.toString(),
+                      padding: const EdgeInsets.all(18.0),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: isButtonEnabled
+                              ? () {
+                                  if (formKey.currentState!.validate()) {
+                                    setState(() {
+                                      isLoadingEdit = true; // Start loading
+                                    });
 
-                                            address: addressController.text
-                                                .toString(),
-                                            email:
-                                                emailController.text.toString(),
-                                            contact: descriptionController.text
-                                                .toString(),
+                                    // Determine whether to update or create a vendor
+                                    if (widget.screenflag.isNotEmpty) {
+                                      BlocProvider.of<AllRequesterBloc>(context)
+                                          .add(
+                                        UserUpdateEventHandler(
+                                          id: widget.id.toString(),
+                                          name: nameController.text.toString(),
 
-                                            unitID: selectedRoleItem ==
-                                                    'Purchase Manager'
-                                                ? '0'
-                                                : (selectedUnitId ?? '0'),
-                                            // Pass the selected unit ID
-                                            role: selectedRoleItem.toString(),
-                                            // Pass the selected role name
+                                          address:
+                                              addressController.text.toString(),
+                                          email:
+                                              emailController.text.toString(),
+                                          contact:
+                                              contactController.text.toString(),
 
-                                            password: passwsordController.text
-                                                .toString(),
-                                            designation: designationController
-                                                .text
-                                                .toString(),
-                                          ),
-                                        );
-                                      } else {
-                                        BlocProvider.of<AllRequesterBloc>(
-                                                context)
-                                            .add(
-                                          UserCreateEventHandler(
-                                            id: widget.id.toString(),
-                                            name:
-                                            editController.text.toString(),
+                                          unitID: selectedRoleItem ==
+                                                  'Purchase Manager'
+                                              ? '0'
+                                              : (selectedUnitId ?? '0'),
+                                          // Pass the selected unit ID
+                                          role: selectedRoleItem.toString(),
+                                          // Pass the selected role name
 
-                                            address: addressController.text
-                                                .toString(),
-                                            email:
-                                            emailController.text.toString(),
-                                            contact: descriptionController.text
-                                                .toString(),
+                                          password: passwordController.text
+                                              .toString(),
+                                          designation: designationController
+                                              .text
+                                              .toString(),
+                                        ),
+                                      );
+                                    } else {
+                                      BlocProvider.of<AllRequesterBloc>(context)
+                                          .add(
+                                        UserCreateEventHandler(
+                                          id: widget.id.toString(),
+                                          name: nameController.text.toString(),
 
-                                            unitID: selectedRoleItem ==
-                                                'Purchase Manager'
-                                                ? '0'
-                                                : (selectedUnitId ?? '0'),
-                                            // Pass the selected unit ID
-                                            role: selectedRoleItem.toString(),
-                                            // Pass the selected role name
+                                          address:
+                                              addressController.text.toString(),
+                                          email:
+                                              emailController.text.toString(),
+                                          contact:
+                                              contactController.text.toString(),
 
-                                            password: passwsordController.text
-                                                .toString(),
-                                            designation: designationController
-                                                .text
-                                                .toString(),
-                                          ),
-                                        );
-                                      }
+                                          unitID: selectedRoleItem ==
+                                                  'Purchase Manager'
+                                              ? '0'
+                                              : (selectedUnitId ?? '0'),
+                                          // Pass the selected unit ID
+                                          role: selectedRoleItem.toString(),
+                                          // Pass the selected role name
+
+                                          password: passwordController.text
+                                              .toString(),
+                                          designation: designationController
+                                              .text
+                                              .toString(),
+                                        ),
+                                      );
                                     }
-                                  : null,
-                              style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(26),
-                                ),
-                                backgroundColor: isButtonEnabled
-                                    ? AppColors.primaryColourDark
-                                    : AppColors.disableButtonColor,
-                              ),
-                              child: isLoadingEdit
-                                  ? const CircularProgressIndicator(
-                                      color: Colors.white,
-                                    )
-                                  : Text(
-                                      "Save",
-                                      style: FTextStyle.loginBtnStyle,
-                                    )),
-                        )),
+
+                                    // Note: Your submission logic is handled in the Bloc event
+                                  } else {
+                                    // If any field is invalid, trigger validation error display
+                                    formKey.currentState!.validate();
+                                  }
+                                }
+                              : null,
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(26),
+                            ),
+                            backgroundColor: isButtonEnabled
+                                ? AppColors.primaryColourDark
+                                : AppColors.formFieldBorderColour,
+                          ),
+                          child: isLoadingEdit
+                              ? const CircularProgressIndicator(
+                                  color: Colors.blue)
+                              : Text("Save", style: FTextStyle.loginBtnStyle),
+                        ),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 20),
                 ],
@@ -773,4 +778,6 @@ class _UserEditsState extends State<UserEdits> {
       ),
     );
   }
+
+
 }
