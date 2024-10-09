@@ -455,7 +455,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
               ),
             ),
             Expanded(
-              child: isLoading
+              child: isLoading && data.isEmpty
                   ? Shimmer.fromColors(
                       baseColor: Colors.grey[300]!,
                       highlightColor: Colors.grey[100]!,

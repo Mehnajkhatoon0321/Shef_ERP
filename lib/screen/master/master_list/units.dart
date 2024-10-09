@@ -129,7 +129,6 @@ class _UnitsState extends State<Units> {
   }
 
   void fetchData() {
-    // Trigger the initial data fetch
     BlocProvider.of<AllRequesterBloc>(context)
         .add(GetUnitHandler("", pageNo, pageSize));
   }
@@ -138,13 +137,11 @@ class _UnitsState extends State<Units> {
     controller.addListener(() {
       if (controller.position.pixels == controller.position.maxScrollExtent) {
         if (!isLoading && hasMoreData) {
-
           pageNo++;
-          setState(() {
-            isLoading = true; // Set loading state before fetching new data
-          });
 
-          // Fetch more data
+          isInitialLoading = false;
+          isLoading = true;
+
           BlocProvider.of<AllRequesterBloc>(context)
               .add(GetUnitHandler("", pageNo, pageSize));
         }
@@ -152,11 +149,8 @@ class _UnitsState extends State<Units> {
     });
   }
 
-
   Map<String, dynamic> errorServerMessage = {};
   String? errorMessage;
-
-
 
 // Don't forget to remove the listener when no longer needed
   @override
@@ -241,29 +235,24 @@ class _UnitsState extends State<Units> {
               isInitialLoading = true;
             });
           } else if (state is UnitSuccess) {
-            var responseData = state.UnitList['list'];
-            int totalItemCount = responseData["total"];
-
-
-            totalPages = (totalItemCount / pageSize).ceil();
-
-
-            if (pageNo == 1) {
-              data.clear();
-            }
-
-            data.addAll(responseData['data']);
-
             setState(() {
-              isInitialLoading = false;
-              isLoading = false;
-              // Reset loading state
+              var responseData = state.UnitList['list'];
+              int totalItemCount = responseData["total"];
+              totalPages = (totalItemCount / pageSize).ceil();
 
-                hasMoreData = pageNo < totalPages; // Update hasMoreData
+              if (pageNo == 1) {
+                data.clear();
+              }
 
+              data.addAll(responseData['data']);
 
+                isInitialLoading = false;
+                isLoading = false; // Reset loading state
+
+              if (pageNo==totalPages) {
+                hasMoreData = false;
+              }
             });
-
           } else if (state is UnitFailure) {
             setState(() {
               isLoading = false;
@@ -363,200 +352,243 @@ class _UnitsState extends State<Units> {
               ),
             ),
             Expanded(
-              child: isInitialLoading
+              child: isInitialLoading && data.isEmpty
                   ? Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
-                child: ListView.builder(
-                  itemCount: 10, // Number of shimmer placeholders
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
-                      child: Container(
-                        margin: const EdgeInsets.all(8),
-                        padding: const EdgeInsets.all(7),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              spreadRadius: 2,
-                              blurRadius: 4,
-                              offset: const Offset(0, 1),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                      baseColor: Colors.grey[300]!,
+                      highlightColor: Colors.grey[100]!,
+                      child: ListView.builder(
+                        itemCount: 10, // Number of shimmer placeholders
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: screenWidth * 0.03, vertical: 5),
+                            child: Container(
+                              margin: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.all(7),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    spreadRadius: 2,
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 1),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
                                 children: [
-                                  Container(height: 10, color: Colors.grey),
-                                  const SizedBox(height: 5),
-                                  Container(height: 10, color: Colors.grey),
-                                  const SizedBox(height: 5),
-                                  Container(height: 10, color: Colors.grey),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                            height: 10, color: Colors.grey),
+                                        const SizedBox(height: 5),
+                                        Container(
+                                            height: 10, color: Colors.grey),
+                                        const SizedBox(height: 5),
+                                        Container(
+                                            height: 10, color: Colors.grey),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
-              )
+                    )
                   : (errorMessage != null || errorServerMessage.isNotEmpty)
-                  ? Center(
-                child: Text(
-                  errorMessage ?? errorServerMessage.toString(),
-                  style: FTextStyle.listTitle,
-                  textAlign: TextAlign.center,
-                ),
-              )
-                  : (data.isEmpty)
-                  ? Center(
-                child: const Text("No more data.", style: FTextStyle.listTitle),
-              )
-                  :  ListView.builder(
-                controller: controller,
-                itemCount: data.length + (hasMoreData ? 1 : 0),  // Show loading indicator if there's more data
-                itemBuilder: (context, index) {
-                  if (index < data.length) {
-                    final item = data[index];
-                    return GestureDetector(
-                      onTap: () {
-                        // Handle tap event if needed
-                      },
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
-                        child: Container(
-                          margin: const EdgeInsets.all(2),
-                          padding: const EdgeInsets.all(7),
-                          decoration: BoxDecoration(
-                            color: index % 2 == 0 ? Colors.white : Colors.grey[200],
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primaryColourDark,
-                                spreadRadius: 1.5,
-                                blurRadius: 0.4,
-                                offset: const Offset(0, 0.9),
-                              ),
-                            ],
+                      ? Center(
+                          child: Text(
+                            errorMessage ?? errorServerMessage.toString(),
+                            style: FTextStyle.listTitle,
+                            textAlign: TextAlign.center,
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  const Text("ID: ", style: FTextStyle.listTitle),
-                                  Text("${index + 1}", style: FTextStyle.listTitleSub),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  const Text("Name: ", style: FTextStyle.listTitle),
-                                  Expanded(
-                                    child: Text(
-                                      "${item["name"]}",
-                                      style: FTextStyle.listTitleSub,
-                                      maxLines: 1,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  const Text("Billing Address: ", style: FTextStyle.listTitle),
-                                  Expanded(
-                                    child: Text(
-                                      "${item["billing_name"]}",
-                                      style: FTextStyle.listTitleSub,
-                                      maxLines: 2,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  const Text("Address: ", style: FTextStyle.listTitle),
-                                  Expanded(
-                                    child: Text(
-                                      "${item["address"]}",
-                                      style: FTextStyle.listTitleSub,
-                                      maxLines: 2,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit, color: Colors.black),
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => BlocProvider(
-                                            create: (context) => AllRequesterBloc(),
-                                            child: UnitEdit(
-                                              id: item["id"].toString(),
-                                              screenflag: "Edit",
-                                              name: item["name"],
-                                              billingAddress: item["billing_name"],
-                                              address: item["address"],
+                        )
+                      : (data.isEmpty)
+                          ? const Center(
+                              child: Text("No more data.",
+                                  style: FTextStyle.listTitle),
+                            )
+                          : ListView.builder(
+                              controller: controller,
+                              itemCount: data.length +1
+                                ,
+                              // Show loading indicator if there's more data
+                              itemBuilder: (context, index) {
+                                if (index < data.length) {
+                                  final item = data[index];
+                                  return GestureDetector(
+                                    onTap: () {
+                                      // Handle tap event if needed
+                                    },
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: screenWidth * 0.03,
+                                          vertical: 5),
+                                      child: Container(
+                                        margin: const EdgeInsets.all(2),
+                                        padding: const EdgeInsets.all(7),
+                                        decoration: BoxDecoration(
+                                          color: index % 2 == 0
+                                              ? Colors.white
+                                              : Colors.grey[200],
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          boxShadow: const [
+                                            BoxShadow(
+                                              color:
+                                                  AppColors.primaryColourDark,
+                                              spreadRadius: 1.5,
+                                              blurRadius: 0.4,
+                                              offset: Offset(0, 0.9),
                                             ),
-                                          ),
+                                          ],
                                         ),
-                                      );
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () {
-                                      CommonPopups.showDeleteCustomPopup(
-                                        context,
-                                        "Are you sure you want to delete?",
-                                            () {
-                                          BlocProvider.of<AllRequesterBloc>(context)
-                                              .add(DeleteUnitHandlers(item['id']));
-                                        },
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  }
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                const Text("ID: ",
+                                                    style:
+                                                        FTextStyle.listTitle),
+                                                Text("${index + 1}",
+                                                    style: FTextStyle
+                                                        .listTitleSub),
+                                              ],
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                const Text("Name: ",
+                                                    style:
+                                                        FTextStyle.listTitle),
+                                                Expanded(
+                                                  child: Text(
+                                                    "${item["name"]}",
+                                                    style:
+                                                        FTextStyle.listTitleSub,
+                                                    maxLines: 1,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                const Text("Billing Address: ",
+                                                    style:
+                                                        FTextStyle.listTitle),
+                                                Expanded(
+                                                  child: Text(
+                                                    "${item["billing_name"]}",
+                                                    style:
+                                                        FTextStyle.listTitleSub,
+                                                    maxLines: 2,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              children: [
+                                                const Text("Address: ",
+                                                    style:
+                                                        FTextStyle.listTitle),
+                                                Expanded(
+                                                  child: Text(
+                                                    "${item["address"]}",
+                                                    style:
+                                                        FTextStyle.listTitleSub,
+                                                    maxLines: 2,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: [
+                                                IconButton(
+                                                  icon: const Icon(Icons.edit,
+                                                      color: Colors.black),
+                                                  onPressed: () {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            BlocProvider(
+                                                          create: (context) =>
+                                                              AllRequesterBloc(),
+                                                          child: UnitEdit(
+                                                            id: item["id"]
+                                                                .toString(),
+                                                            screenflag: "Edit",
+                                                            name: item["name"],
+                                                            billingAddress: item[
+                                                                "billing_name"],
+                                                            address:
+                                                                item["address"],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                                IconButton(
+                                                  icon: const Icon(Icons.delete,
+                                                      color: Colors.red),
+                                                  onPressed: () {
+                                                    CommonPopups
+                                                        .showDeleteCustomPopup(
+                                                      context,
+                                                      "Are you sure you want to delete?",
+                                                      () {
+                                                        BlocProvider.of<
+                                                                    AllRequesterBloc>(
+                                                                context)
+                                                            .add(
+                                                                DeleteUnitHandlers(
+                                                                    item[
+                                                                        'id']));
+                                                      },
+                                                    );
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
 
-                  // If we reach this point, we are showing the loading indicator
-                  if (hasMoreData && index == data.length ) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+                                // If we reach this point, we are showing the loading indicator
+                                if (hasMoreData && index == data.length) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                }
 
-                  // If there's no more data to load, show a message
-                  return Center(child: Text("No more data.", style: FTextStyle.listTitle));
-                },
-              ),
+                                // If there's no more data to load, show a message
+                                return const Center(
+                                    child: Text("No more data.",
+                                        style: FTextStyle.listTitle));
+                              },
+                            ),
             ),
-
-
-
-
-
-
             const SizedBox(height: 20),
           ],
         ),
