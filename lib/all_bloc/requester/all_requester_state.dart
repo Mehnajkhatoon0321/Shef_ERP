@@ -18,6 +18,12 @@ final class AddCartFailure extends AllRequesterState{
   AddCartFailure(this.addCartDetailFailure);
 
 }
+
+final class ServerFailure extends AllRequesterState{
+  final Map<String, dynamic> serverFailure;
+  ServerFailure(this.serverFailure);
+
+}
 //View Add List
 final class ViewAddListLoading extends AllRequesterState{}
 final class ViewAddListSuccess extends AllRequesterState{

@@ -1,4 +1,3 @@
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -137,6 +136,10 @@ class _AdminRequisitionState extends State<AdminRequisition> {
     ),
   };
 
+  // Map<String , dynamic> errorMessage={};
+  Map<String, dynamic> errorServerMessage = {};
+  String? errorMessage;
+
   @override
   void initState() {
     super.initState();
@@ -253,7 +256,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
             setState(() {
               var responseData = state.addCartDetails['list']['requisitions'];
               list = state.addCartDetails['list']['vendors'];
-
+              print("allRequisitionData$responseData");
               productNames = list
                   .map<String>((item) => item['company_name'] as String)
                   .toList();
@@ -282,6 +285,9 @@ class _AdminRequisitionState extends State<AdminRequisition> {
 
               data.addAll(responseData['data']);
 
+              if (responseData["data"].length < pageSize) {
+                hasMoreData = false;
+              }
               setState(() {
                 isLoading = false;
                 if (pageNo == totalPages) {
@@ -293,6 +299,16 @@ class _AdminRequisitionState extends State<AdminRequisition> {
             setState(() {
               isLoading = false;
             });
+            errorMessage = state.addCartDetailFailure['message'];
+
+            print("messageErrorFailure$errorMessage");
+          } else if (state is ServerFailure) {
+            setState(() {
+              isLoading = false;
+            });
+            errorServerMessage = state.serverFailure;
+
+            print("messageErrorServer$errorServerMessage");
           } else if (state is DeleteLoading) {
             DeletePopupManager.playLoader();
           } else if (state is DeleteSuccess) {
@@ -399,11 +415,10 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                             : 38,
                     child: ElevatedButton(
                       onPressed: () async {
-
                         _showBrandDialog(
                             BlocProvider.of<AllRequesterBloc>(context),
-                            context, selectedIds
-                            );
+                            context,
+                            selectedIds);
                       },
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
@@ -440,7 +455,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
               ),
             ),
             Expanded(
-              child: isLoading && data.isEmpty
+              child: isLoading
                   ? Shimmer.fromColors(
                       baseColor: Colors.grey[300]!,
                       highlightColor: Colors.grey[100]!,
@@ -490,298 +505,322 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                         },
                       ),
                     )
-                  : data.isEmpty
-                      ? Center(
-                          child: isLoading
-                              ? const CircularProgressIndicator()
-                              : const Text("No more data.",
-                                  style: FTextStyle.listTitle),
+                  : (errorMessage != null || errorServerMessage.isNotEmpty)
+                      ?
+              Center(
+                          child: (errorMessage != null)
+                              ? Text(
+                                  errorMessage.toString(),
+                                  style: FTextStyle.listTitle,
+                                  textAlign: TextAlign.center,
+                                )
+                              : Text(
+                                  errorServerMessage.toString(),
+                                  style: FTextStyle.listTitle,
+                                  textAlign: TextAlign.center,
+                                ),
                         )
-                      : ListView.builder(
-                          controller: controllerI,
-                          itemCount: data.length + (hasMoreData ? 1 : 0),
-                          itemBuilder: (context, index) {
-                            if (index < data.length) {
-                              final item = data[index];
-                              return GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ViewDetails(
-                                        requisition: item["req_no"] ?? "N/A",
-                                        poNumber: item["po_no"] ?? "N/A",
-                                        requestDate: item["req_date"] ?? "N/A",
-                                        unit: item["unit"] ?? "N/A",
-                                        product: item["product_name"] ?? "N/A",
-                                        specification:
-                                            item["specification"] ?? "N/A",
-                                        quantity: item["quantity"].toString(),
-                                        unitHead: item["unitHead"].toString(),
-                                        purchase: item["purchase"].toString() ??
-                                            "N/A",
-                                        delivery:
-                                            item["dl_status"].toString() ??
-                                                "N/A",
-                                        vender: item["vender"] ?? "N/A",
-                                        image: item["image"].toString(),
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: screenWidth * 0.01,
-                                      vertical: 5),
-                                  child: Row(
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.only(top: 10.h),
-                                        child: Transform.scale(
-                                          scale: 1.2,
-                                          child: Checkbox(
-                                            value:
-                                                selectedIndices.contains(index),
-                                            activeColor:
-                                                AppColors.primaryColourDark,
-                                            onChanged: (bool? value) {
-                                              setState(() {
-                                                if (value == true) {
-                                                  selectedIndices.add(index);
-                                                  selectedIds.add(item['id']
-                                                      .toString()); // Add ID when checked
-                                                } else {
-                                                  selectedIndices.remove(index);
-                                                  selectedIds.remove(item['id']
-                                                      .toString()); // Remove ID when unchecked
-                                                }
-                                              });
-                                            },
+                      :
+              data.isEmpty
+                          ?
+               Center(
+                              child: Text("No more data available.",
+                                      style: FTextStyle.listTitle),
+                            )
+                          : ListView.builder(
+                            controller: controllerI,
+                            itemCount: data.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index < data.length) {
+                                  final item = data[index];
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ViewDetails(
+                                            requisition:
+                                                item["req_no"] ?? "N/A",
+                                            poNumber: item["po_no"] ?? "N/A",
+                                            requestDate:
+                                                item["req_date"] ?? "N/A",
+                                            unit: item["unit"] ?? "N/A",
+                                            product:
+                                                item["product_name"] ?? "N/A",
+                                            specification:
+                                                item["specification"] ?? "N/A",
+                                            quantity:
+                                                item["quantity"].toString(),
+                                            unitHead:
+                                                item["unitHead"].toString(),
+                                            purchase:
+                                                item["purchase"].toString() ??
+                                                    "N/A",
+                                            delivery:
+                                                item["dl_status"].toString() ??
+                                                    "N/A",
+                                            vender: item["vender"] ?? "N/A",
+                                            image: item["image"].toString(),
                                           ),
                                         ),
-                                      ),
-
-                                      Expanded(
-                                        child: Container(
-                                          margin: const EdgeInsets.all(8),
-                                          padding: const EdgeInsets.all(7),
-                                          decoration: BoxDecoration(
-                                            color: index % 2 == 0
-                                                ? Colors.white
-                                                : Colors.white,
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            boxShadow: const [
-                                              BoxShadow(
-                                                color:
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: screenWidth * 0.01,
+                                          vertical: 5),
+                                      child: Row(
+                                        children: [
+                                          Padding(
+                                            padding: EdgeInsets.only(top: 10.h),
+                                            child: Transform.scale(
+                                              scale: 1.2,
+                                              child: Checkbox(
+                                                value: selectedIndices
+                                                    .contains(index),
+                                                activeColor:
                                                     AppColors.primaryColourDark,
-                                                spreadRadius: 1.6,
-                                                blurRadius: 0.6,
-                                                offset: Offset(0, 1),
+                                                onChanged: (bool? value) {
+                                                  setState(() {
+                                                    if (value == true) {
+                                                      selectedIndices
+                                                          .add(index);
+                                                      selectedIds.add(item['id']
+                                                          .toString()); // Add ID when checked
+                                                    } else {
+                                                      selectedIndices
+                                                          .remove(index);
+                                                      selectedIds.remove(item[
+                                                              'id']
+                                                          .toString()); // Remove ID when unchecked
+                                                    }
+                                                  });
+                                                },
                                               ),
-                                            ],
+                                            ),
                                           ),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Row(
-                                                children: [
-                                                  const Text("Requisition No: ",
-                                                      style:
-                                                          FTextStyle.listTitle),
-                                                  Expanded(
-                                                      child: Text(
-                                                          "${item["req_no"] ?? 'N/A'}",
-                                                          style: FTextStyle
-                                                              .listTitleSub,
-                                                          maxLines: 1)),
+                                          Expanded(
+                                            child: Container(
+                                              margin: const EdgeInsets.all(8),
+                                              padding: const EdgeInsets.all(7),
+                                              decoration: BoxDecoration(
+                                                color: index % 2 == 0
+                                                    ? Colors.white
+                                                    : Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                boxShadow: const [
+                                                  BoxShadow(
+                                                    color: AppColors
+                                                        .primaryColourDark,
+                                                    spreadRadius: 1.6,
+                                                    blurRadius: 0.6,
+                                                    offset: Offset(0, 1),
+                                                  ),
                                                 ],
                                               ),
-                                              Row(
-                                                children: [
-                                                  const Text("PO No. : ",
-                                                      style:
-                                                          FTextStyle.listTitle),
-                                                  Expanded(
-                                                      child: Text(
-                                                          "${item["po_no"] ?? 'N/A'}",
-                                                          style: FTextStyle
-                                                              .listTitleSub,
-                                                          maxLines: 1)),
-                                                ],
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
+                                              child: Column(
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  const Text("Request Date: ",
-                                                      style:
-                                                          FTextStyle.listTitle),
-                                                  Expanded(
-                                                      child: Text(
-                                                          "${item["req_date"] ?? 'N/A'}",
-                                                          style: FTextStyle
-                                                              .listTitleSub,
-                                                          maxLines: 1)),
-                                                ],
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  const Text("Unit: ",
-                                                      style:
-                                                          FTextStyle.listTitle),
-                                                  Expanded(
-                                                      child: Text(
-                                                          "${item["unit"] ?? 'N/A'}",
-                                                          style: FTextStyle
-                                                              .listTitleSub,
-                                                          maxLines: 1)),
-                                                ],
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                      child: DeliveryStatus(
-                                                          dlStatus:
-                                                              item["dl_status"]
-                                                                  .toString())),
-                                                ],
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                      child: UnitHeadStatus(
-                                                          unitStatus:
-                                                              item["uh_status"]
-                                                                  .toString())),
-                                                ],
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                      child: PurchaseManager(
-                                                          pmStatus:
-                                                              item["pm_status"]
-                                                                  .toString())),
-                                                ],
-                                              ),
-                                              VendorStatus(
-                                                role: PrefUtils.getRole(),
-                                                deliveryStatus:
-                                                    item["dl_status"],
-                                                companyName:
-                                                    item['company'] ?? "NA",
-                                              ),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.end,
-                                                children: [
-                                                  Column(
+                                                  Row(
                                                     children: [
-                                                      if (PrefUtils.getRole() ==
-                                                          "Purchase Manager")
-                                                        Visibility(
-                                                          visible: item[
-                                                                  'dl_status'] ==
-                                                              1,
-                                                          child: Padding(
-                                                            padding:
-                                                                const EdgeInsets
+                                                      const Text(
+                                                          "Requisition No: ",
+                                                          style: FTextStyle
+                                                              .listTitle),
+                                                      Expanded(
+                                                          child: Text(
+                                                              "${item["req_no"] ?? 'N/A'}",
+                                                              style: FTextStyle
+                                                                  .listTitleSub,
+                                                              maxLines: 1)),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      const Text("PO No. : ",
+                                                          style: FTextStyle
+                                                              .listTitle),
+                                                      Expanded(
+                                                          child: Text(
+                                                              "${item["po_no"] ?? 'N/A'}",
+                                                              style: FTextStyle
+                                                                  .listTitleSub,
+                                                              maxLines: 1)),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      const Text(
+                                                          "Request Date: ",
+                                                          style: FTextStyle
+                                                              .listTitle),
+                                                      Expanded(
+                                                          child: Text(
+                                                              "${item["req_date"] ?? 'N/A'}",
+                                                              style: FTextStyle
+                                                                  .listTitleSub,
+                                                              maxLines: 1)),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      const Text("Unit: ",
+                                                          style: FTextStyle
+                                                              .listTitle),
+                                                      Expanded(
+                                                          child: Text(
+                                                              "${item["unit"] ?? 'N/A'}",
+                                                              style: FTextStyle
+                                                                  .listTitleSub,
+                                                              maxLines: 1)),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Expanded(
+                                                          child: DeliveryStatus(
+                                                              dlStatus: item[
+                                                                      "dl_status"]
+                                                                  .toString())),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Expanded(
+                                                          child: UnitHeadStatus(
+                                                              unitStatus: item[
+                                                                      "uh_status"]
+                                                                  .toString())),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Expanded(
+                                                          child: PurchaseManager(
+                                                              pmStatus: item[
+                                                                      "pm_status"]
+                                                                  .toString())),
+                                                    ],
+                                                  ),
+                                                  VendorStatus(
+                                                    role: PrefUtils.getRole(),
+                                                    deliveryStatus:
+                                                        item["dl_status"],
+                                                    companyName:
+                                                        item['company'] ?? "NA",
+                                                  ),
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.end,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.end,
+                                                    children: [
+                                                      Column(
+                                                        children: [
+                                                          if (PrefUtils
+                                                                  .getRole() ==
+                                                              "Purchase Manager")
+                                                            Visibility(
+                                                              visible: item[
+                                                                      'dl_status'] ==
+                                                                  1,
+                                                              child: Padding(
+                                                                padding: const EdgeInsets
                                                                     .symmetric(
                                                                     vertical:
                                                                         4.0),
-                                                            child:
-                                                                ElevatedButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                _showMarkDeliveryDialog(
-                                                                    -1);
-                                                              },
-                                                              style:
-                                                                  ElevatedButton
+                                                                child:
+                                                                    ElevatedButton(
+                                                                  onPressed:
+                                                                      () async {
+                                                                    _showMarkDeliveryDialog(
+                                                                        -1);
+                                                                  },
+                                                                  style: ElevatedButton
                                                                       .styleFrom(
-                                                                shape:
-                                                                    RoundedRectangleBorder(
-                                                                  borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
+                                                                    shape:
+                                                                        RoundedRectangleBorder(
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
                                                                               26),
+                                                                    ),
+                                                                    backgroundColor:
+                                                                        AppColors
+                                                                            .yellow,
+                                                                    minimumSize:
+                                                                        const Size(
+                                                                            80,
+                                                                            32),
+                                                                  ),
+                                                                  child: Text(
+                                                                    "Mark Delivery",
+                                                                    style: FTextStyle
+                                                                        .emailProfile,
+                                                                  ),
                                                                 ),
-                                                                backgroundColor:
-                                                                    AppColors
-                                                                        .yellow,
-                                                                minimumSize:
-                                                                    const Size(
-                                                                        80, 32),
-                                                              ),
-                                                              child: Text(
-                                                                "Mark Delivery",
-                                                                style: FTextStyle
-                                                                    .emailProfile,
                                                               ),
                                                             ),
-                                                          ),
+                                                        ],
+                                                      ),
+                                                      if (item["uh_status"] ==
+                                                              1 &&
+                                                          item['pm_status'] ==
+                                                              1)
+                                                        Row(
+                                                          children: [
+                                                            IconButton(
+                                                              icon: const Icon(
+                                                                  Icons.delete,
+                                                                  color: Colors
+                                                                      .red,
+                                                                  size: 26),
+                                                              onPressed: () {
+                                                                CommonPopups
+                                                                    .showDeleteCustomPopup(
+                                                                  context,
+                                                                  "Are you sure you want to delete?",
+                                                                  () {
+                                                                    BlocProvider.of<AllRequesterBloc>(
+                                                                            context)
+                                                                        .add(DeleteHandlers(data[index]['id'] ??
+                                                                            'N/A'));
+                                                                  },
+                                                                );
+                                                              },
+                                                            ),
+                                                          ],
                                                         ),
                                                     ],
                                                   ),
-                                                  if (item["uh_status"] == 1 &&
-                                                      item['pm_status'] == 1)
-                                                    Row(
-                                                      children: [
-                                                        IconButton(
-                                                          icon: const Icon(
-                                                              Icons.delete,
-                                                              color: Colors.red,
-                                                              size: 26),
-                                                          onPressed: () {
-                                                            CommonPopups
-                                                                .showDeleteCustomPopup(
-                                                              context,
-                                                              "Are you sure you want to delete?",
-                                                              () {
-                                                                BlocProvider.of<
-                                                                            AllRequesterBloc>(
-                                                                        context)
-                                                                    .add(DeleteHandlers(data[index]
-                                                                            [
-                                                                            'id'] ??
-                                                                        'N/A'));
-                                                              },
-                                                            );
-                                                          },
-                                                        ),
-                                                      ],
-                                                    ),
                                                 ],
                                               ),
-                                            ],
+                                            ).animateOnPageLoad(animationsMap[
+                                                'imageOnPageLoadAnimation2']!),
                                           ),
-                                        ).animateOnPageLoad(animationsMap[
-                                            'imageOnPageLoadAnimation2']!),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            } else {
-                              return Center(
-                                child: isLoading
-                                    ? const CircularProgressIndicator()
-                                    : const Text("No more data.",
-                                        style: FTextStyle.listTitle),
-                              );
-                            }
-                          },
-                        ),
+                                    ),
+                                  );
+                                }
+                                else {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+                              },
+                            ),
             ),
             const SizedBox(height: 20),
           ],
@@ -1260,12 +1299,10 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                           });
                         },
                         onTap: () {
-                          setState(() {
-                          });
+                          setState(() {});
                         },
                         onEditingComplete: () {
-                          setState(() {
-                          });
+                          setState(() {});
                         },
                       ).animateOnPageLoad(
                         animationsMap['imageOnPageLoadAnimation2']!,
@@ -1300,9 +1337,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                   ),
                 ).animateOnPageLoad(
                     animationsMap['imageOnPageLoadAnimation2']!),
-
                 const SizedBox(width: 10),
-
                 ElevatedButton(
                   onPressed: isButtonEnabled
                       ? () {
@@ -1336,7 +1371,6 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                   ),
                 ).animateOnPageLoad(
                     animationsMap['imageOnPageLoadAnimation2']!),
-
               ],
             ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation1']!);
           },

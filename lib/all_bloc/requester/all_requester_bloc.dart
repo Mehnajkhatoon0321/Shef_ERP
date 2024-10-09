@@ -35,20 +35,30 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
 
             },
           );
+          print("allRequisitionData URL >>>>>>>$APIEndpoint");
           developer.log("URL: $APIEndpoint");
           if (response.statusCode == 200) {
             print('response.statusCode_in>${response.statusCode}');
             final responseData = jsonDecode(response.body);
             emit(AddCartSuccess(responseData));
-
+            print("allRequisitionData$responseData");
           }
-          else {
+          else if   (response.statusCode == 400) {
             final responseError = jsonDecode(response.body);
             emit(AddCartFailure(responseError));
+            print(">>>>> Response: $responseError");
           }
+          else if   (response.statusCode == 500) {
+            final responseError = jsonDecode(response.body);
+            emit(AddCartFailure(responseError));
+            print(">>>>> Response: $responseError");
+          }  else {
+            emit(ServerFailure(const {'error': 'Failed to upload requisition'}));
+          } // Print request details
+
         } catch (e) {
           print('Exception: $e');
-          emit(AddCartFailure({'error': 'Exception occurred: $e'}));
+          emit(ServerFailure({'error': 'Exception occurred: $e'}));
         }
       } else {
         print('Network error');
@@ -237,7 +247,7 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
           if (response.statusCode == 200) {
             emit(AddRequisitionSuccess(response.data));
             print(">>>>> Response: ${response.data}");
-          }else if   (response.statusCode == 400) {
+          }else if   (response.statusCode == 401) {
             emit(AddCartFailure(response.data));
             print(">>>>> Response: ${response.data}");
           }
@@ -405,13 +415,24 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
             emit(UnitSuccess(responseData));
 
           }
-          else {
+          else if   (response.statusCode == 400) {
             final responseError = jsonDecode(response.body);
             emit(UnitFailure(responseError));
+            print(">>>>> Response: ${responseError}");
+          }
+          else if   (response.statusCode == 500) {
+            final responseError = jsonDecode(response.body);
+            emit(UnitFailure(responseError));
+            print(">>>>> Response: ${responseError}");
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(ServiceFailure(responseError));
+            print(">>>>> ResponseFailure: ${responseError}");
           }
         } catch (e) {
           print('Exception: $e');
-          emit(UnitFailure({'error': 'Exception occurred: $e'}));
+          emit(ServiceFailure({'error': 'Exception occurred: $e'}));
         }
       } else {
         print('Network error');
@@ -578,13 +599,14 @@ print("RequestData>>>>>>>>>>$request");
             emit(ServiceCategorySuccess(responseData));
 
           }
+
           else {
             final responseError = jsonDecode(response.body);
             emit(ServiceCategoryFailure(responseError));
           }
         } catch (e) {
           print('Exception: $e');
-          emit(UnitFailure({'error': 'Exception occurred: $e'}));
+          emit(ServerFailure({'error': 'Exception occurred: $e'}));
         }
       } else {
         print('Network error');

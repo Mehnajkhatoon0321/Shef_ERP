@@ -117,7 +117,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
-                          "9695844884",
+                          "--",
                           style: FTextStyle.formhintTxtStyle,
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
@@ -126,7 +126,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
-                          "01-08-2003",
+                          "--",
                           style: FTextStyle.formhintTxtStyle,
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
@@ -135,7 +135,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
-                          "Gorakhpur dfgfdfgfdgfdgfdgfdgdfgfdgfdgfdgfgfd",
+                          "--",
                           style: FTextStyle.formhintTxtStyle,
                           overflow: TextOverflow.ellipsis,
                           maxLines: 2,

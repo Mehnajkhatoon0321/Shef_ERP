@@ -400,9 +400,6 @@ class _UnitEditState extends State<UnitEdit> {
       isButtonEnabled = ValidatorUtils.isValidAddress(addressController.text) &&
           ValidatorUtils.isValidAddress(billingAddressController.text) &&
           ValidatorUtils.isValidSimpleName(eventNameController.text);
-
-
-
       if (isEventFieldFocused == true) {
         _eventNameKey.currentState!.validate();
       }

@@ -12,6 +12,7 @@ import 'package:shef_erp/utils/pref_utils.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../utils/flutter_flow_animations.dart';
+
 class Units extends StatefulWidget {
   const Units({super.key});
 
@@ -20,8 +21,7 @@ class Units extends StatefulWidget {
 }
 
 class _UnitsState extends State<Units> {
-
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
 
   final animationsMap = {
@@ -107,46 +107,65 @@ class _UnitsState extends State<Units> {
   int totalPages = 0;
   int pageSize = 5;
   bool hasMoreData = true;
-  List<dynamic> data = [
-
-
-  ];
+  List<dynamic> data = [];
   final controller = ScrollController();
-  final controllerI = ScrollController();
+  late final TextEditingController controllerText = TextEditingController();
   bool isLoading = false;
-  bool isLoadingEdit = false;
+  bool isInitialLoading = false;
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
   @override
   void initState() {
     super.initState();
-    _controller.addListener(() {
+    // Initialize the ScrollController
+    controllerText.addListener(() {
       setState(() {
-        _isTextEmpty = _controller.text.isEmpty;
+        _isTextEmpty = controllerText.text.isEmpty;
       });
     });
-    BlocProvider.of<AllRequesterBloc>(context)
-        .add(GetUnitHandler("", pageNo, pageSize));
+
+    // Fetch initial data
+    fetchData();
     paginationCall();
   }
 
+  void fetchData() {
+    // Trigger the initial data fetch
+    BlocProvider.of<AllRequesterBloc>(context)
+        .add(GetUnitHandler("", pageNo, pageSize));
+  }
+
   void paginationCall() {
-    controllerI.addListener(() {
-      if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
-        if (pageNo < totalPages && !isLoading) {
-          if (hasMoreData) {
-            pageNo++;
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetUnitHandler("", pageNo, pageSize));
-          }
+    controller.addListener(() {
+      if (controller.position.pixels == controller.position.maxScrollExtent) {
+        if (!isLoading && hasMoreData) {
+
+          pageNo++;
+          setState(() {
+            isLoading = true; // Set loading state before fetching new data
+          });
+
+          // Fetch more data
+          BlocProvider.of<AllRequesterBloc>(context)
+              .add(GetUnitHandler("", pageNo, pageSize));
         }
       }
     });
   }
+
+
+  Map<String, dynamic> errorServerMessage = {};
+  String? errorMessage;
+
+
+
+// Don't forget to remove the listener when no longer needed
+  @override
+  void dispose() {
+    controller.removeListener(paginationCall);
+    controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -169,23 +188,24 @@ class _UnitsState extends State<Units> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: SizedBox(
-              height: (displayType == 'desktop' || displayType == 'tablet') ? 70 : 43,
+              height: (displayType == 'desktop' || displayType == 'tablet')
+                  ? 70
+                  : 43,
               child: ElevatedButton(
                 onPressed: () => {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) =>  BlocProvider(
-                      create: (context) => AllRequesterBloc(),
-                      child:  UnitEdit(
-                        id: PrefUtils.getUserId().toString(),
-                          screenflag:"",
-                              name:"",
-                        billingAddress:"",
-                        address:""
-                      ),
-                    )),
+                    MaterialPageRoute(
+                        builder: (context) => BlocProvider(
+                              create: (context) => AllRequesterBloc(),
+                              child: UnitEdit(
+                                  id: PrefUtils.getUserId().toString(),
+                                  screenflag: "",
+                                  name: "",
+                                  billingAddress: "",
+                                  address: ""),
+                            )),
                   )
-
                 },
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
@@ -195,7 +215,8 @@ class _UnitsState extends State<Units> {
                 ),
                 child: Text(
                   "Add +",
-                  style: FTextStyle.loginBtnStyle.copyWith(color: AppColors.primaryColourDark),
+                  style: FTextStyle.loginBtnStyle
+                      .copyWith(color: AppColors.primaryColourDark),
                 ),
               ),
             ),
@@ -217,34 +238,50 @@ class _UnitsState extends State<Units> {
         listener: (context, state) {
           if (state is UnitLoading) {
             setState(() {
-              isLoading = true;
+              isInitialLoading = true;
             });
           } else if (state is UnitSuccess) {
+            var responseData = state.UnitList['list'];
+            int totalItemCount = responseData["total"];
+
+
+            totalPages = (totalItemCount / pageSize).ceil();
+
+
+            if (pageNo == 1) {
+              data.clear();
+            }
+
+            data.addAll(responseData['data']);
+
             setState(() {
-              var responseData = state.UnitList['list'];
-              print(">>>>>>>>>>>ALLDATA$responseData");
-              totalPages = responseData["total"];
+              isInitialLoading = false;
+              isLoading = false;
+              // Reset loading state
 
-              if (pageNo == 1) {
-                data.clear();
-              }
+                hasMoreData = pageNo < totalPages; // Update hasMoreData
 
-              data.addAll(responseData['data']);
 
-              setState(() {
-                isLoading = false;
-                if (pageNo == totalPages) {
-                  hasMoreData = false;
-                }
-              });
             });
+
           } else if (state is UnitFailure) {
             setState(() {
               isLoading = false;
+              isInitialLoading = false;
             });
-            print("error>> ${state.unitFailure}");
-          }  else if (state is UnitDeleteLoading) {
-                 DeletePopupManager.playLoader();
+            errorMessage = state.unitFailure['message'];
+
+            print("messageErrorFailure$errorMessage");
+          } else if (state is ServerFailure) {
+            setState(() {
+              isLoading = false;
+              isInitialLoading = false;
+            });
+            errorServerMessage = state.serverFailure;
+
+            print("messageErrorServer$errorServerMessage");
+          } else if (state is UnitDeleteLoading) {
+            DeletePopupManager.playLoader();
           } else if (state is UnitDeleteSuccess) {
             DeletePopupManager.stopLoader();
 
@@ -264,14 +301,13 @@ class _UnitsState extends State<Units> {
             });
           }
 
-
-
           // TODO: implement listener
         },
         child: Column(
           children: [
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05, vertical: 10),
+              padding: EdgeInsets.symmetric(
+                  horizontal: screenWidth * 0.05, vertical: 10),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -286,29 +322,35 @@ class _UnitsState extends State<Units> {
                   ],
                 ),
                 child: TextFormField(
-                  controller: _controller,
+                  controller: controllerText,
                   decoration: InputDecoration(
                     hintText: 'Search',
                     hintStyle: FTextStyle.formhintTxtStyle,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
+                      borderSide: const BorderSide(
+                          color: AppColors.primaryColourDark, width: 1.0),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
+                      borderSide: const BorderSide(
+                          color: AppColors.primaryColourDark, width: 1.0),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(color: AppColors.primaryColourDark, width: 1.0),
+                      borderSide: const BorderSide(
+                          color: AppColors.primaryColourDark, width: 1.0),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 18.0),
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 13.0, horizontal: 18.0),
                     suffixIcon: _isTextEmpty
-                        ? const Icon(Icons.search, color: AppColors.primaryColourDark)
+                        ? const Icon(Icons.search,
+                            color: AppColors.primaryColourDark)
                         : IconButton(
-                      icon: const Icon(Icons.clear, color: AppColors.primaryColourDark),
-                      onPressed: _clearText,
-                    ),
+                            icon: const Icon(Icons.clear,
+                                color: AppColors.primaryColourDark),
+                            onPressed: _clearText,
+                          ),
                     fillColor: Colors.grey[100],
                     filled: true,
                   ),
@@ -321,7 +363,7 @@ class _UnitsState extends State<Units> {
               ),
             ),
             Expanded(
-              child: isLoading && data.isEmpty
+              child: isInitialLoading
                   ? Shimmer.fromColors(
                 baseColor: Colors.grey[300]!,
                 highlightColor: Colors.grey[100]!,
@@ -329,8 +371,7 @@ class _UnitsState extends State<Units> {
                   itemCount: 10, // Number of shimmer placeholders
                   itemBuilder: (context, index) {
                     return Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.03, vertical: 5),
+                      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
                       child: Container(
                         margin: const EdgeInsets.all(8),
                         padding: const EdgeInsets.all(7),
@@ -350,23 +391,13 @@ class _UnitsState extends State<Units> {
                           children: [
                             Expanded(
                               child: Column(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Container(
-                                    height: 10,
-                                    color: Colors.grey,
-                                  ),
+                                  Container(height: 10, color: Colors.grey),
                                   const SizedBox(height: 5),
-                                  Container(
-                                    height: 10,
-                                    color: Colors.grey,
-                                  ),
+                                  Container(height: 10, color: Colors.grey),
                                   const SizedBox(height: 5),
-                                  Container(
-                                    height: 10,
-                                    color: Colors.grey,
-                                  ),
+                                  Container(height: 10, color: Colors.grey),
                                 ],
                               ),
                             ),
@@ -377,17 +408,21 @@ class _UnitsState extends State<Units> {
                   },
                 ),
               )
-                  : data.isEmpty
+                  : (errorMessage != null || errorServerMessage.isNotEmpty)
                   ? Center(
-                child: isLoading
-                    ? const CircularProgressIndicator() // Show circular progress indicator
-                    : const Text("No more data .",
-                    style: FTextStyle.listTitle),
+                child: Text(
+                  errorMessage ?? errorServerMessage.toString(),
+                  style: FTextStyle.listTitle,
+                  textAlign: TextAlign.center,
+                ),
+              )
+                  : (data.isEmpty)
+                  ? Center(
+                child: const Text("No more data.", style: FTextStyle.listTitle),
               )
                   :  ListView.builder(
-                controller: controllerI,
-                itemCount: data.length + (hasMoreData ? 1 : 0),
-                // Add one for the loading indicator
+                controller: controller,
+                itemCount: data.length + (hasMoreData ? 1 : 0),  // Show loading indicator if there's more data
                 itemBuilder: (context, index) {
                   if (index < data.length) {
                     final item = data[index];
@@ -397,122 +432,131 @@ class _UnitsState extends State<Units> {
                       },
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                margin: const EdgeInsets.all(2),
-                                padding: const EdgeInsets.all(7),
-                                decoration: BoxDecoration(
-                                  color: index % 2 == 0 ? Colors.white : Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.primaryColourDark,
-
-                                      spreadRadius: 1.5,
-                                      blurRadius: 0.4,
-                                      offset: const Offset(0, 0.9),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            const Text("ID: ", style: FTextStyle.listTitle),
-                                            Text("${index + 1}", style: FTextStyle.listTitleSub),
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            const Text("Name: ", style: FTextStyle.listTitle),
-                                            Expanded(child: Text("${item["name"]}", style: FTextStyle.listTitleSub,maxLines: 1,)),
-                                          ],
-                                        ),
-
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            const Text("Billing Address: ", style: FTextStyle.listTitle),
-                                            Expanded(child: Text("${item["billing_name"]}", style: FTextStyle.listTitleSub,maxLines: 2,)),
-                                          ],
-                                        ),
-
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.start,
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            const Text("Address: ", style: FTextStyle.listTitle),
-                                            Expanded(child: Text("${item["address"]}", style: FTextStyle.listTitleSub,maxLines: 2,)),
-                                          ],
-                                        ),
-
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.end,
-                                          crossAxisAlignment: CrossAxisAlignment.end,
-                                          children: [
-                                            IconButton(
-                                              icon: const Icon(Icons.edit, color: Colors.black),
-                                              onPressed: () => {
-                                              Navigator.push(
-                                              context,
-                                              MaterialPageRoute(builder: (context) =>  BlocProvider(
-                                              create: (context) => AllRequesterBloc(),
-                                              child:  UnitEdit(
-                                                id:item["id"].toString() ,
-                                                screenflag:"Edit",
-
-                                                  name:item["name"],
-                                                  billingAddress:item["billing_name"],
-                                                  address:item["address"]
-                                              ),
-                                              )),
-                                              )
-                                                        },
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(Icons.delete, color: Colors.red),
-                                              onPressed: () => {
-                                                CommonPopups
-                                                    .showDeleteCustomPopup(
-                                                  context,
-                                                  "Are you sure you want to delete?",
-                                                      () {
-                                                    BlocProvider.of<
-                                                        AllRequesterBloc>(
-                                                        context)
-                                                        .add(DeleteUnitHandlers(
-                                                        data[index][
-                                                        'id']));
-                                                  },
-                                                )
-                                              },
-                                            ),
-                                          ],
-                                        ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                                      ],
-                                    ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                                  ],
-                                ),
+                        child: Container(
+                          margin: const EdgeInsets.all(2),
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: index % 2 == 0 ? Colors.white : Colors.grey[200],
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primaryColourDark,
+                                spreadRadius: 1.5,
+                                blurRadius: 0.4,
+                                offset: const Offset(0, 0.9),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  const Text("ID: ", style: FTextStyle.listTitle),
+                                  Text("${index + 1}", style: FTextStyle.listTitleSub),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  const Text("Name: ", style: FTextStyle.listTitle),
+                                  Expanded(
+                                    child: Text(
+                                      "${item["name"]}",
+                                      style: FTextStyle.listTitleSub,
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  const Text("Billing Address: ", style: FTextStyle.listTitle),
+                                  Expanded(
+                                    child: Text(
+                                      "${item["billing_name"]}",
+                                      style: FTextStyle.listTitleSub,
+                                      maxLines: 2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  const Text("Address: ", style: FTextStyle.listTitle),
+                                  Expanded(
+                                    child: Text(
+                                      "${item["address"]}",
+                                      style: FTextStyle.listTitleSub,
+                                      maxLines: 2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit, color: Colors.black),
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => BlocProvider(
+                                            create: (context) => AllRequesterBloc(),
+                                            child: UnitEdit(
+                                              id: item["id"].toString(),
+                                              screenflag: "Edit",
+                                              name: item["name"],
+                                              billingAddress: item["billing_name"],
+                                              address: item["address"],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () {
+                                      CommonPopups.showDeleteCustomPopup(
+                                        context,
+                                        "Are you sure you want to delete?",
+                                            () {
+                                          BlocProvider.of<AllRequesterBloc>(context)
+                                              .add(DeleteUnitHandlers(item['id']));
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );
                   }
+
+                  // If we reach this point, we are showing the loading indicator
+                  if (hasMoreData && index == data.length ) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  // If there's no more data to load, show a message
+                  return Center(child: Text("No more data.", style: FTextStyle.listTitle));
                 },
               ),
             ),
+
+
+
+
+
+
             const SizedBox(height: 20),
           ],
         ),
@@ -526,9 +570,4 @@ class _UnitsState extends State<Units> {
       _isTextEmpty = true;
     });
   }
-
-
-
-
-
 }

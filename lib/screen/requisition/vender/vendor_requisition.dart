@@ -3,10 +3,12 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 import 'package:shef_erp/screen/requisition/vender/vendor_details.dart';
+import 'package:shef_erp/utils/DeletePopupManager.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shimmer/shimmer.dart';
 class VenderRequisition extends StatefulWidget {
   const VenderRequisition({super.key});
 
@@ -16,11 +18,6 @@ class VenderRequisition extends StatefulWidget {
 
 class _VenderRequisitionState extends State<VenderRequisition> {
   List<Map<String, dynamic>> listData = [
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":"assets/images/requisition.png"},
-    { "requisitionNo": "12000","poNumber": "4544200","requestDate": "12-03-2003","unit": "TC-R3110","product": "copy","specification":"NA","quantity":"12","unitHead":"Success","purchase":"Pending","delivery":"Success","vender":"Mahi", "image":""},
 
   ];
   final TextEditingController _controller = TextEditingController();
@@ -104,6 +101,19 @@ class _VenderRequisitionState extends State<VenderRequisition> {
       ],
     ),
   };
+  int? selectedId;
+  int? selectedBillingId;
+  List<String> selectedIds = [];
+  Map<String, String>? selectedItemForEditing;
+  Map<String, int> productMap = {};
+  Map<String, int> billingMap = {};
+  late final TextEditingController vendorName = TextEditingController();
+  late final TextEditingController billingName = TextEditingController();
+
+
+  String? selectedItem;
+  String? selectedBilling;
+  bool isButtonPartEnabled = false;
   int pageNo = 1;
   int totalPages = 0;
   int pageSize = 5;
@@ -111,6 +121,16 @@ class _VenderRequisitionState extends State<VenderRequisition> {
   List<dynamic> data = [];
   final controller = ScrollController();
   final controllerI = ScrollController();
+
+  bool isLoadingApprove = false;
+  List<dynamic> list = [];
+  List<dynamic> billing = [];
+  List<dynamic> listBilling = ['Demo', 'data', 'items'];
+
+
+  // Map<String , dynamic> errorMessage={};
+  Map<String , dynamic> errorServerMessage={};
+  String ?errorMessage;
   @override
   void initState() {
     super.initState();
@@ -119,8 +139,8 @@ class _VenderRequisitionState extends State<VenderRequisition> {
         _isTextEmpty = _controller.text.isEmpty;
       });
     });
-
-    BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
+    BlocProvider.of<AllRequesterBloc>(context)
+        .add(AddCartDetailHandler("", pageNo, pageSize));
     paginationCall();
   }
 
@@ -130,12 +150,18 @@ class _VenderRequisitionState extends State<VenderRequisition> {
         if (pageNo < totalPages && !isLoading) {
           if (hasMoreData) {
             pageNo++;
-            BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
+            BlocProvider.of<AllRequesterBloc>(context)
+                .add(AddCartDetailHandler("", pageNo, pageSize));
           }
         }
       }
     });
   }
+
+  Set<int> selectedIndices = {};
+  List<String> productNames = [];
+  List<String> billingNames = [];
+
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +194,104 @@ class _VenderRequisitionState extends State<VenderRequisition> {
           ),
         ),// You can set this to any color you prefer
       ),
-      body: Column(
+      body: BlocListener<AllRequesterBloc, AllRequesterState>(
+  listener: (context, state)  {
+    if (state is AddCartLoading) {
+      setState(() {
+        isLoading = true;
+      });
+    } else if (state is AddCartSuccess) {
+      setState(() {
+        var responseData = state.addCartDetails['list']['requisitions'];
+        list = state.addCartDetails['list']['vendors'];
+        print("allRequisitionData$responseData");
+        productNames = list
+            .map<String>((item) => item['company_name'] as String)
+            .toList();
+
+        productMap = {
+          for (var item in list)
+            item['company_name'] as String: item['id'] as int
+        };
+
+        billing = state.addCartDetails['list']['billings'];
+
+        billingNames = billing
+            .map<String>((item) => item['billing_name'] as String)
+            .toList();
+
+        billingMap = {
+          for (var item in billing)
+            item['billing_name'] as String: item['id'] as int
+        };
+
+        totalPages = responseData["total"];
+
+        if (pageNo == 1) {
+          data.clear();
+        }
+
+        data.addAll(responseData['data']);
+
+        setState(() {
+          isLoading = false;
+          if (pageNo == totalPages) {
+            hasMoreData = false;
+          }
+        });
+      });
+    }
+    else if (state is AddCartFailure) {
+      setState(() {
+        isLoading = false;
+      });
+      errorMessage=state.addCartDetailFailure['message'];
+
+      print("messageErrorFailure$errorMessage");
+    } else if (state is ServerFailure) {
+      setState(() {
+        isLoading = false;
+      });
+      errorServerMessage=state.serverFailure;
+
+      print("messageErrorServer$errorServerMessage");
+    }
+
+    else if (state is DeleteLoading) {
+      DeletePopupManager.playLoader();
+    } else if (state is DeleteSuccess) {
+      DeletePopupManager.stopLoader();
+
+      var deleteMessage = state.deleteList['message'];
+
+      BlocProvider.of<AllRequesterBloc>(context)
+          .add(AddCartDetailHandler("", pageNo, pageSize));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(deleteMessage),
+          backgroundColor: AppColors.primaryColour,
+        ),
+      );
+
+      Future.delayed(const Duration(milliseconds: 500), () {
+        Navigator.pop(context);
+      });
+    } else if (state is RejectLoading) {
+      setState(() {
+        isLoadingApprove = true;
+      });
+    } else if (state is RejectSuccess) {
+      isLoadingApprove = false;
+      setState(() {
+        Navigator.of(context).pop();
+      });
+    } else if (state is RejectFailure) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  },
+  child: Column(
         children: [
           Padding(
             padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.05, vertical: 10),
@@ -221,7 +344,63 @@ class _VenderRequisitionState extends State<VenderRequisition> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
+            child: isLoading
+                ? Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: ListView.builder(
+                itemCount: 10, // Number of shimmer placeholders
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.03, vertical: 5),
+                    child: Container(
+                      margin: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            spreadRadius: 2,
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                    height: 10, color: Colors.grey),
+                                const SizedBox(height: 5),
+                                Container(
+                                    height: 10, color: Colors.grey),
+                                const SizedBox(height: 5),
+                                Container(
+                                    height: 10, color: Colors.grey),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ):(errorMessage != null)?
+            Center(child: Text(errorMessage.toString(),  style: FTextStyle.listTitle,textAlign: TextAlign.center,),)
+                : (errorServerMessage!= null) ?   Center(child: Text(errorServerMessage.toString()!,  style: FTextStyle.listTitle,textAlign: TextAlign.center,),)  : data.isEmpty ? Center(
+              child: isLoading
+                  ? const CircularProgressIndicator()
+                  : const Text("No more data.",
+                  style: FTextStyle.listTitle),
+            ) :ListView.builder(
               itemCount: listData.length,
               itemBuilder: (BuildContext context, int index) {
                 final item = listData[index];
@@ -245,7 +424,7 @@ class _VenderRequisitionState extends State<VenderRequisition> {
                     // Handle item tap
                   },
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.02, vertical: 0.5),
                     child: Container(
                       margin: const EdgeInsets.all(8),
                       padding: const EdgeInsets.all(7),
@@ -261,65 +440,68 @@ class _VenderRequisitionState extends State<VenderRequisition> {
                           ),
                         ],
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+                      child: Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
 
-                          Row(
-                            children: [
-                              const Text("Product/Service: ", style: FTextStyle.listTitle),
-                              Expanded(child: Text("${item["product"]}", style: FTextStyle.listTitleSub)),
-                            ],
-                          ),
-                          const SizedBox(height: 5),
-                          Row(
-                            children: [
-                              const Text("Specification: ", style: FTextStyle.listTitle),
-                              Text("${item["specification"]}", style: FTextStyle.listTitleSub),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  const Text("Event: ", style: FTextStyle.listTitle),
-                                  Text("${item["unit"]}", style: FTextStyle.listTitleSub),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  const Text("Quantity: ", style: FTextStyle.listTitle),
-                                  Text("${item["quantity"]}", style: FTextStyle.listTitleSub),
-                                ],
-                              ),
-                            ],
-                          ),
-
-
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  const Text("Request Date: ", style: FTextStyle.listTitle),
-                                  Text("${item["requestDate"]}", style: FTextStyle.listTitleSub),
-                                ],
-                              ),
-                              const SizedBox(height: 5),
-                              Row(
-                                children: [
-                                  const Text("Delivery Status: ", style: FTextStyle.listTitle),
-                                  Text("${item["delivery"]}", style:item["delivery"] == 'Pending'
-                                      ? FTextStyle.listTitleSubBig.copyWith(color: Colors.red)
-                                      : FTextStyle.listTitleSubBig.copyWith(color: Colors.green),),
-                                ],
-                              ),
-                            ],
-                          ),
+                            Row(
+                              children: [
+                                const Text("Product/Service: ", style: FTextStyle.listTitle),
+                                Expanded(child: Text("${item["product"]}", style: FTextStyle.listTitleSub)),
+                              ],
+                            ),
+                            const SizedBox(height: 5),
+                            Row(
+                              children: [
+                                const Text("Specification: ", style: FTextStyle.listTitle),
+                                Text("${item["specification"]}", style: FTextStyle.listTitleSub),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Text("Event: ", style: FTextStyle.listTitle),
+                                    Text("${item["unit"]}", style: FTextStyle.listTitleSub),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    const Text("Quantity: ", style: FTextStyle.listTitle),
+                                    Text("${item["quantity"]}", style: FTextStyle.listTitleSub),
+                                  ],
+                                ),
+                              ],
+                            ),
 
 
-                        ],
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Text("Request Date: ", style: FTextStyle.listTitle),
+                                    Text("${item["requestDate"]}", style: FTextStyle.listTitleSub),
+                                  ],
+                                ),
+                                const SizedBox(height: 5),
+                                Row(
+                                  children: [
+                                    const Text("Delivery Status: ", style: FTextStyle.listTitle),
+                                    Text("${item["delivery"]}", style:item["delivery"] == 'Pending'
+                                        ? FTextStyle.listTitleSubBig.copyWith(color: Colors.red)
+                                        : FTextStyle.listTitleSubBig.copyWith(color: Colors.green),),
+                                  ],
+                                ),
+                              ],
+                            ),
+
+
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -329,6 +511,7 @@ class _VenderRequisitionState extends State<VenderRequisition> {
           ),
         ],
       ),
+),
 
     );
   }

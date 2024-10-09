@@ -177,8 +177,8 @@ class _UserListState extends State<UserList> {
                       create: (context) => AllRequesterBloc(),
                       child:  UserEdits(
 
-                          screenflag:"",
-                          id:PrefUtils.getUserId().toString(),
+                        screenflag:"",
+                        id:PrefUtils.getUserId().toString(),
                       ),
                     )),
                   )
@@ -494,7 +494,7 @@ class _UserListState extends State<UserList> {
                                                   MaterialPageRoute(builder: (context) =>  BlocProvider(
                                                     create: (context) => AllRequesterBloc(),
                                                     child:  UserEdits(
-                                                        screenflag:"Edit",
+                                                      screenflag:"Edit",
                                                       id:item["id"].toString(),
 
                                                     ),
