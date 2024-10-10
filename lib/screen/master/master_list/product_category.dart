@@ -28,6 +28,7 @@ class _ProductCategoryState extends State<ProductCategory> {
   final controller = ScrollController();
   final controllerI = ScrollController();
   bool isLoading = false;
+  bool isInitialLoading = false;
   bool isLoadingCreate = false;
   TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
@@ -124,15 +125,18 @@ class _ProductCategoryState extends State<ProductCategory> {
     paginationCall();
   }
 
+
   void paginationCall() {
     controllerI.addListener(() {
       if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
-        if (pageNo < totalPages && !isLoading) {
-          if (hasMoreData) {
-            pageNo++;
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetProductCategoryHandler("", pageNo, pageSize));
-          }
+        if (!isLoading && hasMoreData) {
+          pageNo++;
+
+          isInitialLoading = false;
+          isLoading = true;
+
+          BlocProvider.of<AllRequesterBloc>(context)
+              .add(MasterServiceHandler("", pageNo, pageSize));
         }
       }
     });
@@ -197,13 +201,14 @@ class _ProductCategoryState extends State<ProductCategory> {
         listener: (context, state) {
           if (state is ServiceCategoryLoading) {
             setState(() {
-              isLoading = true;
+              isInitialLoading = true;
             });
           } else if (state is ServiceCategorySuccess) {
             setState(() {
               var responseData = state.serviceCategoryList['list'];
               print(">>>>>>>>>>>ALLDATA$responseData");
-              totalPages = responseData["total"];
+              int totalItemCount = responseData["total"];
+              totalPages = (totalItemCount / pageSize).ceil();
 
               if (pageNo == 1) {
                 data.clear();
@@ -211,12 +216,14 @@ class _ProductCategoryState extends State<ProductCategory> {
 
               data.addAll(responseData['data']);
 
-              setState(() {
-                isLoading = false;
-                if (pageNo == totalPages) {
-                  hasMoreData = false;
-                }
-              });
+              isInitialLoading = false;
+              isLoading = false; // Reset loading state
+
+              if (pageNo == totalPages) {
+                hasMoreData = false;
+              }
+
+
             });
           } else if (state is EventFailure) {
             setState(() {

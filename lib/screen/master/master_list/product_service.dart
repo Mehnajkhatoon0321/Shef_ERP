@@ -27,29 +27,25 @@ class _ProductServiceState extends State<ProductService> {
   int pageSize = 5;
   bool hasMoreData = true;
   List<dynamic> data = [
-    {
-      "name": "Event1",
-    },
-    {
-      "name": "Event2",
-    },
-    {
-      "name": "Event3",
-    },
-    {
-      "name": "Event4",
-    },
-    {
-      "name": "Event5",
-    },
+
   ];
   final controller = ScrollController();
   final controllerI = ScrollController();
   bool isLoading = false;
+  bool isInitialLoading = false;
 
   TextEditingController _editController = TextEditingController();
   final TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
+  Map<String, dynamic> errorServerMessage = {};
+  String? errorMessage;
+
+  @override
+  void dispose() {
+    controllerI.removeListener(paginationCall);
+    controllerI.dispose();
+    super.dispose();
+  }
 
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
@@ -149,12 +145,14 @@ class _ProductServiceState extends State<ProductService> {
   void paginationCall() {
     controllerI.addListener(() {
       if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
-        if (pageNo < totalPages && !isLoading) {
-          if (hasMoreData) {
-            pageNo++;
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(MasterServiceHandler("", pageNo, pageSize));
-          }
+        if (!isLoading && hasMoreData) {
+          pageNo++;
+
+          isInitialLoading = false;
+          isLoading = true;
+
+          BlocProvider.of<AllRequesterBloc>(context)
+              .add(MasterServiceHandler("", pageNo, pageSize));
         }
       }
     });
@@ -239,13 +237,14 @@ class _ProductServiceState extends State<ProductService> {
         listener: (context, state) {
           if (state is ServiceLoading) {
             setState(() {
-              isLoading = true;
+              isInitialLoading = true;
             });
           } else if (state is ServiceSuccess) {
             setState(() {
               var responseData = state.serviceList['list'];
               print(">>>>>>>>>>>ALLDATA$responseData");
-              totalPages = responseData["total"];
+              int totalItemCount = responseData["total"];
+              totalPages = (totalItemCount / pageSize).ceil();
 
               if (pageNo == 1) {
                 data.clear();
@@ -253,18 +252,29 @@ class _ProductServiceState extends State<ProductService> {
 
               data.addAll(responseData['data']);
 
-              setState(() {
-                isLoading = false;
-                if (pageNo == totalPages) {
-                  hasMoreData = false;
-                }
-              });
+              isInitialLoading = false;
+              isLoading = false; // Reset loading state
+
+              if (pageNo == totalPages) {
+                hasMoreData = false;
+              }
+
             });
           } else if (state is ServiceCategoryFailure) {
             setState(() {
+              isInitialLoading = false;
+            });
+            errorMessage = state.serviceCategoryFailure['message'];
+
+            print("messageErrorFailure$errorMessage");
+
+          } else if (state is ServerFailure) {
+            setState(() {
               isLoading = false;
             });
-            print("error>> ${state.serviceCategoryFailure}");
+            errorServerMessage = state.serverFailure;
+
+            print("messageErrorServer$errorServerMessage");
           }
           //Delete Services
           else if (state is DeleteServiceLoading) {
@@ -361,7 +371,7 @@ class _ProductServiceState extends State<ProductService> {
               ),
             ),
             Expanded(
-              child: isLoading && data.isEmpty
+              child: isInitialLoading && data.isEmpty
                   ? Shimmer.fromColors(
                 baseColor: Colors.grey[300]!,
                 highlightColor: Colors.grey[100]!,
@@ -417,199 +427,220 @@ class _ProductServiceState extends State<ProductService> {
                   },
                 ),
               )
-                  : data.isEmpty
+                  : (errorMessage != null || errorServerMessage.isNotEmpty)
                   ? Center(
-                child: isLoading
-                    ? const CircularProgressIndicator() // Show circular progress indicator
-                    : const Text("No more data .",
-                    style: FTextStyle.listTitle),
+                child: Text(
+                  errorMessage ?? errorServerMessage.toString(),
+                  style: FTextStyle.listTitle,
+                  textAlign: TextAlign.center,
+                ),
               )
-                  : ListView.builder(
-                itemCount: data.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final item = data[index];
-                  return GestureDetector(
-                      onTap: () {},
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.03,
-                            vertical: 5),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                margin: const EdgeInsets.all(2),
-                                padding: const EdgeInsets.all(7),
-                                decoration: BoxDecoration(
-                                  color: index % 2 == 0
-                                      ? Colors.white
-                                      : Colors.white,
-                                  borderRadius:
-                                  BorderRadius.circular(10),
-                                  boxShadow: const [
-                                    BoxShadow(
-                                      color:
-                                      AppColors.primaryColourDark,
-                                      spreadRadius: 1.5,
-                                      blurRadius: 0.4,
-                                      offset: Offset(0, 0.9),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        const Text("Sr. No: ",
-                                            style:
-                                            FTextStyle.listTitle),
-                                        Text("${index + 1}",
-                                            style: FTextStyle
-                                                .listTitleSub),
-                                      ],
-                                    ),
+                  : (data.isEmpty)
+                  ? const Center(
+                child: Text("No more data.",
+                    style: FTextStyle.listTitle),
+              ):
+              ListView.builder(
 
-                                    Row(
-                                      children: [
-                                        const Text("Category: ",
-                                            style:
-                                            FTextStyle.listTitle),
-                                        Expanded(
-                                            child: Text(
-                                                "${item["cate_name"]}",
-                                                style: FTextStyle
-                                                    .listTitleSub)),
+                controller: controllerI,
+                itemCount: data.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index < data.length) {
+                      final item = data[index];
+                      return GestureDetector(
+                          onTap: () {},
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: screenWidth * 0.03,
+                                vertical: 5),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    margin: const EdgeInsets.all(2),
+                                    padding: const EdgeInsets.all(7),
+                                    decoration: BoxDecoration(
+                                      color: index % 2 == 0
+                                          ? Colors.white
+                                          : Colors.white,
+                                      borderRadius:
+                                      BorderRadius.circular(10),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color:
+                                          AppColors.primaryColourDark,
+                                          spreadRadius: 1.5,
+                                          blurRadius: 0.4,
+                                          offset: Offset(0, 0.9),
+                                        ),
                                       ],
                                     ),
-
-                                    Row(
-                                      children: [
-                                        const Text("Name: ",
-                                            style:
-                                            FTextStyle.listTitle),
-                                        Text("${item["name"]}",
-                                            style: FTextStyle
-                                                .listTitleSub),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        const Text("Specification: ",
-                                            style:
-                                            FTextStyle.listTitle),
-                                        Text(
-                                            "${item["specification"]}",
-                                            style: FTextStyle
-                                                .listTitleSub),
-                                      ],
-                                    ),
-
-                                    Row(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.start,
+                                    child: Column(
                                       crossAxisAlignment:
                                       CrossAxisAlignment.start,
                                       children: [
-                                        Text("Status: ",
-                                            style:
-                                            FTextStyle.listTitle),
-                                        GestureDetector(
-                                          onTap: () {
-                                            _showStatusDialog(
-                                              BlocProvider.of<AllRequesterBloc>(
-                                                  context),
-                                              context,
-                                              item,
-                                              item["id"]
-                                                  .toString(), // Pass the id here
-                                            );
-                                          },
-                                          child: Text(
-                                            item["status"] == 0
-                                                ? "Active"
-                                                : item["status"] == 4
-                                                ? "Inactive"
-                                                : "${item["status"]}",
-                                            style: (item["status"] == 0
-                                                ? FTextStyle.listTitleSub
-                                                .copyWith(color: Colors.green)
-                                                : item["status"] == 4
-                                                ? FTextStyle.listTitleSub
-                                                .copyWith(color: Colors.red)
-                                                : FTextStyle.listTitleSub),
-                                          ),
+                                        Row(
+                                          children: [
+                                            const Text("Sr. No: ",
+                                                style:
+                                                FTextStyle.listTitle),
+                                            Text("${index + 1}",
+                                                style: FTextStyle
+                                                    .listTitleSub),
+                                          ],
                                         ),
 
-                                      ],
-                                    ),
-
-                                    Row(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.end,
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.end,
-                                      children: [
-                                        IconButton(
-                                          icon: const Icon(Icons.edit,
-                                              color: Colors.black),
-                                          onPressed: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder:
-                                                      (context) =>
-                                                      BlocProvider(
-                                                        create: (context) =>
-                                                            AllRequesterBloc(),
-                                                        child:
-                                                        ProductServiceEdit(
-                                                          screenflag:
-                                                          "Edit",
-                                                          id: item["id"]
-                                                              .toString(),
-                                                        ),
-                                                      )),
-                                            );
-                                          },
+                                        Row(
+                                          children: [
+                                            const Text("Category: ",
+                                                style:
+                                                FTextStyle.listTitle),
+                                            Expanded(
+                                                child: Text(
+                                                    "${item["cate_name"]}",
+                                                    style: FTextStyle
+                                                        .listTitleSub)),
+                                          ],
                                         ),
-                                        IconButton(
-                                          icon: const Icon(
-                                              Icons.delete,
-                                              color: Colors.red),
-                                          onPressed: () =>
-                                          {
-                                            CommonPopups
-                                                .showDeleteCustomPopup(
-                                              context,
-                                              "Are you sure you want to delete?",
-                                                  () {
-                                                BlocProvider.of<
-                                                    AllRequesterBloc>(
-                                                    context)
-                                                    .add(
-                                                    DeleteMasterServiceHandlers(
-                                                        data[index]
-                                                        ['id']));
+
+                                        Row(
+                                          children: [
+                                            const Text("Name: ",
+                                                style:
+                                                FTextStyle.listTitle),
+                                            Text("${item["name"]}",
+                                                style: FTextStyle
+                                                    .listTitleSub),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            const Text("Specification: ",
+                                                style:
+                                                FTextStyle.listTitle),
+                                            Text(
+                                                "${item["specification"]}",
+                                                style: FTextStyle
+                                                    .listTitleSub),
+                                          ],
+                                        ),
+
+                                        Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                          children: [
+                                            Text("Status: ",
+                                                style:
+                                                FTextStyle.listTitle),
+                                            GestureDetector(
+                                              onTap: () {
+                                                _showStatusDialog(
+                                                  BlocProvider.of<
+                                                      AllRequesterBloc>(
+                                                      context),
+                                                  context,
+                                                  item,
+                                                  item["id"]
+                                                      .toString(), // Pass the id here
+                                                );
                                               },
-                                            )
-                                          },
+                                              child: Text(
+                                                item["status"] == 0
+                                                    ? "Active"
+                                                    : item["status"] == 4
+                                                    ? "Inactive"
+                                                    : "${item["status"]}",
+                                                style: (item["status"] == 0
+                                                    ? FTextStyle.listTitleSub
+                                                    .copyWith(
+                                                    color: Colors.green)
+                                                    : item["status"] == 4
+                                                    ? FTextStyle.listTitleSub
+                                                    .copyWith(color: Colors.red)
+                                                    : FTextStyle.listTitleSub),
+                                              ),
+                                            ),
+
+                                          ],
                                         ),
+
+                                        Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.end,
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.edit,
+                                                  color: Colors.black),
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder:
+                                                          (context) =>
+                                                          BlocProvider(
+                                                            create: (context) =>
+                                                                AllRequesterBloc(),
+                                                            child:
+                                                            ProductServiceEdit(
+                                                              screenflag:
+                                                              "Edit",
+                                                              id: item["id"]
+                                                                  .toString(),
+                                                            ),
+                                                          )),
+                                                );
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(
+                                                  Icons.delete,
+                                                  color: Colors.red),
+                                              onPressed: () =>
+                                              {
+                                                CommonPopups
+                                                    .showDeleteCustomPopup(
+                                                  context,
+                                                  "Are you sure you want to delete?",
+                                                      () {
+                                                    BlocProvider.of<
+                                                        AllRequesterBloc>(
+                                                        context)
+                                                        .add(
+                                                        DeleteMasterServiceHandlers(
+                                                            data[index]
+                                                            ['id']));
+                                                  },
+                                                )
+                                              },
+                                            ),
+                                          ],
+                                        ).animateOnPageLoad(animationsMap[
+                                        'imageOnPageLoadAnimation2']!),
+                                        // const SizedBox(height: 5),
+
+                                        // const SizedBox(height: 5),
                                       ],
                                     ).animateOnPageLoad(animationsMap[
                                     'imageOnPageLoadAnimation2']!),
-                                    // const SizedBox(height: 5),
-
-                                    // const SizedBox(height: 5),
-                                  ],
-                                ).animateOnPageLoad(animationsMap[
-                                'imageOnPageLoadAnimation2']!),
-                              ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ));
+                          ));
+                    }
+                    if (hasMoreData && index == data.length) {
+                      return const Center(
+                          child: CircularProgressIndicator());
+                    }
+
+                    // If there's no more data to load, show a message
+                    return const Center(
+                        child: Text("No more data.",
+                            style: FTextStyle.listTitle));
                 },
               ),
             ),

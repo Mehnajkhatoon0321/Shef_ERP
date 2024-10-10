@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -29,17 +31,32 @@ class AdminRequisition extends StatefulWidget {
   @override
   State<AdminRequisition> createState() => _AdminRequisitionState();
 }
+String? fileUploadValidator(String? value) {
+  if (value == null || value.isEmpty) {
+    return 'Please upload a file.';
+  }
 
+  final validFileExtensions = ['pdf', 'jpeg', 'jpg', 'png'];
+  final fileExtension = value.split('.').last.toLowerCase();
+
+  if (!validFileExtensions.contains(fileExtension)) {
+    return 'Invalid file type. Only pdf, jpeg, jpg, and png are allowed.';
+  }
+
+  return null; // Return null if validation passes
+}
 class _AdminRequisitionState extends State<AdminRequisition> {
   int? selectedId;
   int? selectedBillingId;
+  File? imagesIdCancelled;
   List<String> selectedIds = [];
   Map<String, String>? selectedItemForEditing;
   Map<String, int> productMap = {};
   Map<String, int> billingMap = {};
   late final TextEditingController vendorName = TextEditingController();
   late final TextEditingController billingName = TextEditingController();
-
+  final FocusNode _cancelledFocusNode = FocusNode();
+  final FocusNode _remarkFocusNode = FocusNode();
   final TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
   String? selectedItem;
@@ -47,10 +64,14 @@ class _AdminRequisitionState extends State<AdminRequisition> {
   bool isButtonPartEnabled = false;
   int pageNo = 1;
   int totalPages = 0;
-  int pageSize = 5;
+  int pageSize = 10;
   bool hasMoreData = true;
   List<dynamic> data = [];
-  final controller = ScrollController();
+  final TextEditingController controller = TextEditingController();
+  String? cancelledNameFile;
+  final GlobalKey<FormFieldState<String>> _cancelledKey =
+  GlobalKey<FormFieldState<String>>();  final GlobalKey<FormFieldState<String>> _remarkKey =
+  GlobalKey<FormFieldState<String>>();
   final controllerI = ScrollController();
   bool isLoading = false;
   bool isLoadingApprove = false;
@@ -135,17 +156,21 @@ class _AdminRequisitionState extends State<AdminRequisition> {
       ],
     ),
   };
-
+  bool isInitialLoading = false;
+  late final TextEditingController cancelledName = TextEditingController();
   // Map<String , dynamic> errorMessage={};
   Map<String, dynamic> errorServerMessage = {};
   String? errorMessage;
 
+  bool isCancelledFieldFocused = false;
+  bool isRemarkFieldFocused = false;
+  bool isShowMarkEnabled = false;
   @override
   void initState() {
     super.initState();
-    _controller.addListener(() {
+    controller.addListener(() {
       setState(() {
-        _isTextEmpty = _controller.text.isEmpty;
+        _isTextEmpty = controller.text.isEmpty;
       });
     });
     BlocProvider.of<AllRequesterBloc>(context)
@@ -156,15 +181,24 @@ class _AdminRequisitionState extends State<AdminRequisition> {
   void paginationCall() {
     controllerI.addListener(() {
       if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
-        if (pageNo < totalPages && !isLoading) {
-          if (hasMoreData) {
-            pageNo++;
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(AddCartDetailHandler("", pageNo, pageSize));
-          }
+        if (!isLoading && hasMoreData) {
+          pageNo++;
+
+          isInitialLoading = false;
+          isLoading = true;
+
+          BlocProvider.of<AllRequesterBloc>(context)
+              .add(AddCartDetailHandler("", pageNo, pageSize));
         }
       }
     });
+  }
+
+  @override
+  void dispose() {
+    controllerI.removeListener(paginationCall);
+    controllerI.dispose();
+    super.dispose();
   }
 
   Set<int> selectedIndices = {};
@@ -250,7 +284,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
         listener: (context, state) {
           if (state is AddCartLoading) {
             setState(() {
-              isLoading = true;
+              isInitialLoading = true;
             });
           } else if (state is AddCartSuccess) {
             setState(() {
@@ -277,7 +311,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                   item['billing_name'] as String: item['id'] as int
               };
 
-              totalPages = responseData["total"];
+              int totalItemCount = responseData["total"];
+              totalPages = (totalItemCount / pageSize).ceil();
 
               if (pageNo == 1) {
                 data.clear();
@@ -285,19 +320,32 @@ class _AdminRequisitionState extends State<AdminRequisition> {
 
               data.addAll(responseData['data']);
 
-              if (responseData["data"].length < pageSize) {
+              isInitialLoading = false;
+              isLoading = false; // Reset loading state
+
+              if (pageNo == totalPages) {
                 hasMoreData = false;
               }
-              setState(() {
-                isLoading = false;
-                if (pageNo == totalPages) {
-                  hasMoreData = false;
-                }
-              });
             });
+
+            // if (pageNo == 1) {
+            //   data.clear();
+            // }
+            //
+            // data.addAll(responseData['data']);
+            //
+            // if (responseData["data"].length < pageSize) {
+            //   hasMoreData = false;
+            // }
+            // setState(() {
+            //   isLoading = false;
+            //   if (pageNo == totalPages) {
+            //     hasMoreData = false;
+            //   }
+            // });
           } else if (state is AddCartFailure) {
             setState(() {
-              isLoading = false;
+              isInitialLoading = false;
             });
             errorMessage = state.addCartDetailFailure['message'];
 
@@ -455,7 +503,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
               ),
             ),
             Expanded(
-              child: isLoading && data.isEmpty
+              child: isInitialLoading && data.isEmpty
                   ? Shimmer.fromColors(
                       baseColor: Colors.grey[300]!,
                       highlightColor: Colors.grey[100]!,
@@ -506,30 +554,21 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                       ),
                     )
                   : (errorMessage != null || errorServerMessage.isNotEmpty)
-                      ?
-              Center(
-                          child: (errorMessage != null)
-                              ? Text(
-                                  errorMessage.toString(),
-                                  style: FTextStyle.listTitle,
-                                  textAlign: TextAlign.center,
-                                )
-                              : Text(
-                                  errorServerMessage.toString(),
-                                  style: FTextStyle.listTitle,
-                                  textAlign: TextAlign.center,
-                                ),
+                      ? Center(
+                          child: Text(
+                            errorMessage ?? errorServerMessage.toString(),
+                            style: FTextStyle.listTitle,
+                            textAlign: TextAlign.center,
+                          ),
                         )
-                      :
-              data.isEmpty
-                          ?
-               Center(
-                              child: Text("No more data available.",
-                                      style: FTextStyle.listTitle),
+                      : (data.isEmpty)
+                          ? const Center(
+                              child: Text("No more data.",
+                                  style: FTextStyle.listTitle),
                             )
                           : ListView.builder(
-                            controller: controllerI,
-                            itemCount: data.length + 1,
+                              controller: controllerI,
+                              itemCount: data.length + 1,
                               itemBuilder: (context, index) {
                                 if (index < data.length) {
                                   final item = data[index];
@@ -746,6 +785,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                                                   onPressed:
                                                                       () async {
                                                                     _showMarkDeliveryDialog(
+                                                                        BlocProvider.of<AllRequesterBloc>(context),
+                                                                        context,
                                                                         -1);
                                                                   },
                                                                   style: ElevatedButton
@@ -814,11 +855,15 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                     ),
                                   );
                                 }
-                                else {
+                                if (hasMoreData && index == data.length) {
                                   return const Center(
-                                    child: CircularProgressIndicator(),
-                                  );
+                                      child: CircularProgressIndicator());
                                 }
+
+                                // If there's no more data to load, show a message
+                                return const Center(
+                                    child: Text("No more data.",
+                                        style: FTextStyle.listTitle));
                               },
                             ),
             ),
@@ -1161,7 +1206,9 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                     onPressed: isButtonEnabled
                         ? () {
                             if (formKey.currentState?.validate() ?? false) {
-                              // Handle the reject action here
+                              BlocProvider.of<AllRequesterBloc>(context).add(
+                                RejectHandler(editController.text),
+                              );
                               Navigator.of(context).pop();
                             }
                           }
@@ -1181,205 +1228,182 @@ class _AdminRequisitionState extends State<AdminRequisition> {
     );
   }
 
-  void _showMarkDeliveryDialog(int index) {
+  //markDelivery
+
+  Future<bool?> _showMarkDeliveryDialog(AllRequesterBloc of, BuildContext context, int? index) {
     final formKey = GlobalKey<FormState>();
     final TextEditingController editController = TextEditingController();
-    bool isButtonEnabled = false; // Initialize button state
-    late final GlobalKey<FormFieldState<String>> uploadNameKey =
-        GlobalKey<FormFieldState<String>>();
-    late final TextEditingController uploadName = TextEditingController();
-    late final FocusNode uploadNameNode = FocusNode();
-    String? fileName1;
-    showDialog(
+    final TextEditingController uploadName = TextEditingController();
+    bool isButtonEnabled = false;
+    String? fileName;
+
+    editController.addListener(() {
+      isButtonEnabled = editController.text.isNotEmpty && uploadName.text.isNotEmpty;
+    });
+
+    return showDialog(
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            // Add listener to the TextEditingController to monitor text changes
-            editController.addListener(() {
-              setState(() {
-                isButtonEnabled = editController.text.isNotEmpty;
-              });
-            });
+            return BlocProvider.value(
+              value: of,
+              child: AlertDialog(
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32.0)),
+                title: Text("Mark Delivery", style: FTextStyle.preHeading16BoldStyle.copyWith(fontSize: 20)),
+                content: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.7,
+                  child: Form(
+                    onChanged: updateState,
+                    key: formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Purchase Manager Remark", style: FTextStyle.preHeading16BoldStyle),
+                        const SizedBox(height: 10),
+                        TextFormField(
+                          focusNode: _remarkFocusNode,
+                          key: _remarkKey,
+                          controller: editController,
+                          decoration:
+                          FormFieldStyle.defaultInputEditDecoration.copyWith(
+                            fillColor: Colors.grey[100],
+                            filled: true,
+                            hintText: "Enter Purchase Manager Remark",
+                          ),
+                          onTap: () {
+                            setState(() {
 
-            return AlertDialog(
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(32.0),
-              ),
-              title: Text(
-                "Mark Delivery",
-                style: FTextStyle.preHeading16BoldStyle.copyWith(fontSize: 20),
-              ),
-              content: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.7,
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "Purchase Manager Remark",
-                        style: FTextStyle.preHeading16BoldStyle,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: editController,
-                        decoration: InputDecoration(
-                          hintText: "Enter Purchase Manager Remark",
-                          hintStyle: FTextStyle.formhintTxtStyle,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(23.0),
-                            borderSide: const BorderSide(
-                                color: AppColors.formFieldHintColour,
-                                width: 1.0),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(23.0),
-                            borderSide: const BorderSide(
-                                color: AppColors.formFieldHintColour,
-                                width: 1.0),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(23.0),
-                            borderSide: const BorderSide(
-                                color: AppColors.primaryColourDark, width: 1.0),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                              vertical: 13.0, horizontal: 18.0),
-                          fillColor: Colors.grey[100],
-                          filled: true,
+
+                              isCancelledFieldFocused = false;
+                              isRemarkFieldFocused = true;
+                            });
+                          },
+                          onChanged: (value) {
+                            setState(() {
+
+                              isCancelledFieldFocused = false;
+                              isRemarkFieldFocused = true;
+                            });
+                            updateState(); // Update button state on change
+                          },
+                          validator: (value) => (value == null || value.isEmpty) ? 'Please enter a remark' : null,
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter a remark';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        "Upload",
-                        style: FTextStyle.formLabelTxtStyle,
-                      ).animateOnPageLoad(
-                        animationsMap['imageOnPageLoadAnimation2']!,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        readOnly: true,
-                        key: uploadNameKey,
-                        focusNode: uploadNameNode,
-                        decoration:
-                            FormFieldStyle.defaultInputDecoration.copyWith(
-                          fillColor: AppColors.formFieldBackColour,
-                          hintText: "Upload File",
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.attach_file),
-                            onPressed: () async {
-                              final result =
-                                  await FilePicker.platform.pickFiles();
-                              if (result != null && result.files.isNotEmpty) {
-                                setState(() {
-                                  fileName1 = result.files.single.name;
-                                  uploadName.text = fileName1!;
-                                });
-                              }
-                            },
+                        const SizedBox(height: 10),
+                        Text("Upload", style: FTextStyle.formLabelTxtStyle),
+                        const SizedBox(height: 10),
+                        TextFormField(
+                          focusNode: _cancelledFocusNode,
+                          key: _cancelledKey,
+                          decoration:
+                          FormFieldStyle.defaultInputEditDecoration.copyWith(
+                            fillColor: Colors.grey[100],
+                            filled: true,
+                            hintText: "Upload Cancelled",
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.attach_file),
+                              onPressed: () async {
+                                final result = await FilePicker.platform.pickFiles(
+                                  type: FileType.custom, // Specify custom file types
+                                  allowedExtensions: [
+                                    'pdf',
+                                    'jpeg',
+                                    'jpg',
+                                    'png'
+                                  ], // Allowed extensions
+                                );
+                                if (result != null && result.files.isNotEmpty) {
+                                  setState(() {
+                                    cancelledNameFile = result.files.single.name;
+                                    imagesIdCancelled =
+                                        File(result.files.single.path!);
+                                    cancelledName.text = cancelledNameFile!;
+                                  });
+                                  updateState(); // Update button state after selection
+                                }
+                              },
+                            ),
                           ),
+                          controller: cancelledName,
+                          validator: fileUploadValidator,
+                          onTap: () {
+                            setState(() {
+
+
+                              isCancelledFieldFocused = true;
+                              isRemarkFieldFocused = false;
+                            });
+                          },
+                          onChanged: (value) {
+                            setState(() {
+
+                              isCancelledFieldFocused = true;
+                              isRemarkFieldFocused = false;
+                            });
+                            updateState(); // Update button state on change
+                          },
                         ),
-                        controller: uploadName,
-                        validator: ValidatorUtils.uploadValidator,
-                        onChanged: (text) {
-                          setState(() {
-                            isButtonPartEnabled = selectedItem != null &&
-                                selectedItem!.isNotEmpty &&
-                                ValidatorUtils.isValidCommon(text);
-                          });
-                        },
-                        onTap: () {
-                          setState(() {});
-                        },
-                        onEditingComplete: () {
-                          setState(() {});
-                        },
-                      ).animateOnPageLoad(
-                        animationsMap['imageOnPageLoadAnimation2']!,
-                      ),
-                    ],
+
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              actions: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColourDark,
-                    textStyle: FTextStyle.loginBtnStyle,
-                    // Adjusted button height
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(35.0),
-                    ),
-                    elevation: 1,
-                    side: const BorderSide(color: Colors.white),
+                actions: [
+                  ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColourDark),
+                    child: const Text('Cancel', style: TextStyle(color: Colors.white)),
                   ),
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(
-                        fontFamily: 'Outfit-Regular',
-                        fontSize: 15,
-                        overflow: TextOverflow.ellipsis,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w300),
-                  ),
-                ).animateOnPageLoad(
-                    animationsMap['imageOnPageLoadAnimation2']!),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: isButtonEnabled
-                      ? () {
-                          if (formKey.currentState?.validate() ?? false) {
-                            BlocProvider.of<AllRequesterBloc>(context).add(
-                              RejectHandler(editController.text.toString()),
-                            );
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: isButtonEnabled
+                        ? () {
+                      if (formKey.currentState?.validate() ?? false) {
 
-                            // Handle the reject action here
-                          }
-                        }
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColourDark,
-                    textStyle: FTextStyle.loginBtnStyle,
-                    // Adjusted button height
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(35.0),
-                    ),
-                    elevation: 1,
-                    side: const BorderSide(color: Colors.white),
+                        Navigator.of(context).pop(); // Optionally close the dialog
+                      }else {
+                        // If any field is invalid, trigger validation error display
+                        formKey.currentState!.validate();
+                      }
+                    }
+                        : null,
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColourDark),
+                    child: const Text('OK', style: TextStyle(color: Colors.white)),
                   ),
-                  child: const Text(
-                    'OK',
-                    style: TextStyle(
-                        fontFamily: 'Outfit-Regular',
-                        fontSize: 15,
-                        overflow: TextOverflow.ellipsis,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w300),
-                  ),
-                ).animateOnPageLoad(
-                    animationsMap['imageOnPageLoadAnimation2']!),
-              ],
-            ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation1']!);
+                ],
+              ),
+            );
           },
         );
       },
     );
   }
 
+
   List<int> _getSelectedIds() {
     return selectedIndices.map((index) => data[index]['id'] as int).toList();
+  }
+
+  void updateState() {
+    setState(() {
+   if  ( cancelledName.text.isNotEmpty &&
+       fileUploadValidator(cancelledName.text) == null  ){
+
+
+     isShowMarkEnabled = true;
+   } else {
+     isShowMarkEnabled = false;
+   }
+   if (isCancelledFieldFocused == true) {
+     _cancelledKey.currentState!.validate();
+   }   if (isRemarkFieldFocused == true) {
+     _remarkKey.currentState!.validate();
+   }
+
+
+    });
   }
 }
