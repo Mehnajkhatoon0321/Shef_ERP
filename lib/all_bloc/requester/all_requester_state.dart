@@ -62,7 +62,11 @@ final class AddRequisitionSuccess extends AllRequesterState{
 
 
 }
+final class AddFailure extends AllRequesterState{
+  final Map<String, dynamic> updateFailure;
+  AddFailure(this.updateFailure);
 
+}
 //Delete Requisition
 
 final class DeleteLoading extends AllRequesterState{}

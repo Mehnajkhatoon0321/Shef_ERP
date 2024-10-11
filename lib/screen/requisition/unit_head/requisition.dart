@@ -33,7 +33,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
   final controller = ScrollController();
   final controllerI = ScrollController();
   TextEditingController _editController = TextEditingController();
-  List<dynamic> filteredData = [];
+
   final TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
   bool isLoading = false;
@@ -123,27 +123,11 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
         _isTextEmpty = _controller.text.isEmpty;
       });
     });
-    filteredData = data;
+
     BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
     paginationCall();
   }
-  void _filterData(String query) {
-    if (query.isEmpty) {
-      setState(() {
-        _isTextEmpty = true;
-        filteredData = data; // Show all data when query is empty
-      });
-    } else {
-      setState(() {
-        _isTextEmpty = false;
-        filteredData = data.where((item) {
-          return item["req_no"].toString().toLowerCase().contains(query.toLowerCase()) ||
-              item["po_no"].toString().toLowerCase().contains(query.toLowerCase())|| item["unit"].toString().toLowerCase().contains(query.toLowerCase()) ||
-              item["req_date"].toString().toLowerCase().contains(query.toLowerCase());
-        }).toList();
-      });
-    }
-  }
+
 
   void paginationCall() {
     controllerI.addListener(() {
@@ -159,7 +143,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
   }
 
   Set<int> selectedIndices = {};
-
+  String searchQuery = "";
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -330,8 +314,11 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                 ),
                 onChanged: (value) {
                   setState(() {
-                    _filterData(value);
                     _isTextEmpty = value.isEmpty;
+                    searchQuery = value;
+                    BlocProvider.of<AllRequesterBloc>(context).add(
+                        AddCartDetailHandler(
+                            searchQuery, pageNo, pageSize));
                   });
                 },
               ),
@@ -441,18 +428,18 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                 },
               ),
             )
-                : data.isEmpty&& filteredData.isEmpty?Center(
+                : data.isEmpty&& data.isEmpty?Center(
               child: isLoading
                   ? const CircularProgressIndicator() // Show circular progress indicator
                   : const Text("No more data .", style: FTextStyle.listTitle),
-            ):  filteredData.isEmpty
+            ):  data.isEmpty
           ? const Center(child: Text("No results available.", style: FTextStyle.listTitle))
         : ListView.builder(
               controller: controllerI,
-              itemCount: filteredData.length + (hasMoreData ? 1 : 0), // Add one for the loading indicator
+              itemCount: data.length + (hasMoreData ? 1 : 0), // Add one for the loading indicator
               itemBuilder: (context, index) {
-                if (index < filteredData.length) {
-                  final item = filteredData[index];
+                if (index < data.length) {
+                  final item = data[index];
 
                   // Handle case where item might be null
                   if (item == null) {
@@ -655,9 +642,9 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
 
   void _clearText() {
     _controller.clear();
-    BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
-    setState(() {
 
+    setState(() {
+      BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
       _isTextEmpty = true;
     });
   }

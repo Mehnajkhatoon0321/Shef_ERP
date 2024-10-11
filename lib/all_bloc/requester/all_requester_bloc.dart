@@ -26,7 +26,7 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
         try {
           String authToken = PrefUtils.getToken();
           int userId = PrefUtils.getUserId();
-          final APIEndpoint = Uri.parse("${APIEndPoints.requesterList}$userId?page=${event.page}&per_page=${event.size}");
+          final APIEndpoint = Uri.parse("${APIEndPoints.requesterList}$userId?page=${event.page}&per_page=${event.size}&search=${event.search}");
           var response = await http.get(
             APIEndpoint,
             headers: {
@@ -190,85 +190,160 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
     });
 
 
+//     on<AddRequisitionHandler>((event, emit) async {
+//       if (await ConnectivityService.isConnected()) {
+//         emit(AddRequisitionLoading());
+//         try {
+//           Dio dio = Dio();
+//           String authToken = PrefUtils.getToken();
+//           dio.options.headers["Authorization"] = 'Bearer $authToken';
+//
+// // Prepare FormData with proper field names
+//           FormData formData = FormData.fromMap({
+//             'date': event.date,
+//             'unit': event.unit,
+//             'time': event.time,
+//             'delivery_date':event.nextDate,
+//             'user_id': PrefUtils.getUserId(),
+//           });
+//
+// // Prepare requisition list and attach files
+//           for (int i = 0; i < event.requisitionList.length; i++) {
+//             var item = event.requisitionList[i];
+//             String filePath = item['image']?.path ?? '';
+//
+//             // Add each requisition field to FormData
+//             formData.fields.addAll([
+//               MapEntry('requisition_list[$i][product]', item['product'] ?? ''),
+//               MapEntry('requisition_list[$i][specification]', item['specification'] ?? ''),
+//               MapEntry('requisition_list[$i][event]', item['event'] ?? ''),
+//               MapEntry('requisition_list[$i][additional]', item['additional'] ?? ''),
+//               MapEntry('requisition_list[$i][quantity]', item['quantity']?.toString() ?? ''),
+//               MapEntry('requisition_list[$i][user_id]', item['user_id']?.toString() ?? ''),
+//             ]);
+//
+//             // Attach image file if present
+//             if (filePath.isNotEmpty) {
+//               File file = File(filePath);
+//               if (await file.exists()) {
+//                 String fileName = basename(filePath);
+//                 formData.files.add(MapEntry(
+//                   'requisition_list[$i][image]',
+//                   await MultipartFile.fromFile(filePath, filename: fileName),
+//                 ));
+//               }
+//               else {
+//                 emit(AddCartFailure({'error': 'File not found: $filePath'}));
+//                 return;
+//               }
+//             } else {
+//               emit(AddCartFailure(const {'error': 'Invalid file path'}));
+//               return;
+//             }
+//           }
+//               print(">>>>>Imaage");
+//
+//           var response = await dio.post(APIEndPoints.postRequisition, data: formData);
+//
+//           if (response.statusCode == 200) {
+//             emit(AddRequisitionSuccess(response.data));
+//             print(">>>>> Response: ${response.data}");
+//           }else if   (response.statusCode == 401) {
+//             emit(AddCartFailure(response.data));
+//             print(">>>>> Response: ${response.data}");
+//           }
+//           else if   (response.statusCode == 500) {
+//             emit(AddCartFailure(response.data));
+//             print(">>>>> Response: ${response.data}");
+//           }  else {
+//             emit(AddCartFailure(const {'error': 'Failed to upload requisition'}));
+//           } // Print request details
+//
+//         } catch (e) {
+//           if (kDebugMode) {
+//             developer.log(e.toString());
+//           }
+//           emit(AddCartFailure({'error': 'Exception occurred: ${e.toString()}'}));
+//         }
+//       } else {
+//         emit(AddCartFailure(const {'error': 'No internet connection'}));
+//       }
+//     });
     on<AddRequisitionHandler>((event, emit) async {
       if (await ConnectivityService.isConnected()) {
         emit(AddRequisitionLoading());
-        try {
-          Dio dio = Dio();
-          String authToken = PrefUtils.getToken();
-          dio.options.headers["Authorization"] = 'Bearer $authToken';
 
-// Prepare FormData with proper field names
-          FormData formData = FormData.fromMap({
-            'date': event.date,
-            'unit': event.unit,
-            'time': event.time,
-            'delivery_date':event.nextDate,
-            'user_id': PrefUtils.getUserId(),
-          });
+        Dio dio = Dio();
+        String authToken = PrefUtils.getToken();
+        dio.options.headers["Authorization"] = 'Bearer $authToken';
 
-// Prepare requisition list and attach files
-          for (int i = 0; i < event.requisitionList.length; i++) {
-            var item = event.requisitionList[i];
-            String filePath = item['image']?.path ?? '';
+        // Prepare FormData with proper field names
+        FormData formData = FormData.fromMap({
+          'date': event.date,
+          'unit': event.unit,
+          'time': event.time,
+          'delivery_date': event.nextDate,
+          'user_id': PrefUtils.getUserId(),
+        });
 
-            // Add each requisition field to FormData
-            formData.fields.addAll([
-              MapEntry('requisition_list[$i][product]', item['product'] ?? ''),
-              MapEntry('requisition_list[$i][specification]', item['specification'] ?? ''),
-              MapEntry('requisition_list[$i][event]', item['event'] ?? ''),
-              MapEntry('requisition_list[$i][additional]', item['additional'] ?? ''),
-              MapEntry('requisition_list[$i][quantity]', item['quantity']?.toString() ?? ''),
-              MapEntry('requisition_list[$i][user_id]', item['user_id']?.toString() ?? ''),
-            ]);
+        // Prepare requisition list and attach files
+        for (int i = 0; i < event.requisitionList.length; i++) {
+          var item = event.requisitionList[i];
 
-            // Attach image file if present
-            if (filePath.isNotEmpty) {
-              File file = File(filePath);
-              if (await file.exists()) {
-                String fileName = basename(filePath);
-                formData.files.add(MapEntry(
-                  'requisition_list[$i][image]',
-                  await MultipartFile.fromFile(filePath, filename: fileName),
-                ));
-              } else {
-                emit(AddCartFailure({'error': 'File not found: $filePath'}));
-                return;
-              }
-            } else {
-              emit(AddCartFailure(const {'error': 'Invalid file path'}));
-              return;
+          // Add each requisition field to FormData
+          formData.fields.addAll([
+            MapEntry('requisition_list[$i][product]', item['product'] ?? ''),
+            MapEntry('requisition_list[$i][specification]', item['specification'] ?? ''),
+            MapEntry('requisition_list[$i][event]', item['event'] ?? ''),
+            MapEntry('requisition_list[$i][additional]', item['additional'] ?? ''),
+            MapEntry('requisition_list[$i][quantity]', item['quantity']?.toString() ?? ''),
+            MapEntry('requisition_list[$i][user_id]', item['user_id']?.toString() ?? ''),
+          ]);
+
+          // Check if the image file path is present
+          String filePath = item['image']?.path ?? '';
+          if (filePath.isNotEmpty) {
+            File file = File(filePath);
+            if (await file.exists()) {
+              String fileName = basename(filePath);
+              formData.files.add(MapEntry(
+                'requisition_list[$i][image]',
+                await MultipartFile.fromFile(filePath, filename: fileName),
+              ));
             }
-          }
-              print(">>>>>Imaage");
-// Send the request
-          var response = await dio.post(APIEndPoints.postRequisition, data: formData);
 
-          if (response.statusCode == 200) {
-            emit(AddRequisitionSuccess(response.data));
-            print(">>>>> Response: ${response.data}");
-          }else if   (response.statusCode == 401) {
-            emit(AddCartFailure(response.data));
-            print(">>>>> Response: ${response.data}");
           }
-          else if   (response.statusCode == 500) {
-            emit(AddCartFailure(response.data));
-            print(">>>>> Response: ${response.data}");
-          }  else {
-            emit(AddCartFailure(const {'error': 'Failed to upload requisition'}));
-          } // Print request details
-
-        } catch (e) {
-          if (kDebugMode) {
-            developer.log(e.toString());
-          }
-          emit(AddCartFailure({'error': 'Exception occurred: ${e.toString()}'}));
+          // If no image, just continue without adding a file
         }
+
+        print(">>>>> Image Upload Attempt");
+
+        var response = await dio.post(APIEndPoints.postRequisition, data: formData);
+
+        // Print the status code
+        print(">>>>> Status Code: ${response.statusCode}");
+
+        if (response.statusCode == 200) {
+          emit(AddRequisitionSuccess(response.data));
+          print(">>>>> Response: ${response.data}");
+        } else if (response.statusCode == 401) {
+          emit(AddCartFailure(response.data));
+          print(">>>>> Response: ${response.data}");
+        } else if (response.statusCode == 500) {
+          emit(AddCartFailure(response.data));
+          print(">>>>> Response: ${response.data}");
+        } else {
+          emit(AddCartFailure(const {'error': 'Failed to upload requisition'}));
+        }
+
       } else {
         emit(AddCartFailure(const {'error': 'No internet connection'}));
       }
     });
-    //Delete Requisition
+
+
+
+
 
     on<DeleteHandlers>((event, emit) async {
       if (await ConnectivityService.isConnected()) {
@@ -399,7 +474,7 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
         try {
           String authToken = PrefUtils.getToken();
           int userId = PrefUtils.getUserId();
-          final APIEndpoint = Uri.parse("${APIEndPoints.getUnits}/$userId?page=${event.page}&per_page=${event.size}");
+          final APIEndpoint = Uri.parse("${APIEndPoints.getUnits}/$userId?page=${event.page}&per_page=${event.size}&search=${event.search}");
           var response = await http.get(
             APIEndpoint,
             headers: {
@@ -583,7 +658,7 @@ print("RequestData>>>>>>>>>>$request");
         try {
           String authToken = PrefUtils.getToken();
           int userId = PrefUtils.getUserId();
-          final APIEndpoint = Uri.parse("${APIEndPoints.productGetCategory}$userId?page=${event.page}&per_page=${event.size}");
+          final APIEndpoint = Uri.parse("${APIEndPoints.productGetCategory}$userId?page=${event.page}&per_page=${event.size}&search=${event.search}");
           var response = await http.get(
             APIEndpoint,
             headers: {
@@ -772,7 +847,7 @@ print("RequestData>>>>>>>>>>$request");
         try {
           String authToken = PrefUtils.getToken();
           int userId = PrefUtils.getUserId();
-          final APIEndpoint = Uri.parse("${APIEndPoints.getUserList}$userId?page=${event.page}&per_page=${event.size}");
+          final APIEndpoint = Uri.parse("${APIEndPoints.getUserList}$userId?page=${event.page}&per_page=${event.size}&search=${event.search}");
           var response = await http.get(
             APIEndpoint,
             headers: {
@@ -1013,7 +1088,7 @@ print("RequestData>>>>>>>>>>$request");
         try {
           String authToken = PrefUtils.getToken();
           int userId = PrefUtils.getUserId();
-          final APIEndpoint = Uri.parse("${APIEndPoints.getBillingList}$userId?page=${event.page}&per_page=${event.size}");
+          final APIEndpoint = Uri.parse("${APIEndPoints.getBillingList}$userId?page=${event.page}&per_page=${event.size}&search=${event.search}");
           var response = await http.get(
             APIEndpoint,
             headers: {
@@ -1198,7 +1273,7 @@ print("RequestData>>>>>>>>>>$request");
         try {
           String authToken = PrefUtils.getToken();
           int userId = PrefUtils.getUserId();
-          final APIEndpoint = Uri.parse("${APIEndPoints.getProductList}$userId?page=${event.page}&per_page=${event.size}");
+          final APIEndpoint = Uri.parse("${APIEndPoints.getProductList}$userId?page=${event.page}&per_page=${event.size}&search=${event.search}");
           var response = await http.get(
             APIEndpoint,
             headers: {
@@ -1680,7 +1755,7 @@ print("RequestData>>>>>>>>>>$request");
         try {
           String authToken = PrefUtils.getToken();
           int userId = PrefUtils.getUserId();
-          final APIEndpoint = Uri.parse("${APIEndPoints.getEventsList}$userId?page=${event.page}&per_page=${event.size}");
+          final APIEndpoint = Uri.parse("${APIEndPoints.getEventsList}$userId?page=${event.page}&per_page=${event.size}&search=${event.search}");
           var response = await http.get(
             APIEndpoint,
             headers: {
@@ -1867,7 +1942,7 @@ print("RequestData>>>>>>>>>>$request");
         try {
           String authToken = PrefUtils.getToken();
           int userId = PrefUtils.getUserId();
-          final APIEndpoint = Uri.parse("${APIEndPoints.getVendorList}$userId?page=${event.page}&per_page=${event.size}");
+          final APIEndpoint = Uri.parse("${APIEndPoints.getVendorList}$userId?page=${event.page}&per_page=${event.size}&search=${event.search}");
           var response = await http.get(
             APIEndpoint,
             headers: {

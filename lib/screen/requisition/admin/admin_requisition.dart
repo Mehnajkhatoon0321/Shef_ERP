@@ -156,6 +156,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
       ],
     ),
   };
+  String searchQuery = "";
   bool isInitialLoading = false;
   late final TextEditingController cancelledName = TextEditingController();
   // Map<String , dynamic> errorMessage={};
@@ -445,7 +446,12 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                   onChanged: (value) {
                     setState(() {
                       _isTextEmpty = value.isEmpty;
+                      searchQuery = value;
+                      BlocProvider.of<AllRequesterBloc>(context).add(
+                          AddCartDetailHandler(
+                              searchQuery, pageNo, pageSize));
                     });
+
                   },
                 ),
               ),
@@ -816,9 +822,10 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                                         ],
                                                       ),
                                                       if (item["uh_status"] ==
-                                                              1 &&
-                                                          item['pm_status'] ==
-                                                              1)
+                                                              0 )
+                                                          // &&
+                                                          // item['pm_status'] ==
+                                                          //     0)
                                                         Row(
                                                           children: [
                                                             IconButton(
@@ -878,6 +885,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
     _controller.clear();
     setState(() {
       _isTextEmpty = true;
+      BlocProvider.of<AllRequesterBloc>(context)
+          .add(AddCartDetailHandler("", pageNo, pageSize));
     });
   }
 

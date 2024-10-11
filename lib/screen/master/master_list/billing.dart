@@ -176,9 +176,11 @@ class _BillingListState extends State<BillingList> {
                     MaterialPageRoute(
                         builder: (context) => BlocProvider(
                               create: (context) => AllRequesterBloc(),
-                              child: BillingEdit(screenflag: '', billingAddress: '', address: '', id: '',
-
-
+                              child: BillingEdit(
+                                screenflag: '',
+                                billingAddress: '',
+                                address: '',
+                                id: '',
                               ),
                             )),
                   )
@@ -524,7 +526,15 @@ class _BillingListState extends State<BillingList> {
                                                                           create: (context) =>
                                                                               AllRequesterBloc(),
                                                                           child:
-                                                                              BillingEdit(screenflag: 'Edit', billingAddress: item["billing_name"], address: item["address"], id: item["id"].toString(),),
+                                                                              BillingEdit(
+                                                                            screenflag:
+                                                                                'Edit',
+                                                                            billingAddress:
+                                                                                item["billing_name"],
+                                                                            address:
+                                                                                item["address"],
+                                                                            id: item["id"].toString(),
+                                                                          ),
                                                                         )),
                                                           )
                                                         },

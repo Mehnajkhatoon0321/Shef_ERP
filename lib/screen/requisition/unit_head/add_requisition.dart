@@ -14,6 +14,7 @@ import 'package:shef_erp/screen/requisition/unit_head/requisition.dart';
 
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
+import 'package:shef_erp/utils/common_popups.dart';
 
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
@@ -336,7 +337,8 @@ class _AddRequisitionState extends State<AddRequisition> {
             setState(() {
               isAddLoading = true;
             });
-          } else if (state is AddRequisitionSuccess) {
+          }
+          else if (state is AddRequisitionSuccess) {
             isAddLoading = false;
             setState(() {
               var Add = state.addRequisition;
@@ -394,7 +396,18 @@ class _AddRequisitionState extends State<AddRequisition> {
               // }
             });
           }
+          else if (state is AddCartFailure) {
+            setState(() {
+              isAddLoading = false;
+            });
 
+            CommonPopups.showCustomPopup(context, state.addCartDetailFailure.toString());
+          } else if (state is CheckNetworkConnection) {
+            CommonPopups.showCustomPopup(
+              context,
+              'Internet is not connected.',
+            );
+          }
           // TODO: implement listener
         },
         child: SingleChildScrollView(

@@ -22,7 +22,7 @@ class _VendorState extends State<Vendor> {
 
   TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
-
+  String searchQuery = "";
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
       trigger: AnimationTrigger.onPageLoad,
@@ -140,7 +140,7 @@ class _VendorState extends State<Vendor> {
           if (hasMoreData) {
             pageNo++;
             BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetUserListHandler("", pageNo, pageSize));
+                .add(VendorListHandler("", pageNo, pageSize));
           }
         }
       }
@@ -350,6 +350,10 @@ class _VendorState extends State<Vendor> {
                   onChanged: (value) {
                     setState(() {
                       _isTextEmpty = value.isEmpty;
+                      searchQuery = value;
+                      BlocProvider.of<AllRequesterBloc>(context).add(
+                          VendorListHandler(
+                              searchQuery, pageNo, pageSize));
                     });
                   },
                 ),
@@ -594,6 +598,8 @@ class _VendorState extends State<Vendor> {
     _controller.clear();
     setState(() {
       _isTextEmpty = true;
+      BlocProvider.of<AllRequesterBloc>(context)
+          .add(VendorListHandler("", pageNo, pageSize));
     });
   }
 

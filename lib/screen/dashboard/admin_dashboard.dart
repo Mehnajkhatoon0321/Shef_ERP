@@ -31,6 +31,7 @@ import 'package:shef_erp/utils/font_text_Style.dart';
 import 'package:shef_erp/utils/pref_utils.dart';
 
 import 'dashboard.dart';
+
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
 
@@ -41,76 +42,96 @@ class AdminDashboard extends StatefulWidget {
 class _AdminDashboardState extends State<AdminDashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final List<dynamic> _items = [
-    {"title": "All Requisitions","total": "21", "image": "https://via.placeholder.com/150"},
-    {"title": "Today,s Requisitions","total": "12", "image": "https://via.placeholder.com/150"},
-    {"title": "Pending Requisitions","total": "33", "image": "https://via.placeholder.com/150"},
-    {"title": "Delivered Requisition","total": "4", "image": "https://via.placeholder.com/150"}
+    {
+      "title": "All Requisitions",
+      "total": "21",
+      "image": "https://via.placeholder.com/150"
+    },
+    {
+      "title": "Today,s Requisitions",
+      "total": "12",
+      "image": "https://via.placeholder.com/150"
+    },
+    {
+      "title": "Pending Requisitions",
+      "total": "33",
+      "image": "https://via.placeholder.com/150"
+    },
+    {
+      "title": "Delivered Requisition",
+      "total": "4",
+      "image": "https://via.placeholder.com/150"
+    }
   ];
 
   List<Map<String, dynamic>> listItem = [
     {'subtitle': 'Dashboard', 'icon': Icons.dashboard},
     {'subtitle': 'Requisition', 'icon': Icons.list_alt},
-
-    {'subtitle': 'Master', 'icon': Icons.book,"subLine": [
-      {
-        'icon': Icons.ac_unit,
-        "title": 'Units',
-      },
-      {
-        'icon': Icons.person,
-        "title": 'Users',
-      },
- {
-        'icon': Icons.card_membership_sharp,
-        "title": 'Billing',
-      },
-
-      {
-      'icon': Icons.padding_rounded,
-      "title": 'Product/Services',
+    {
+      'subtitle': 'Master',
+      'icon': Icons.book,
+      "subLine": [
+        {
+          'icon': Icons.ac_unit,
+          "title": 'Units',
+        },
+        {
+          'icon': Icons.person,
+          "title": 'Users',
+        },
+        {
+          'icon': Icons.card_membership_sharp,
+          "title": 'Billing',
+        },
+        {
+          'icon': Icons.padding_rounded,
+          "title": 'Product/Services',
+        },
+        {
+          'icon': Icons.category_rounded,
+          "title": 'Product/Category',
+        },
+        {
+          'icon': Icons.event,
+          "title": 'Events',
+        },
+        {
+          'icon': Icons.vertical_shades,
+          "title": 'Vendor',
+        },
+      ],
     },
-
-      {
-        'icon': Icons.category_rounded,
-        "title": 'Product/Category',
-      },
-
-      {
-        'icon': Icons.event,
-        "title": 'Events',
-      },
-      {
-        'icon': Icons.vertical_shades,
-        "title": 'Vendor',
-      },
-
-
-    ],},
     {'subtitle': 'Reports', 'icon': Icons.request_page_outlined},
     {'subtitle': 'My Profile', 'icon': Icons.person},
     {'subtitle': 'Logout', 'icon': Icons.logout},
   ];
   int? _expandedIndex;
+
   Future<bool> _showExitConfirmation(BuildContext context) async {
     return (await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title:  Text('Exit Confirmation',style: FTextStyle.FaqsTxtStyle,),
-        content:  const Text('Do you really want to exit the app?',style: FTextStyle.listTitle),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false), // Don't exit
-            child: const Text('No'),
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(
+              'Exit Confirmation',
+              style: FTextStyle.FaqsTxtStyle,
+            ),
+            content: const Text('Do you really want to exit the app?',
+                style: FTextStyle.listTitle),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false), // Don't exit
+                child: const Text('No'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true), // Exit
+                child: const Text('Yes'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true), // Exit
-            child: const Text('Yes'),
-          ),
-        ],
-      ),
-    )) ??
+        )) ??
         false; // Return false if the dialog was dismissed without a choice
   }
+
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
       trigger: AnimationTrigger.onPageLoad,
@@ -189,234 +210,223 @@ class _AdminDashboardState extends State<AdminDashboard> {
       ],
     ),
   };
+
   @override
   Widget build(BuildContext context) {
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
     var displayType = valueType.toString().split('.').last;
 
-
     return WillPopScope(
         onWillPop: () async {
           bool shouldExit = (await _showExitConfirmation(context));
           return shouldExit;
-
-
         },
-
-
-      child: MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
-
-        child: Scaffold(
-          key: _scaffoldKey,
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            centerTitle: true,
-            automaticallyImplyLeading: false,
-            title: Text(
-              'Dashboard',
-              style: FTextStyle.HeadingTxtWhiteStyle,
-              textAlign: TextAlign.center,
-            ),
-            backgroundColor: AppColors.primaryColourDark,
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 15),
-              child: GestureDetector(
-                onTap: () {
-                  _scaffoldKey.currentState!.openDrawer(); // Open the end drawer
-                },
-                child: const Icon(
-                  Icons.menu,
-                  size: 35,
-                  color: Colors.white,
-                ),
+        child: MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: const TextScaler.linear(1.0)),
+          child: Scaffold(
+            key: _scaffoldKey,
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              centerTitle: true,
+              automaticallyImplyLeading: false,
+              title: Text(
+                'Dashboard',
+                style: FTextStyle.HeadingTxtWhiteStyle,
+                textAlign: TextAlign.center,
               ),
-            ),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 15),
+              backgroundColor: AppColors.primaryColourDark,
+              leading: Padding(
+                padding: const EdgeInsets.only(left: 15),
                 child: GestureDetector(
                   onTap: () {
-                    // Add your action here
-                    print("Bell icon tapped!");
-                    // You can navigate to another page or show a dialog, etc.
+                    _scaffoldKey.currentState!
+                        .openDrawer(); // Open the end drawer
                   },
                   child: const Icon(
-                    Icons.notifications,
+                    Icons.menu,
                     size: 35,
                     color: Colors.white,
                   ),
                 ),
               ),
-            ],
-          ),
-
-          drawer: Drawer(
-            backgroundColor: Colors.white,
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: <Widget>[
-                SizedBox(
-                  height: MediaQuery.of(context).size.height / 3.9,
-                  child: UserAccountsDrawerHeader(
-
-                    accountName:
-                    Text(PrefUtils.getUserName(), style: FTextStyle.nameProfile),
-                    accountEmail: Text(PrefUtils.getUserEmailLogin(),maxLines: 1,
-                        style: FTextStyle.emailProfile),
-                    decoration: const BoxDecoration(
-                      color: AppColors.primaryColourDark,
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 15),
+                  child: GestureDetector(
+                    onTap: () {
+                      // Add your action here
+                      print("Bell icon tapped!");
+                      // You can navigate to another page or show a dialog, etc.
+                    },
+                    child: const Icon(
+                      Icons.notifications,
+                      size: 35,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-                ...buildMenuItems(listItem, PrefUtils.getRole()),
-
               ],
             ),
-          ),
-          body:  Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18.0,vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-
-                Padding(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 3.0, vertical: 10),
-                  child: Container(
-                    height: MediaQuery.of(context).size.height / 7,
-                    decoration: BoxDecoration(
-                      color: Colors.white, // Background color
-                      borderRadius: BorderRadius.circular(12), // Rounded corners
-                      border: Border.all(
-                          color:  Colors.yellow.shade700, // Border color
-                          width: 1 // Border width
+            drawer: Drawer(
+              backgroundColor: Colors.white,
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: <Widget>[
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 3.9,
+                    child: UserAccountsDrawerHeader(
+                      accountName: Text(PrefUtils.getUserName(),
+                          style: FTextStyle.nameProfile),
+                      accountEmail: Text(PrefUtils.getUserEmailLogin(),
+                          maxLines: 1, style: FTextStyle.emailProfile),
+                      decoration: const BoxDecoration(
+                        color: AppColors.primaryColourDark,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color:
-                          Colors.yellow.shade700, // Shadow color
-                          spreadRadius: 0.5, // Spread radius
-                          blurRadius: 5, // Blur radius
-                          // offset: const Offset(0, 3), // Offset from the container
-                        ),
-                      ],
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width/1.9,
-                            child: Text(
-                              'Welcome\n'
-                                  '${PrefUtils.getUserName()}'
-                                  '\nlets plan your day',overflow: TextOverflow.ellipsis,
-                              maxLines: 3,
-                              style: FTextStyle.preHeadingStyle.copyWith(fontWeight: FontWeight.w700),
-                            ).animateOnPageLoad(
-                                animationsMap['imageOnPageLoadAnimation2']!),
-                          ),
-                          Container(
-                            height: 220,
-                            // color: Colors.redAccent,
-                            alignment: Alignment.center,
-                            child: Image.asset(
-                              'assets/images/timer.png',
-                              // color: AppColors.primaryColourDarkDark,
-                              width: (displayType == 'desktop' ||
-                                  displayType == 'tablet')
-                                  ? 150.w
-                                  : 120,
-                              height: (displayType == 'desktop' ||
-                                  displayType == 'tablet')
-                                  ? 100.h
-                                  : 200,
+                  ),
+                  ...buildMenuItems(listItem, PrefUtils.getRole()),
+                ],
+              ),
+            ),
+            body: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 18.0, vertical: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 3.0, vertical: 10),
+                    child: Container(
+                      height: MediaQuery.of(context).size.height / 7,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        // Background color
+                        borderRadius: BorderRadius.circular(12),
+                        // Rounded corners
+                        border: Border.all(
+                            color: Colors.yellow.shade700, // Border color
+                            width: 1 // Border width
                             ),
-                          ).animateOnPageLoad(
-                              animationsMap['imageOnPageLoadAnimation2']!),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.yellow.shade700, // Shadow color
+                            spreadRadius: 0.5, // Spread radius
+                            blurRadius: 5, // Blur radius
+                            // offset: const Offset(0, 3), // Offset from the container
+                          ),
                         ],
                       ),
-                    ),
-                  ),
-                ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 10, top: 20),
-                    child: GridView.builder(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2, // Number of columns
-                        childAspectRatio: 1.8, // Aspect ratio of each grid item
-                        crossAxisSpacing: 13, // Space between columns
-                        mainAxisSpacing: 16, // Space between rows
-                      ),
-                      itemCount: _items.length, // Number of items
-                      itemBuilder: (context, index) {
-                        final item = _items[index];
-                        bool isEvenIndex = index % 3 == 0;
-
-                        return Container(
-
-                          decoration: BoxDecoration(
-
-                            color: Colors.white,
-                            border: Border.all(
-                                color:  AppColors.primaryColourDark , // Border color
-                                width: 1 // Border width
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width / 1.9,
+                              child: Text(
+                                'Welcome\n'
+                                '${PrefUtils.getUserName()}'
+                                '\nlets plan your day',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 3,
+                                style: FTextStyle.preHeadingStyle
+                                    .copyWith(fontWeight: FontWeight.w700),
+                              ).animateOnPageLoad(
+                                  animationsMap['imageOnPageLoadAnimation2']!),
                             ),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: AppColors.primaryColourDark,
-                                spreadRadius: 1,
-                                blurRadius: 3,
-                                offset: Offset(0, 0.5),
+                            Container(
+                              height: 220,
+                              // color: Colors.redAccent,
+                              alignment: Alignment.center,
+                              child: Image.asset(
+                                'assets/images/timer.png',
+                                // color: AppColors.primaryColourDarkDark,
+                                width: (displayType == 'desktop' ||
+                                        displayType == 'tablet')
+                                    ? 150.w
+                                    : 120,
+                                height: (displayType == 'desktop' ||
+                                        displayType == 'tablet')
+                                    ? 100.h
+                                    : 200,
                               ),
-                            ],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                  item['total'], // Title from JSON
-                                  style:FTextStyle.authlogin_signupTxtStyle.copyWith(fontSize: 20)
-                              ),
-                              const SizedBox(height: 20,),
-                              Text(
-                                item['title'], // Title from JSON
-                                style:FTextStyle.authlogin_signupTxtStyle,
-                                overflow:TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                            ).animateOnPageLoad(
+                                animationsMap['imageOnPageLoadAnimation2']!),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                )
+                  ).animateOnPageLoad(
+                      animationsMap['imageOnPageLoadAnimation2']!),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 10, top: 20),
+                      child: GridView.builder(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          // Number of columns
+                          childAspectRatio: 1.8,
+                          // Aspect ratio of each grid item
+                          crossAxisSpacing: 13,
+                          // Space between columns
+                          mainAxisSpacing: 16, // Space between rows
+                        ),
+                        itemCount: _items.length, // Number of items
+                        itemBuilder: (context, index) {
+                          final item = _items[index];
+                          bool isEvenIndex = index % 3 == 0;
 
-
-
-
-
-              ],
+                          return Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(
+                                  color: AppColors.primaryColourDark,
+                                  // Border color
+                                  width: 1 // Border width
+                                  ),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: AppColors.primaryColourDark,
+                                  spreadRadius: 1,
+                                  blurRadius: 3,
+                                  offset: Offset(0, 0.5),
+                                ),
+                              ],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(item['total'], // Title from JSON
+                                    style: FTextStyle.authlogin_signupTxtStyle
+                                        .copyWith(fontSize: 20)),
+                                const SizedBox(
+                                  height: 20,
+                                ),
+                                Text(
+                                  item['title'], // Title from JSON
+                                  style: FTextStyle.authlogin_signupTxtStyle,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
-        ),
-      )
-    );
-
+        ));
   }
-
-
-
-
-
-
 
   void _showLogDialog() {
     showDialog(
@@ -462,9 +472,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => BlocProvider(
-                                create: (context) => AuthFlowBloc(),
-                                child: const LogScreen(),
-                              )),
+                                    create: (context) => AuthFlowBloc(),
+                                    child: const LogScreen(),
+                                  )),
                         );
                       },
                     ),
@@ -477,6 +487,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       },
     );
   }
+
   void _navigateBasedOnRole(String role) {
     Widget nextPage;
 
@@ -488,21 +499,23 @@ class _AdminDashboardState extends State<AdminDashboard> {
         nextPage = const Navigation(); // Replace with your Admin screen widget
         break;
       case 'Purchase Manager':
-        nextPage = const AdminDashboard(); // Replace with your User screen widget
+        nextPage =
+            const AdminDashboard(); // Replace with your User screen widget
         break;
 
       case 'Program Director':
-        nextPage = const AdminDashboard(); // Replace with your User screen widget
+        nextPage =
+            const AdminDashboard(); // Replace with your User screen widget
         break;
       case 'Vendor':
-        nextPage = const VendorDashboard(); // Replace with your User screen widget
+        nextPage =
+            const VendorDashboard(); // Replace with your User screen widget
         break;
       case 'Requester':
-        nextPage = const RequesterDashboard(); // Replace with your User screen widget
+        nextPage =
+            const RequesterDashboard(); // Replace with your User screen widget
         break;
       default:
-
-
         return; // No navigation occurs if the role is not recognized
     }
 
@@ -511,48 +524,52 @@ class _AdminDashboardState extends State<AdminDashboard> {
       MaterialPageRoute(builder: (context) => nextPage),
     );
   }
+
   void _navigateOnRole(String role) {
     Widget nextPage;
 
     switch (role) {
       case 'Unit Head':
-        nextPage =  BlocProvider(
-  create: (context) => AllRequesterBloc(),
-  child: const RequisitionScreen(),
-);
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: const RequisitionScreen(),
+        );
         break;
 
       case 'Purchase Manager':
-        nextPage =  BlocProvider(
-  create: (context) => AllRequesterBloc(),
-  child: const AdminRequisition(),
-);
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: const AdminRequisition(),
+        );
         break;
       case 'Program Director':
-        nextPage =  BlocProvider(
-  create: (context) => AllRequesterBloc(),
-  child: const VenderRequisition(),
-);
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: const VenderRequisition(),
+        );
         break;
       case 'Vendor':
-        nextPage =  BlocProvider(
-  create: (context) => AllRequesterBloc(),
-  child: const VenderRequisition(),
-);
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: const VenderRequisition(),
+        );
         break;
       case 'Requester':
-        nextPage =  BlocProvider(
-  create: (context) => AllRequesterBloc(),
-  child: const RequisitionRequester(),
-);
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: const RequisitionRequester(),
+        );
         break;
       default:
         return;
     }
 
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => nextPage));
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => nextPage));
   }
-  List<Widget> buildMenuItems(List<Map<String, dynamic>> listItem, String userRole) {
+
+  List<Widget> buildMenuItems(
+      List<Map<String, dynamic>> listItem, String userRole) {
     List<Widget> widgets = [];
 
     for (int index = 0; index < listItem.length; index++) {
@@ -567,11 +584,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
       }
 
       // Ensure subtitle is not null
-      String subtitle = item['subtitle'] ?? 'Unknown'; // Provide a default value
+      String subtitle =
+          item['subtitle'] ?? 'Unknown'; // Provide a default value
 
       // Allow all items for Purchase Manager role
       if (userRole == 'Purchase Manager') {
-        if (item.containsKey('subLine') && item['subLine'] != null && item['subLine'].isNotEmpty) {
+        if (item.containsKey('subLine') &&
+            item['subLine'] != null &&
+            item['subLine'].isNotEmpty) {
           widgets.add(
             Column(
               children: [
@@ -583,8 +603,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   ),
                   child: ExpansionTile(
                     backgroundColor: Colors.transparent,
-                    leading: Icon(item['icon'],      color: AppColors.aboutUsHeadingColor),
-                    title: Text(subtitle, style: FTextStyle.FaqsTxtStyle.copyWith()),
+                    leading: Icon(item['icon'],
+                        color: AppColors.aboutUsHeadingColor),
+                    title: Text(subtitle,
+                        style: FTextStyle.FaqsTxtStyle.copyWith()),
                     initiallyExpanded: _expandedIndex == index,
                     onExpansionChanged: (expanded) {
                       setState(() {
@@ -605,7 +627,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
         }
       }
       // Hide Master and Reports for Requester role
-      else if (userRole == 'Requester' && (subtitle == 'Master' || subtitle == 'Reports')) {
+      else if (userRole == 'Requester' &&
+          (subtitle == 'Master' || subtitle == 'Reports')) {
         continue; // Skip these items
       } else {
         widgets.add(buildListTile(item, index, listItem.length));
@@ -616,7 +639,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   List<Widget> buildSubMenuItems(List<Map<String, dynamic>>? subItems) {
-    if (subItems == null || subItems.isEmpty) return []; // Return empty if subItems is null or empty
+    if (subItems == null || subItems.isEmpty)
+      return []; // Return empty if subItems is null or empty
 
     List<Widget> widgets = [];
     for (var item in subItems) {
@@ -631,7 +655,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
           child: Container(
             color: Colors.grey[100],
             child: ListTile(
-              leading: Icon(item['icon'],color: AppColors.aboutUsTextColor,),
+              leading: Icon(
+                item['icon'],
+                color: AppColors.aboutUsTextColor,
+              ),
               title: Text(subtitle, style: FTextStyle.Faqssubtitle),
               onTap: () {
                 handleSubMenuTap(item);
@@ -649,29 +676,25 @@ class _AdminDashboardState extends State<AdminDashboard> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-
-
         Visibility(
-            visible: index == totalLength - 3 && PrefUtils.getRole() == 'Purchase Manager',
-            child: const Divider(height: 1, color: Colors.grey, thickness: 1.5)),
+            visible: index == totalLength - 3 &&
+                PrefUtils.getRole() == 'Purchase Manager',
+            child:
+                const Divider(height: 1, color: Colors.grey, thickness: 1.5)),
         ListTile(
-          leading: Icon(item['icon'],       color: AppColors.aboutUsHeadingColor),
-          title: Text(item['subtitle'] ?? 'Unknown', style: FTextStyle.FaqsTxtStyle),
+          leading: Icon(item['icon'], color: AppColors.aboutUsHeadingColor),
+          title: Text(item['subtitle'] ?? 'Unknown',
+              style: FTextStyle.FaqsTxtStyle),
           onTap: () {
             Navigator.pop(context); // Close the drawer
             handleMenuNavigation(item['subtitle']);
           },
         ),
         if (index != totalLength - 1)
-
-    const Divider(height: 1, color: Colors.grey, thickness: 1.5)
+          const Divider(height: 1, color: Colors.grey, thickness: 1.5)
       ],
     );
   }
-
-
-
-
 
   void handleMenuNavigation(String subtitle) {
     switch (subtitle) {
@@ -679,25 +702,31 @@ class _AdminDashboardState extends State<AdminDashboard> {
         _navigateBasedOnRole(PrefUtils.getRole());
         break;
       case 'Requisition':
-        Navigator.push(context, MaterialPageRoute(builder: (context) =>  BlocProvider(
-  create: (context) => AllRequesterBloc(),
-  child: const AdminRequisition(),
-)));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => BlocProvider(
+                      create: (context) => AllRequesterBloc(),
+                      child: const AdminRequisition(),
+                    )));
         break;
       case 'Reports':
-        Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportScreen()));
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const ReportScreen()));
         break;
       case 'Master':
-        Navigator.push(context, MaterialPageRoute(builder: (context) => const MasterScreen()));
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const MasterScreen()));
         break;
       case 'My Profile':
-        Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileDetails()));
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const ProfileDetails()));
         break;
       case 'Logout':
         _showLogDialog();
         break;
       default:
-      // Handle default case if needed
+        // Handle default case if needed
         break;
     }
   }
@@ -710,70 +739,76 @@ class _AdminDashboardState extends State<AdminDashboard> {
       case 'Product/Category':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>  BlocProvider(
-  create: (context) => AllRequesterBloc(),
-  child: const ProductCategory(),
-)),
+          MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                    create: (context) => AllRequesterBloc(),
+                    child: const ProductCategory(),
+                  )),
         );
         break;
       case 'Product/Services':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>  BlocProvider(
-  create: (context) => AllRequesterBloc(),
-  child:  ProductService(),
-)),
+          MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                    create: (context) => AllRequesterBloc(),
+                    child: ProductService(),
+                  )),
         );
         break;
       case 'Events':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>  BlocProvider(
-  create: (context) => AllRequesterBloc(),
-  child: const EventScreen(),
-)),
+          MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                    create: (context) => AllRequesterBloc(),
+                    child: const EventScreen(),
+                  )),
         );
         break;
-        case 'Units':
+      case 'Units':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>  BlocProvider(
-  create: (context) => AllRequesterBloc(),
-  child:  Units(),
-)),
+          MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                    create: (context) => AllRequesterBloc(),
+                    child: Units(),
+                  )),
         );
         break;
       case 'Users':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>  BlocProvider(
-            create: (context) => AllRequesterBloc(),
-            child:  UserList(),
-          )),
-        );
-        break;  case 'Vendor':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) =>  BlocProvider(
-            create: (context) => AllRequesterBloc(),
-            child:  Vendor(),
-          )),
+          MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                    create: (context) => AllRequesterBloc(),
+                    child: UserList(),
+                  )),
         );
         break;
-        case 'Billing':
+      case 'Vendor':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) =>  BlocProvider(
-            create: (context) => AllRequesterBloc(),
-            child:  BillingList(),
-          )),
+          MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                    create: (context) => AllRequesterBloc(),
+                    child: Vendor(),
+                  )),
+        );
+        break;
+      case 'Billing':
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => BlocProvider(
+                    create: (context) => AllRequesterBloc(),
+                    child: BillingList(),
+                  )),
         );
         break;
       default:
-      // Handle other cases if necessary
+        // Handle other cases if necessary
         break;
     }
   }
-
-
 }

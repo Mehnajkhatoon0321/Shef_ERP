@@ -22,6 +22,7 @@ class _EventScreenState extends State<EventScreen> {
   TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
   bool isLoadingCreate = false;
+  String searchQuery = "";
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
       trigger: AnimationTrigger.onPageLoad,
@@ -365,6 +366,10 @@ class _EventScreenState extends State<EventScreen> {
                   onChanged: (value) {
                     setState(() {
                       _isTextEmpty = value.isEmpty;
+                      searchQuery = value;
+                      BlocProvider.of<AllRequesterBloc>(context).add(
+                          EventListHandler(
+                              searchQuery, pageNo, pageSize));
                     });
                   },
                 ),
@@ -577,6 +582,9 @@ class _EventScreenState extends State<EventScreen> {
   void _clearText() {
     _controller.clear();
     setState(() {
+      BlocProvider.of<AllRequesterBloc>(context).add(
+          EventListHandler(
+              searchQuery, pageNo, pageSize));
       _isTextEmpty = true;
     });
   }

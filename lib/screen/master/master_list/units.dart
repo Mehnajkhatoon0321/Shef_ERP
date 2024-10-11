@@ -102,7 +102,7 @@ class _UnitsState extends State<Units> {
       ],
     ),
   };
-
+  String searchQuery = "";
   int pageNo = 1;
   int totalPages = 0;
   int pageSize = 5;
@@ -346,6 +346,10 @@ class _UnitsState extends State<Units> {
                   onChanged: (value) {
                     setState(() {
                       _isTextEmpty = value.isEmpty;
+                      searchQuery = value;
+                      BlocProvider.of<AllRequesterBloc>(context).add(
+                          GetUnitHandler(
+                              searchQuery, pageNo, pageSize));
                     });
                   },
                 ),
@@ -600,6 +604,9 @@ class _UnitsState extends State<Units> {
     _controller.clear();
     setState(() {
       _isTextEmpty = true;
+      BlocProvider.of<AllRequesterBloc>(context).add(
+          GetUnitHandler(
+              "", pageNo, pageSize));
     });
   }
 }

@@ -29,6 +29,7 @@ class _ProductServiceState extends State<ProductService> {
   List<dynamic> data = [
 
   ];
+  String searchQuery = "";
   final controller = ScrollController();
   final controllerI = ScrollController();
   bool isLoading = false;
@@ -365,6 +366,10 @@ class _ProductServiceState extends State<ProductService> {
                   onChanged: (value) {
                     setState(() {
                       _isTextEmpty = value.isEmpty;
+                      searchQuery = value;
+                      BlocProvider.of<AllRequesterBloc>(context).add(
+                          MasterServiceHandler(
+                              searchQuery, pageNo, pageSize));
                     });
                   },
                 ),
@@ -655,6 +660,9 @@ class _ProductServiceState extends State<ProductService> {
     _controller.clear();
     setState(() {
       _isTextEmpty = true;
+      BlocProvider.of<AllRequesterBloc>(context).add(
+          MasterServiceHandler(
+              "", pageNo, pageSize));
     });
   }
 

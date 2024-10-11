@@ -21,6 +21,7 @@ class _VenderRequisitionState extends State<VenderRequisition> {
   final TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
   bool isLoading = false;
+  String searchQuery = "";
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
       trigger: AnimationTrigger.onPageLoad,
@@ -343,6 +344,10 @@ class _VenderRequisitionState extends State<VenderRequisition> {
                   onChanged: (value) {
                     setState(() {
                       _isTextEmpty = value.isEmpty;
+                      searchQuery = value;
+                      BlocProvider.of<AllRequesterBloc>(context).add(
+                          AddCartDetailHandler(
+                              searchQuery, pageNo, pageSize));
                     });
                   },
                 ),
@@ -592,6 +597,8 @@ class _VenderRequisitionState extends State<VenderRequisition> {
   void _clearText() {
     _controller.clear();
     setState(() {
+      BlocProvider.of<AllRequesterBloc>(context)
+          .add(AddCartDetailHandler("", pageNo, pageSize));
       _isTextEmpty = true;
     });
   }

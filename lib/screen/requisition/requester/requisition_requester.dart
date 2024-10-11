@@ -509,6 +509,8 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
     _controller.clear();
     setState(() {
       _isTextEmpty = true;
+      BlocProvider.of<AllRequesterBloc>(context)
+          .add(AddCartDetailHandler("", pageNo, pageSize));
     });
   }
 }

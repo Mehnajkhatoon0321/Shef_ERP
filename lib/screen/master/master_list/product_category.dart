@@ -30,6 +30,7 @@ class _ProductCategoryState extends State<ProductCategory> {
   bool isLoading = false;
   bool isInitialLoading = false;
   bool isLoadingCreate = false;
+  String searchQuery = "";
   TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
 
@@ -358,6 +359,10 @@ class _ProductCategoryState extends State<ProductCategory> {
                   onChanged: (value) {
                     setState(() {
                       _isTextEmpty = value.isEmpty;
+                      searchQuery = value;
+                      BlocProvider.of<AllRequesterBloc>(context).add(
+                          MasterServiceHandler(
+                              searchQuery, pageNo, pageSize));
                     });
                   },
                 ),
@@ -568,6 +573,9 @@ class _ProductCategoryState extends State<ProductCategory> {
     _controller.clear();
     setState(() {
       _isTextEmpty = true;
+      BlocProvider.of<AllRequesterBloc>(context).add(
+          MasterServiceHandler(
+              "", pageNo, pageSize));
     });
   }
 

@@ -114,7 +114,7 @@ class _UserListState extends State<UserList> {
   final controllerI = ScrollController();
   bool isLoading = false;
   bool isLoadingEdit = false;
-
+  String searchQuery = "";
   @override
   void dispose() {
     _controller.dispose();
@@ -335,6 +335,10 @@ class _UserListState extends State<UserList> {
                   onChanged: (value) {
                     setState(() {
                       _isTextEmpty = value.isEmpty;
+                      searchQuery = value;
+                      BlocProvider.of<AllRequesterBloc>(context).add(
+                          GetUserListHandler(
+                              searchQuery, pageNo, pageSize));
                     });
                   },
                 ),
@@ -547,6 +551,9 @@ class _UserListState extends State<UserList> {
     _controller.clear();
     setState(() {
       _isTextEmpty = true;
+      BlocProvider.of<AllRequesterBloc>(context).add(
+          GetUserListHandler(
+              "", pageNo, pageSize));
     });
   }
 
