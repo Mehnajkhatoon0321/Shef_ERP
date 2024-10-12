@@ -22,6 +22,7 @@ class _UserListState extends State<UserList> {
 
   TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
+  bool  isInitialLoading = false;
 
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
@@ -133,19 +134,24 @@ class _UserListState extends State<UserList> {
     paginationCall();
   }
 
+  Map<String, dynamic> errorServerMessage = {};
+  String? errorMessage;
   void paginationCall() {
-    controllerI.addListener(() {
-      if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
-        if (pageNo < totalPages && !isLoading) {
-          if (hasMoreData) {
-            pageNo++;
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetUserListHandler("", pageNo, pageSize));
-          }
+    controller.addListener(() {
+      if (controller.position.pixels == controller.position.maxScrollExtent) {
+        if (!isLoading && hasMoreData) {
+          pageNo++;
+
+          isInitialLoading = false;
+          isLoading = true;
+
+          BlocProvider.of<AllRequesterBloc>(context)
+              .add(GetUserListHandler("", pageNo, pageSize));
         }
       }
     });
   }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -213,8 +219,7 @@ class _UserListState extends State<UserList> {
       body: BlocListener<AllRequesterBloc, AllRequesterState>(
         listener: (context, state) {
           if (state is UnitLoading) {
-            setState(() {
-              isLoading = true;
+            setState(() {          isInitialLoading = true;
             });
           } else if (state is GetUserListSuccess) {
             setState(() {
@@ -224,7 +229,9 @@ class _UserListState extends State<UserList> {
 
 
               print(">>>>>>>>>>>ALLDATA$responseData");
-              totalPages = responseData["total"];
+
+              int totalItemCount = responseData["total"];
+              totalPages = (totalItemCount / pageSize).ceil();
 
               if (pageNo == 1) {
                 data.clear();
@@ -232,18 +239,27 @@ class _UserListState extends State<UserList> {
 
               data.addAll(responseData['data']);
 
-              setState(() {
-                isLoading = false;
-                if (pageNo == totalPages) {
-                  hasMoreData = false;
-                }
-              });
+              isInitialLoading = false;
+              isLoading = false; // Reset loading state
+
+              if (pageNo==totalPages) {
+                hasMoreData = false;
+              }
             });
+
+
+
           } else if (state is GetUserListFailure) {
+
+
+
             setState(() {
               isLoading = false;
+              isInitialLoading = false;
             });
-            print("error>> ${state.failureMessage}");
+            errorMessage = state.failureMessage;
+
+            print("messageErrorFailure$errorMessage");
           }  else if (state is UserDeleteLoading) {
             DeletePopupManager.playLoader();
           } else if (state is UserDeleteSuccess) {
@@ -252,7 +268,7 @@ class _UserListState extends State<UserList> {
             var deleteMessage = state.userDeleteList['message'];
             print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
             BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetUnitHandler("", pageNo, pageSize));
+                .add(GetUserListHandler("", pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(deleteMessage),
@@ -345,7 +361,7 @@ class _UserListState extends State<UserList> {
               ),
             ),
             Expanded(
-              child: isLoading && data.isEmpty
+              child: isInitialLoading && data.isEmpty
                   ? Shimmer.fromColors(
                 baseColor: Colors.grey[300]!,
                 highlightColor: Colors.grey[100]!,
@@ -378,19 +394,13 @@ class _UserListState extends State<UserList> {
                                 CrossAxisAlignment.start,
                                 children: [
                                   Container(
-                                    height: 10,
-                                    color: Colors.grey,
-                                  ),
+                                      height: 10, color: Colors.grey),
                                   const SizedBox(height: 5),
                                   Container(
-                                    height: 10,
-                                    color: Colors.grey,
-                                  ),
+                                      height: 10, color: Colors.grey),
                                   const SizedBox(height: 5),
                                   Container(
-                                    height: 10,
-                                    color: Colors.grey,
-                                  ),
+                                      height: 10, color: Colors.grey),
                                 ],
                               ),
                             ),
@@ -401,17 +411,21 @@ class _UserListState extends State<UserList> {
                   },
                 ),
               )
-                  : data.isEmpty
+                  : (errorMessage != null || errorServerMessage.isNotEmpty)
                   ? Center(
-                child: isLoading
-                    ? const CircularProgressIndicator() // Show circular progress indicator
-                    : const Text("No more data .",
-                    style: FTextStyle.listTitle),
+                child: Text(
+                  errorMessage ?? errorServerMessage.toString(),
+                  style: FTextStyle.listTitle,
+                  textAlign: TextAlign.center,
+                ),
               )
-                  :  ListView.builder(
+                  : (data.isEmpty)
+                  ? const Center(
+                child: Text("No more data.",
+                    style: FTextStyle.listTitle),
+              ):  ListView.builder(
                 controller: controllerI,
                 itemCount: data.length + (hasMoreData ? 1 : 0),
-                // Add one for the loading indicator
                 itemBuilder: (context, index) {
                   if (index < data.length) {
                     final item = data[index];
@@ -536,7 +550,18 @@ class _UserListState extends State<UserList> {
                         ),
                       ),
                     );
+
                   }
+                  // If we reach this point, we are showing the loading indicator
+                  if (hasMoreData && index == data.length) {
+                    return const Center(
+                        child: CircularProgressIndicator());
+                  }
+
+                  // If there's no more data to load, show a message
+                  return const Center(
+                      child: Text("No more data.",
+                          style: FTextStyle.listTitle));
                 },
               ),
             ),

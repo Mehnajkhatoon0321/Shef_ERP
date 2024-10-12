@@ -105,6 +105,7 @@ class _BillingListState extends State<BillingList> {
   int totalPages = 0;
   int pageSize = 5;
   bool hasMoreData = true;
+  bool       isInitialLoading = false;
   List<dynamic> data = [];
   final controller = ScrollController();
   final controllerI = ScrollController();
@@ -131,18 +132,23 @@ class _BillingListState extends State<BillingList> {
   }
 
   void paginationCall() {
-    controllerI.addListener(() {
-      if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
-        if (pageNo < totalPages && !isLoading) {
-          if (hasMoreData) {
-            pageNo++;
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetBillingListHandler("", pageNo, pageSize));
-          }
+    controller.addListener(() {
+      if (controller.position.pixels == controller.position.maxScrollExtent) {
+        if (!isLoading && hasMoreData) {
+          pageNo++;
+
+          isInitialLoading = false;
+          isLoading = true;
+
+          BlocProvider.of<AllRequesterBloc>(context)
+              .add(GetBillingListHandler("", pageNo, pageSize));
         }
       }
     });
   }
+
+  Map<String, dynamic> errorServerMessage = {};
+  String? errorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -216,13 +222,14 @@ class _BillingListState extends State<BillingList> {
         listener: (context, state) {
           if (state is UserBillingLoading) {
             setState(() {
-              isLoading = true;
+              isInitialLoading = true;
             });
           } else if (state is UserBillingSuccess) {
             setState(() {
               var responseData = state.BillingList['list'];
               print(">>>>>>>>>>>ALLDATA$responseData");
-              totalPages = responseData["total"] ?? 0; // Default to 0 if null
+              int totalItemCount = responseData["total"];
+              totalPages = (totalItemCount / pageSize).ceil();
 
               if (pageNo == 1) {
                 data.clear();
@@ -230,18 +237,19 @@ class _BillingListState extends State<BillingList> {
 
               data.addAll(responseData['data']);
 
-              setState(() {
-                isLoading = false;
-                if (pageNo == totalPages) {
-                  hasMoreData = false;
-                }
-              });
+              isInitialLoading = false;
+              isLoading = false; // Reset loading state
+
+              if (pageNo==totalPages) {
+                hasMoreData = false;
+              }
             });
           } else if (state is UserEditDetailsFailure) {
             setState(() {
               isLoading = false;
+              isInitialLoading = false;
             });
-            print("error>> ${state.deleteEditFailure}");
+            errorMessage = state.deleteEditFailure['message'];
           } else if (state is UserBillingDeleteLoading) {
             setState(() {
               isLoading = false;
@@ -252,8 +260,9 @@ class _BillingListState extends State<BillingList> {
 
             var deleteMessage = state.deleteBillingList['message'];
             print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
+
             BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetUnitHandler("", pageNo, pageSize));
+                .add(GetBillingListHandler("", pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(deleteMessage),
@@ -269,8 +278,9 @@ class _BillingListState extends State<BillingList> {
 
             var deleteMessage = state.billingFailure['message'];
             print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
+
             BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetUnitHandler("", pageNo, pageSize));
+                .add(GetBillingListHandler("", pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(deleteMessage),
@@ -345,70 +355,69 @@ class _BillingListState extends State<BillingList> {
               ),
             ),
             Expanded(
-              child: isLoading && data.isEmpty
+              child: isInitialLoading && data.isEmpty
                   ? Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
-                      child: ListView.builder(
-                        itemCount: 10, // Number of shimmer placeholders
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: screenWidth * 0.03, vertical: 5),
-                            child: Container(
-                              margin: const EdgeInsets.all(8),
-                              padding: const EdgeInsets.all(7),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    spreadRadius: 2,
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 1),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: ListView.builder(
+                  itemCount: 10, // Number of shimmer placeholders
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.03, vertical: 5),
+                      child: Container(
+                        margin: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              spreadRadius: 2,
+                              blurRadius: 4,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          height: 10,
-                                          color: Colors.grey,
-                                        ),
-                                        const SizedBox(height: 5),
-                                        Container(
-                                          height: 10,
-                                          color: Colors.grey,
-                                        ),
-                                        const SizedBox(height: 5),
-                                        Container(
-                                          height: 10,
-                                          color: Colors.grey,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                  Container(
+                                      height: 10, color: Colors.grey),
+                                  const SizedBox(height: 5),
+                                  Container(
+                                      height: 10, color: Colors.grey),
+                                  const SizedBox(height: 5),
+                                  Container(
+                                      height: 10, color: Colors.grey),
                                 ],
                               ),
                             ),
-                          );
-                        },
+                          ],
+                        ),
                       ),
-                    )
-                  : data.isEmpty
-                      ? Center(
-                          child: isLoading
-                              ? const CircularProgressIndicator() // Show circular progress indicator
-                              : const Text("No more data .",
-                                  style: FTextStyle.listTitle),
-                        )
-                      : ListView.builder(
+                    );
+                  },
+                ),
+              )
+                  : (errorMessage != null || errorServerMessage.isNotEmpty)
+                  ? Center(
+                child: Text(
+                  errorMessage ?? errorServerMessage.toString(),
+                  style: FTextStyle.listTitle,
+                  textAlign: TextAlign.center,
+                ),
+              )
+                  : (data.isEmpty)
+                  ? const Center(
+                child: Text("No more data.",
+                    style: FTextStyle.listTitle),
+              ):  ListView.builder(
                           controller: controllerI,
                           itemCount: data.length + (hasMoreData ? 1 : 0),
                           // Add one for the loading indicator
@@ -575,6 +584,15 @@ class _BillingListState extends State<BillingList> {
                                 ),
                               );
                             }
+                            if (hasMoreData && index == data.length) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+
+                            // If there's no more data to load, show a message
+                            return const Center(
+                                child: Text("No more data.",
+                                    style: FTextStyle.listTitle));
                           },
                         ),
             ),

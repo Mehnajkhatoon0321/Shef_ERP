@@ -37,6 +37,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
   final TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
   bool isLoading = false;
+  bool isInitialLoading = false;
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
       trigger: AnimationTrigger.onPageLoad,
@@ -132,16 +133,20 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
   void paginationCall() {
     controllerI.addListener(() {
       if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
-        if (pageNo < totalPages && !isLoading) {
-          if (hasMoreData) {
-            pageNo++;
-            BlocProvider.of<AllRequesterBloc>(context).add(AddCartDetailHandler("", pageNo, pageSize));
-          }
+        if (!isLoading && hasMoreData) {
+          pageNo++;
+
+          isInitialLoading = false;
+          isLoading = true;
+
+          BlocProvider.of<AllRequesterBloc>(context)
+              .add(AddCartDetailHandler("", pageNo, pageSize));
         }
       }
     });
   }
-
+  Map<String, dynamic> errorServerMessage = {};
+  String? errorMessage;
   Set<int> selectedIndices = {};
   String searchQuery = "";
   @override
@@ -221,13 +226,14 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
         listener: (context, state) {
           if (state is AddCartLoading) {
             setState(() {
-              isLoading = true;
+              isInitialLoading = true;
             });
           } else if (state is AddCartSuccess) {
             setState(() {
               var responseData = state.addCartDetails['list']['requisitions'];
               print(">>>>>>>>>>>ALLDATA$responseData");
-              totalPages = responseData["total"];
+              int totalItemCount = responseData["total"];
+              totalPages = (totalItemCount / pageSize).ceil();
 
               if (pageNo == 1) {
                 data.clear();
@@ -235,18 +241,27 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
 
               data.addAll(responseData['data']);
 
-              setState(() {
-                isLoading = false;
-                if (pageNo == totalPages) {
-                  hasMoreData = false;
-                }
-              });
+              isInitialLoading = false;
+              isLoading = false; // Reset loading state
+
+              if (pageNo == totalPages) {
+                hasMoreData = false;
+              }
             });
           } else if (state is AddCartFailure) {
             setState(() {
+              isInitialLoading = false;
+            });
+            errorMessage = state.addCartDetailFailure['message'];
+
+            print("messageErrorFailure$errorMessage");
+          } else if (state is ServerFailure) {
+            setState(() {
               isLoading = false;
             });
-            print("error>> ${state.addCartDetailFailure}");
+            errorServerMessage = state.serverFailure;
+
+            print("messageErrorServer$errorServerMessage");
           } else if (state is DeleteLoading) {
             DeletePopupManager.playLoader();
           } else if (state is DeleteSuccess) {
@@ -374,7 +389,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
           ),
 
           Expanded(
-            child: isLoading && data.isEmpty
+            child:  isInitialLoading && data.isEmpty
                 ? Shimmer.fromColors(
               baseColor: Colors.grey[300]!,
               highlightColor: Colors.grey[100]!,
@@ -382,7 +397,8 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                 itemCount: 10, // Number of shimmer placeholders
                 itemBuilder: (context, index) {
                   return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.03, vertical: 5),
                     child: Container(
                       margin: const EdgeInsets.all(8),
                       padding: const EdgeInsets.all(7),
@@ -402,22 +418,17 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                         children: [
                           Expanded(
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
                               children: [
                                 Container(
-                                  height: 10,
-                                  color: Colors.grey,
-                                ),
+                                    height: 10, color: Colors.grey),
                                 const SizedBox(height: 5),
                                 Container(
-                                  height: 10,
-                                  color: Colors.grey,
-                                ),
+                                    height: 10, color: Colors.grey),
                                 const SizedBox(height: 5),
                                 Container(
-                                  height: 10,
-                                  color: Colors.grey,
-                                ),
+                                    height: 10, color: Colors.grey),
                               ],
                             ),
                           ),
@@ -428,13 +439,20 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                 },
               ),
             )
-                : data.isEmpty&& data.isEmpty?Center(
-              child: isLoading
-                  ? const CircularProgressIndicator() // Show circular progress indicator
-                  : const Text("No more data .", style: FTextStyle.listTitle),
-            ):  data.isEmpty
-          ? const Center(child: Text("No results available.", style: FTextStyle.listTitle))
-        : ListView.builder(
+                : (errorMessage != null || errorServerMessage.isNotEmpty)
+                ? Center(
+              child: Text(
+                errorMessage ?? errorServerMessage.toString(),
+                style: FTextStyle.listTitle,
+                textAlign: TextAlign.center,
+              ),
+            )
+                : (data.isEmpty)
+                ? const Center(
+              child: Text("No more data.",
+                  style: FTextStyle.listTitle),
+            )
+                : ListView.builder(
               controller: controllerI,
               itemCount: data.length + (hasMoreData ? 1 : 0), // Add one for the loading indicator
               itemBuilder: (context, index) {

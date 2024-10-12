@@ -22,6 +22,7 @@ class _VendorState extends State<Vendor> {
 
   TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
+  bool isInitialLoading=true;
   String searchQuery = "";
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
@@ -132,20 +133,24 @@ class _VendorState extends State<Vendor> {
         .add(VendorListHandler("", pageNo, pageSize));
     paginationCall();
   }
-
+  Map<String, dynamic> errorServerMessage = {};
+  String? errorMessage;
   void paginationCall() {
-    controllerI.addListener(() {
-      if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
-        if (pageNo < totalPages && !isLoading) {
-          if (hasMoreData) {
-            pageNo++;
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(VendorListHandler("", pageNo, pageSize));
-          }
+    controller.addListener(() {
+      if (controller.position.pixels == controller.position.maxScrollExtent) {
+        if (!isLoading && hasMoreData) {
+          pageNo++;
+
+          isInitialLoading = false;
+          isLoading = true;
+          BlocProvider.of<AllRequesterBloc>(context)
+              .add(VendorListHandler("", pageNo, pageSize));
         }
       }
     });
   }
+
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -214,7 +219,7 @@ class _VendorState extends State<Vendor> {
         listener: (context, state) {
           if (state is VendorListLoading) {
             setState(() {
-              isLoading = true;
+              isInitialLoading = true;
             });
           } else if (state is VendorListSuccess) {
             setState(() {
@@ -223,8 +228,8 @@ class _VendorState extends State<Vendor> {
 
 
 
-              print(">>>>>>>>>>>ALLDATA$responseData");
-              totalPages = responseData["total"];
+              int totalItemCount = responseData["total"];
+              totalPages = (totalItemCount / pageSize).ceil();
 
               if (pageNo == 1) {
                 data.clear();
@@ -232,27 +237,21 @@ class _VendorState extends State<Vendor> {
 
               data.addAll(responseData['data']);
 
-              setState(() {
-                isLoading = false;
-                if (pageNo == totalPages) {
-                  hasMoreData = false;
-                }
-              });
+              isInitialLoading = false;
+              isLoading = false; // Reset loading state
+
+              if (pageNo==totalPages) {
+                hasMoreData = false;
+              }
             });
           } else if (state is VendorListFailure) {
             setState(() {
               isLoading = false;
+              isInitialLoading = false;
             });
-            print("error>> ${state.eventFailure}");
-            var serverFail = state.eventFailure['message'];
-            print(">>>>>>>>>>>ALLDATADelete$serverFail");
+            errorMessage = state.eventFailure['message'];
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(serverFail),
-                backgroundColor: AppColors.primaryColour,
-              ),
-            );
+
 
             Future.delayed(const Duration(milliseconds: 500), () {
               Navigator.pop(context);
@@ -360,7 +359,7 @@ class _VendorState extends State<Vendor> {
               ),
             ),
             Expanded(
-              child: isLoading && data.isEmpty
+              child: isInitialLoading && data.isEmpty
                   ? Shimmer.fromColors(
                 baseColor: Colors.grey[300]!,
                 highlightColor: Colors.grey[100]!,
@@ -393,19 +392,13 @@ class _VendorState extends State<Vendor> {
                                 CrossAxisAlignment.start,
                                 children: [
                                   Container(
-                                    height: 10,
-                                    color: Colors.grey,
-                                  ),
+                                      height: 10, color: Colors.grey),
                                   const SizedBox(height: 5),
                                   Container(
-                                    height: 10,
-                                    color: Colors.grey,
-                                  ),
+                                      height: 10, color: Colors.grey),
                                   const SizedBox(height: 5),
                                   Container(
-                                    height: 10,
-                                    color: Colors.grey,
-                                  ),
+                                      height: 10, color: Colors.grey),
                                 ],
                               ),
                             ),
@@ -416,14 +409,19 @@ class _VendorState extends State<Vendor> {
                   },
                 ),
               )
-                  : data.isEmpty
+                  : (errorMessage != null || errorServerMessage.isNotEmpty)
                   ? Center(
-                child: isLoading
-                    ? const CircularProgressIndicator() // Show circular progress indicator
-                    : const Text("No more data .",
-                    style: FTextStyle.listTitle),
+                child: Text(
+                  errorMessage ?? errorServerMessage.toString(),
+                  style: FTextStyle.listTitle,
+                  textAlign: TextAlign.center,
+                ),
               )
-                  :  ListView.builder(
+                  : (data.isEmpty)
+                  ? const Center(
+                child: Text("No more data.",
+                    style: FTextStyle.listTitle),
+              ):  ListView.builder(
                 controller: controllerI,
                 itemCount: data.length + (hasMoreData ? 1 : 0),
                 // Add one for the loading indicator
@@ -584,6 +582,15 @@ class _VendorState extends State<Vendor> {
                       ),
                     );
                   }
+                  if (hasMoreData && index == data.length) {
+                    return const Center(
+                        child: CircularProgressIndicator());
+                  }
+
+                  // If there's no more data to load, show a message
+                  return const Center(
+                      child: Text("No more data.",
+                          style: FTextStyle.listTitle));
                 },
               ),
             ),
