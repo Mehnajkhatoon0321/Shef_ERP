@@ -244,10 +244,24 @@ class _BillingListState extends State<BillingList> {
             });
           } else if (state is UserEditDetailsFailure) {
             setState(() {
+<<<<<<< HEAD
               isInitialLoading = false;
             });
             errorMessage = state.deleteEditFailure['message'];
             print("error>> ${state.deleteEditFailure}");
+=======
+<<<<<<< HEAD
+              isInitialLoading = false;
+            });
+            errorMessage = state.deleteEditFailure['message'];
+            print("error>> ${state.deleteEditFailure}");
+=======
+              isLoading = false;
+              isInitialLoading = false;
+            });
+            errorMessage = state.deleteEditFailure['message'];
+>>>>>>> 808415c758239ac2a313c976d44f488f0b64248e
+>>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
           } else if (state is UserBillingDeleteLoading) {
             setState(() {
               isInitialLoading = false;
@@ -351,7 +365,15 @@ class _BillingListState extends State<BillingList> {
               ),
             ),
             Expanded(
+<<<<<<< HEAD
               child:isInitialLoading && data.isEmpty
+=======
+<<<<<<< HEAD
+              child:isInitialLoading && data.isEmpty
+=======
+              child: isInitialLoading && data.isEmpty
+>>>>>>> 808415c758239ac2a313c976d44f488f0b64248e
+>>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
                   ? Shimmer.fromColors(
                 baseColor: Colors.grey[300]!,
                 highlightColor: Colors.grey[100]!,
@@ -413,10 +435,22 @@ class _BillingListState extends State<BillingList> {
                   ? const Center(
                 child: Text("No more data.",
                     style: FTextStyle.listTitle),
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
               )
                   : ListView.builder(
                           controller: controller,
                           itemCount: data.length +1,
+<<<<<<< HEAD
+=======
+=======
+              ):  ListView.builder(
+                          controller: controllerI,
+                          itemCount: data.length + (hasMoreData ? 1 : 0),
+>>>>>>> 808415c758239ac2a313c976d44f488f0b64248e
+>>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
                           // Add one for the loading indicator
                           itemBuilder: (context, index) {
                             if (index < data.length) {
