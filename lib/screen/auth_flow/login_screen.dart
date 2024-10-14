@@ -296,6 +296,7 @@ class _LogScreenState extends State<LogScreen> {
                         Padding(
                           padding: const EdgeInsets.only(top: 20, bottom: 15),
                           child: Form(
+                            key: formKey,
                             onChanged: () {
                               if (ValidatorUtils.isValidEmail(_email.text) &&
                                   isValidPass(_password.text)) {
@@ -457,45 +458,52 @@ class _LogScreenState extends State<LogScreen> {
                           ],
                         ),
                         const SizedBox(height: 65),
-                        SizedBox(
-                          height: (displayType == 'desktop' ||
-                                  displayType == 'tablet')
-                              ? 70
-                              : 52,
-                          child: ElevatedButton(
-                              onPressed: isButtonEnabled
-                                  ? () async {
-                                      setState(() {
-                                        isLoading = true;
-                                      });
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(18.0),
+                            child: SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              height: 48,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  if (formKey.currentState!.validate()) {
+                                    // All fields are valid, proceed with submission
+                                    setState(() {
+                                      isLoading = true; // Start loading
+                                    });
+                                    BlocProvider.of<AuthFlowBloc>(context)
+                                        .add(
+                                      LogEventHandler(
+                                        email: _email.text.toString(),
+                                        password: _password.text.toString(),
+                                      ),
+                                    );
+                                    // Determine whether to update or create a vendor
 
-                                      BlocProvider.of<AuthFlowBloc>(context)
-                                          .add(
-                                        LogEventHandler(
-                                          email: _email.text.toString(),
-                                          password: _password.text.toString(),
-                                        ),
-                                      );
-                                    }
-                                  : null,
-                              style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(26),
+                                  } else {
+                                    // If any field is invalid, trigger validation error display
+                                    formKey.currentState!.validate();
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(26),
+                                  ),
+                                  backgroundColor: isButtonEnabled
+                                      ? AppColors.primaryColourDark
+                                      : AppColors.formFieldBorderColour,
                                 ),
-                                backgroundColor: isButtonEnabled
-                                    ? AppColors.primaryColourDark
-                                    : AppColors.disableButtonColor,
+                                child: isLoading
+                                    ? CircularProgressIndicator(color: Colors.blue)
+                                    : Text("Save", style: FTextStyle.loginBtnStyle),
                               ),
-                              child:
-                              isLoading
-                                      ? const CircularProgressIndicator(
-                                          color: Colors.white,
-                                        )
-                                      : Text(
-                                          Constants.loginBtnTxt,
-                                          style: FTextStyle.loginBtnStyle,
-                                        )),
-                        ).animateOnPageLoad(
+                            ),
+                          ),
+                        )
+
+
+
+                            .animateOnPageLoad(
                             animationsMap['imageOnPageLoadAnimation2']!),
                         const SizedBox(height: 20),
                       ],

@@ -489,7 +489,8 @@ class _ProductServiceState extends State<ProductService> {
                                                 FTextStyle.listTitle),
                                             Text("${index + 1}",
                                                 style: FTextStyle
-                                                    .listTitleSub),
+                                                    .listTitleSub).animateOnPageLoad(
+                                                animationsMap['imageOnPageLoadAnimation2']!),
                                           ],
                                         ),
 
@@ -502,7 +503,8 @@ class _ProductServiceState extends State<ProductService> {
                                                 child: Text(
                                                     "${item["cate_name"]}",
                                                     style: FTextStyle
-                                                        .listTitleSub)),
+                                                        .listTitleSub)).animateOnPageLoad(
+                                                animationsMap['imageOnPageLoadAnimation2']!),
                                           ],
                                         ),
 
@@ -513,7 +515,8 @@ class _ProductServiceState extends State<ProductService> {
                                                 FTextStyle.listTitle),
                                             Text("${item["name"]}",
                                                 style: FTextStyle
-                                                    .listTitleSub),
+                                                    .listTitleSub).animateOnPageLoad(
+                                                animationsMap['imageOnPageLoadAnimation2']!),
                                           ],
                                         ),
                                         Row(
@@ -524,7 +527,8 @@ class _ProductServiceState extends State<ProductService> {
                                             Text(
                                                 "${item["specification"]}",
                                                 style: FTextStyle
-                                                    .listTitleSub),
+                                                    .listTitleSub).animateOnPageLoad(
+                                                animationsMap['imageOnPageLoadAnimation2']!),
                                           ],
                                         ),
 

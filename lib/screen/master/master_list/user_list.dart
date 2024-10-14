@@ -455,7 +455,8 @@ class _UserListState extends State<UserList> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             const Text("ID: ", style: FTextStyle.listTitle),
-                                            Text("${index + 1}", style: FTextStyle.listTitleSub),
+                                            Text("${index + 1}", style: FTextStyle.listTitleSub).animateOnPageLoad(
+                                                animationsMap['imageOnPageLoadAnimation2']!),
                                           ],
                                         ),
                                         Row(
@@ -463,7 +464,8 @@ class _UserListState extends State<UserList> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             const Text("Name: ", style: FTextStyle.listTitle),
-                                            Expanded(child: Text("${item["name"]}", style: FTextStyle.listTitleSub,maxLines: 1,)),
+                                            Expanded(child: Text("${item["name"]}", style: FTextStyle.listTitleSub,maxLines: 1,)).animateOnPageLoad(
+                                                animationsMap['imageOnPageLoadAnimation2']!),
                                           ],
                                         ),
 
@@ -472,7 +474,8 @@ class _UserListState extends State<UserList> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             const Text("Email: ", style: FTextStyle.listTitle),
-                                            Expanded(child: Text("${item["email"]}", style: FTextStyle.listTitleSub,maxLines: 2,)),
+                                            Expanded(child: Text("${item["email"]}", style: FTextStyle.listTitleSub,maxLines: 2,)).animateOnPageLoad(
+                                                animationsMap['imageOnPageLoadAnimation2']!),
                                           ],
                                         ),
 
@@ -486,7 +489,8 @@ class _UserListState extends State<UserList> {
                                                 "${item['roles'].map((role) => role['name']).join(', ')}",
                                                 style: FTextStyle.listTitleSub,
                                                 maxLines: 2,
-                                              ),
+                                              ).animateOnPageLoad(
+                                                  animationsMap['imageOnPageLoadAnimation2']!),
                                             ),
                                           ],
                                         ),

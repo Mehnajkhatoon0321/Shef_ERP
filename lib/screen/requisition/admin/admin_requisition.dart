@@ -160,6 +160,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
       ],
     ),
   };
+  final TextEditingController editController = TextEditingController();
   String searchQuery = "";
   bool isInitialLoading = false;
   late final TextEditingController cancelledName = TextEditingController();
@@ -1316,7 +1317,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
   Future<bool?> _showMarkDeliveryDialog(
       AllRequesterBloc of, BuildContext context, int? index) {
     final formKey = GlobalKey<FormState>();
-    final TextEditingController editController = TextEditingController();
+
     final TextEditingController uploadName = TextEditingController();
     bool isButtonEnabled = false;
     String? fileName;
@@ -1343,6 +1344,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                 content: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.7,
                   child: Form(
+
                     onChanged: updateState,
                     key: formKey,
                     child: Column(
@@ -1376,9 +1378,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                             });
                             updateState(); // Update button state on change
                           },
-                          validator: (value) => (value == null || value.isEmpty)
-                              ? 'Please enter a remark'
-                              : null,
+                          validator:ValidatorUtils.remarkMarkValidator
                         ),
                         const SizedBox(height: 10),
                         Text("Upload", style: FTextStyle.formLabelTxtStyle),
@@ -1460,9 +1460,13 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                           }
                         : null,
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryColourDark),
+                        backgroundColor:isShowMarkEnabled
+                            ? AppColors.primaryColourDark
+                            : AppColors.formFieldBorderColour, ),
                     child:
-                        const Text('OK', style: TextStyle(color: Colors.white)),
+                         Text('OK', style: TextStyle(color:isShowMarkEnabled
+                            ? AppColors.primaryColourDark
+                            : AppColors.formFieldBorderColour,)),
                   ),
                 ],
               ),
@@ -1473,14 +1477,11 @@ class _AdminRequisitionState extends State<AdminRequisition> {
     );
   }
 
-  List<int> _getSelectedIds() {
-    return selectedIndices.map((index) => data[index]['id'] as int).toList();
-  }
 
   void updateState() {
     setState(() {
       if (cancelledName.text.isNotEmpty &&
-          fileUploadValidator(cancelledName.text) == null) {
+          fileUploadValidator(cancelledName.text) == null &&  ValidatorUtils.isValidRemarkName(editController.text)     ) {
         isShowMarkEnabled = true;
       } else {
         isShowMarkEnabled = false;

@@ -480,7 +480,8 @@ class _BillingListState extends State<BillingList> {
                                                           style: FTextStyle
                                                               .listTitleSub),
                                                     ],
-                                                  ),
+                                                  ).animateOnPageLoad(
+                                              animationsMap['imageOnPageLoadAnimation2']!),
                                                   Row(
                                                     mainAxisAlignment:
                                                         MainAxisAlignment.start,
@@ -500,7 +501,8 @@ class _BillingListState extends State<BillingList> {
                                                         maxLines: 2,
                                                       )),
                                                     ],
-                                                  ),
+                                                  ).animateOnPageLoad(
+                                                      animationsMap['imageOnPageLoadAnimation2']!),
                                                   Row(
                                                     mainAxisAlignment:
                                                         MainAxisAlignment.start,
@@ -519,7 +521,8 @@ class _BillingListState extends State<BillingList> {
                                                         maxLines: 2,
                                                       )),
                                                     ],
-                                                  ),
+                                                  ).animateOnPageLoad(
+                                                      animationsMap['imageOnPageLoadAnimation2']!),
                                                   Row(
                                                     mainAxisAlignment:
                                                         MainAxisAlignment.end,
@@ -583,7 +586,8 @@ class _BillingListState extends State<BillingList> {
                                                   'imageOnPageLoadAnimation2']!),
                                             ],
                                           ),
-                                        ),
+                                        ).animateOnPageLoad(
+                                            animationsMap['imageOnPageLoadAnimation2']!),
                                       ),
                                     ],
                                   ),

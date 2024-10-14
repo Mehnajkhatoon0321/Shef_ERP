@@ -466,7 +466,8 @@ class _UnitsState extends State<Units> {
                                                         FTextStyle.listTitle),
                                                 Text("${index + 1}",
                                                     style: FTextStyle
-                                                        .listTitleSub),
+                                                        .listTitleSub).animateOnPageLoad(
+                                                    animationsMap['imageOnPageLoadAnimation2']!),
                                               ],
                                             ),
                                             Row(
@@ -484,7 +485,8 @@ class _UnitsState extends State<Units> {
                                                         FTextStyle.listTitleSub,
                                                     maxLines: 1,
                                                   ),
-                                                ),
+                                                ).animateOnPageLoad(
+                                                    animationsMap['imageOnPageLoadAnimation2']!),
                                               ],
                                             ),
                                             Row(
@@ -502,7 +504,8 @@ class _UnitsState extends State<Units> {
                                                         FTextStyle.listTitleSub,
                                                     maxLines: 2,
                                                   ),
-                                                ),
+                                                ).animateOnPageLoad(
+                                                    animationsMap['imageOnPageLoadAnimation2']!),
                                               ],
                                             ),
                                             Row(
@@ -520,7 +523,8 @@ class _UnitsState extends State<Units> {
                                                         FTextStyle.listTitleSub,
                                                     maxLines: 2,
                                                   ),
-                                                ),
+                                                ).animateOnPageLoad(
+                                                    animationsMap['imageOnPageLoadAnimation2']!),
                                               ],
                                             ),
                                             Row(

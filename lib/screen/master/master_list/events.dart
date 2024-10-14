@@ -462,13 +462,15 @@ class _EventScreenState extends State<EventScreen> {
                                         Row(
                                           children: [
                                             const Text("ID: ", style: FTextStyle.listTitle),
-                                            Text("${index + 1}", style: FTextStyle.listTitleSub),
+                                            Text("${index + 1}", style: FTextStyle.listTitleSub).animateOnPageLoad(
+                                                animationsMap['imageOnPageLoadAnimation2']!),
                                           ],
                                         ),
                                         Row(
                                           children: [
                                             const Text("Name: ", style: FTextStyle.listTitle),
-                                            Expanded(child: Text("${item["name"]}", style: FTextStyle.listTitleSub)),
+                                            Expanded(child: Text("${item["name"]}", style: FTextStyle.listTitleSub)).animateOnPageLoad(
+                                                animationsMap['imageOnPageLoadAnimation2']!),
                                           ],
                                         ),
                                         Row(

@@ -449,6 +449,42 @@ class ValidatorUtils {
     // Check length (e.g., at least 10 characters)
     return value.length >= 10;
   }
+  //remark
+
+  static String? remarkMarkValidator(String? value) {
+    // Check if the value is null or empty
+    if (value == null || value.isEmpty) {
+      return 'Remark name is required';
+    }
+
+    // Check length (e.g., at least 3 characters)
+    if (value.length < 3) {
+      return 'Remark name must be at least 3 characters long';
+    }
+
+    // Return null if all validations pass
+    return null;
+  }
+
+  static bool isValidRemarkName(String value) {
+    // Check if the value is null or empty
+    if (value.isEmpty) {
+      return false;
+    }
+
+    // Check length (e.g., at least 3 characters)
+    return value.length >= 3;
+  }
+
+
+
+
+
+
+
+
+
+
 
   static String? productNameValidator(String? value) {
     // Check if the value is null or empty
