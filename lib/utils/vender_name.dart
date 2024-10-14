@@ -45,13 +45,17 @@ class VendorStatus extends StatelessWidget {
     }
 
     return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text("Vendor Name:", style: TextStyle(fontWeight: FontWeight.bold)),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text(
-            statusText,
-            style: FTextStyle.listTitle.copyWith( color: statusColor,fontSize: 15),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Text(
+              statusText,
+              style: FTextStyle.listTitle.copyWith( color: statusColor,fontSize: 15),
+            ),
           ),
         ),
       ],

@@ -356,7 +356,16 @@ class VendorActionHandler extends AllRequesterEvent {
   List<dynamic> allCount;
   VendorActionHandler({required this.userID, required this.btnAssign,required this.userRole,required this.vendor,required this.billing,required this.allCount,required this.count});
 }
+//Reject
 
+class VendorRejectHandler extends AllRequesterEvent {
+  String userRole;
+  String btnAssign;
+  String userID;
+  String count;
+  List<dynamic> allCount;
+  VendorRejectHandler({required this.userID, required this.btnAssign,required this.userRole,required this.allCount,required this.count});
+}
 
 //Events list
 

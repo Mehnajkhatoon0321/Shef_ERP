@@ -105,14 +105,14 @@ class _VendorState extends State<Vendor> {
 
   int pageNo = 1;
   int totalPages = 0;
-  int pageSize = 5;
+  int pageSize = 10;
   bool hasMoreData = true;
   List<dynamic> data = [
 
 
   ];
   final controller = ScrollController();
-  final controllerI = ScrollController();
+
   bool isLoading = false;
   bool isLoadingEdit = false;
 
@@ -422,8 +422,8 @@ class _VendorState extends State<Vendor> {
                 child: Text("No more data.",
                     style: FTextStyle.listTitle),
               ):  ListView.builder(
-                controller: controllerI,
-                itemCount: data.length + (hasMoreData ? 1 : 0),
+                controller: controller,
+                itemCount: data.length +1,
                 // Add one for the loading indicator
                 itemBuilder: (context, index) {
                   if (index < data.length) {
@@ -493,7 +493,7 @@ class _VendorState extends State<Vendor> {
                                             const Text("Contact No. : ", style: FTextStyle.listTitle),
                                             Expanded(
                                               child: Text(
-                                                  "${item["contact"]}",
+                                                "${item["contact"]}",
                                                 style: FTextStyle.listTitleSub,
                                                 maxLines: 2,
                                               ),

@@ -19,7 +19,7 @@ class BillingList extends StatefulWidget {
 }
 
 class _BillingListState extends State<BillingList> {
-  TextEditingController _controller = TextEditingController();
+
   bool _isTextEmpty = true;
 
   final animationsMap = {
@@ -103,34 +103,35 @@ class _BillingListState extends State<BillingList> {
 
   int pageNo = 1;
   int totalPages = 0;
-  int pageSize = 5;
+  int pageSize = 10;
   bool hasMoreData = true;
-  bool       isInitialLoading = false;
   List<dynamic> data = [];
   final controller = ScrollController();
-  final controllerI = ScrollController();
+  final TextEditingController controllerText = TextEditingController();
   bool isLoading = false;
+  bool isInitialLoading = false;
   bool isLoadingEdit = false;
 
   @override
   void dispose() {
-    _controller.dispose();
+    controllerText.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    _controller.addListener(() {
+    controllerText.addListener(() {
       setState(() {
-        _isTextEmpty = _controller.text.isEmpty;
+        _isTextEmpty = controllerText.text.isEmpty;
       });
     });
     BlocProvider.of<AllRequesterBloc>(context)
         .add(GetBillingListHandler("", pageNo, pageSize));
     paginationCall();
   }
-
+  Map<String, dynamic> errorServerMessage = {};
+  String? errorMessage;
   void paginationCall() {
     controller.addListener(() {
       if (controller.position.pixels == controller.position.maxScrollExtent) {
@@ -146,9 +147,6 @@ class _BillingListState extends State<BillingList> {
       }
     });
   }
-
-  Map<String, dynamic> errorServerMessage = {};
-  String? errorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -246,13 +244,13 @@ class _BillingListState extends State<BillingList> {
             });
           } else if (state is UserEditDetailsFailure) {
             setState(() {
-              isLoading = false;
               isInitialLoading = false;
             });
             errorMessage = state.deleteEditFailure['message'];
+            print("error>> ${state.deleteEditFailure}");
           } else if (state is UserBillingDeleteLoading) {
             setState(() {
-              isLoading = false;
+              isInitialLoading = false;
             });
             DeletePopupManager.playLoader();
           } else if (state is UserBillingDeleteSuccess) {
@@ -260,7 +258,6 @@ class _BillingListState extends State<BillingList> {
 
             var deleteMessage = state.deleteBillingList['message'];
             print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
-
             BlocProvider.of<AllRequesterBloc>(context)
                 .add(GetBillingListHandler("", pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
@@ -278,7 +275,6 @@ class _BillingListState extends State<BillingList> {
 
             var deleteMessage = state.billingFailure['message'];
             print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
-
             BlocProvider.of<AllRequesterBloc>(context)
                 .add(GetBillingListHandler("", pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
@@ -314,7 +310,7 @@ class _BillingListState extends State<BillingList> {
                   ],
                 ),
                 child: TextFormField(
-                  controller: _controller,
+                  controller: controllerText,
                   decoration: InputDecoration(
                     hintText: 'Search',
                     hintStyle: FTextStyle.formhintTxtStyle,
@@ -355,7 +351,7 @@ class _BillingListState extends State<BillingList> {
               ),
             ),
             Expanded(
-              child: isInitialLoading && data.isEmpty
+              child:isInitialLoading && data.isEmpty
                   ? Shimmer.fromColors(
                 baseColor: Colors.grey[300]!,
                 highlightColor: Colors.grey[100]!,
@@ -417,9 +413,10 @@ class _BillingListState extends State<BillingList> {
                   ? const Center(
                 child: Text("No more data.",
                     style: FTextStyle.listTitle),
-              ):  ListView.builder(
-                          controller: controllerI,
-                          itemCount: data.length + (hasMoreData ? 1 : 0),
+              )
+                  : ListView.builder(
+                          controller: controller,
+                          itemCount: data.length +1,
                           // Add one for the loading indicator
                           itemBuilder: (context, index) {
                             if (index < data.length) {
@@ -444,13 +441,13 @@ class _BillingListState extends State<BillingList> {
                                                 : Colors.white,
                                             borderRadius:
                                                 BorderRadius.circular(10),
-                                            boxShadow: [
+                                            boxShadow: const [
                                               BoxShadow(
                                                 color:
                                                     AppColors.primaryColourDark,
                                                 spreadRadius: 1.5,
                                                 blurRadius: 0.4,
-                                                offset: const Offset(0, 0.9),
+                                                offset: Offset(0, 0.9),
                                               ),
                                             ],
                                           ),
@@ -604,9 +601,11 @@ class _BillingListState extends State<BillingList> {
   }
 
   void _clearText() {
-    _controller.clear();
+    controllerText.clear();
     setState(() {
       _isTextEmpty = true;
+      BlocProvider.of<AllRequesterBloc>(context)
+          .add(GetBillingListHandler("", pageNo, pageSize));
     });
   }
 }

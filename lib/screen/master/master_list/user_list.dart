@@ -22,8 +22,7 @@ class _UserListState extends State<UserList> {
 
   TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
-  bool  isInitialLoading = false;
-
+  Map<String, dynamic> errorServerMessage = {};
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
       trigger: AnimationTrigger.onPageLoad,
@@ -105,15 +104,16 @@ class _UserListState extends State<UserList> {
 
   int pageNo = 1;
   int totalPages = 0;
-  int pageSize = 5;
+  int pageSize = 10;
   bool hasMoreData = true;
   List<dynamic> data = [
 
 
   ];
   final controller = ScrollController();
-  final controllerI = ScrollController();
+
   bool isLoading = false;
+  bool isInitialLoading = false;
   bool isLoadingEdit = false;
   String searchQuery = "";
   @override
@@ -134,8 +134,6 @@ class _UserListState extends State<UserList> {
     paginationCall();
   }
 
-  Map<String, dynamic> errorServerMessage = {};
-  String? errorMessage;
   void paginationCall() {
     controller.addListener(() {
       if (controller.position.pixels == controller.position.maxScrollExtent) {
@@ -151,7 +149,7 @@ class _UserListState extends State<UserList> {
       }
     });
   }
-
+  String? errorMessage;
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -219,7 +217,8 @@ class _UserListState extends State<UserList> {
       body: BlocListener<AllRequesterBloc, AllRequesterState>(
         listener: (context, state) {
           if (state is UnitLoading) {
-            setState(() {          isInitialLoading = true;
+            setState(() {
+              isInitialLoading = true;
             });
           } else if (state is GetUserListSuccess) {
             setState(() {
@@ -229,7 +228,6 @@ class _UserListState extends State<UserList> {
 
 
               print(">>>>>>>>>>>ALLDATA$responseData");
-
               int totalItemCount = responseData["total"];
               totalPages = (totalItemCount / pageSize).ceil();
 
@@ -246,20 +244,11 @@ class _UserListState extends State<UserList> {
                 hasMoreData = false;
               }
             });
-
-
-
           } else if (state is GetUserListFailure) {
-
-
-
             setState(() {
-              isLoading = false;
               isInitialLoading = false;
             });
-            errorMessage = state.failureMessage;
-
-            print("messageErrorFailure$errorMessage");
+            errorMessage = state.failureMessage.toString();
           }  else if (state is UserDeleteLoading) {
             DeletePopupManager.playLoader();
           } else if (state is UserDeleteSuccess) {
@@ -268,7 +257,7 @@ class _UserListState extends State<UserList> {
             var deleteMessage = state.userDeleteList['message'];
             print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
             BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetUserListHandler("", pageNo, pageSize));
+                .add(GetUnitHandler("", pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(deleteMessage),
@@ -414,7 +403,7 @@ class _UserListState extends State<UserList> {
                   : (errorMessage != null || errorServerMessage.isNotEmpty)
                   ? Center(
                 child: Text(
-                  errorMessage ?? errorServerMessage.toString(),
+                  errorMessage ?? errorMessage.toString(),
                   style: FTextStyle.listTitle,
                   textAlign: TextAlign.center,
                 ),
@@ -423,9 +412,11 @@ class _UserListState extends State<UserList> {
                   ? const Center(
                 child: Text("No more data.",
                     style: FTextStyle.listTitle),
-              ):  ListView.builder(
-                controller: controllerI,
-                itemCount: data.length + (hasMoreData ? 1 : 0),
+              )
+                  : ListView.builder(
+                controller: controller,
+                itemCount: data.length +1,
+                // Add one for the loading indicator
                 itemBuilder: (context, index) {
                   if (index < data.length) {
                     final item = data[index];
@@ -550,9 +541,7 @@ class _UserListState extends State<UserList> {
                         ),
                       ),
                     );
-
                   }
-                  // If we reach this point, we are showing the loading indicator
                   if (hasMoreData && index == data.length) {
                     return const Center(
                         child: CircularProgressIndicator());
@@ -562,6 +551,8 @@ class _UserListState extends State<UserList> {
                   return const Center(
                       child: Text("No more data.",
                           style: FTextStyle.listTitle));
+
+
                 },
               ),
             ),

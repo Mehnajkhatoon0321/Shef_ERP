@@ -207,6 +207,10 @@ class _UserEditsState extends State<UserEdits> {
     super.initState();
   }
 
+  bool _hasPressedSaveButton = false;
+  bool _hasRoleSaveButton = false;
+
+
   List<String> UnitNames = [];
   List<String> RolesNames = [];
   List<dynamic> RoleDataList = [];
@@ -404,8 +408,8 @@ class _UserEditsState extends State<UserEdits> {
                             selectedRoleItem = eventValue;
 
                             _updateButtonState();// Update the selected role
-                            // isButtonEnabled =
-                            //     eventValue != null && eventValue.isNotEmpty;
+
+
                           });
                         },
                         items: RolesNames.map<DropdownMenuItem<String>>(
@@ -418,6 +422,14 @@ class _UserEditsState extends State<UserEdits> {
                       ),
                     ),
                   ),
+                  if (_hasRoleSaveButton && selectedRoleItem == null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2.0,horizontal: 6),
+                      child: Text(
+                        "Please select a role",
+                        style: FTextStyle.formErrorTxtStyle,
+                      ),
+                    ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
@@ -459,9 +471,7 @@ class _UserEditsState extends State<UserEdits> {
                             )['id']
                                 as String; // Ensure we safely cast to String
 
-                            // // Update button enabled state
-                            // isButtonEnabled =
-                            //     eventValue != null && eventValue.isNotEmpty;
+
                           });
                         },
                         items: UnitNames.map<DropdownMenuItem<String>>(
@@ -475,6 +485,14 @@ class _UserEditsState extends State<UserEdits> {
                       ),
                     ),
                   ),
+                  if (_hasPressedSaveButton && selectedUnitItem == null)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2.0,horizontal: 6),
+                      child: Text(
+                        "Please select a unit",
+                        style: FTextStyle.formErrorTxtStyle,
+                      ),
+                    ),
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text("Name", style: FTextStyle.preHeadingStyle),
@@ -678,8 +696,11 @@ class _UserEditsState extends State<UserEdits> {
                         width: MediaQuery.of(context).size.width,
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: isButtonEnabled
-                              ? () {
+                          onPressed:  () {
+                            setState(() {
+                              _hasPressedSaveButton = true; // Set the flag to true
+                              _hasRoleSaveButton = true; // Set the flag to true
+                            });
                                   if (formKey.currentState!.validate()) {
                                     setState(() {
                                       isLoadingEdit = true; // Start loading
@@ -752,14 +773,14 @@ class _UserEditsState extends State<UserEdits> {
                                     formKey.currentState!.validate();
                                   }
                                 }
-                              : null,
+                             ,
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(26),
                             ),
                             backgroundColor: isButtonEnabled
                                 ? AppColors.primaryColourDark
-                                : AppColors.formFieldBorderColour,
+                                : AppColors.formFieldBackColour,
                           ),
                           child: isLoadingEdit
                               ? const CircularProgressIndicator(

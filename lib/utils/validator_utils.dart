@@ -197,14 +197,6 @@ class ValidatorUtils {
       return 'TAN number is required';
     }
 
-    // Basic TAN format validation (10 characters)
-    // The format: 4 uppercase letters, followed by 5 digits, and ending with 1 uppercase letter
-    // final RegExp tanRegex = RegExp(r'^[A-Z]{4}[0-9]{5}[A-Z]{1}$');
-    //
-    // // Validate against the regex pattern
-    // if (!tanRegex.hasMatch(value)) {
-    //   return 'Invalid TAN number format';
-    // }
 
     // Return null if all validations pass
     return null;

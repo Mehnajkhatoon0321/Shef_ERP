@@ -105,7 +105,7 @@ class _UnitsState extends State<Units> {
   String searchQuery = "";
   int pageNo = 1;
   int totalPages = 0;
-  int pageSize = 5;
+  int pageSize = 10;
   bool hasMoreData = true;
   List<dynamic> data = [];
   final controller = ScrollController();
@@ -116,14 +116,11 @@ class _UnitsState extends State<Units> {
   @override
   void initState() {
     super.initState();
-    // Initialize the ScrollController
     controllerText.addListener(() {
       setState(() {
         _isTextEmpty = controllerText.text.isEmpty;
       });
     });
-
-    // Fetch initial data
     fetchData();
     paginationCall();
   }
@@ -273,7 +270,8 @@ class _UnitsState extends State<Units> {
             DeletePopupManager.playLoader();
           } else if (state is UnitDeleteSuccess) {
             DeletePopupManager.stopLoader();
-
+            BlocProvider.of<AllRequesterBloc>(context)
+                .add(GetUnitHandler("", pageNo, pageSize));
             var deleteMessage = state.unitDeleteList['message'];
             print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
             BlocProvider.of<AllRequesterBloc>(context)
@@ -461,6 +459,7 @@ class _UnitsState extends State<Units> {
                                             Row(
                                               mainAxisAlignment:
                                                   MainAxisAlignment.start,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 const Text("ID: ",
                                                     style:
@@ -472,7 +471,8 @@ class _UnitsState extends State<Units> {
                                             ),
                                             Row(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment.start,
+                                              MainAxisAlignment.start,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 const Text("Name: ",
                                                     style:
@@ -489,7 +489,8 @@ class _UnitsState extends State<Units> {
                                             ),
                                             Row(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment.start,
+                                              MainAxisAlignment.start,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 const Text("Billing Address: ",
                                                     style:
@@ -506,7 +507,8 @@ class _UnitsState extends State<Units> {
                                             ),
                                             Row(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment.start,
+                                              MainAxisAlignment.start,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 const Text("Address: ",
                                                     style:

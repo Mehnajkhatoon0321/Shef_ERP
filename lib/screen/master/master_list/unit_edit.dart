@@ -261,8 +261,7 @@ class _UnitEditState extends State<UnitEdit> {
                     key: _eventNameKey,
                     focusNode: _eventFocusNode,
                     controller: eventNameController,
-                    decoration:
-                        FormFieldStyle.defaultInputEditDecoration.copyWith(
+                    decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
                       fillColor: Colors.grey[100],
                       filled: true,
                       hintText: "Enter Event Name",
@@ -272,18 +271,22 @@ class _UnitEditState extends State<UnitEdit> {
                       isBillingAddressFieldFocused = false;
                       isAddressFieldFocused = false;
                     },
-                    validator: ValidatorUtils.simpleNameValidator,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Event name cannot be empty';
+                      }
+                      return null;
+                    },
                   ),
                   Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text("Event Billing Address",
-                          style: FTextStyle.preHeadingStyle)),
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text("Event Billing Address", style: FTextStyle.preHeadingStyle),
+                  ),
                   TextFormField(
                     key: _billingAddressKey,
                     focusNode: _billingFocusNode,
                     controller: billingAddressController,
-                    decoration:
-                        FormFieldStyle.defaultInputEditDecoration.copyWith(
+                    decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
                       fillColor: Colors.grey[100],
                       filled: true,
                       hintText: "Enter Billing Address",
@@ -293,17 +296,17 @@ class _UnitEditState extends State<UnitEdit> {
                       isBillingAddressFieldFocused = true;
                       isAddressFieldFocused = false;
                     },
-                    validator: ValidatorUtils.billingAddressValidator,
+                      validator: ValidatorUtils.addressValidator
                   ),
                   Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text("Address", style: FTextStyle.preHeadingStyle)),
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text("Address", style: FTextStyle.preHeadingStyle),
+                  ),
                   TextFormField(
                     key: _addressKey,
                     focusNode: _addressFocusNode,
                     controller: addressController,
-                    decoration:
-                        FormFieldStyle.defaultInputEditDecoration.copyWith(
+                    decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
                       fillColor: Colors.grey[100],
                       filled: true,
                       hintText: "Enter Address",
@@ -313,7 +316,7 @@ class _UnitEditState extends State<UnitEdit> {
                       isBillingAddressFieldFocused = false;
                       isAddressFieldFocused = true;
                     },
-                    validator: ValidatorUtils.addressValidator,
+                    validator: ValidatorUtils.addressValidator
                   ),
                   const SizedBox(height: 40),
                   Center(
@@ -323,53 +326,37 @@ class _UnitEditState extends State<UnitEdit> {
                         width: MediaQuery.of(context).size.width,
                         height: 48,
                         child: ElevatedButton(
-                          onPressed: isButtonEnabled ? () {
+                          onPressed: () {
                             if (formKey.currentState!.validate()) {
                               // All fields are valid, proceed with submission
                               setState(() {
                                 isLoadingEdit = true; // Start loading
                               });
 
-
-
                               // Determine whether to update or create a vendor
                               if (widget.screenflag.isNotEmpty) {
-                                BlocProvider.of<AllRequesterBloc>(
-                                    context)
-                                    .add(
+                                BlocProvider.of<AllRequesterBloc>(context).add(
                                   UnitUpdateEventHandler(
                                     id: widget.id.toString(),
-                                    name: eventNameController.text
-                                        .toString(),
-                                    billingAddress:
-                                    billingAddressController.text
-                                        .toString(),
-                                    address: addressController.text
-                                        .toString(),
+                                    name: eventNameController.text.toString(),
+                                    billingAddress: billingAddressController.text.toString(),
+                                    address: addressController.text.toString(),
                                   ),
                                 );
                               } else {
-                                BlocProvider.of<AllRequesterBloc>(
-                                    context)
-                                    .add(
+                                BlocProvider.of<AllRequesterBloc>(context).add(
                                   UnitCreateEventHandler(
-                                    name: eventNameController.text
-                                        .toString(),
-                                    billingAddress:
-                                    billingAddressController.text
-                                        .toString(),
-                                    address: addressController.text
-                                        .toString(),
+                                    name: eventNameController.text.toString(),
+                                    billingAddress: billingAddressController.text.toString(),
+                                    address: addressController.text.toString(),
                                   ),
                                 );
                               }
-
-                              // Note: Your submission logic is handled in the Bloc event
                             } else {
                               // If any field is invalid, trigger validation error display
                               formKey.currentState!.validate();
                             }
-                          }: null,
+                          } ,
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(26),
@@ -378,20 +365,20 @@ class _UnitEditState extends State<UnitEdit> {
                                 ? AppColors.primaryColourDark
                                 : AppColors.formFieldBorderColour,
                           ),
-                          child:  isLoadingEdit
+                          child: isLoadingEdit
                               ? CircularProgressIndicator(color: Colors.blue)
                               : Text("Save", style: FTextStyle.loginBtnStyle),
                         ),
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 20),
                 ],
               ),
             ),
           ),
         ),
+
       ),
     );
   }
