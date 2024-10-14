@@ -24,7 +24,7 @@ class ProductService extends StatefulWidget {
 class _ProductServiceState extends State<ProductService> {
   int pageNo = 1;
   int totalPages = 0;
-  int pageSize = 5;
+  int pageSize = 10;
   bool hasMoreData = true;
   List<dynamic> data = [
 
@@ -175,7 +175,7 @@ class _ProductServiceState extends State<ProductService> {
         .split('.')
         .last;
     return Scaffold(
-      backgroundColor: AppColors.dividerColor,
+      backgroundColor: AppColors.formFieldBorderColour,
       appBar: AppBar(
         centerTitle: true,
         automaticallyImplyLeading: false,

@@ -1147,7 +1147,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                                               text: item["productName"] ?? "--",
                                               style: FTextStyle.listTitle),
                                           const TextSpan(
-                                              text: "\nSpecialization: ",
+                                              text: "\nSpecification: ",
                                               style: FTextStyle.listTitleSub),
                                           TextSpan(
                                               text:

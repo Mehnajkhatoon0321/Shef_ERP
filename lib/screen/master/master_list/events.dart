@@ -104,7 +104,7 @@ class _EventScreenState extends State<EventScreen> {
 
   int pageNo = 1;
   int totalPages = 0;
-  int pageSize = 5;
+  int pageSize = 10;
   bool hasMoreData = true;
   List<dynamic> data = [
 
@@ -113,6 +113,7 @@ class _EventScreenState extends State<EventScreen> {
   final controllerI = ScrollController();
   bool isLoading = false;
   bool isLoadingEdit = false;
+  bool isInitialLoading = false;
 
   @override
   void dispose() {
@@ -134,19 +135,23 @@ class _EventScreenState extends State<EventScreen> {
   }
 
   void paginationCall() {
-    controllerI.addListener(() {
-      if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
-        if (pageNo < totalPages && !isLoading) {
-          if (hasMoreData) {
-            pageNo++;
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(EventListHandler("", pageNo, pageSize));
-          }
+    controller.addListener(() {
+      if (controller.position.pixels == controller.position.maxScrollExtent) {
+        if (!isLoading && hasMoreData) {
+          pageNo++;
+
+          isInitialLoading = false;
+          isLoading = true;
+
+          BlocProvider.of<AllRequesterBloc>(context)
+              .add(EventListHandler("", pageNo, pageSize));
         }
       }
     });
   }
 
+  Map<String, dynamic> errorServerMessage = {};
+  String? errorMessage;
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -206,13 +211,14 @@ class _EventScreenState extends State<EventScreen> {
         listener: (context, state) {
           if (state is EventListLoading) {
             setState(() {
-              isLoading = true;
+              isInitialLoading = true;
             });
           } else if (state is EventListSuccess) {
             setState(() {
               var responseData = state.eventList['list'];
               print(">>>>>>>>>>>ALLDATA$responseData");
-              totalPages = responseData["total"];
+              int totalItemCount = responseData["total"];
+              totalPages = (totalItemCount / pageSize).ceil();
 
               if (pageNo == 1) {
                 data.clear();
@@ -220,23 +226,23 @@ class _EventScreenState extends State<EventScreen> {
 
               data.addAll(responseData['data']);
 
-              setState(() {
-                isLoading = false;
-                if (pageNo == totalPages) {
-                  hasMoreData = false;
-                }
-              });
+              isInitialLoading = false;
+              isLoading = false; // Reset loading state
+
+              if (pageNo==totalPages) {
+                hasMoreData = false;
+              }
             });
           } else if (state is EventListFailure) {
             setState(() {
               isLoading = false;
+              isInitialLoading = false;
             });
-
-            var eventFailMessage = state.eventFailure['message'];
+            errorMessage = state.eventFailure['message'];
 
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(eventFailMessage),
+                content: Text(errorMessage.toString()),
                 backgroundColor: AppColors.primaryColour,
               ),
             );
@@ -354,12 +360,12 @@ class _EventScreenState extends State<EventScreen> {
                         vertical: 13.0, horizontal: 18.0),
                     suffixIcon: _isTextEmpty
                         ? const Icon(Icons.search,
-                            color: AppColors.primaryColourDark)
+                        color: AppColors.primaryColourDark)
                         : IconButton(
-                            icon: const Icon(Icons.clear,
-                                color: AppColors.primaryColourDark),
-                            onPressed: _clearText,
-                          ),
+                      icon: const Icon(Icons.clear,
+                          color: AppColors.primaryColourDark),
+                      onPressed: _clearText,
+                    ),
                     fillColor: Colors.grey[100],
                     filled: true,
                   ),
@@ -376,202 +382,158 @@ class _EventScreenState extends State<EventScreen> {
               ),
             ),
             Expanded(
-              child: isLoading && data.isEmpty
+              child: isInitialLoading && data.isEmpty
                   ? Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
-                      child: ListView.builder(
-                        itemCount: 10, // Number of shimmer placeholders
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: screenWidth * 0.03, vertical: 5),
-                            child: Container(
-                              margin: const EdgeInsets.all(8),
-                              padding: const EdgeInsets.all(7),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    spreadRadius: 2,
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 1),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: ListView.builder(
+                  itemCount: 10, // Number of shimmer placeholders
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
+                      child: Container(
+                        margin: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              spreadRadius: 2,
+                              blurRadius: 4,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          height: 10,
-                                          color: Colors.grey,
-                                        ),
-                                        const SizedBox(height: 5),
-                                        Container(
-                                          height: 10,
-                                          color: Colors.grey,
-                                        ),
-                                        const SizedBox(height: 5),
-                                        Container(
-                                          height: 10,
-                                          color: Colors.grey,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                  Container(height: 10, color: Colors.grey),
+                                  const SizedBox(height: 5),
+                                  Container(height: 10, color: Colors.grey),
+                                  const SizedBox(height: 5),
+                                  Container(height: 10, color: Colors.grey),
                                 ],
                               ),
                             ),
-                          );
-                        },
-                      ),
-                    )
-                  : data.isEmpty
-                      ? Center(
-                          child: isLoading
-                              ? const CircularProgressIndicator() // Show circular progress indicator
-                              : const Text("No more data .",
-                                  style: FTextStyle.listTitle),
-                        )
-                      : ListView.builder(
-                          controller: controllerI,
-                          itemCount: data.length + (hasMoreData ? 1 : 0),
-                          // Add one for the loading indicator
-                          itemBuilder: (context, index) {
-                            if (index < data.length) {
-                              final item = data[index];
-                              return GestureDetector(
-                                onTap: () {
-                                  // Handle tap event if needed
-                                },
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: screenWidth * 0.03,
-                                      vertical: 5),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Container(
-                                          margin: const EdgeInsets.all(2),
-                                          padding: const EdgeInsets.all(7),
-                                          decoration: BoxDecoration(
-                                            color: index % 2 == 0
-                                                ? Colors.white
-                                                : Colors.white,
-                                            borderRadius:
-                                                BorderRadius.circular(10),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color:
-                                                    AppColors.primaryColourDark,
-                                                spreadRadius: 1.5,
-                                                blurRadius: 0.4,
-                                                offset: const Offset(0, 0.9),
-                                              ),
-                                            ],
-                                          ),
-                                          child: Column(
-                                            children: [
-                                              Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Row(
-                                                    children: [
-                                                      const Text("ID: ",
-                                                          style: FTextStyle
-                                                              .listTitle),
-                                                      Text("${index + 1}",
-                                                          style: FTextStyle
-                                                              .listTitleSub),
-                                                    ],
-                                                  ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Row(
-                                                        children: [
-                                                          const Text("Name: ",
-                                                              style: FTextStyle
-                                                                  .listTitle),
-                                                          Text(
-                                                              "${item["name"]}",
-                                                              style: FTextStyle
-                                                                  .listTitleSub),
-                                                        ],
-                                                      ),
-                                                      Row(
-                                                        children: [
-                                                          IconButton(
-                                                            icon: const Icon(
-                                                                Icons.edit,
-                                                                color: Colors
-                                                                    .black),
-                                                            onPressed: () =>
-                                                                _showCategoryDialog(
-                                                                    BlocProvider.of<
-                                                                            AllRequesterBloc>(
-                                                                        context),
-                                                                    context,
-                                                                    isEditing:
-                                                                        true,
-                                                                    index:
-                                                                        index),
-                                                          ),
-                                                          IconButton(
-                                                            icon: const Icon(
-                                                                Icons.delete,
-                                                                color:
-                                                                    Colors.red),
-                                                            onPressed: () => {
-                                                              CommonPopups
-                                                                  .showDeleteCustomPopup(
-                                                                context,
-                                                                "Are you sure you want to delete?",
-                                                                () {
-                                                                  BlocProvider.of<
-                                                                              AllRequesterBloc>(
-                                                                          context)
-                                                                      .add(DeleteEventHandlers(
-                                                                          data[index]
-                                                                              [
-                                                                              'id']));
-                                                                },
-                                                              )
-                                                            },
-                                                          ),
-                                                        ],
-                                                      ).animateOnPageLoad(
-                                                          animationsMap[
-                                                              'imageOnPageLoadAnimation2']!),
-                                                    ],
-                                                  ),
-                                                ],
-                                              ).animateOnPageLoad(animationsMap[
-                                                  'imageOnPageLoadAnimation2']!),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }
-                          },
+                          ],
                         ),
+                      ),
+                    );
+                  },
+                ),
+              )
+                  : (errorMessage != null || errorServerMessage.isNotEmpty)
+                  ? Center(
+                child: Text(
+                  errorMessage ?? errorServerMessage.toString(),
+                  style: FTextStyle.listTitle,
+                  textAlign: TextAlign.center,
+                ),
+              )
+                  : (data.isEmpty)
+                  ? const Center(
+                child: Text("No more data.", style: FTextStyle.listTitle),
+              )
+                  : ListView.builder(
+                controller: controller,
+                  itemCount: data.length +1,// Loader condition
+                itemBuilder: (context, index) {
+                  if (index < data.length) {
+                    final item = data[index];
+                    return GestureDetector(
+                      onTap: () {
+                        // Handle tap event if needed
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                margin: const EdgeInsets.all(2),
+                                padding: const EdgeInsets.all(7),
+                                decoration: BoxDecoration(
+                                  color: index % 2 == 0 ? Colors.white : Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.primaryColourDark,
+                                      spreadRadius: 1.5,
+                                      blurRadius: 0.4,
+                                      offset: const Offset(0, 0.9),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            const Text("ID: ", style: FTextStyle.listTitle),
+                                            Text("${index + 1}", style: FTextStyle.listTitleSub),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            const Text("Name: ", style: FTextStyle.listTitle),
+                                            Expanded(child: Text("${item["name"]}", style: FTextStyle.listTitleSub)),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          crossAxisAlignment: CrossAxisAlignment.end,
+                                          children: [
+                                            IconButton(
+                                              icon: const Icon(Icons.edit, color: Colors.black),
+                                              onPressed: () => _showCategoryDialog(
+                                                  BlocProvider.of<AllRequesterBloc>(context),
+                                                  context,
+                                                  isEditing: true,
+                                                  index: index),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(Icons.delete, color: Colors.red),
+                                              onPressed: () {
+                                                CommonPopups.showDeleteCustomPopup(
+                                                  context,
+                                                  "Are you sure you want to delete?",
+                                                      () {
+                                                    BlocProvider.of<AllRequesterBloc>(context)
+                                                        .add(DeleteEventHandlers(data[index]['id']));
+                                                  },
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                                      ],
+                                    ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
+                  if (hasMoreData && isLoading) {
+                    return const Center(child: CircularProgressIndicator()); // Loader
+                  }
+
+                  // If there's no more data to load, show a message
+                  return const Center(child: Text("No more data.", style: FTextStyle.listTitle));
+                },
+              ),
             ),
+
             const SizedBox(height: 20),
           ],
         ),
@@ -584,7 +546,7 @@ class _EventScreenState extends State<EventScreen> {
     setState(() {
       BlocProvider.of<AllRequesterBloc>(context).add(
           EventListHandler(
-              searchQuery, pageNo, pageSize));
+              "", pageNo, pageSize));
       _isTextEmpty = true;
     });
   }
@@ -593,7 +555,7 @@ class _EventScreenState extends State<EventScreen> {
       {bool isEditing = false, int? index}) async {
     final _formKey = GlobalKey<FormState>();
     final _editController =
-        TextEditingController(text: isEditing ? data[index!]["name"] : '');
+    TextEditingController(text: isEditing ? data[index!]["name"] : '');
     bool isButtonEnabled = isEditing ? true : false;
 
     showDialog(
@@ -705,7 +667,7 @@ class _EventScreenState extends State<EventScreen> {
                             if (state.createResponse is Map &&
                                 state.createResponse.containsKey('message')) {
                               var deleteMessage =
-                                  state.createResponse['message'];
+                              state.createResponse['message'];
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(deleteMessage),
@@ -715,9 +677,9 @@ class _EventScreenState extends State<EventScreen> {
                             }
 
                             Future.delayed(const Duration(milliseconds: 500),
-                                () {
-                              Navigator.pop(context);
-                            });
+                                    () {
+                                  Navigator.pop(context);
+                                });
                           } else if (state is EventCreateFailure) {
                             var deleteMessage = state.failureMessage;
 
@@ -729,9 +691,9 @@ class _EventScreenState extends State<EventScreen> {
                             );
 
                             Future.delayed(const Duration(milliseconds: 500),
-                                () {
-                              Navigator.pop(context);
-                            });
+                                    () {
+                                  Navigator.pop(context);
+                                });
                             setState(() {
                               isLoadingCreate = false;
                             });
@@ -753,9 +715,9 @@ class _EventScreenState extends State<EventScreen> {
                             );
 
                             Future.delayed(const Duration(milliseconds: 500),
-                                () {
-                              Navigator.pop(context);
-                            });
+                                    () {
+                                  Navigator.pop(context);
+                                });
                           } else if (state is UpdateEventsFailure) {
                             var deleteMessage = state.failureUpdateMessage['message'];
 
@@ -767,9 +729,9 @@ class _EventScreenState extends State<EventScreen> {
                             );
 
                             Future.delayed(const Duration(milliseconds: 500),
-                                () {
-                              Navigator.pop(context);
-                            });
+                                    () {
+                                  Navigator.pop(context);
+                                });
                             setState(() {
                               isLoadingCreate = false;
                             });
@@ -781,28 +743,28 @@ class _EventScreenState extends State<EventScreen> {
                           child: isLoadingCreate
                               ? CircularProgressIndicator(color: Colors.white)
                               : Text(
-                                  isEditing ? "Save" : "Add",
-                                  style: TextStyle(color: Colors.white),
-                                ),
+                            isEditing ? "Save" : "Add",
+                            style: TextStyle(color: Colors.white),
+                          ),
                           onPressed: isButtonEnabled
                               ? () {
-                                  if (_formKey.currentState?.validate() ??
-                                      false) {
-                                    if (mounted) {
-                                      // Check if the widget is still mounted
-                                      if (isEditing) {
-                                        of.add(UpdateEventHandler(
-                                          name: _editController.text,
+                            if (_formKey.currentState?.validate() ??
+                                false) {
+                              if (mounted) {
+                                // Check if the widget is still mounted
+                                if (isEditing) {
+                                  of.add(UpdateEventHandler(
+                                    name: _editController.text,
 
-                                          id: data[index!]["id"],
-                                        ));
-                                      } else {
-                                        of.add(CreateEventHandler(
-                                            category: _editController.text));
-                                      }
-                                    }
-                                  }
+                                    id: data[index!]["id"],
+                                  ));
+                                } else {
+                                  of.add(CreateEventHandler(
+                                      category: _editController.text));
                                 }
+                              }
+                            }
+                          }
                               : null,
                         ),
                       ).animateOnPageLoad(

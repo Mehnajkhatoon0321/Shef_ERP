@@ -19,7 +19,7 @@ class BillingList extends StatefulWidget {
 }
 
 class _BillingListState extends State<BillingList> {
-  TextEditingController _controller = TextEditingController();
+
   bool _isTextEmpty = true;
 
   final animationsMap = {
@@ -103,42 +103,46 @@ class _BillingListState extends State<BillingList> {
 
   int pageNo = 1;
   int totalPages = 0;
-  int pageSize = 5;
+  int pageSize = 10;
   bool hasMoreData = true;
   List<dynamic> data = [];
   final controller = ScrollController();
-  final controllerI = ScrollController();
+  final TextEditingController controllerText = TextEditingController();
   bool isLoading = false;
+  bool isInitialLoading = false;
   bool isLoadingEdit = false;
 
   @override
   void dispose() {
-    _controller.dispose();
+    controllerText.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    _controller.addListener(() {
+    controllerText.addListener(() {
       setState(() {
-        _isTextEmpty = _controller.text.isEmpty;
+        _isTextEmpty = controllerText.text.isEmpty;
       });
     });
     BlocProvider.of<AllRequesterBloc>(context)
         .add(GetBillingListHandler("", pageNo, pageSize));
     paginationCall();
   }
-
+  Map<String, dynamic> errorServerMessage = {};
+  String? errorMessage;
   void paginationCall() {
-    controllerI.addListener(() {
-      if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
-        if (pageNo < totalPages && !isLoading) {
-          if (hasMoreData) {
-            pageNo++;
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetBillingListHandler("", pageNo, pageSize));
-          }
+    controller.addListener(() {
+      if (controller.position.pixels == controller.position.maxScrollExtent) {
+        if (!isLoading && hasMoreData) {
+          pageNo++;
+
+          isInitialLoading = false;
+          isLoading = true;
+
+          BlocProvider.of<AllRequesterBloc>(context)
+              .add(GetBillingListHandler("", pageNo, pageSize));
         }
       }
     });
@@ -216,13 +220,14 @@ class _BillingListState extends State<BillingList> {
         listener: (context, state) {
           if (state is UserBillingLoading) {
             setState(() {
-              isLoading = true;
+              isInitialLoading = true;
             });
           } else if (state is UserBillingSuccess) {
             setState(() {
               var responseData = state.BillingList['list'];
               print(">>>>>>>>>>>ALLDATA$responseData");
-              totalPages = responseData["total"] ?? 0; // Default to 0 if null
+              int totalItemCount = responseData["total"];
+              totalPages = (totalItemCount / pageSize).ceil();
 
               if (pageNo == 1) {
                 data.clear();
@@ -230,21 +235,22 @@ class _BillingListState extends State<BillingList> {
 
               data.addAll(responseData['data']);
 
-              setState(() {
-                isLoading = false;
-                if (pageNo == totalPages) {
-                  hasMoreData = false;
-                }
-              });
+              isInitialLoading = false;
+              isLoading = false; // Reset loading state
+
+              if (pageNo==totalPages) {
+                hasMoreData = false;
+              }
             });
           } else if (state is UserEditDetailsFailure) {
             setState(() {
-              isLoading = false;
+              isInitialLoading = false;
             });
+            errorMessage = state.deleteEditFailure['message'];
             print("error>> ${state.deleteEditFailure}");
           } else if (state is UserBillingDeleteLoading) {
             setState(() {
-              isLoading = false;
+              isInitialLoading = false;
             });
             DeletePopupManager.playLoader();
           } else if (state is UserBillingDeleteSuccess) {
@@ -253,7 +259,7 @@ class _BillingListState extends State<BillingList> {
             var deleteMessage = state.deleteBillingList['message'];
             print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
             BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetUnitHandler("", pageNo, pageSize));
+                .add(GetBillingListHandler("", pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(deleteMessage),
@@ -270,7 +276,7 @@ class _BillingListState extends State<BillingList> {
             var deleteMessage = state.billingFailure['message'];
             print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
             BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetUnitHandler("", pageNo, pageSize));
+                .add(GetBillingListHandler("", pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(deleteMessage),
@@ -304,7 +310,7 @@ class _BillingListState extends State<BillingList> {
                   ],
                 ),
                 child: TextFormField(
-                  controller: _controller,
+                  controller: controllerText,
                   decoration: InputDecoration(
                     hintText: 'Search',
                     hintStyle: FTextStyle.formhintTxtStyle,
@@ -345,72 +351,72 @@ class _BillingListState extends State<BillingList> {
               ),
             ),
             Expanded(
-              child: isLoading && data.isEmpty
+              child:isInitialLoading && data.isEmpty
                   ? Shimmer.fromColors(
-                      baseColor: Colors.grey[300]!,
-                      highlightColor: Colors.grey[100]!,
-                      child: ListView.builder(
-                        itemCount: 10, // Number of shimmer placeholders
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: screenWidth * 0.03, vertical: 5),
-                            child: Container(
-                              margin: const EdgeInsets.all(8),
-                              padding: const EdgeInsets.all(7),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    spreadRadius: 2,
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 1),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: ListView.builder(
+                  itemCount: 10, // Number of shimmer placeholders
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.03, vertical: 5),
+                      child: Container(
+                        margin: const EdgeInsets.all(8),
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              spreadRadius: 2,
+                              blurRadius: 4,
+                              offset: const Offset(0, 1),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
                                 children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          height: 10,
-                                          color: Colors.grey,
-                                        ),
-                                        const SizedBox(height: 5),
-                                        Container(
-                                          height: 10,
-                                          color: Colors.grey,
-                                        ),
-                                        const SizedBox(height: 5),
-                                        Container(
-                                          height: 10,
-                                          color: Colors.grey,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                  Container(
+                                      height: 10, color: Colors.grey),
+                                  const SizedBox(height: 5),
+                                  Container(
+                                      height: 10, color: Colors.grey),
+                                  const SizedBox(height: 5),
+                                  Container(
+                                      height: 10, color: Colors.grey),
                                 ],
                               ),
                             ),
-                          );
-                        },
+                          ],
+                        ),
                       ),
-                    )
-                  : data.isEmpty
-                      ? Center(
-                          child: isLoading
-                              ? const CircularProgressIndicator() // Show circular progress indicator
-                              : const Text("No more data .",
-                                  style: FTextStyle.listTitle),
-                        )
-                      : ListView.builder(
-                          controller: controllerI,
-                          itemCount: data.length + (hasMoreData ? 1 : 0),
+                    );
+                  },
+                ),
+              )
+                  : (errorMessage != null || errorServerMessage.isNotEmpty)
+                  ? Center(
+                child: Text(
+                  errorMessage ?? errorServerMessage.toString(),
+                  style: FTextStyle.listTitle,
+                  textAlign: TextAlign.center,
+                ),
+              )
+                  : (data.isEmpty)
+                  ? const Center(
+                child: Text("No more data.",
+                    style: FTextStyle.listTitle),
+              )
+                  : ListView.builder(
+                          controller: controller,
+                          itemCount: data.length +1,
                           // Add one for the loading indicator
                           itemBuilder: (context, index) {
                             if (index < data.length) {
@@ -435,13 +441,13 @@ class _BillingListState extends State<BillingList> {
                                                 : Colors.white,
                                             borderRadius:
                                                 BorderRadius.circular(10),
-                                            boxShadow: [
+                                            boxShadow: const [
                                               BoxShadow(
                                                 color:
                                                     AppColors.primaryColourDark,
                                                 spreadRadius: 1.5,
                                                 blurRadius: 0.4,
-                                                offset: const Offset(0, 0.9),
+                                                offset: Offset(0, 0.9),
                                               ),
                                             ],
                                           ),
@@ -575,6 +581,15 @@ class _BillingListState extends State<BillingList> {
                                 ),
                               );
                             }
+                            if (hasMoreData && index == data.length) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+
+                            // If there's no more data to load, show a message
+                            return const Center(
+                                child: Text("No more data.",
+                                    style: FTextStyle.listTitle));
                           },
                         ),
             ),
@@ -586,9 +601,11 @@ class _BillingListState extends State<BillingList> {
   }
 
   void _clearText() {
-    _controller.clear();
+    controllerText.clear();
     setState(() {
       _isTextEmpty = true;
+      BlocProvider.of<AllRequesterBloc>(context)
+          .add(GetBillingListHandler("", pageNo, pageSize));
     });
   }
 }

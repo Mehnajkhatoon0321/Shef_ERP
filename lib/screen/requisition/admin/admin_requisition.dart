@@ -48,6 +48,7 @@ String? fileUploadValidator(String? value) {
 class _AdminRequisitionState extends State<AdminRequisition> {
   int? selectedId;
   int? selectedBillingId;
+  int? selectedProductId;
   File? imagesIdCancelled;
   List<String> selectedIds = [];
   Map<String, String>? selectedItemForEditing;
@@ -766,6 +767,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                                     companyName:
                                                         item['company'] ?? "NA",
                                                   ),
+                                                  
+                                                  
                                                   Row(
                                                     mainAxisAlignment:
                                                         MainAxisAlignment.end,
@@ -958,6 +961,9 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                 onChanged: (String? eventValue) {
                                   setState(() {
                                     selectedItem = eventValue;
+                                    selectedProductId=productMap[
+                                    eventValue];
+
                                     updateButtonState(); // Call the helper function
                                   });
                                 },
@@ -1000,6 +1006,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                 onChanged: (String? eventValue) {
                                   setState(() {
                                     selectedBilling = eventValue;
+                                    selectedBillingId = billingMap[
+                                    eventValue];
                                     updateButtonState(); // Call the helper function
                                   });
                                 },
@@ -1074,12 +1082,12 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                               of.add(VendorActionHandler(
                                 userID: PrefUtils.getUserId().toString(),
                                 btnAssign: 'assign',
-                                vendor: selectedItem ?? '2',
+                                vendor: selectedProductId.toString() ?? '2',
                                 // Use selected vendor
                                 userRole: PrefUtils.getRole(),
                                 allCount: selectedIds,
                                 // Pass all selected IDs here
-                                billing: selectedBilling ?? '2',
+                                billing: selectedBillingId.toString() ?? '2',
                                 // Use selected billing
                                 count: selectedIds.length
                                     .toString(), // Count of selected IDs
