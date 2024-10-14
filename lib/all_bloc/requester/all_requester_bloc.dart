@@ -1968,7 +1968,7 @@ print("RequestData>>>>>>>>>>$request");
         }
       } else {
         print('Network error');
-        emit(UnitFailure(const {'error': 'Network error'}));
+        emit(VendorListFailure(const {'error': 'Network error'}));
       }
     });
   //vendor delete

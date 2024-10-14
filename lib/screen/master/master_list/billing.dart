@@ -105,6 +105,7 @@ class _BillingListState extends State<BillingList> {
   int totalPages = 0;
   int pageSize = 10;
   bool hasMoreData = true;
+  bool       isInitialLoading = false;
   List<dynamic> data = [];
   final controller = ScrollController();
   final TextEditingController controllerText = TextEditingController();
@@ -147,6 +148,9 @@ class _BillingListState extends State<BillingList> {
       }
     });
   }
+
+  Map<String, dynamic> errorServerMessage = {};
+  String? errorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -244,10 +248,17 @@ class _BillingListState extends State<BillingList> {
             });
           } else if (state is UserEditDetailsFailure) {
             setState(() {
+<<<<<<< HEAD
               isInitialLoading = false;
             });
             errorMessage = state.deleteEditFailure['message'];
             print("error>> ${state.deleteEditFailure}");
+=======
+              isLoading = false;
+              isInitialLoading = false;
+            });
+            errorMessage = state.deleteEditFailure['message'];
+>>>>>>> 808415c758239ac2a313c976d44f488f0b64248e
           } else if (state is UserBillingDeleteLoading) {
             setState(() {
               isInitialLoading = false;
@@ -258,6 +269,7 @@ class _BillingListState extends State<BillingList> {
 
             var deleteMessage = state.deleteBillingList['message'];
             print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
+
             BlocProvider.of<AllRequesterBloc>(context)
                 .add(GetBillingListHandler("", pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
@@ -275,6 +287,7 @@ class _BillingListState extends State<BillingList> {
 
             var deleteMessage = state.billingFailure['message'];
             print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
+
             BlocProvider.of<AllRequesterBloc>(context)
                 .add(GetBillingListHandler("", pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
@@ -351,7 +364,11 @@ class _BillingListState extends State<BillingList> {
               ),
             ),
             Expanded(
+<<<<<<< HEAD
               child:isInitialLoading && data.isEmpty
+=======
+              child: isInitialLoading && data.isEmpty
+>>>>>>> 808415c758239ac2a313c976d44f488f0b64248e
                   ? Shimmer.fromColors(
                 baseColor: Colors.grey[300]!,
                 highlightColor: Colors.grey[100]!,
@@ -413,10 +430,16 @@ class _BillingListState extends State<BillingList> {
                   ? const Center(
                 child: Text("No more data.",
                     style: FTextStyle.listTitle),
+<<<<<<< HEAD
               )
                   : ListView.builder(
                           controller: controller,
                           itemCount: data.length +1,
+=======
+              ):  ListView.builder(
+                          controller: controllerI,
+                          itemCount: data.length + (hasMoreData ? 1 : 0),
+>>>>>>> 808415c758239ac2a313c976d44f488f0b64248e
                           // Add one for the loading indicator
                           itemBuilder: (context, index) {
                             if (index < data.length) {
