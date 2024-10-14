@@ -35,7 +35,6 @@ class _ProductServiceState extends State<ProductService> {
   bool isLoading = false;
   bool isInitialLoading = false;
 
-  TextEditingController _editController = TextEditingController();
   final TextEditingController _controller = TextEditingController();
   bool _isTextEmpty = true;
   Map<String, dynamic> errorServerMessage = {};
@@ -137,7 +136,6 @@ class _ProductServiceState extends State<ProductService> {
       });
     });
 
-    _editController = TextEditingController();
     BlocProvider.of<AllRequesterBloc>(context)
         .add(MasterServiceHandler("", pageNo, pageSize));
     paginationCall();
@@ -536,7 +534,7 @@ class _ProductServiceState extends State<ProductService> {
                                           crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                           children: [
-                                            Text("Status: ",
+                                            const Text("Status: ",
                                                 style:
                                                 FTextStyle.listTitle),
                                             GestureDetector(
@@ -768,7 +766,7 @@ class _ProductServiceState extends State<ProductService> {
                   ),
                   child: TextButton(
                     child: isLoading
-                        ? CircularProgressIndicator(color: Colors.white)
+                        ? const CircularProgressIndicator(color: Colors.white)
                         : const Text("OK", style: TextStyle(color: Colors
                         .white)),
                     onPressed: () {

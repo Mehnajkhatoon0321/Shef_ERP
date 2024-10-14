@@ -1518,6 +1518,7 @@ print("RequestData>>>>>>>>>>$request");
             'cate': event.cateName,
             'specification': event.specification,
             'user_id': event.user_id,
+            'id':event.id
 
 
           });

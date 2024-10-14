@@ -4,17 +4,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 import 'package:shef_erp/screen/master/master_list/billing.dart';
 import 'package:shef_erp/utils/colours.dart';
-import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shef_erp/utils/form_field_style.dart';
+import 'package:shef_erp/utils/validator_utils.dart';
+
 class BillingEdit extends StatefulWidget {
   String screenflag;
   String id;
   String billingAddress;
   String address;
 
-   BillingEdit({required this.screenflag,required this.id,required this.billingAddress,required this.address,super.key});
+  BillingEdit(
+      {required this.screenflag,
+      required this.id,
+      required this.billingAddress,
+      required this.address,
+      super.key});
 
   @override
   State<BillingEdit> createState() => _BillingEditState();
@@ -100,35 +107,42 @@ class _BillingEditState extends State<BillingEdit> {
       ],
     ),
   };
-  bool isButtonEnabled = true;
+  bool isButtonEnabled = false;
   bool isLoadingEdit = false;
 
   final formKey = GlobalKey<FormState>();
-  late final TextEditingController editController = TextEditingController();
-  late final TextEditingController descriptionController =
-  TextEditingController();
-  late final TextEditingController addressController =
-  TextEditingController();
+
+  late final TextEditingController billingAddressController =
+      TextEditingController();
+  late final TextEditingController addressController = TextEditingController();
+
+  final GlobalKey<FormFieldState<String>> _billingAddressKey =
+      GlobalKey<FormFieldState<String>>();
+
+  final GlobalKey<FormFieldState<String>> _addressKey =
+      GlobalKey<FormFieldState<String>>();
+
+  final FocusNode _billingFocusNode = FocusNode();
+  final FocusNode _addressFocusNode = FocusNode();
+  bool isEventFieldFocused = false;
+  bool isBillingAddressFieldFocused = false;
+  bool isAddressFieldFocused = false;
 
   void initState() {
     super.initState();
     if (widget.screenflag.isNotEmpty && widget.screenflag == "Edit") {
-
-      descriptionController.text = widget.billingAddress;
+      billingAddressController.text = widget.billingAddress;
       addressController.text = widget.address;
+
+      isButtonEnabled = billingAddressController.text.isNotEmpty &&
+          addressController.text.isNotEmpty;
     }
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
-    var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
-    var displayType = valueType.toString().split('.').last;
-
     return Scaffold(
-      backgroundColor: AppColors.formFieldBorderColour,
+      backgroundColor: AppColors.formFieldBackColour,
       appBar: AppBar(
         centerTitle: true,
         automaticallyImplyLeading: false,
@@ -163,14 +177,12 @@ class _BillingEditState extends State<BillingEdit> {
               });
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) =>  BlocProvider(
-                  create: (context) => AllRequesterBloc(),
-                  child:  BillingList(
-
-                  ),
-                )),
+                MaterialPageRoute(
+                    builder: (context) => BlocProvider(
+                          create: (context) => AllRequesterBloc(),
+                          child: BillingList(),
+                        )),
               );
-
             });
           } else if (state is BillingCreateFailure) {
             setState(() {
@@ -183,18 +195,16 @@ class _BillingEditState extends State<BillingEdit> {
               context,
               'Internet is not connected.',
             );
-          }else if (state is BillingUpdateSuccess) {
+          } else if (state is BillingUpdateSuccess) {
             setState(() {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) =>  BlocProvider(
-                  create: (context) => AllRequesterBloc(),
-                  child:  BillingList(
-
-                  ),
-                )),
+                MaterialPageRoute(
+                    builder: (context) => BlocProvider(
+                          create: (context) => AllRequesterBloc(),
+                          child: BillingList(),
+                        )),
               );
-
             });
           } else if (state is BillingUpdateFailure) {
             setState(() {
@@ -203,153 +213,106 @@ class _BillingEditState extends State<BillingEdit> {
 
             CommonPopups.showCustomPopup(context, state.failureMessage);
           }
-
         },
         child: Padding(
           padding: const EdgeInsets.all(18.0),
           child: Form(
             key: formKey,
+            onChanged: _updateButtonState,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Text("Event Billing Address",
-                        style: FTextStyle.preHeadingStyle)
-
-                ),
+                        style: FTextStyle.preHeadingStyle)),
                 TextFormField(
-                  controller: descriptionController,
-                  decoration: InputDecoration(
-                    hintText: "Enter Billing Address",
-                    hintStyle: FTextStyle.formhintTxtStyle,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.formFieldHintColour, width: 1.0),
+                    key: _billingAddressKey,
+                    focusNode: _billingFocusNode,
+                    controller: billingAddressController,
+                    decoration:
+                        FormFieldStyle.defaultInputEditDecoration.copyWith(
+                      fillColor: Colors.grey[100],
+                      filled: true,
+                      hintText: "Enter Billing Address",
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.formFieldHintColour, width: 1.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.primaryColourDark, width: 1.0),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 13.0, horizontal: 18.0),
-                    fillColor: Colors.grey[100],
-                    filled: true,
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a description';
-                    }
-                    return null;
-                  },
-                ),
+                    onTap: () {
+                      isBillingAddressFieldFocused = true;
+                      isAddressFieldFocused = false;
+                    },
+                    validator: ValidatorUtils.addressValidator),
                 Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text("Address", style: FTextStyle.preHeadingStyle)
-
-                ),
+                    child: Text("Address", style: FTextStyle.preHeadingStyle)),
                 TextFormField(
-                  controller: addressController,
-                  decoration: InputDecoration(
-                    hintText: "Enter Address",
-                    hintStyle: FTextStyle.formhintTxtStyle,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.formFieldHintColour, width: 1.0),
+                    key: _addressKey,
+                    focusNode: _addressFocusNode,
+                    controller: addressController,
+                    decoration:
+                        FormFieldStyle.defaultInputEditDecoration.copyWith(
+                      fillColor: Colors.grey[100],
+                      filled: true,
+                      hintText: "Enter  Address",
                     ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.formFieldHintColour, width: 1.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.primaryColourDark, width: 1.0),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 13.0, horizontal: 18.0),
-                    fillColor: Colors.grey[100],
-                    filled: true,
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a description';
-                    }
-                    return null;
-                  },
-                ),
+                    onTap: () {
+                      isBillingAddressFieldFocused = false;
+                      isAddressFieldFocused = true;
+                    },
+                    validator: ValidatorUtils.addressValidator),
                 const SizedBox(height: 40),
                 Center(
                   child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: SizedBox(
-                        height: (displayType == 'desktop' ||
-                            displayType == 'tablet')
-                            ? 70
-                            : 40,
-                        child: ElevatedButton(
-                            onPressed: isButtonEnabled
-                                ? () async {
-                              setState(() {
-                                isLoadingEdit = true;
-                              });
-                              if(widget.screenflag.isNotEmpty){
-                                BlocProvider.of<AllRequesterBloc>(context)
-                                    .add(
-                                  BillingUpdateEventHandler(
-                                    id: widget.id.toString(),
+                    padding: const EdgeInsets.all(18.0),
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (formKey.currentState!.validate()) {
+                            // All fields are valid, proceed with submission
+                            setState(() {
+                              isLoadingEdit = true; // Start loading
+                            });
 
-                                    billingAddress: descriptionController
-                                        .text
-                                        .toString(),
-                                    address:
-                                    addressController.text.toString(),
-                                  ),
-                                );
-                              }else{
-
-                                BlocProvider.of<AllRequesterBloc>(context)
-                                    .add(
-                                  BillingCreateEventHandler(
-
-                                    billingAddress: descriptionController
-                                        .text
-                                        .toString(),
-                                    address:
-                                    addressController.text.toString(),
-                                  ),
-                                );
-                              }
+                            // Determine whether to update or create a vendor
+                            if (widget.screenflag.isNotEmpty) {
+                              BlocProvider.of<AllRequesterBloc>(context).add(
+                                BillingUpdateEventHandler(
+                                  id: widget.id.toString(),
+                                  billingAddress:
+                                      billingAddressController.text.toString(),
+                                  address: addressController.text.toString(),
+                                ),
+                              );
+                            } else {
+                              BlocProvider.of<AllRequesterBloc>(context).add(
+                                BillingCreateEventHandler(
+                                  billingAddress:
+                                      billingAddressController.text.toString(),
+                                  address: addressController.text.toString(),
+                                ),
+                              );
                             }
-                                : null,
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(26),
-                              ),
-                              backgroundColor: isButtonEnabled
-                                  ? AppColors.primaryColourDark
-                                  : AppColors.disableButtonColor,
-                            ),
-                            child: isLoadingEdit
-                                ? const CircularProgressIndicator(
-                              color: Colors.white,
-                            )
-                                : Text(
-                              "Save",
-                              style: FTextStyle.loginBtnStyle,
-                            )),
-                      )),
+                          } else {
+                            // If any field is invalid, trigger validation error display
+                            formKey.currentState!.validate();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(26),
+                          ),
+                          backgroundColor: isButtonEnabled
+                              ? AppColors.primaryColourDark
+                              : AppColors.formFieldBorderColour,
+                        ),
+                        child: isLoadingEdit
+                            ? CircularProgressIndicator(color: Colors.blue)
+                            : Text("Save", style: FTextStyle.loginBtnStyle),
+                      ),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 20),
               ],
@@ -358,5 +321,19 @@ class _BillingEditState extends State<BillingEdit> {
         ),
       ),
     );
+  }
+
+  void _updateButtonState() {
+    setState(() {
+      isButtonEnabled = ValidatorUtils.isValidAddress(addressController.text) &&
+          ValidatorUtils.isValidAddress(billingAddressController.text);
+
+      if (isBillingAddressFieldFocused == true) {
+        _billingAddressKey.currentState!.validate();
+      }
+      if (isAddressFieldFocused == true) {
+        _addressKey.currentState!.validate();
+      }
+    });
   }
 }

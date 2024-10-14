@@ -324,8 +324,9 @@ class ProductUpdateEventHandler extends AllRequesterEvent {
   final String name;
   final String specification;
   final String user_id;
+  final String id;
 
-  ProductUpdateEventHandler({required this.cateName, required this.name, required this.specification, required this.user_id,});
+  ProductUpdateEventHandler({required this.cateName,required this.id, required this.name, required this.specification, required this.user_id,});
 }
 
 //product status

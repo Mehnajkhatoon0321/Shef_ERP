@@ -425,6 +425,56 @@ class ValidatorUtils {
   }
 //password
 
+  static String? specificationProductValidator(String? value) {
+    // Check if the value is null or empty
+    if (value == null || value.isEmpty) {
+      return 'Specification is required';
+    }
+
+    // Check length (e.g., at least 10 characters)
+    if (value.length < 10) {
+      return 'Specification must be at least 10 characters long';
+    }
+
+    // Return null if all validations pass
+    return null;
+  }
+
+  static bool isValidSpecification(String value) {
+    // Check if the value is null or empty
+    if (value.isEmpty) {
+      return false;
+    }
+
+    // Check length (e.g., at least 10 characters)
+    return value.length >= 10;
+  }
+
+  static String? productNameValidator(String? value) {
+    // Check if the value is null or empty
+    if (value == null || value.isEmpty) {
+      return 'Product name is required';
+    }
+
+    // Check length (e.g., at least 3 characters)
+    if (value.length < 3) {
+      return 'Product name must be at least 3 characters long';
+    }
+
+    // Return null if all validations pass
+    return null;
+  }
+
+  static bool isValidProductName(String value) {
+    // Check if the value is null or empty
+    if (value.isEmpty) {
+      return false;
+    }
+
+    // Check length (e.g., at least 3 characters)
+    return value.length >= 3;
+  }
+
   static String? passwordValidator(String? value) {
     // Check if the value is null or empty
     if (value == null || value.isEmpty) {

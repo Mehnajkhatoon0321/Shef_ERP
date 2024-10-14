@@ -136,19 +136,28 @@ class _EventScreenState extends State<EventScreen> {
 
   void paginationCall() {
     controller.addListener(() {
+      // Check if we've scrolled to the bottom
       if (controller.position.pixels == controller.position.maxScrollExtent) {
+        // Only proceed if we're not already loading and there's more data
         if (!isLoading && hasMoreData) {
+          // Increment the page number and set loading states
           pageNo++;
-
           isInitialLoading = false;
           isLoading = true;
 
+          // Dispatch the event to fetch more data
           BlocProvider.of<AllRequesterBloc>(context)
               .add(EventListHandler("", pageNo, pageSize));
         }
+      } else {
+        // Hide loader and "no more data" when not at max scroll extent
+        isLoading = false;
+        // Optionally, reset the no more data state if you want
+        // hasMoreData = true; // Uncomment if you want to reset when scrolling up
       }
     });
   }
+
 
   Map<String, dynamic> errorServerMessage = {};
   String? errorMessage;
