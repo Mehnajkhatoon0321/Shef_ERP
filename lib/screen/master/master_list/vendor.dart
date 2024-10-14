@@ -422,18 +422,11 @@ class _VendorState extends State<Vendor> {
                 child: Text("No more data.",
                     style: FTextStyle.listTitle),
               ):  ListView.builder(
-<<<<<<< HEAD
+
                 controller: controller,
                 itemCount: data.length +1,
-=======
-<<<<<<< HEAD
-                controller: controller,
-                itemCount: data.length +1,
-=======
-                controller: controllerI,
-                itemCount: data.length + (hasMoreData ? 1 : 0),
->>>>>>> 808415c758239ac2a313c976d44f488f0b64248e
->>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
+
+
                 // Add one for the loading indicator
                 itemBuilder: (context, index) {
                   if (index < data.length) {

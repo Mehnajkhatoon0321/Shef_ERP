@@ -966,12 +966,12 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                 onChanged: (String? eventValue) {
                                   setState(() {
                                     selectedItem = eventValue;
-<<<<<<< HEAD
+
                                     selectedProductId = productMap[eventValue];
-=======
+
                                     selectedProductId=productMap[
                                     eventValue];
->>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
+
 
                                     updateButtonState(); // Call the helper function
                                   });
@@ -1015,12 +1015,11 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                 onChanged: (String? eventValue) {
                                   setState(() {
                                     selectedBilling = eventValue;
-<<<<<<< HEAD
-                                    selectedBillingId = billingMap[eventValue];
-=======
+
+
                                     selectedBillingId = billingMap[
                                     eventValue];
->>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
+
                                     updateButtonState(); // Call the helper function
                                   });
                                 },

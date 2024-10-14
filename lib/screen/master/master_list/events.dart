@@ -359,16 +359,10 @@ class _EventScreenState extends State<EventScreen> {
                   itemCount: 10, // Number of shimmer placeholders
                   itemBuilder: (context, index) {
                     return Padding(
-<<<<<<< HEAD
-                      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
-=======
-<<<<<<< HEAD
-                      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
-=======
+
                       padding: EdgeInsets.symmetric(
                           horizontal: screenWidth * 0.03, vertical: 5),
->>>>>>> 808415c758239ac2a313c976d44f488f0b64248e
->>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
+
                       child: Container(
                         margin: const EdgeInsets.all(8),
                         padding: const EdgeInsets.all(7),
@@ -388,10 +382,7 @@ class _EventScreenState extends State<EventScreen> {
                           children: [
                             Expanded(
                               child: Column(
-<<<<<<< HEAD
-                                crossAxisAlignment: CrossAxisAlignment.start,
-=======
-<<<<<<< HEAD
+
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Container(height: 10, color: Colors.grey),
@@ -399,28 +390,12 @@ class _EventScreenState extends State<EventScreen> {
                                   Container(height: 10, color: Colors.grey),
                                   const SizedBox(height: 5),
                                   Container(height: 10, color: Colors.grey),
-=======
-                                crossAxisAlignment:
-                                CrossAxisAlignment.start,
->>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
-                                children: [
-                                  Container(height: 10, color: Colors.grey),
-                                  const SizedBox(height: 5),
-                                  Container(height: 10, color: Colors.grey),
-                                  const SizedBox(height: 5),
-<<<<<<< HEAD
-                                  Container(height: 10, color: Colors.grey),
-=======
-                                  Container(
-                                      height: 10, color: Colors.grey),
->>>>>>> 808415c758239ac2a313c976d44f488f0b64248e
->>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
-                                ],
+
+                               ]
                               ),
                             ),
                           ],
-<<<<<<< HEAD
-=======
+
                         ),
                       ),
                     );
@@ -469,7 +444,7 @@ class _EventScreenState extends State<EventScreen> {
                                     ),
                                   ],
                                 ),
-<<<<<<< HEAD
+
                                 child: Column(
                                   children: [
                                     Column(
@@ -524,8 +499,8 @@ class _EventScreenState extends State<EventScreen> {
                         ),
                       ),
                     );
-=======
-                              );
+
+
                             }
                             if (hasMoreData && index == data.length) {
                               return const Center(
@@ -537,126 +512,16 @@ class _EventScreenState extends State<EventScreen> {
                                 child: Text("No more data.",
                                     style: FTextStyle.listTitle));
                           },
->>>>>>> 808415c758239ac2a313c976d44f488f0b64248e
+
                         ),
                       ),
-                    );
-                  },
-                ),
-              )
-                  : (errorMessage != null || errorServerMessage.isNotEmpty)
-                  ? Center(
-                child: Text(
-                  errorMessage ?? errorServerMessage.toString(),
-                  style: FTextStyle.listTitle,
-                  textAlign: TextAlign.center,
-                ),
-              )
-                  : (data.isEmpty)
-                  ? const Center(
-                child: Text("No more data.", style: FTextStyle.listTitle),
-              )
-                  : ListView.builder(
-                controller: controller,
-                  itemCount: data.length +1,// Loader condition
-                itemBuilder: (context, index) {
-                  if (index < data.length) {
-                    final item = data[index];
-                    return GestureDetector(
-                      onTap: () {
-                        // Handle tap event if needed
-                      },
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.03, vertical: 5),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                margin: const EdgeInsets.all(2),
-                                padding: const EdgeInsets.all(7),
-                                decoration: BoxDecoration(
-                                  color: index % 2 == 0 ? Colors.white : Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors.primaryColourDark,
-                                      spreadRadius: 1.5,
-                                      blurRadius: 0.4,
-                                      offset: const Offset(0, 0.9),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            const Text("ID: ", style: FTextStyle.listTitle),
-                                            Text("${index + 1}", style: FTextStyle.listTitleSub),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            const Text("Name: ", style: FTextStyle.listTitle),
-                                            Expanded(child: Text("${item["name"]}", style: FTextStyle.listTitleSub)),
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.end,
-                                          crossAxisAlignment: CrossAxisAlignment.end,
-                                          children: [
-                                            IconButton(
-                                              icon: const Icon(Icons.edit, color: Colors.black),
-                                              onPressed: () => _showCategoryDialog(
-                                                  BlocProvider.of<AllRequesterBloc>(context),
-                                                  context,
-                                                  isEditing: true,
-                                                  index: index),
-                                            ),
-                                            IconButton(
-                                              icon: const Icon(Icons.delete, color: Colors.red),
-                                              onPressed: () {
-                                                CommonPopups.showDeleteCustomPopup(
-                                                  context,
-                                                  "Are you sure you want to delete?",
-                                                      () {
-                                                    BlocProvider.of<AllRequesterBloc>(context)
-                                                        .add(DeleteEventHandlers(data[index]['id']));
-                                                  },
-                                                );
-                                              },
-                                            ),
-                                          ],
-                                        ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                                      ],
-                                    ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
->>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
-                  }
-                  if (hasMoreData && isLoading) {
-                    return const Center(child: CircularProgressIndicator()); // Loader
-                  }
+                   ] )
 
-                  // If there's no more data to load, show a message
-                  return const Center(child: Text("No more data.", style: FTextStyle.listTitle));
-                },
-              ),
-            ),
+                ),
+              );
 
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
+
+
   }
 
   void _clearText() {
@@ -857,15 +722,14 @@ class _EventScreenState extends State<EventScreen> {
                           // TODO: implement listener
                         },
                         child: TextButton(
-<<<<<<< HEAD
-=======
+
                           child: isLoadingCreate
                               ? CircularProgressIndicator(color: Colors.white)
                               : Text(
                             isEditing ? "Save" : "Add",
                             style: TextStyle(color: Colors.white),
                           ),
->>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
+
                           onPressed: isButtonEnabled
                               ? () {
                             if (_formKey.currentState?.validate() ??
@@ -886,12 +750,7 @@ class _EventScreenState extends State<EventScreen> {
                             }
                           }
                               : null,
-                          child: isLoadingCreate
-                              ? const CircularProgressIndicator(color: Colors.white)
-                              : Text(
-                            isEditing ? "Save" : "Add",
-                            style: const TextStyle(color: Colors.white),
-                          ),
+
                         ),
                       ).animateOnPageLoad(
                           animationsMap['imageOnPageLoadAnimation2']!),

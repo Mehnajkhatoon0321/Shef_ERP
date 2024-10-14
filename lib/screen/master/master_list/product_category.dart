@@ -204,7 +204,8 @@ class _ProductCategoryState extends State<ProductCategory> {
             setState(() {
               isInitialLoading = true;
             });
-          } else if (state is ServiceCategorySuccess) {
+          }
+          else if (state is ServiceCategorySuccess) {
             setState(() {
               var responseData = state.serviceCategoryList['list'];
               print(">>>>>>>>>>>ALLDATA$responseData");
@@ -224,20 +225,24 @@ class _ProductCategoryState extends State<ProductCategory> {
                 hasMoreData = false;
               }
             });
-          } else if (state is EventFailure) {
+          }
+          else if (state is EventFailure) {
             setState(() {
               isLoading = false;
               isInitialLoading = false;
             });
             errorMessage = state.eventFailure['message'];
 
-          } else if (state is DeleteServiceCategoryLoading) {
+          }
+          else if (state is DeleteServiceCategoryLoading) {
             DeletePopupManager.playLoader();
-          } else if (state is DeleteServiceCategorySuccess) {
+          }
+          else if (state is DeleteServiceCategorySuccess) {
             DeletePopupManager.stopLoader();
 
             var deleteMessage = state.deleteEventCategoryList['message'];
-
+            BlocProvider.of<AllRequesterBloc>(context)
+                .add(GetProductCategoryHandler("", pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(deleteMessage),
@@ -248,7 +253,8 @@ class _ProductCategoryState extends State<ProductCategory> {
             Future.delayed(const Duration(milliseconds: 500), () {
               Navigator.pop(context);
             });
-          } else if (state is DeleteEventCategoryFailure) {
+          }
+          else if (state is DeleteEventCategoryFailure) {
             DeletePopupManager.stopLoader();
 
             var deleteMessage = state.deleteEventCategoryFailure['message'];
@@ -266,43 +272,10 @@ class _ProductCategoryState extends State<ProductCategory> {
             Future.delayed(const Duration(milliseconds: 500), () {
               Navigator.pop(context);
             });
-          } else if (state is CreateCategoryLoading) {
-            setState(() {
-              isLoadingCreate = true;
-            });
-          } else if (state is CreateCategorySuccess) {
-            isLoadingCreate = false;
-
-            var deleteMessage = state.createResponse['message'];
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(deleteMessage),
-                backgroundColor: AppColors.primaryColour,
-              ),
-            );
-
-            Future.delayed(const Duration(milliseconds: 500), () {
-              Navigator.pop(context);
-            });
-          } else if (state is CreateCategoryFailure) {
-            var deleteMessage = state.failureMessage;
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(deleteMessage),
-                backgroundColor: AppColors.primaryColour,
-              ),
-            );
-
-            Future.delayed(const Duration(milliseconds: 500), () {
-              Navigator.pop(context);
-            });
-            setState(() {
-              isLoadingCreate = false;
-            });
-            print("error>> ${state.failureMessage}");
           }
+
+
+
           // TODO: implement listener
         },
         child: Column(
@@ -361,7 +334,7 @@ class _ProductCategoryState extends State<ProductCategory> {
                       _isTextEmpty = value.isEmpty;
                       searchQuery = value;
                       BlocProvider.of<AllRequesterBloc>(context).add(
-                          MasterServiceHandler(searchQuery, pageNo, pageSize));
+                          GetProductCategoryHandler(searchQuery, pageNo, pageSize));
                     });
                   },
                 ),
@@ -393,62 +366,23 @@ class _ProductCategoryState extends State<ProductCategory> {
                             ),
                           ],
                         ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment:
-                                CrossAxisAlignment.start,
-                                children: [
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
-                                  Container(
-                                      height: 10, color: Colors.grey),
-                                  const SizedBox(height: 5),
-                                  Container(
-                                      height: 10, color: Colors.grey),
-                                  const SizedBox(height: 5),
-                                  Container(
-                                      height: 10, color: Colors.grey),
-<<<<<<< HEAD
-=======
-=======
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                            height: 10, color: Colors.grey),
-                                        const SizedBox(height: 5),
-                                        Container(
-                                            height: 10, color: Colors.grey),
-                                        const SizedBox(height: 5),
-                                        Container(
-                                            height: 10, color: Colors.grey),
-                                      ],
-                                    ),
-                                  ),
->>>>>>> 808415c758239ac2a313c976d44f488f0b64248e
->>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
-                                ],
-                              ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: List.generate(6, (index) => // Generate placeholders
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 5),
+                            child: Container(
+                              height: 10,
+                              color: Colors.grey,
                             ),
-                          ],
+                          ),
+                          ),
                         ),
                       ),
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
                     );
                   },
                 ),
               )
-<<<<<<< HEAD
-=======
                   : (errorMessage != null || errorServerMessage.isNotEmpty)
                   ? Center(
                 child: Text(
@@ -459,11 +393,10 @@ class _ProductCategoryState extends State<ProductCategory> {
               )
                   : (data.isEmpty)
                   ? const Center(
-                child: Text("No more data.",
-                    style: FTextStyle.listTitle),
+                child: Text("No more data.", style: FTextStyle.listTitle),
               )
                   : ListView.builder(
-                  itemCount: data.length +1,
+                itemCount: data.length + 1,
                 controller: controllerI,
                 itemBuilder: (context, index) {
                   if (index < data.length) {
@@ -474,326 +407,88 @@ class _ProductCategoryState extends State<ProductCategory> {
                       },
                       child: Padding(
                         padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.03,
-                            vertical: 5),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                margin: const EdgeInsets.all(2),
-                                padding: const EdgeInsets.all(7),
-                                decoration: BoxDecoration(
-                                  color: index % 2 == 0
-                                      ? Colors.white
-                                      : Colors.white,
-                                  borderRadius:
-                                  BorderRadius.circular(10),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors
-                                          .primaryColourDark,
-                                      spreadRadius: 1.5,
-                                      blurRadius: 0.4,
-                                      offset:
-                                      const Offset(0, 0.9),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment
-                                          .start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            const Text("ID: ",
-                                                style: FTextStyle
-                                                    .listTitle),
-                                            Text("${item["id"]}",
-                                                style: FTextStyle
-                                                    .listTitleSub),
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment
-                                              .spaceBetween,
-                                          crossAxisAlignment:
-                                          CrossAxisAlignment
-                                              .start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                const Text(
-                                                    "Name: ",
-                                                    style: FTextStyle
-                                                        .listTitle),
-                                                Text(
-                                                    "${item["cate_name"]}",
-                                                    style: FTextStyle
-                                                        .listTitleSub),
-                                              ],
-                                            ),
-                                            Row(
-                                              children: [
-                                                IconButton(
-                                                  icon: const Icon(
-                                                      Icons.edit,
-                                                      color: Colors
-                                                          .black),
-                                                  onPressed: () => _showCategoryDialog(
-                                                      BlocProvider.of<
-                                                          AllRequesterBloc>(
-                                                          context),
-                                                      context,
-                                                      isEditing:
-                                                      true,
-                                                      index:
-                                                      index),
-                                                ),
-                                                IconButton(
-                                                  icon: const Icon(
-                                                      Icons
-                                                          .delete,
-                                                      color: Colors
-                                                          .red),
-                                                  onPressed: () {
-                                                    final localContext =
-                                                        context; // Capture context
-
-                                                    CommonPopups
-                                                        .showDeleteCustomPopup(
-                                                      localContext,
-                                                      "Are you sure you want to delete?",
-                                                          () async {
-                                                        await Future.delayed(const Duration(
-                                                            seconds:
-                                                            1));
-
-                                                        if (!mounted)
-                                                          return; // Check if still mounted
-
-                                                        BlocProvider.of<AllRequesterBloc>(
-                                                            localContext)
-                                                            .add(
-                                                          DeleteMasterCategoryHandlers(data[index]
-                                                          [
-                                                          'id']),
-                                                        );
-                                                        // BlocProvider.of<AllRequesterBloc>(context).add(DeleteMasterCategoryHandlers(data[index]['id']));
-                                                        // print("================");
-                                                      },
-                                                    );
-                                                  },
-                                                ),
-                                              ],
-                                            ).animateOnPageLoad(
-                                                animationsMap[
-                                                'imageOnPageLoadAnimation2']!),
-                                          ],
-                                        ),
-                                      ],
-                                    ).animateOnPageLoad(animationsMap[
-                                    'imageOnPageLoadAnimation2']!),
-                                  ],
-                                ),
+                            horizontal: screenWidth * 0.03, vertical: 5),
+                        child: Container(
+                          margin: const EdgeInsets.all(2),
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primaryColourDark,
+                                spreadRadius: 1.5,
+                                blurRadius: 0.4,
+                                offset: const Offset(0, 0.9),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Text("ID: ", style: FTextStyle.listTitle),
+                                  Text("${item["id"]}", style: FTextStyle.listTitleSub),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Text("Name: ", style: FTextStyle.listTitle),
+                                      Text("${item["cate_name"]}", style: FTextStyle.listTitleSub),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.edit, color: Colors.black),
+                                        onPressed: () => _showCategoryDialog(
+                                            BlocProvider.of<AllRequesterBloc>(context),
+                                            context,
+                                            isEditing: true,
+                                            index: index),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete, color: Colors.red),
+                                        onPressed: () {
+                                          final localContext = context; // Capture context
+                                          CommonPopups.showDeleteCustomPopup(
+                                            localContext,
+                                            "Are you sure you want to delete?",
+                                                () async {
+                                              await Future.delayed(const Duration(seconds: 1));
+                                              if (!mounted) return; // Check if still mounted
+                                              BlocProvider.of<AllRequesterBloc>(localContext).add(
+                                                DeleteMasterCategoryHandlers(data[index]['id']),
+                                              );
+                                            },
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );
                   }
                   if (hasMoreData && index == data.length) {
-                    return const Center(
-                        child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }
-
-                  // If there's no more data to load, show a message
                   return const Center(
-                      child: Text("No more data.",
-                          style: FTextStyle.listTitle));
+                    child: Text("No more data.", style: FTextStyle.listTitle),
+                  );
                 },
               ),
-=======
-                    )
->>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
-                  : (errorMessage != null || errorServerMessage.isNotEmpty)
-                  ? Center(
-                child: Text(
-                  errorMessage ?? errorServerMessage.toString(),
-                  style: FTextStyle.listTitle,
-                  textAlign: TextAlign.center,
-                ),
-              )
-                  : (data.isEmpty)
-                  ? const Center(
-                child: Text("No more data.",
-                    style: FTextStyle.listTitle),
-              )
-                  : ListView.builder(
-                  itemCount: data.length +1,
-                controller: controllerI,
-                itemBuilder: (context, index) {
-                  if (index < data.length) {
-                    final item = data[index];
-                    return GestureDetector(
-                      onTap: () {
-                        // Handle tap event if needed
-                      },
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.03,
-                            vertical: 5),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                margin: const EdgeInsets.all(2),
-                                padding: const EdgeInsets.all(7),
-                                decoration: BoxDecoration(
-                                  color: index % 2 == 0
-                                      ? Colors.white
-                                      : Colors.white,
-                                  borderRadius:
-                                  BorderRadius.circular(10),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: AppColors
-                                          .primaryColourDark,
-                                      spreadRadius: 1.5,
-                                      blurRadius: 0.4,
-                                      offset:
-                                      const Offset(0, 0.9),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment
-                                          .start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            const Text("ID: ",
-                                                style: FTextStyle
-                                                    .listTitle),
-                                            Text("${item["id"]}",
-                                                style: FTextStyle
-                                                    .listTitleSub),
-                                          ],
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment
-                                              .spaceBetween,
-                                          crossAxisAlignment:
-                                          CrossAxisAlignment
-                                              .start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                const Text(
-                                                    "Name: ",
-                                                    style: FTextStyle
-                                                        .listTitle),
-                                                Text(
-                                                    "${item["cate_name"]}",
-                                                    style: FTextStyle
-                                                        .listTitleSub),
-                                              ],
-                                            ),
-                                            Row(
-                                              children: [
-                                                IconButton(
-                                                  icon: const Icon(
-                                                      Icons.edit,
-                                                      color: Colors
-                                                          .black),
-                                                  onPressed: () => _showCategoryDialog(
-                                                      BlocProvider.of<
-                                                          AllRequesterBloc>(
-                                                          context),
-                                                      context,
-                                                      isEditing:
-                                                      true,
-                                                      index:
-                                                      index),
-                                                ),
-                                                IconButton(
-                                                  icon: const Icon(
-                                                      Icons
-                                                          .delete,
-                                                      color: Colors
-                                                          .red),
-                                                  onPressed: () {
-                                                    final localContext =
-                                                        context; // Capture context
+            )
 
-                                                    CommonPopups
-                                                        .showDeleteCustomPopup(
-                                                      localContext,
-                                                      "Are you sure you want to delete?",
-                                                          () async {
-                                                        await Future.delayed(const Duration(
-                                                            seconds:
-                                                            1));
-
-                                                        if (!mounted)
-                                                          return; // Check if still mounted
-
-                                                        BlocProvider.of<AllRequesterBloc>(
-                                                            localContext)
-                                                            .add(
-                                                          DeleteMasterCategoryHandlers(data[index]
-                                                          [
-                                                          'id']),
-                                                        );
-                                                        // BlocProvider.of<AllRequesterBloc>(context).add(DeleteMasterCategoryHandlers(data[index]['id']));
-                                                        // print("================");
-                                                      },
-                                                    );
-                                                  },
-                                                ),
-                                              ],
-                                            ).animateOnPageLoad(
-                                                animationsMap[
-                                                'imageOnPageLoadAnimation2']!),
-                                          ],
-                                        ),
-                                      ],
-                                    ).animateOnPageLoad(animationsMap[
-                                    'imageOnPageLoadAnimation2']!),
-                                  ],
-                                ),
-                              ),
-                            ),
-<<<<<<< HEAD
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                  if (hasMoreData && index == data.length) {
-                    return const Center(
-                        child: CircularProgressIndicator());
-                  }
-
-                  // If there's no more data to load, show a message
-                  return const Center(
-                      child: Text("No more data.",
-                          style: FTextStyle.listTitle));
-                },
-              ),
-=======
->>>>>>> 808415c758239ac2a313c976d44f488f0b64248e
->>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
-            ),
-            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -805,12 +500,13 @@ class _ProductCategoryState extends State<ProductCategory> {
     setState(() {
       _isTextEmpty = true;
       BlocProvider.of<AllRequesterBloc>(context)
-          .add(MasterServiceHandler("", pageNo, pageSize));
+          .add(GetProductCategoryHandler("", pageNo, pageSize));
     });
   }
 
   Future<bool?> _showCategoryDialog(AllRequesterBloc of, BuildContext context,
-      {bool isEditing = false, int? index}) async {
+      {bool isEditing = false, int? index}) async
+  {
     final _formKey = GlobalKey<FormState>();
     final _editController =
     TextEditingController(text: isEditing ? data[index!]["cate_name"] : '');
@@ -1003,14 +699,9 @@ class _ProductCategoryState extends State<ProductCategory> {
                         ),
                         onPressed: isButtonEnabled
                             ? () {
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
-                          if (_formKey.currentState?.validate() ??
-                              false) {
+
+                          if (_formKey.currentState?.validate() ?? false) {
                             if (mounted) {
-                              // Check if the widget is still mounted
                               if (isEditing) {
                                 of.add(CategoryUpdateEventHandler(
                                   category: _editController.text,
@@ -1019,42 +710,16 @@ class _ProductCategoryState extends State<ProductCategory> {
                                 ));
                               } else {
                                 of.add(CategoryCreateEventHandler(
-                                    category: _editController.text));
-<<<<<<< HEAD
+                                  category: _editController.text,
+                                ));
                               }
                             }
                           }
                         }
-=======
-                              }
-                            }
-                          }
-                        }
-=======
-                                if (_formKey.currentState?.validate() ??
-                                    false) {
-                                  if (mounted) {
-                                    // Check if the widget is still mounted
-                                    if (isEditing) {
-                                      of.add(CategoryUpdateEventHandler(
-                                        category: _editController.text,
-                                        userId: PrefUtils.getUserId(),
-                                        id: data[index!]["id"],
-                                      ));
-                                    } else {
-                                      of.add(CategoryCreateEventHandler(
-                                          category: _editController.text));
-                                    }
-                                  }
-                                }
-                              }
->>>>>>> 808415c758239ac2a313c976d44f488f0b64248e
->>>>>>> b3b5ec6f489cb43e2f3167321288507cdb0f4b55
-                            : null,
-                      ).animateOnPageLoad(
-                          animationsMap['imageOnPageLoadAnimation2']!),
+                            : null, // Disable button if not enabled
+                      ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation1']!);
@@ -1062,5 +727,6 @@ class _ProductCategoryState extends State<ProductCategory> {
         );
       },
     );
+
   }
 }
