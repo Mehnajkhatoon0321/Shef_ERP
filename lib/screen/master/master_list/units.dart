@@ -439,7 +439,7 @@ class _UnitsState extends State<Units> {
                                         decoration: BoxDecoration(
                                           color: index % 2 == 0
                                               ? Colors.white
-                                              : Colors.grey[200],
+                                              : Colors.white,
                                           borderRadius:
                                               BorderRadius.circular(10),
                                           boxShadow: const [

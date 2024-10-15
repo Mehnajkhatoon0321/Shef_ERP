@@ -1458,7 +1458,7 @@ print("RequestData>>>>>>>>>>$request");
             'name': event.name,
             'cate': event.cateName,
             'specification': event.specification,
-            'user_id': event.user_id,
+            'user_id': PrefUtils.getUserId().toString(),
 
 
           });

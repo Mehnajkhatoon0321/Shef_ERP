@@ -157,17 +157,21 @@ class _VendorEditState extends State<VendorEdit> {
           .add(VendorUserHandler(widget.id));
     }
   }
-
-  String? fileUploadValidator(String? value) {
-    if (value == null || value.isEmpty) {
+  String? fileUploadValidator(String? filePath, {int? fileSize}) {
+    if (filePath == null || filePath.isEmpty) {
       return 'Please upload a file.';
     }
 
     final validFileExtensions = ['pdf', 'jpeg', 'jpg', 'png'];
-    final fileExtension = value.split('.').last.toLowerCase();
+    final fileExtension = filePath.split('.').last.toLowerCase();
 
     if (!validFileExtensions.contains(fileExtension)) {
       return 'Invalid file type. Only pdf, jpeg, jpg, and png are allowed.';
+    }
+
+    // Check file size if it's provided
+    if (fileSize != null && fileSize > 2 * 1024 * 1024) { // 2 MB in bytes
+      return 'File size exceeds 2 MB.';
     }
 
     return null; // Return null if validation passes
@@ -562,10 +566,11 @@ class _VendorEditState extends State<VendorEdit> {
                   TextFormField(
                     key: _emailKey,
                     focusNode: _emailFocusNode,
+                    readOnly: widget.screenFlag.isNotEmpty?true:false,
                     keyboardType: TextInputType.emailAddress,
                     decoration:
                         FormFieldStyle.defaultInputEditDecoration.copyWith(
-                      fillColor: Colors.grey[100],
+                      fillColor: widget.screenFlag.isNotEmpty?AppColors.formFieldBorderColour: Colors.grey[100],
                       filled: true,
                       hintText: "Enter Email",
                     ),

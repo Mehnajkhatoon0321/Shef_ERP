@@ -494,7 +494,7 @@ class _LogScreenState extends State<LogScreen> {
                                       : AppColors.formFieldBorderColour,
                                 ),
                                 child: isLoading
-                                    ? CircularProgressIndicator(color: Colors.blue)
+                                    ? CircularProgressIndicator(color: Colors.white)
                                     : Text("Save", style: FTextStyle.loginBtnStyle),
                               ),
                             ),

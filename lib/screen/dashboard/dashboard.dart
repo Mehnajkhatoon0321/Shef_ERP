@@ -34,17 +34,31 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  List<Map<String, dynamic>> _items = [
+  final List<Map<String, dynamic>> _items = [
     {
-      "title": "All Requisitions",
+      "title": "All Requisition",
       "total": "21",
-      "image": "https://via.placeholder.com/150"
+      "icon": Icons.data_thresholding_rounded,
+      'color': Colors.blue,
     },
     {
-      "title": "Today's Requisitions",
+      "title": "Today's Requisition",
       "total": "12",
-      "image": "https://via.placeholder.com/150"
+      "icon": Icons.today,
+      'color': Colors.yellow,
     },
+    {
+      "title": "Pending Requisition",
+      "total": "33",
+      "icon": Icons.pending_actions,
+      'color': Colors.red,
+    },
+    {
+      "title": "Delivered Requisition",
+      "total": "4",
+      "icon": Icons.check_circle,
+      'color': Colors.green,
+    }
   ];
 
   String? userRole;
@@ -73,8 +87,20 @@ class _DashboardState extends State<Dashboard> {
     return (await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title:  Text('Exit Confirmation',style: FTextStyle.FaqsTxtStyle,),
-        content:  const Text('Do you really want to exit the app?',style: FTextStyle.listTitle),
+        title: Row(
+          children: [
+            Icon(Icons.exit_to_app, color: Theme.of(context).primaryColor),
+            SizedBox(width: 8), // Add some space between icon and title
+            Text(
+              'Exit Confirmation',
+              style: FTextStyle.FaqsTxtStyle,
+            ),
+          ],
+        ),
+        content: const Text(
+          'Do you really want to exit the app?',
+          style: FTextStyle.listTitle,
+        ),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(false), // Don't exit
@@ -86,8 +112,7 @@ class _DashboardState extends State<Dashboard> {
           ),
         ],
       ),
-    )) ??
-        false; // Return false if the dialog was dismissed without a choice
+    )) ?? false; // Return false if the dialog was dismissed without a choice
   }
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
@@ -322,51 +347,80 @@ class _DashboardState extends State<Dashboard> {
                 ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 10, top: 20),
+                    padding: const EdgeInsets.only(bottom: 10, top: 15),
                     child: GridView.builder(
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2, // Number of columns
-                        childAspectRatio: 1.8, // Aspect ratio of each grid item
-                        crossAxisSpacing: 13, // Space between columns
-                        mainAxisSpacing: 16, // Space between rows
+                      gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 1.7,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 14,
                       ),
-                      itemCount: _items.length, // Number of items
+                      itemCount: _items.length,
                       itemBuilder: (context, index) {
                         final item = _items[index];
-                        bool isEvenIndex = index % 3 == 0;
 
                         return Container(
-
                           decoration: BoxDecoration(
-
                             color: Colors.white,
                             border: Border.all(
-                                color:  AppColors.primaryColourDark , // Border color
-                                width: 1 // Border width
+                              color: AppColors.primaryColourDark,
+                              width: 1,
                             ),
-                            boxShadow: [
+                            boxShadow: const [
                               BoxShadow(
                                 color: AppColors.primaryColourDark,
                                 spreadRadius: 1,
                                 blurRadius: 3,
-                                offset: const Offset(0, 0.5),
+                                offset: Offset(0, 0.5),
                               ),
                             ],
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                          child: Stack(
                             children: [
-                              Text(
-                                  item['total'], // Title from JSON
-                                  style:FTextStyle.authlogin_signupTxtStyle.copyWith(fontSize: 20)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 7.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      item['total'],
+                                      style: FTextStyle
+                                          .authlogin_signupTxtStyle
+                                          .copyWith(
+                                          color:
+                                          AppColors.primaryColourDark,
+                                          fontSize: 24),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      item['title'],
+                                      style: FTextStyle
+                                          .authlogin_signupTxtStyle
+                                          .copyWith(
+                                          color: AppColors
+                                              .formFieldHintColour),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
                               ),
-                              const SizedBox(height: 20,),
-                              Text(
-                                item['title'], // Title from JSON
-                                style:FTextStyle.authlogin_signupTxtStyle,
-                                overflow:TextOverflow.ellipsis,
+                              Positioned(
+                                right: 14,
+                                top: 9,
+                                child: Icon(
+                                  item['icon'],
+                                  size: 29, // Same icon for the corner
+                                  color: item['color'],
+                                ),
                               ),
                             ],
                           ),

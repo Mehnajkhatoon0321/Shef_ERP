@@ -236,7 +236,7 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
           } else if (state is ProductEditListLoading) {
             setState(() {
               isLoadingEdit = true;
-              isEditDetails = true;
+              isEditDetails = false;
             });
           } else if (state is ProductEditListSuccess) {
             setState(() {
@@ -245,12 +245,18 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
 
               responseData = state.userEditDeleteList;
 
+
+
+
+
               listData = state.userEditDeleteList['list'];
 
               // If screenflag is empty, fallback to previous logic or data
               UnitNames = listData
                   .map<String>((item) => item['cate_name'] as String)
                   .toList();
+
+
             });
           } else if (state is ProductEditListFailure) {
             setState(() {
@@ -267,15 +273,27 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
           } else if (state is CreateProductSuccess) {
             setState(() {
               isLoadingEdit = false;
+              var     messageSuccess=state.createList['message'];
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => BlocProvider(
-                          create: (context) => AllRequesterBloc(),
-                          child: const ProductService(),
-                        )),
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(messageSuccess),
+                  backgroundColor: AppColors.primaryColour,
+                ),
               );
+
+              Future.delayed(const Duration(milliseconds: 500), () {
+                Navigator.pop(context);
+              });
+
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //       builder: (context) => BlocProvider(
+              //             create: (context) => AllRequesterBloc(),
+              //             child: const ProductService(),
+              //           )),
+              // );
             });
           } else if (state is CreateProductFailure) {
             setState(() {
@@ -283,7 +301,7 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
             });
 
             CommonPopups.showCustomPopup(
-                context, state.createFailure.toString());
+                context, state.createFailure['message'].toString());
           } else if (state is UpdateProductSuccess) {
             setState(() {
               isLoadingEdit = false;
@@ -303,7 +321,7 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
             });
 
             CommonPopups.showCustomPopup(
-                context, state.updateFailure.toString());
+                context, state.updateFailure['message'].toString());
           }
           //create product
         },
@@ -454,19 +472,6 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
                               if (widget.screenflag.isNotEmpty) {
                                 BlocProvider.of<AllRequesterBloc>(context)
                                     .add(
-                                  ProductCreateEventHandler(
-                                      cateName: selectedUnitId.toString(),
-                                      name: descriptionController.text
-                                          .toString(),
-                                      user_id: PrefUtils.getUserId()
-                                          .toString(),
-                                      specification: addressController
-                                          .text
-                                          .toString()),
-                                );
-                              } else {
-                                BlocProvider.of<AllRequesterBloc>(context)
-                                    .add(
                                   ProductUpdateEventHandler(
                                       cateName: selectedUnitId.toString(),
                                       name: descriptionController.text
@@ -476,6 +481,20 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
                                       specification: addressController
                                           .text
                                           .toString(), id: widget.id),
+                                );
+
+                              } else {
+                                BlocProvider.of<AllRequesterBloc>(context)
+                                    .add(
+                                  ProductCreateEventHandler(
+                                      cateName: selectedUnitId.toString(),
+                                      name: descriptionController.text
+                                          .toString(),
+                                      user_id: PrefUtils.getUserId()
+                                          .toString(),
+                                      specification: addressController
+                                          .text
+                                          .toString()),
                                 );
                               }
                             } else {

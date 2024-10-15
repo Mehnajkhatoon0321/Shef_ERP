@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:pie_chart/pie_chart.dart';
 import 'package:shef_erp/all_bloc/authflow/auth_flow_bloc.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 
@@ -29,6 +30,7 @@ import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 import 'package:shef_erp/utils/pref_utils.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 import 'dashboard.dart';
 
@@ -41,26 +43,30 @@ class AdminDashboard extends StatefulWidget {
 
 class _AdminDashboardState extends State<AdminDashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final List<dynamic> _items = [
+  final List<Map<String, dynamic>> _items = [
     {
-      "title": "All Requisitions",
+      "title": "All Requisition",
       "total": "21",
-      "image": "https://via.placeholder.com/150"
+      "icon": Icons.data_thresholding_rounded,
+      'color': Colors.blue,
     },
     {
-      "title": "Today,s Requisitions",
+      "title": "Today's Requisition",
       "total": "12",
-      "image": "https://via.placeholder.com/150"
+      "icon": Icons.today,
+      'color': Colors.yellow,
     },
     {
-      "title": "Pending Requisitions",
+      "title": "Pending Requisition",
       "total": "33",
-      "image": "https://via.placeholder.com/150"
+      "icon": Icons.pending_actions,
+      'color': Colors.red,
     },
     {
       "title": "Delivered Requisition",
       "total": "4",
-      "image": "https://via.placeholder.com/150"
+      "icon": Icons.check_circle,
+      'color': Colors.green,
     }
   ];
 
@@ -109,28 +115,38 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   Future<bool> _showExitConfirmation(BuildContext context) async {
     return (await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: Text(
+      context: context,
+
+
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.exit_to_app, color: Theme.of(context).primaryColor),
+            SizedBox(width: 8), // Add some space between icon and title
+            Text(
               'Exit Confirmation',
               style: FTextStyle.FaqsTxtStyle,
             ),
-            content: const Text('Do you really want to exit the app?',
-                style: FTextStyle.listTitle),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false), // Don't exit
-                child: const Text('No'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(true), // Exit
-                child: const Text('Yes'),
-              ),
-            ],
+          ],
+        ),
+        content: const Text(
+          'Do you really want to exit the app?',
+          style: FTextStyle.listTitle,
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false), // Don't exit
+            child: const Text('No'),
           ),
-        )) ??
-        false; // Return false if the dialog was dismissed without a choice
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true), // Exit
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    )) ?? false; // Return false if the dialog was dismissed without a choice
   }
+
 
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
@@ -210,9 +226,36 @@ class _AdminDashboardState extends State<AdminDashboard> {
       ],
     ),
   };
+  Map<String, double> dataMap = {
+    "All ": 30,
+    "Today's ": 25,
+    "Pending ": 20,
+    "Delivered ": 25,
+  };
+
+  // Define the colors for each segment
+  List<Color> colorList = [
+    Colors.yellow,
+    Colors.red,
+    Colors.green,
+    Colors.blue,
+  ];
+
+
 
   @override
   Widget build(BuildContext context) {
+    final List<double> values = [25, 35, 20, 20]; // Values can be any non-negative numbers
+    final List<String> categories = ['Yellow', 'Red', 'Green', 'Blue'];
+
+    // Calculate total for percentage allocation
+    final total = values.reduce((a, b) => a + b);
+
+    // Create pie data with percentages
+    final List<PieChartData> pieData = List.generate(
+      values.length,
+          (index) => PieChartData(categories[index], (values[index] / total) * 100),
+    );
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
     var displayType = valueType.toString().split('.').last;
 
@@ -291,7 +334,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             ),
             body: Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 18.0, vertical: 10),
+                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -303,6 +346,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       height: MediaQuery.of(context).size.height / 7,
                       decoration: BoxDecoration(
                         color: Colors.white,
+
                         // Background color
                         borderRadius: BorderRadius.circular(12),
                         // Rounded corners
@@ -315,7 +359,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                             color: Colors.yellow.shade700, // Shadow color
                             spreadRadius: 0.5, // Spread radius
                             blurRadius: 5, // Blur radius
-                            // offset: const Offset(0, 3), // Offset from the container
+                            offset:
+                                const Offset(0, 3), // Offset from the container
                           ),
                         ],
                       ),
@@ -338,24 +383,26 @@ class _AdminDashboardState extends State<AdminDashboard> {
                               ).animateOnPageLoad(
                                   animationsMap['imageOnPageLoadAnimation2']!),
                             ),
-                            Container(
-                              height: 220,
-                              // color: Colors.redAccent,
-                              alignment: Alignment.center,
-                              child: Image.asset(
-                                'assets/images/timer.png',
-                                // color: AppColors.primaryColourDarkDark,
-                                width: (displayType == 'desktop' ||
-                                        displayType == 'tablet')
-                                    ? 150.w
-                                    : 120,
-                                height: (displayType == 'desktop' ||
-                                        displayType == 'tablet')
-                                    ? 100.h
-                                    : 200,
-                              ),
-                            ).animateOnPageLoad(
-                                animationsMap['imageOnPageLoadAnimation2']!),
+                            Expanded(
+                              child: Container(
+                                height: 220,
+                                // color: Colors.redAccent,
+                                alignment: Alignment.center,
+                                child: Image.asset(
+                                  'assets/images/timer.png',
+                                  // color: AppColors.primaryColourDarkDark,
+                                  width: (displayType == 'desktop' ||
+                                          displayType == 'tablet')
+                                      ? 150.w
+                                      : 120,
+                                  height: (displayType == 'desktop' ||
+                                          displayType == 'tablet')
+                                      ? 100.h
+                                      : 200,
+                                ),
+                              ).animateOnPageLoad(
+                                  animationsMap['imageOnPageLoadAnimation2']!),
+                            ),
                           ],
                         ),
                       ),
@@ -364,31 +411,26 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       animationsMap['imageOnPageLoadAnimation2']!),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: 10, top: 20),
+                      padding: const EdgeInsets.only(bottom: 10, top: 15),
                       child: GridView.builder(
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
-                          // Number of columns
-                          childAspectRatio: 1.8,
-                          // Aspect ratio of each grid item
-                          crossAxisSpacing: 13,
-                          // Space between columns
-                          mainAxisSpacing: 16, // Space between rows
+                          childAspectRatio: 1.7,
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 14,
                         ),
-                        itemCount: _items.length, // Number of items
+                        itemCount: _items.length,
                         itemBuilder: (context, index) {
                           final item = _items[index];
-                          bool isEvenIndex = index % 3 == 0;
 
                           return Container(
                             decoration: BoxDecoration(
                               color: Colors.white,
                               border: Border.all(
-                                  color: AppColors.primaryColourDark,
-                                  // Border color
-                                  width: 1 // Border width
-                                  ),
+                                color: AppColors.primaryColourDark,
+                                width: 1,
+                              ),
                               boxShadow: const [
                                 BoxShadow(
                                   color: AppColors.primaryColourDark,
@@ -399,20 +441,50 @@ class _AdminDashboardState extends State<AdminDashboard> {
                               ],
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
+                            child: Stack(
                               children: [
-                                Text(item['total'], // Title from JSON
-                                    style: FTextStyle.authlogin_signupTxtStyle
-                                        .copyWith(fontSize: 20)),
-                                const SizedBox(
-                                  height: 20,
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 7.0),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        item['total'],
+                                        style: FTextStyle
+                                            .authlogin_signupTxtStyle
+                                            .copyWith(
+                                                color:
+                                                    AppColors.primaryColourDark,
+                                                fontSize: 24),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        item['title'],
+                                        style: FTextStyle
+                                            .authlogin_signupTxtStyle
+                                            .copyWith(
+                                                color: AppColors
+                                                    .formFieldHintColour),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                Text(
-                                  item['title'], // Title from JSON
-                                  style: FTextStyle.authlogin_signupTxtStyle,
-                                  overflow: TextOverflow.ellipsis,
+                                Positioned(
+                                  right: 14,
+                                  top: 9,
+                                  child: Icon(
+                                    item['icon'],
+                                    size: 29, // Same icon for the corner
+                                    color: item['color'],
+                                  ),
                                 ),
                               ],
                             ),
@@ -420,12 +492,56 @@ class _AdminDashboardState extends State<AdminDashboard> {
                         },
                       ),
                     ),
-                  )
+                  ),
+
+            Container(
+              height: 300,
+              child: PieChart(
+                dataMap: dataMap,
+                animationDuration: Duration(milliseconds: 800),
+                chartLegendSpacing: 35,
+                chartRadius: MediaQuery.of(context).size.width / 2.2,
+                colorList: colorList,
+                initialAngleInDegree: 0,
+                chartType: ChartType.ring,
+                // Remove the center text
+                 centerText: "Requisition",
+                centerTextStyle: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+                legendOptions: LegendOptions(
+                  showLegendsInRow: false,
+                  showLegends: true,
+                  legendTextStyle: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                chartValuesOptions: ChartValuesOptions(
+                  showChartValueBackground: true,
+                  showChartValues: true,
+                  showChartValuesInPercentage: true,
+                  showChartValuesOutside: true,
+                  decimalPlaces: 1,
+                ),
+                gradientList: [
+                  [Colors.yellow, Colors.yellow[400]!],
+                  [Colors.red, Colors.redAccent],
+                  [Colors.green, Colors.greenAccent],
                 ],
+                emptyColorGradient: [Colors.blue, Colors.blueAccent],
               ),
             ),
-          ),
+
+
+
+
+                ]
+    ))
+          )
         ));
+
   }
 
   void _showLogDialog() {
@@ -524,8 +640,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
       MaterialPageRoute(builder: (context) => nextPage),
     );
   }
-
-
 
   List<Widget> buildMenuItems(
       List<Map<String, dynamic>> listItem, String userRole) {
@@ -770,4 +884,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
         break;
     }
   }
+
+}
+
+
+
+class PieChartData {
+  final String category;
+  final double value;
+
+  PieChartData(this.category, this.value);
 }
