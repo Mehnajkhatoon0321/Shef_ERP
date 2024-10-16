@@ -115,7 +115,8 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
       ],
     ),
   };
-
+  Map<String, dynamic> errorServerMessage = {};
+  String? errorMessage;
   @override
   void initState() {
     super.initState();
@@ -133,12 +134,14 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
   void paginationCall() {
     controllerI.addListener(() {
       if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
-        if (pageNo < totalPages && !isLoading) {
-          if (hasMoreData) {
-            pageNo++;
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(AddCartDetailHandler("", pageNo, pageSize));
-          }
+        if (!isLoading && hasMoreData) {
+          pageNo++;
+
+          isInitialLoading = false;
+          isLoading = true;
+
+          BlocProvider.of<AllRequesterBloc>(context)
+              .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
         }
       }
     });
@@ -146,7 +149,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
 
   Set<int> selectedIndices = {};
   String searchQuery = "";
-
+  bool isInitialLoading = false;
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -227,8 +230,8 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
           } else if (state is AddCartSuccess) {
             setState(() {
               var responseData = state.addCartDetails['list']['requisitions'];
-              print(">>>>>>>>>>>ALLDATA$responseData");
-              totalPages = responseData["total"];
+              int totalItemCount = responseData["total"];
+              totalPages = (totalItemCount / pageSize).ceil();
 
               if (pageNo == 1) {
                 data.clear();
@@ -236,19 +239,30 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
 
               data.addAll(responseData['data']);
 
-              setState(() {
-                isLoading = false;
-                if (pageNo == totalPages) {
-                  hasMoreData = false;
-                }
-              });
+              isInitialLoading = false;
+              isLoading = false; // Reset loading state
+
+              if (pageNo == totalPages) {
+                hasMoreData = false;
+              }
             });
+
+
           } else if (state is AddCartFailure) {
+            setState(() {
+              isInitialLoading = false;
+            });
+            errorMessage = state.addCartDetailFailure['message'];
+
+            print("messageErrorFailure$errorMessage");
+          } else if (state is ServerFailure) {
             setState(() {
               isLoading = false;
             });
-            print("error>> ${state.addCartDetailFailure}");
-          } else if (state is DeleteLoading) {
+            errorServerMessage = state.serverFailure;
+
+            print("messageErrorServer$errorServerMessage");
+          }else if (state is DeleteLoading) {
             DeletePopupManager.playLoader();
           } else if (state is DeleteSuccess) {
             DeletePopupManager.stopLoader();
@@ -386,7 +400,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
               ),
             ),
             Expanded(
-              child: isLoading && data.isEmpty
+              child: isInitialLoading && data.isEmpty
                   ? Shimmer.fromColors(
                       baseColor: Colors.grey[300]!,
                       highlightColor: Colors.grey[100]!,
@@ -419,19 +433,13 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Container(
-                                          height: 10,
-                                          color: Colors.grey,
-                                        ),
+                                            height: 10, color: Colors.grey),
                                         const SizedBox(height: 5),
                                         Container(
-                                          height: 10,
-                                          color: Colors.grey,
-                                        ),
+                                            height: 10, color: Colors.grey),
                                         const SizedBox(height: 5),
                                         Container(
-                                          height: 10,
-                                          color: Colors.grey,
-                                        ),
+                                            height: 10, color: Colors.grey),
                                       ],
                                     ),
                                   ),
@@ -442,20 +450,22 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                         },
                       ),
                     )
-                  : data.isEmpty && data.isEmpty
+                  : (errorMessage != null || errorServerMessage.isNotEmpty)
                       ? Center(
-                          child: isLoading
-                              ? const CircularProgressIndicator() // Show circular progress indicator
-                              : const Text("No more data .",
-                                  style: FTextStyle.listTitle),
+                          child: Text(
+                            errorMessage ?? errorServerMessage.toString(),
+                            style: FTextStyle.listTitle,
+                            textAlign: TextAlign.center,
+                          ),
                         )
-                      : data.isEmpty
+                      : (data.isEmpty)
                           ? const Center(
-                              child: Text("No results available.",
-                                  style: FTextStyle.listTitle))
+                              child: Text("No data available.",
+                                  style: FTextStyle.listTitle),
+                            )
                           : ListView.builder(
                               controller: controllerI,
-                              itemCount: data.length + (hasMoreData ? 1 : 0),
+                              itemCount: data.length +1,
                               // Add one for the loading indicator
                               itemBuilder: (context, index) {
                                 if (index < data.length) {
@@ -741,15 +751,16 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                       ),
                                     ),
                                   );
-                                } else {
-                                  // This is the loading indicator
-                                  return Center(
-                                    child: isLoading
-                                        ? const CircularProgressIndicator() // Show circular progress indicator
-                                        : const Text("No more data.",
-                                            style: FTextStyle.listTitle),
-                                  );
                                 }
+                                if (hasMoreData && index == data.length) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                }
+
+                                // If there's no more data to load, show a message
+                                return const Center(
+                                    child: Text("No more data.",
+                                        style: FTextStyle.listTitle));
                               },
                             ),
             ),
@@ -762,14 +773,13 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
 
   void _clearText() {
     _controller.clear();
-
     setState(() {
-      BlocProvider.of<AllRequesterBloc>(context)
-          .add(AddCartDetailHandler("", pageNo, pageSize));
       _isTextEmpty = true;
+      searchQuery = '';
+      BlocProvider.of<AllRequesterBloc>(context)
+          .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
     });
   }
-
   void _showEditDialog() {
     showDialog(
       context: context,

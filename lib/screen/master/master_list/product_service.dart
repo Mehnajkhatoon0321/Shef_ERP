@@ -151,7 +151,7 @@ class _ProductServiceState extends State<ProductService> {
           isLoading = true;
 
           BlocProvider.of<AllRequesterBloc>(context)
-              .add(MasterServiceHandler("", pageNo, pageSize));
+              .add(MasterServiceHandler(searchQuery, pageNo, pageSize));
         }
       }
     });

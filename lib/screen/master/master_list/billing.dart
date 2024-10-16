@@ -111,7 +111,7 @@ class _BillingListState extends State<BillingList> {
   bool isLoading = false;
   bool isInitialLoading = false;
   bool isLoadingEdit = false;
-
+  String searchQuery = "";
   @override
   void dispose() {
     controllerText.dispose();
@@ -142,7 +142,7 @@ class _BillingListState extends State<BillingList> {
           isLoading = true;
 
           BlocProvider.of<AllRequesterBloc>(context)
-              .add(GetBillingListHandler("", pageNo, pageSize));
+              .add(GetBillingListHandler(searchQuery, pageNo, pageSize));
         }
       }
     });
@@ -350,6 +350,9 @@ class _BillingListState extends State<BillingList> {
                   onChanged: (value) {
                     setState(() {
                       _isTextEmpty = value.isEmpty;
+                      searchQuery = value;
+                      BlocProvider.of<AllRequesterBloc>(context).add(
+                          GetBillingListHandler(searchQuery, pageNo, pageSize));
                     });
                   },
                 ),

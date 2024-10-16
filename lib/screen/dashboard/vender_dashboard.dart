@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:pie_chart/pie_chart.dart';
 import 'package:shef_erp/all_bloc/authflow/auth_flow_bloc.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 import 'package:shef_erp/screen/auth_flow/login_screen.dart';
@@ -15,9 +16,7 @@ import 'package:shef_erp/screen/master/master_list/events.dart';
 import 'package:shef_erp/screen/master/master_list/product_category.dart';
 import 'package:shef_erp/screen/master/master_list/product_service.dart';
 import 'package:shef_erp/screen/reports/reports.dart';
-import 'package:shef_erp/screen/requisition/admin/admin_requisition.dart';
-import 'package:shef_erp/screen/requisition/requester/requisition_requester.dart';
-import 'package:shef_erp/screen/requisition/unit_head/requisition.dart';
+
 import 'package:shef_erp/screen/requisition/vender/vendor_requisition.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
@@ -62,6 +61,20 @@ class _VendorDashboardState extends State<VendorDashboard> {
       "icon": Icons.check_circle,
       'color': Colors.green,
     }
+  ];
+  Map<String, double> dataMap = {
+    "All ": 30,
+    "Today's ": 25,
+    "Pending ": 20,
+    "Delivered ": 25,
+  };
+
+  // Define the colors for each segment
+  List<Color> colorList = [
+    Colors.yellow,
+    Colors.red,
+    Colors.green,
+    Colors.blue,
   ];
   String? userRole;
   List<Map<String, dynamic>> listItem = [
@@ -255,7 +268,7 @@ class _VendorDashboardState extends State<VendorDashboard> {
 
                     accountName:
                     Text("${PrefUtils.getUserName()}", style: FTextStyle.nameProfile),
-                    accountEmail: Text("${PrefUtils.getUserEmailLogin()}",maxLines: 1,
+                    accountEmail: Text("${PrefUtils.getInsideEmailLogin()}",maxLines: 1,
                         style: FTextStyle.emailProfile),
                     decoration: const BoxDecoration(
                       color: AppColors.primaryColourDark,
@@ -268,166 +281,215 @@ class _VendorDashboardState extends State<VendorDashboard> {
             ),
           ),
           body:   Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18.0,vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
+              padding:
+              const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 3.0, vertical: 10),
+                      child: Container(
+                        height: MediaQuery.of(context).size.height *0.15,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
 
-                Padding(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 3.0, vertical: 10),
-                  child: Container(
-                    height: MediaQuery.of(context).size.height / 7,
-                    decoration: BoxDecoration(
-                      color: Colors.white, // Background color
-                      borderRadius: BorderRadius.circular(12), // Rounded corners
-                      border: Border.all(
-                          color:  Colors.yellow.shade700, // Border color
-                          width: 1 // Border width
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color:
-                          Colors.yellow.shade700, // Shadow color
-                          spreadRadius: 0.5, // Spread radius
-                          blurRadius: 5, // Blur radius
-                          // offset: const Offset(0, 3), // Offset from the container
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width/1.9,
-                            child: Text(
-                              'Welcome\n'
-                                  '${PrefUtils.getUserName()}'
-                                  '\nlets plan your day',overflow: TextOverflow.ellipsis,
-                              maxLines: 3,
-                              style: FTextStyle.preHeadingStyle.copyWith(fontWeight: FontWeight.w700),
-                            ).animateOnPageLoad(
-                                animationsMap['imageOnPageLoadAnimation2']!),
+                          // Background color
+                          borderRadius: BorderRadius.circular(12),
+                          // Rounded corners
+                          border: Border.all(
+                              color: Colors.yellow.shade700, // Border color
+                              width: 1 // Border width
                           ),
-                          Container(
-                            height: 220,
-                            // color: Colors.redAccent,
-                            alignment: Alignment.center,
-                            child: Image.asset(
-                              'assets/images/timer.png',
-                              // color: AppColors.primaryColourDarkDark,
-                              width: (displayType == 'desktop' ||
-                                  displayType == 'tablet')
-                                  ? 150.w
-                                  : 120,
-                              height: (displayType == 'desktop' ||
-                                  displayType == 'tablet')
-                                  ? 100.h
-                                  : 200,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.yellow.shade700, // Shadow color
+                              spreadRadius: 0.5, // Spread radius
+                              blurRadius: 5, // Blur radius
+                              offset:
+                              const Offset(0, 3), // Offset from the container
                             ),
-                          ).animateOnPageLoad(
-                              animationsMap['imageOnPageLoadAnimation2']!),
-                        ],
-                      ),
-                    ),
-                  ),
-                ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 10, top: 15),
-                    child: GridView.builder(
-                      gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 1.7,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 14,
-                      ),
-                      itemCount: _items.length,
-                      itemBuilder: (context, index) {
-                        final item = _items[index];
-
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(
-                              color: AppColors.primaryColourDark,
-                              width: 1,
-                            ),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: AppColors.primaryColourDark,
-                                spreadRadius: 1,
-                                blurRadius: 3,
-                                offset: Offset(0, 0.5),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width / 1.9,
+                                child: Text(
+                                  'Welcome\n'
+                                      '${PrefUtils.getUserName()}'
+                                      '\nlets plan your day',
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 3,
+                                  style: FTextStyle.preHeadingStyle
+                                      .copyWith(fontWeight: FontWeight.w700),
+                                ).animateOnPageLoad(
+                                    animationsMap['imageOnPageLoadAnimation2']!),
+                              ),
+                              Expanded(
+                                child: Container(
+                                  height: 220,
+                                  // color: Colors.redAccent,
+                                  alignment: Alignment.center,
+                                  child: Image.asset(
+                                    'assets/images/timer.png',
+                                    // color: AppColors.primaryColourDarkDark,
+                                    width: (displayType == 'desktop' ||
+                                        displayType == 'tablet')
+                                        ? 150.w
+                                        : 120,
+                                    height: (displayType == 'desktop' ||
+                                        displayType == 'tablet')
+                                        ? 100.h
+                                        : 200,
+                                  ),
+                                ).animateOnPageLoad(
+                                    animationsMap['imageOnPageLoadAnimation2']!),
                               ),
                             ],
-                            borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Stack(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(left: 7.0),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                        ),
+                      ),
+                    ).animateOnPageLoad(
+                        animationsMap['imageOnPageLoadAnimation2']!),
+                    Expanded(
+                      child: Container(
+                        height: MediaQuery.of(context).size.height *4,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 10, top: 15),
+                          child: GridView.builder(
+                            gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 1.7,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 14,
+                            ),
+                            itemCount: _items.length,
+                            itemBuilder: (context, index) {
+                              final item = _items[index];
+
+                              return Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(
+                                    color: AppColors.primaryColourDark,
+                                    width: 1,
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: AppColors.primaryColourDark,
+                                      spreadRadius: 1,
+                                      blurRadius: 3,
+                                      offset: Offset(0, 0.5),
+                                    ),
+                                  ],
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Stack(
                                   children: [
-                                    SizedBox(
-                                      height: 10,
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 7.0),
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                        children: [
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                          const SizedBox(height: 10),
+                                          Text(
+                                            item['total'],
+                                            style: FTextStyle
+                                                .authlogin_signupTxtStyle
+                                                .copyWith(
+                                                color:
+                                                AppColors.primaryColourDark,
+                                                fontSize: 24),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            item['title'],
+                                            style: FTextStyle
+                                                .authlogin_signupTxtStyle
+                                                .copyWith(
+                                                color: AppColors
+                                                    .formFieldHintColour),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                      item['total'],
-                                      style: FTextStyle
-                                          .authlogin_signupTxtStyle
-                                          .copyWith(
-                                          color:
-                                          AppColors.primaryColourDark,
-                                          fontSize: 24),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    const SizedBox(height: 2),
-                                    Text(
-                                      item['title'],
-                                      style: FTextStyle
-                                          .authlogin_signupTxtStyle
-                                          .copyWith(
-                                          color: AppColors
-                                              .formFieldHintColour),
-                                      overflow: TextOverflow.ellipsis,
+                                    Positioned(
+                                      right: 14,
+                                      top: 9,
+                                      child: Icon(
+                                        item['icon'],
+                                        size: 29, // Same icon for the corner
+                                        color: item['color'],
+                                      ),
                                     ),
                                   ],
                                 ),
-                              ),
-                              Positioned(
-                                right: 14,
-                                top: 9,
-                                child: Icon(
-                                  item['icon'],
-                                  size: 29, // Same icon for the corner
-                                  color: item['color'],
-                                ),
-                              ),
-                            ],
+                              );
+                            },
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     ),
-                  ),
-                )
+
+                    Container(
+                      height: MediaQuery.of(context).size.height *0.35,
+                      child: PieChart(
+                        dataMap: dataMap,
+                        animationDuration: const Duration(milliseconds: 800),
+                        chartLegendSpacing: 35,
+                        chartRadius: MediaQuery.of(context).size.width / 2.2,
+                        colorList: colorList,
+                        initialAngleInDegree: 0,
+                        chartType: ChartType.ring,
+                        // Remove the center text
+                        centerText: "Requisition",
+                        centerTextStyle: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                        legendOptions: const LegendOptions(
+                          showLegendsInRow: false,
+                          showLegends: true,
+                          legendTextStyle: TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        chartValuesOptions: const ChartValuesOptions(
+                          showChartValueBackground: true,
+                          showChartValues: true,
+                          showChartValuesInPercentage: true,
+                          showChartValuesOutside: true,
+                          decimalPlaces: 1,
+                        ),
+                        gradientList: [
+                          [Colors.yellow, Colors.yellow[400]!],
+                          [Colors.red, Colors.redAccent],
+                          [Colors.green, Colors.greenAccent],
+                        ],
+                        emptyColorGradient: [Colors.blue, Colors.blueAccent],
+                      ),
+                    ),
 
 
 
 
-
-              ],
-            ),
-          ),
+                  ]
+              ))
         ),
       ),
     );
@@ -439,7 +501,7 @@ class _VendorDashboardState extends State<VendorDashboard> {
 
 
 
-  void _showLogDialog() {
+  void _showLogDialog(int index) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -673,7 +735,7 @@ class _VendorDashboardState extends State<VendorDashboard> {
         Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileDetails()));
         break;
       case 'Logout':
-        _showLogDialog();
+        _showLogDialog(-1);
         break;
       default:
       // Handle default case if needed
@@ -724,5 +786,11 @@ class _VendorDashboardState extends State<VendorDashboard> {
 }
 
 
+class PieChartData {
+  final String category;
+  final double value;
+
+  PieChartData(this.category, this.value);
+}
 
 

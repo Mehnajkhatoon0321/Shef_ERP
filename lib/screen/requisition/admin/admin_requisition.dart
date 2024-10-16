@@ -196,7 +196,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
           isLoading = true;
 
           BlocProvider.of<AllRequesterBloc>(context)
-              .add(AddCartDetailHandler("", pageNo, pageSize));
+              .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
         }
       }
     });
@@ -341,6 +341,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
             setState(() {
               isInitialLoading = false;
             });
+
             errorMessage = state.addCartDetailFailure['message'];
 
             print("messageErrorFailure$errorMessage");

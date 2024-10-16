@@ -53,6 +53,17 @@ class PrefUtils {
     return value ?? '';
   }
 
+
+  static void setInsideEmailLogin(String value) {
+    Prefs.prefs?.setString(SharedPrefsKeys.userEmailLogin, value);
+  }
+
+  static String getInsideEmailLogin() {
+    final String? value =
+    Prefs.prefs?.getString(SharedPrefsKeys.userEmailLogin);
+    return value ?? '';
+  }
+
   static void setUserName(String value) {
     Prefs.prefs?.setString(SharedPrefsKeys.name, value);
   }

@@ -117,13 +117,13 @@ class _VenderRequisitionState extends State<VenderRequisition> {
   int pageSize = 10;
   bool hasMoreData = true;
   List<dynamic> data = [];
-  final controller = ScrollController();
+
   final controllerI = ScrollController();
 
   bool isLoadingApprove = false;
   List<dynamic> list = [];
   List<dynamic> billing = [];
-  List<dynamic> listBilling = ['Demo', 'data', 'items'];
+
 
   // Map<String , dynamic> errorMessage={};
   Map<String, dynamic> errorServerMessage = {};
@@ -152,7 +152,7 @@ class _VenderRequisitionState extends State<VenderRequisition> {
           isLoading = true;
 
           BlocProvider.of<AllRequesterBloc>(context)
-              .add(AddCartDetailHandler("", pageNo, pageSize));
+              .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
         }
       }
     });
@@ -593,13 +593,13 @@ class _VenderRequisitionState extends State<VenderRequisition> {
       ),
     );
   }
-
   void _clearText() {
     _controller.clear();
     setState(() {
-      BlocProvider.of<AllRequesterBloc>(context)
-          .add(AddCartDetailHandler("", pageNo, pageSize));
       _isTextEmpty = true;
+      searchQuery = '';
+      BlocProvider.of<AllRequesterBloc>(context)
+          .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
     });
   }
 }

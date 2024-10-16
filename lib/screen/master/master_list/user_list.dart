@@ -144,7 +144,7 @@ class _UserListState extends State<UserList> {
           isLoading = true;
 
           BlocProvider.of<AllRequesterBloc>(context)
-              .add(GetUserListHandler("", pageNo, pageSize));
+              .add(GetUserListHandler(searchQuery, pageNo, pageSize));
         }
       }
     });

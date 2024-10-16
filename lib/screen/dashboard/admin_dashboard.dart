@@ -22,15 +22,13 @@ import 'package:shef_erp/screen/master/master_list/user_list.dart';
 import 'package:shef_erp/screen/master/master_list/vendor.dart';
 import 'package:shef_erp/screen/reports/reports.dart';
 import 'package:shef_erp/screen/requisition/admin/admin_requisition.dart';
-import 'package:shef_erp/screen/requisition/requester/requisition_requester.dart';
-import 'package:shef_erp/screen/requisition/unit_head/requisition.dart';
-import 'package:shef_erp/screen/requisition/vender/vendor_requisition.dart';
+
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 import 'package:shef_erp/utils/pref_utils.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+
 
 import 'dashboard.dart';
 
@@ -112,17 +110,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
     {'subtitle': 'Logout', 'icon': Icons.logout},
   ];
   int? _expandedIndex;
-
   Future<bool> _showExitConfirmation(BuildContext context) async {
     return (await showDialog(
       context: context,
-
-
       builder: (context) => AlertDialog(
         title: Row(
           children: [
             Icon(Icons.exit_to_app, color: Theme.of(context).primaryColor),
-            SizedBox(width: 8), // Add some space between icon and title
+            const SizedBox(width: 8), // Add some space between icon and title
             Text(
               'Exit Confirmation',
               style: FTextStyle.FaqsTxtStyle,
@@ -259,10 +254,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
     var displayType = valueType.toString().split('.').last;
 
-    return WillPopScope(
+    return
+      WillPopScope(
         onWillPop: () async {
-          bool shouldExit = (await _showExitConfirmation(context));
+          bool shouldExit=(await _showExitConfirmation(context)) as bool;
           return shouldExit;
+
+
         },
         child: MediaQuery(
           data: MediaQuery.of(context)
@@ -321,7 +319,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     child: UserAccountsDrawerHeader(
                       accountName: Text(PrefUtils.getUserName(),
                           style: FTextStyle.nameProfile),
-                      accountEmail: Text(PrefUtils.getUserEmailLogin(),
+                      accountEmail: Text(PrefUtils.getInsideEmailLogin(),
                           maxLines: 1, style: FTextStyle.emailProfile),
                       decoration: const BoxDecoration(
                         color: AppColors.primaryColourDark,
@@ -343,7 +341,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 3.0, vertical: 10),
                     child: Container(
-                      height: MediaQuery.of(context).size.height / 7,
+                      height: MediaQuery.of(context).size.height *0.15,
                       decoration: BoxDecoration(
                         color: Colors.white,
 
@@ -410,95 +408,98 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   ).animateOnPageLoad(
                       animationsMap['imageOnPageLoadAnimation2']!),
                   Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 10, top: 15),
-                      child: GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          childAspectRatio: 1.7,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 14,
-                        ),
-                        itemCount: _items.length,
-                        itemBuilder: (context, index) {
-                          final item = _items[index];
+                    child: Container(
+                      height: MediaQuery.of(context).size.height *4,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 10, top: 15),
+                        child: GridView.builder(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            childAspectRatio: 1.7,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 14,
+                          ),
+                          itemCount: _items.length,
+                          itemBuilder: (context, index) {
+                            final item = _items[index];
 
-                          return Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(
-                                color: AppColors.primaryColourDark,
-                                width: 1,
-                              ),
-                              boxShadow: const [
-                                BoxShadow(
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                border: Border.all(
                                   color: AppColors.primaryColourDark,
-                                  spreadRadius: 1,
-                                  blurRadius: 3,
-                                  offset: Offset(0, 0.5),
+                                  width: 1,
                                 ),
-                              ],
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Stack(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 7.0),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(
-                                        height: 10,
-                                      ),
-                                      const SizedBox(height: 10),
-                                      Text(
-                                        item['total'],
-                                        style: FTextStyle
-                                            .authlogin_signupTxtStyle
-                                            .copyWith(
-                                                color:
-                                                    AppColors.primaryColourDark,
-                                                fontSize: 24),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        item['title'],
-                                        style: FTextStyle
-                                            .authlogin_signupTxtStyle
-                                            .copyWith(
-                                                color: AppColors
-                                                    .formFieldHintColour),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: AppColors.primaryColourDark,
+                                    spreadRadius: 1,
+                                    blurRadius: 3,
+                                    offset: Offset(0, 0.5),
                                   ),
-                                ),
-                                Positioned(
-                                  right: 14,
-                                  top: 9,
-                                  child: Icon(
-                                    item['icon'],
-                                    size: 29, // Same icon for the corner
-                                    color: item['color'],
+                                ],
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Stack(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 7.0),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        const SizedBox(height: 10),
+                                        Text(
+                                          item['total'],
+                                          style: FTextStyle
+                                              .authlogin_signupTxtStyle
+                                              .copyWith(
+                                                  color:
+                                                      AppColors.primaryColourDark,
+                                                  fontSize: 24),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          item['title'],
+                                          style: FTextStyle
+                                              .authlogin_signupTxtStyle
+                                              .copyWith(
+                                                  color: AppColors
+                                                      .formFieldHintColour),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
+                                  Positioned(
+                                    right: 14,
+                                    top: 9,
+                                    child: Icon(
+                                      item['icon'],
+                                      size: 29, // Same icon for the corner
+                                      color: item['color'],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
 
             Container(
-              height: 300,
+              height: MediaQuery.of(context).size.height *0.35,
               child: PieChart(
                 dataMap: dataMap,
-                animationDuration: Duration(milliseconds: 800),
+                animationDuration: const Duration(milliseconds: 800),
                 chartLegendSpacing: 35,
                 chartRadius: MediaQuery.of(context).size.width / 2.2,
                 colorList: colorList,
@@ -506,19 +507,19 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 chartType: ChartType.ring,
                 // Remove the center text
                  centerText: "Requisition",
-                centerTextStyle: TextStyle(
+                centerTextStyle: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.black,
                 ),
-                legendOptions: LegendOptions(
+                legendOptions: const LegendOptions(
                   showLegendsInRow: false,
                   showLegends: true,
                   legendTextStyle: TextStyle(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                chartValuesOptions: ChartValuesOptions(
+                chartValuesOptions: const ChartValuesOptions(
                   showChartValueBackground: true,
                   showChartValues: true,
                   showChartValuesInPercentage: true,
@@ -544,7 +545,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   }
 
-  void _showLogDialog() {
+  void _showLogDialog(int index) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -796,7 +797,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             MaterialPageRoute(builder: (context) => const ProfileDetails()));
         break;
       case 'Logout':
-        _showLogDialog();
+        _showLogDialog(-1);
         break;
       default:
         // Handle default case if needed
@@ -825,7 +826,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           MaterialPageRoute(
               builder: (context) => BlocProvider(
                     create: (context) => AllRequesterBloc(),
-                    child: ProductService(),
+                    child: const ProductService(),
                   )),
         );
         break;
@@ -845,7 +846,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           MaterialPageRoute(
               builder: (context) => BlocProvider(
                     create: (context) => AllRequesterBloc(),
-                    child: Units(),
+                    child: const Units(),
                   )),
         );
         break;
@@ -855,7 +856,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           MaterialPageRoute(
               builder: (context) => BlocProvider(
                     create: (context) => AllRequesterBloc(),
-                    child: UserList(),
+                    child: const UserList(),
                   )),
         );
         break;
@@ -865,7 +866,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           MaterialPageRoute(
               builder: (context) => BlocProvider(
                     create: (context) => AllRequesterBloc(),
-                    child: Vendor(),
+                    child: const Vendor(),
                   )),
         );
         break;
@@ -875,7 +876,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           MaterialPageRoute(
               builder: (context) => BlocProvider(
                     create: (context) => AllRequesterBloc(),
-                    child: BillingList(),
+                    child: const BillingList(),
                   )),
         );
         break;

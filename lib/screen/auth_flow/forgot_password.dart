@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shef_erp/all_bloc/authflow/auth_flow_bloc.dart';
-
-import 'package:shef_erp/screen/auth_flow/login_screen.dart';
-
 
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
@@ -15,6 +11,7 @@ import 'package:shef_erp/utils/font_text_Style.dart';
 import 'package:shef_erp/utils/form_field_style.dart';
 import 'package:shef_erp/utils/no_space_input_formatter_class.dart';
 import 'package:shef_erp/utils/validator_utils.dart';
+
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});
 
@@ -26,7 +23,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   bool isButtonEnabled = false;
   final TextEditingController _email = TextEditingController();
   final GlobalKey<FormFieldState<String>> _emailKey =
-  GlobalKey<FormFieldState<String>>();
+      GlobalKey<FormFieldState<String>>();
   bool isEmailFieldFocused = false;
   bool isLoading = false;
   final FocusNode _emailFocusNode = FocusNode();
@@ -108,6 +105,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
       ],
     ),
   };
+
   @override
   Widget build(BuildContext context) {
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
@@ -126,29 +124,31 @@ class _ForgotPasswordState extends State<ForgotPassword> {
               child: Container(
                 height: MediaQuery.of(context).size.height * 0.5,
                 color: AppColors.primaryColourDark,
-                child:  Align(alignment: Alignment.topLeft, child:
-                Padding(
-                  padding: const EdgeInsets.all(18.0),
-                  child: Container(
-                    alignment: Alignment.topRight,
-
-                    child: Image.asset(
-                      'assets/images/logowhite.png',
-                      width: (displayType == 'desktop' || displayType == 'tablet')
-                          ? 250.w
-                          : 190,
-                      height: (displayType == 'desktop' || displayType == 'tablet')
-                          ? 100.h
-                          : 160,
+                child: Align(
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.all(18.0),
+                    child: Container(
+                      alignment: Alignment.topRight,
+                      child: Image.asset(
+                        'assets/images/logowhite.png',
+                        width: (displayType == 'desktop' ||
+                                displayType == 'tablet')
+                            ? 250.w
+                            : 190,
+                        height: (displayType == 'desktop' ||
+                                displayType == 'tablet')
+                            ? 100.h
+                            : 160,
+                      ),
                     ),
                   ),
-                ),),
+                ),
               ),
             ),
-
             Center(
               child: Container(
-                margin:  EdgeInsets.only(
+                margin: EdgeInsets.only(
                     top: MediaQuery.of(context).size.height * 0.2),
                 decoration: const BoxDecoration(
                   color: Colors.white,
@@ -158,34 +158,35 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                   ),
                 ),
                 child: ListView(
-                  padding: EdgeInsets.symmetric(horizontal: (displayType == 'desktop' ||  displayType == 'tablet') ? 50 : 20),
+                  padding: EdgeInsets.symmetric(
+                      horizontal:
+                          (displayType == 'desktop' || displayType == 'tablet')
+                              ? 50
+                              : 20),
                   children: [
-
                     // Image.asset(
                     //   'assets/images/logo.png',
                     //   height:  110.h,
                     //   width: 180.w,
                     // ),
-                    const SizedBox(height:45),
+                    const SizedBox(height: 45),
                     Text(
                       Constants.ForgotPassTxt,
                       style: FTextStyle.HeadingTxtStyle.copyWith(
-                          fontSize: 30,
-                          fontWeight: FontWeight.w900
-                      ),
-                    ).animateOnPageLoad(animationsMap[
-                    'imageOnPageLoadAnimation2']!),
+                          fontSize: 30, fontWeight: FontWeight.w900),
+                    ).animateOnPageLoad(
+                        animationsMap['imageOnPageLoadAnimation2']!),
 
-                    const SizedBox(height:30),
+                    const SizedBox(height: 30),
                     Text(
                       Constants.ForgotPassSubTxt,
                       style: FTextStyle.formSubheadingTxtStyle,
                       textAlign: TextAlign.left, // Aligning text to center
-                    ).animateOnPageLoad(animationsMap[
-                    'imageOnPageLoadAnimation2']!),
+                    ).animateOnPageLoad(
+                        animationsMap['imageOnPageLoadAnimation2']!),
 
                     Padding(
-                      padding: const EdgeInsets.only(top:40,bottom:15),
+                      padding: const EdgeInsets.only(top: 40, bottom: 15),
                       child: Form(
                           onChanged: () {
                             if (ValidatorUtils.isValidEmail(_email.text)) {
@@ -207,15 +208,17 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                               Text(
                                 Constants.emailLabel,
                                 style: FTextStyle.formLabelTxtStyle,
-                              ).animateOnPageLoad(animationsMap[
-                              'imageOnPageLoadAnimation2']!),
-                              const SizedBox(height: 5,),
+                              ).animateOnPageLoad(
+                                  animationsMap['imageOnPageLoadAnimation2']!),
+                              const SizedBox(
+                                height: 5,
+                              ),
                               TextFormField(
                                   keyboardType: TextInputType.emailAddress,
                                   key: _emailKey,
                                   focusNode: _emailFocusNode,
-                                  decoration: FormFieldStyle
-                                      .defaultemailDecoration,
+                                  decoration:
+                                      FormFieldStyle.defaultemailDecoration,
                                   inputFormatters: [NoSpaceFormatter()],
                                   controller: _email,
                                   validator: ValidatorUtils.emailValidator,
@@ -223,15 +226,17 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                     setState(() {
                                       isEmailFieldFocused = true;
                                     });
-                                  }
+                                  }),
+                              const SizedBox(
+                                height: 15,
                               ),
-                              const SizedBox(height: 15,),
                             ],
-                          )
-                      ),
-                    ).animateOnPageLoad(animationsMap[
-                    'imageOnPageLoadAnimation2']!),
-                    const SizedBox(height: 25,),
+                          )),
+                    ).animateOnPageLoad(
+                        animationsMap['imageOnPageLoadAnimation2']!),
+                    const SizedBox(
+                      height: 25,
+                    ),
                     SizedBox(
                       height: 55,
                       child: ElevatedButton(
@@ -244,22 +249,26 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                               borderRadius: BorderRadius.circular(26)),
                           backgroundColor: AppColors.primaryColourDark,
                         ),
-                        child:isLoading? const CircularProgressIndicator(color: Colors.white,):Text(
-                            Constants.continueBtnTxt,
-                            style: FTextStyle.loginBtnStyle
-                        ),
+                        child: isLoading
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : Text(Constants.continueBtnTxt,
+                                style: FTextStyle.loginBtnStyle),
                       ),
-                    ).animateOnPageLoad(animationsMap[
-                    'imageOnPageLoadAnimation2']!),
-                    const SizedBox(height:20),
+                    ).animateOnPageLoad(
+                        animationsMap['imageOnPageLoadAnimation2']!),
+                    const SizedBox(height: 20),
                     GestureDetector(
                       onTap: () {
-
-
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>  BlocProvider(
-  create: (context) => AuthFlowBloc(),
-  child: const LogScreen(),
-)));
+                        Navigator.pop(context);
+                        // Navigator.push(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //         builder: (context) => BlocProvider(
+                        //               create: (context) => AuthFlowBloc(),
+                        //               child: const LogScreen(),
+                        //             )));
                       },
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -275,7 +284,9 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 50,)
+                    const SizedBox(
+                      height: 50,
+                    )
                   ],
                 ),
               ),

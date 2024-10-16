@@ -54,7 +54,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
           if (hasMoreData) {
             pageNo++;
             BlocProvider.of<AllRequesterBloc>(context)
-                .add(AddCartDetailHandler("", pageNo, pageSize));
+                .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
           }
         }
       }

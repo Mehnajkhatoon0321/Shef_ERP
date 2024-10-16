@@ -321,7 +321,7 @@ class _NavigationState extends State<Navigation> {
                           break;
 
                         case 'Logout':
-                          _showLogDialog();
+                          _showLogDialog(-1);
                           break;
                         default:
                         // Handle default case if needed
@@ -538,7 +538,7 @@ class _NavigationState extends State<Navigation> {
     }
   }
 
-  void _showLogDialog() {
+  void _showLogDialog(int index) {
     showDialog(
       context: context,
       builder: (BuildContext context) {

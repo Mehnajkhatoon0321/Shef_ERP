@@ -137,7 +137,7 @@ class _ProductCategoryState extends State<ProductCategory> {
           isLoading = true;
 
           BlocProvider.of<AllRequesterBloc>(context)
-              .add(GetProductCategoryHandler("", pageNo, pageSize));
+              .add(GetProductCategoryHandler(searchQuery, pageNo, pageSize));
         }
       }
     });

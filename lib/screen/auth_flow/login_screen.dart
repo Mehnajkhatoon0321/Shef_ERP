@@ -31,7 +31,7 @@ class LogScreen extends StatefulWidget {
 
 class _LogScreenState extends State<LogScreen> {
   final formKey = GlobalKey<FormState>();
-  final TextEditingController _email = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _password = TextEditingController();
   final GlobalKey<FormFieldState<String>> _emailKey =
       GlobalKey<FormFieldState<String>>();
@@ -40,7 +40,7 @@ class _LogScreenState extends State<LogScreen> {
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
-  bool passwordVisible = true;
+  bool passwordVisible = false;
   bool checkboxChecked = false;
   bool isButtonEnabled = false;
   bool passIncorrect = false;
@@ -73,18 +73,22 @@ class _LogScreenState extends State<LogScreen> {
     }
 
     if (email.isNotEmpty) {
-      _email.text = email;
+      _emailController.text = email;
     }
     if (rememberMe) {
       isButtonEnabled = true;
       checkboxChecked = true;
     }
   }
-
   @override
   void dispose() {
+    _emailController.dispose();
+    _password.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
+
 
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
@@ -185,7 +189,16 @@ class _LogScreenState extends State<LogScreen> {
                 isLoading = false;
                 PrefUtils.setIsLogin(true);
               });
+              if (checkboxChecked) {
+                PrefUtils.setRememberMe(true);
+                PrefUtils.setUserEmailLogin(_emailController.text.toString());
+                PrefUtils.setUserPassword(_password.text.toString());
+              } else {
+                PrefUtils.setRememberMe(false);
+                PrefUtils.setUserEmailLogin(""); // Clear email
+                PrefUtils.setUserPassword("");
 
+              }
 
               Map<String, dynamic> data = state.logResponse;
 
@@ -207,7 +220,7 @@ class _LogScreenState extends State<LogScreen> {
                   // Save  role
                   PrefUtils.setUserId(roleId);
 
-                  PrefUtils.setUserEmailLogin(email);
+                  PrefUtils.setInsideEmailLogin(email);
                   PrefUtils.setUserName(name);
 
 
@@ -298,7 +311,7 @@ class _LogScreenState extends State<LogScreen> {
                           child: Form(
                             key: formKey,
                             onChanged: () {
-                              if (ValidatorUtils.isValidEmail(_email.text) &&
+                              if (ValidatorUtils.isValidEmail(_emailController.text) &&
                                   isValidPass(_password.text)) {
                                 setState(() {
                                   isButtonEnabled = true;
@@ -335,7 +348,7 @@ class _LogScreenState extends State<LogScreen> {
                                   decoration:
                                       FormFieldStyle.defaultemailDecoration,
                                   inputFormatters: [NoSpaceFormatter()],
-                                  controller: _email,
+                                  controller: _emailController,
                                   validator: ValidatorUtils.emailValidator,
                                   onTap: () {
                                     setState(() {
@@ -362,9 +375,9 @@ class _LogScreenState extends State<LogScreen> {
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         passwordVisible
-                                            ? Icons.visibility_off
-                                            : Icons.visibility,
-                                        color: AppColors.formFieldBackColour,
+                                            ? Icons.visibility
+                                            : Icons.visibility_off,
+                                        color:Colors.black45,
                                       ),
                                       onPressed: () {
                                         setState(() {
@@ -406,16 +419,17 @@ class _LogScreenState extends State<LogScreen> {
                                   onTap: () {
                                     setState(() {
                                       checkboxChecked = !checkboxChecked;
+                                      print('Checkbox checked: $checkboxChecked');
+
                                       if (checkboxChecked) {
                                         PrefUtils.setRememberMe(true);
-                                        PrefUtils.setUserEmailLogin(
-                                            _email.text.toString());
-                                        PrefUtils.setUserPassword(
-                                            _password.text.toString());
+                                        PrefUtils.setUserEmailLogin(_emailController.text.toString());
+                                        PrefUtils.setUserPassword(_password.text.toString());
                                       } else {
                                         PrefUtils.setRememberMe(false);
-                                        PrefUtils.setUserEmailLogin("");
+                                        PrefUtils.setUserEmailLogin(""); // Clear email
                                         PrefUtils.setUserPassword("");
+
                                       }
                                     });
                                   },
@@ -427,13 +441,12 @@ class _LogScreenState extends State<LogScreen> {
                                         size: 20,
                                       ),
                                       child: Icon(
-                                        checkboxChecked
-                                            ? Icons.check_box
-                                            : Icons.check_box_outline_blank,
+                                        checkboxChecked ? Icons.check_box : Icons.check_box_outline_blank,
                                       ),
                                     ),
                                   ),
                                 ),
+
                                 Text(
                                   Constants.rememberMeTxt,
                                   style: FTextStyle.rememberMeTextStyle,
@@ -474,7 +487,7 @@ class _LogScreenState extends State<LogScreen> {
                                     BlocProvider.of<AuthFlowBloc>(context)
                                         .add(
                                       LogEventHandler(
-                                        email: _email.text.toString(),
+                                        email: _emailController.text.toString(),
                                         password: _password.text.toString(),
                                       ),
                                     );
@@ -495,7 +508,7 @@ class _LogScreenState extends State<LogScreen> {
                                 ),
                                 child: isLoading
                                     ? CircularProgressIndicator(color: Colors.white)
-                                    : Text("Save", style: FTextStyle.loginBtnStyle),
+                                    : Text("Login", style: FTextStyle.loginBtnStyle),
                               ),
                             ),
                           ),

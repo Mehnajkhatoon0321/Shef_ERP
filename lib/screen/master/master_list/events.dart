@@ -147,7 +147,7 @@ class _EventScreenState extends State<EventScreen> {
 
           // Dispatch the event to fetch more data
           BlocProvider.of<AllRequesterBloc>(context)
-              .add(EventListHandler("", pageNo, pageSize));
+              .add(EventListHandler(searchQuery, pageNo, pageSize));
         }
       } else {
         // Hide loader and "no more data" when not at max scroll extent

@@ -144,7 +144,7 @@ class _VendorState extends State<Vendor> {
           isInitialLoading = false;
           isLoading = true;
           BlocProvider.of<AllRequesterBloc>(context)
-              .add(VendorListHandler("", pageNo, pageSize));
+              .add(VendorListHandler(searchQuery, pageNo, pageSize));
         }
       }
     });

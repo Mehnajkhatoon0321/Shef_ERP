@@ -108,7 +108,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 8.0),
                         child: Text(
-                          PrefUtils.getUserEmailLogin(),
+                          PrefUtils.getInsideEmailLogin(),
                           style: FTextStyle.formhintTxtStyle,
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,

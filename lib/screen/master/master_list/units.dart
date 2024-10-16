@@ -140,7 +140,7 @@ class _UnitsState extends State<Units> {
           isLoading = true;
 
           BlocProvider.of<AllRequesterBloc>(context)
-              .add(GetUnitHandler("", pageNo, pageSize));
+              .add(GetUnitHandler(searchQuery, pageNo, pageSize));
         }
       }
     });

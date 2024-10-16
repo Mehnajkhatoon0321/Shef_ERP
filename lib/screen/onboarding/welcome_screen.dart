@@ -155,14 +155,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   child: ElevatedButton(
                     onPressed: () {
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => BlocProvider(
-                                    create: (context) => AuthFlowBloc(),
-                                    child: LogScreen(),
-                                  )),
-                        );
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) =>  BlocProvider(
+                          create: (context) => AuthFlowBloc(),
+                          child: LogScreen(),
+                        )),
+                            (route) => false, // This will remove all previous routes
+                      );
 
                     },
                     style: ElevatedButton.styleFrom(
@@ -182,13 +182,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 SizedBox(height: 20.h), // Use ScreenUtil for spacing
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (context) =>  BlocProvider(
-  create: (context) => AuthFlowBloc(),
-  child: LogScreen(),
-)),
+                        create: (context) => AuthFlowBloc(),
+                        child: LogScreen(),
+                      )),
+                          (route) => false, // This will remove all previous routes
                     );
+
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
