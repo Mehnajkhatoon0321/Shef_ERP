@@ -21,7 +21,7 @@ class DeliveryStatus extends StatelessWidget {
         deliveryStatusText = 'Pending for Delivery';
         deliveryStatusColor = Colors.red;
         break;
-      case '2':
+      case '9':
         deliveryStatusText = 'Cancelled';
         deliveryStatusColor = Colors.orange; // Color for cancelled status
         break;

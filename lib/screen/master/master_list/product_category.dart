@@ -234,10 +234,14 @@ class _ProductCategoryState extends State<ProductCategory> {
             errorMessage = state.eventFailure['message'];
 
           }
-          else if (state is DeleteServiceCategoryLoading) {
+          else if (state is DeleteServiceCategoryLoading) {setState(() {
             DeletePopupManager.playLoader();
+          });
+
           }
           else if (state is DeleteServiceCategorySuccess) {
+            setState(() {
+
             DeletePopupManager.stopLoader();
 
             var deleteMessage = state.deleteEventCategoryList['message'];
@@ -253,6 +257,9 @@ class _ProductCategoryState extends State<ProductCategory> {
             Future.delayed(const Duration(milliseconds: 500), () {
               Navigator.pop(context);
             });
+          });
+
+
           }
           else if (state is DeleteEventCategoryFailure) {
             DeletePopupManager.stopLoader();
@@ -613,7 +620,8 @@ class _ProductCategoryState extends State<ProductCategory> {
                         });
                       } else if (state is CreateCategorySuccess) {
                         isLoadingCreate = false;
-
+                        BlocProvider.of<AllRequesterBloc>(context)
+                            .add(GetProductCategoryHandler(searchQuery, pageNo, pageSize));
                         if (state.createResponse is Map &&
                             state.createResponse.containsKey('message')) {
                           var deleteMessage = state.createResponse['message'];
@@ -649,21 +657,29 @@ class _ProductCategoryState extends State<ProductCategory> {
                         setState(() {
                           isLoadingCreate = true;
                         });
-                      } else if (state is UpdateCategorySuccess) {
-                        isLoadingCreate = false;
+                      } else if (state is UpdateCategorySuccess){
 
-                        var update = state.updateResponse['message'];
 
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(update),
-                            backgroundColor: AppColors.primaryColour,
-                          ),
-                        );
+                        setState(() {
+                          isLoadingCreate = false;
+                          BlocProvider.of<AllRequesterBloc>(context)
+                              .add(GetProductCategoryHandler(searchQuery, pageNo, pageSize));
+                          var update = state.updateResponse['message'];
 
-                        Future.delayed(const Duration(milliseconds: 500), () {
-                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(update),
+                              backgroundColor: AppColors.primaryColour,
+                            ),
+                          );
+
+                          Future.delayed(const Duration(milliseconds: 500), () {
+                            Navigator.pop(context);
+                          });
                         });
+
+
+
                       } else if (state is UpdateCategoryFailure) {
                         var deleteMessage = state.failureMessage['message'];
 

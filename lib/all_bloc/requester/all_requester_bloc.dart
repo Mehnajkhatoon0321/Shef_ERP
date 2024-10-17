@@ -1747,12 +1747,11 @@ print("RequestData>>>>>>>>>>$request");
         emit(CheckNetworkConnection("No internet connection"));
       }
     });
-
-    //reject action
-    on<VendorRejectHandler>((event, emit) async {
+    //unitVendor
+    on<UnitActionHandler>((event, emit) async {
       // Check for internet connectivity
       if (await ConnectivityService.isConnected()) {
-        emit(VendorAssignLoading());
+        emit(UnitAssignLoading());
 
         try {
           String authToken = PrefUtils.getToken();
@@ -1773,15 +1772,93 @@ print("RequestData>>>>>>>>>>$request");
           var fields = {
             'userRole': event.userRole,
             'user_id': event.userID,
-            'count': event.count,
+            'allCount': event.allCount,
             'btnAssign': event.btnAssign,
+          };
+
+          // Check if event.count is not empty
+          if (event.count.isNotEmpty) {
+            for (int i = 0; i < event.count.length; i++) {
+              fields['count[$i]'] = event.count[i].toString();
+            }
+          } else {
+            developer.log("Warning: event.count is empty.");
+          }
+
+          // Add fields and headers to the request
+          request.fields.addAll(fields);
+          request.headers.addAll(headers);
+
+          // Log the complete request details
+          developer.log("Request Fields: ${request.fields}");
+          developer.log("Request Headers: ${request.headers}");
+
+          // Send the request
+          final response = await request.send();
+          final responseData = await response.stream.bytesToString();
+
+          // Log the response status and data
+          developer.log("Response status: ${response.statusCode}");
+          developer.log("Response data: $responseData");
+
+          // Handle the response based on status code
+          if (response.statusCode == 200) {
+            emit(UnitAssignSuccess(jsonDecode(responseData)));
+          } else {
+            // Handle error responses
+            try {
+              final responseError = jsonDecode(responseData);
+              emit(UnitAssignFailure(responseError));
+              developer.log("Update failure: ${response.statusCode} - ${responseError['message'] ?? responseData}");
+            } catch (e) {
+              emit(UnitAssignFailure({'message': 'Failed to process server response.'}));
+              developer.log("Failed to decode error response: ${e.toString()} - Response data: $responseData");
+            }
+          }
+        } catch (e) {
+          emit(AuthFlowServerFailure(e.toString()));
+          developer.log("Error during user update: ${e.toString()}");
+        }
+      } else {
+        emit(CheckNetworkConnection("No internet connection"));
+      }
+    });
+
+
+    //reject action
+    on<VendorRejectHandler>((event, emit) async {
+      // Check for internet connectivity
+      if (await ConnectivityService.isConnected()) {
+        emit(VendorAssignLoading());
+
+        try {
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            'Authorization': 'Bearer $authToken',
+          };
+
+          var request = http.MultipartRequest(
+            'POST',
+            Uri.parse(APIEndPoints.actionRejectVendor),
+          );
+
+          // Log the request details for debugging
+          developer.log("Request URL: ${request.url}");
+          developer.log("Request Method: ${request.method}");
+
+          // Prepare fields to add to the request
+          var fields = {
+
+            'user_id': event.user_id,
+            'btnReject': event.btnReject,
+            'pmremark': event.pmremark,
 
           };
 
           // Check if event.allCount is not empty
-          if (event.allCount.isNotEmpty) {
-            for (int i = 0; i < event.allCount.length; i++) {
-              fields['allCount[$i]'] = event.allCount[i].toString();
+          if (event.pmCount.isNotEmpty) {
+            for (int i = 0; i < event.pmCount.length; i++) {
+              fields['pmCount[$i]'] = event.pmCount[i].toString();
             }
           } else {
             developer.log("Warning: event.allCount is empty.");
@@ -1807,7 +1884,7 @@ print("RequestData>>>>>>>>>>$request");
 
           // Handle the response based on status code
           if (response.statusCode == 200) {
-            emit(VendorAssignSuccess(jsonDecode(responseData)));
+            emit(VendorRejectSuccess(jsonDecode(responseData)));
           } else {
             // Handle error responses
             try {
@@ -2307,7 +2384,47 @@ print("RequestData>>>>>>>>>>$request");
       }
     });
 
+//markAsDelivery
+    on<MarkRequisitionEventHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(MarkDeliveryLoading());
+        try {
+          Dio dio = Dio();
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            "Authorization": 'Bearer $authToken',
+          };
 
+          var formData = FormData.fromMap(
+              {
+            'user_id': event.userid,
+            'req_id': event.reqID,
+            'status': event.status,
+            'remark': event.remark,
+            if (event.Image != null)
+              'del_image': await MultipartFile.fromFile(event.Image!.path)
+          }
+          );
+          print(">>>> Request Headers >>>> $headers");
+          print(">>>> Request FormData >>>> $formData");
+           print(">>>>Request>>>$formData");
+          var response = await dio.post(APIEndPoints.postMark,
+              data: formData,
+              options: Options(headers: headers)
+          );
+          print(">>>>Response>>>$response");
+          if (response.statusCode == 200) {
+            emit(MarkDeliverySuccess(response.data));
+          } else {
+            emit(MarkDeliveryFailure(response.data));
+          }
+        } catch (e) {
+          emit(MarkDeliveryFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        emit(MarkDeliveryFailure(const {'error': 'No internet connection'}));
+      }
+    });
 
 
   }

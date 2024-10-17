@@ -360,14 +360,25 @@ class VendorActionHandler extends AllRequesterEvent {
 //Reject
 
 class VendorRejectHandler extends AllRequesterEvent {
+
+  String user_id;
+  String btnReject;
+  String pmremark;
+
+
+  List<dynamic> pmCount;
+  VendorRejectHandler({required this.user_id, required this.btnReject,required this.pmremark,required this.pmCount});
+}
+
+//unitApproved
+class UnitActionHandler extends AllRequesterEvent {
   String userRole;
   String btnAssign;
   String userID;
-  String count;
-  List<dynamic> allCount;
-  VendorRejectHandler({required this.userID, required this.btnAssign,required this.userRole,required this.allCount,required this.count});
+  String allCount;
+  List<dynamic> count;
+  UnitActionHandler({required this.userID, required this.btnAssign,required this.userRole,required this.allCount,required this.count});
 }
-
 //Events list
 
 class EventListHandler extends AllRequesterEvent {
@@ -524,5 +535,32 @@ class VendorCreateHandler extends AllRequesterEvent {
     required this.panImage,
     required this.gstImage,
     required this.cancelledImage,
+  });
+}
+//mark as a delivery
+
+class MarkRequisitionEventHandler extends AllRequesterEvent {
+  final String remark;
+
+  final String userid;
+
+  final String reqID;
+  final String status;
+
+  final File? Image;
+
+  MarkRequisitionEventHandler({
+    required this.status ,
+    required this.remark ,
+
+    required this.userid ,
+
+    required this.reqID ,
+    required this.Image ,
+
+
+
+
+
   });
 }

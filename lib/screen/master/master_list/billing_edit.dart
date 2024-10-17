@@ -175,14 +175,7 @@ class _BillingEditState extends State<BillingEdit> {
               setState(() {
                 isLoadingEdit = false;
               });
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => BlocProvider(
-                          create: (context) => AllRequesterBloc(),
-                          child: BillingList(),
-                        )),
-              );
+              Navigator.pop(context);
             });
           } else if (state is BillingCreateFailure) {
             setState(() {
@@ -197,14 +190,7 @@ class _BillingEditState extends State<BillingEdit> {
             );
           } else if (state is BillingUpdateSuccess) {
             setState(() {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => BlocProvider(
-                          create: (context) => AllRequesterBloc(),
-                          child: BillingList(),
-                        )),
-              );
+              Navigator.pop(context);
             });
           } else if (state is BillingUpdateFailure) {
             setState(() {

@@ -265,7 +265,8 @@ class _VendorState extends State<Vendor> {
             DeletePopupManager.stopLoader();
 
             var deleteMessage = state.deleteEventList['message'];
-
+            BlocProvider.of<AllRequesterBloc>(context)
+                .add(VendorListHandler(searchQuery, pageNo, pageSize));
 
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

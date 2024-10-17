@@ -1,7 +1,10 @@
 
 
 class  APIEndPoints{
-  static const String baseUrl = 'https://erp.studyhallfoundation.org/api/';
+
+  //demoUrl
+  static const String baseUrl = 'https://demo.studyhallfoundation.org/api/';
+  // static const String baseUrl = 'https://erp.studyhallfoundation.org/api/';
   static const String login = '${baseUrl}login';
   static const String requesterList = '${baseUrl}req/';
   static const String requesterListAdd = '${baseUrl}req/create/';
@@ -11,6 +14,7 @@ class  APIEndPoints{
   static const String postDelete= '${baseUrl}req/destroy/';
   static const String postReqEdit= '${baseUrl}req/edit/';
   static const String postReqUpdate= '${baseUrl}req/update/';
+  static const String postMark= '${baseUrl}req/status';
 
 
   //Friday  unit and category
@@ -52,6 +56,7 @@ class  APIEndPoints{
 
 //vendor reject
   static const String actionVendor= '${baseUrl}req/action';
+  static const String actionRejectVendor= '${baseUrl}req/rejectpm';
 
   //events
 

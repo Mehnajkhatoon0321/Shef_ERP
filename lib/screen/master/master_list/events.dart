@@ -267,7 +267,8 @@ class _EventScreenState extends State<EventScreen> {
             DeletePopupManager.stopLoader();
 
             var deleteMessage = state.deleteEventList['message'];
-
+            BlocProvider.of<AllRequesterBloc>(context)
+                .add(EventListHandler(searchQuery, pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(deleteMessage),
@@ -656,8 +657,10 @@ class _EventScreenState extends State<EventScreen> {
                               isLoadingCreate = true;
                             });
                           } else if (state is EventCreateSuccess) {
-                            isLoadingCreate = false;
 
+                            isLoadingCreate = false;
+                            BlocProvider.of<AllRequesterBloc>(context)
+                                .add(EventListHandler(searchQuery, pageNo, pageSize));
                             if (state.createResponse.containsKey('message')) {
                               var deleteMessage =
                               state.createResponse['message'];
@@ -697,7 +700,8 @@ class _EventScreenState extends State<EventScreen> {
                             });
                           } else if (state is UpdateEventsSuccess) {
                             isLoadingCreate = false;
-
+                            BlocProvider.of<AllRequesterBloc>(context)
+                                .add(EventListHandler(searchQuery, pageNo, pageSize));
                             var update = state.updateResponse['message'];
 
                             ScaffoldMessenger.of(context).showSnackBar(

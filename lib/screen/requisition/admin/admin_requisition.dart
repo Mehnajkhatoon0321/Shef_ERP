@@ -355,6 +355,10 @@ class _AdminRequisitionState extends State<AdminRequisition> {
           } else if (state is DeleteLoading) {
             DeletePopupManager.playLoader();
           } else if (state is DeleteSuccess) {
+            setState(() {
+              BlocProvider.of<AllRequesterBloc>(context)
+                  .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
+            });
             DeletePopupManager.stopLoader();
 
             var deleteMessage = state.deleteList['message'];
@@ -370,19 +374,6 @@ class _AdminRequisitionState extends State<AdminRequisition> {
 
             Future.delayed(const Duration(milliseconds: 500), () {
               Navigator.pop(context);
-            });
-          } else if (state is RejectLoading) {
-            setState(() {
-              isLoadingApprove = true;
-            });
-          } else if (state is RejectSuccess) {
-            isLoadingApprove = false;
-            setState(() {
-              Navigator.of(context).pop();
-            });
-          } else if (state is RejectFailure) {
-            setState(() {
-              isLoading = false;
             });
           }
         },
@@ -786,10 +777,9 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                                                   onPressed:
                                                                       () async {
                                                                     _showMarkDeliveryDialog(
-                                                                        BlocProvider.of<AllRequesterBloc>(
-                                                                            context),
+                                                                        BlocProvider.of<AllRequesterBloc>(context),
                                                                         context,
-                                                                        -1);
+                                                                        item['id']);
                                                                   },
                                                                   style: ElevatedButton
                                                                       .styleFrom(
@@ -1041,9 +1031,12 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                           isLoading = true; // Set loading state
                         });
                       } else if (state is VendorAssignSuccess) {
+
                         setState(() {
-                          isLoading = false; // Reset loading state
-                          Navigator.of(context).pop(); // Close dialog
+                          BlocProvider.of<AllRequesterBloc>(context)
+                              .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
+                          isLoading = false; // Set loading state
+
                           var successMessage = state.vendorList['message'];
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -1051,8 +1044,12 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                               backgroundColor: AppColors.primaryColour,
                             ),
                           );
-                        });
-                      } else if (state is VendorAssignFailure) {
+                          Future.delayed(const Duration(milliseconds: 500), () {
+                            Navigator.pop(context);
+                          });
+
+                        } );
+                      }else if (state is VendorAssignFailure) {
                         setState(() {
                           isLoading = false; // Reset loading state
                           var errorMessage = state.vendorFailure['message'];
@@ -1228,18 +1225,31 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                 setState(() {
                                   isLoading = true; // Set loading state
                                 });
-                              } else if (state is VendorAssignSuccess) {
+                              } else if (state is VendorRejectSuccess) {
                                 setState(() {
                                   isLoading = false; // Reset loading state
-                                  Navigator.of(context).pop(); // Close dialog
+
                                   var successMessage =
                                       state.vendorList['message'];
+
+
+                                  setState(() {
+                                    BlocProvider.of<AllRequesterBloc>(context)
+                                        .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
+                                  });
+                                  // BlocProvider.of<AllRequesterBloc>(context)
+                                  //     .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text(successMessage),
                                       backgroundColor: AppColors.primaryColour,
                                     ),
+
+
                                   );
+                                  Future.delayed(const Duration(milliseconds: 500), () {
+                                    Navigator.pop(context);
+                                  });
                                 });
                               } else if (state is VendorAssignFailure) {
                                 setState(() {
@@ -1269,12 +1279,12 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                       if (formKey.currentState?.validate() ??
                                           false) {
                                         of.add(VendorRejectHandler(
-                                          userID:
+                                          user_id:
                                               PrefUtils.getUserId().toString(),
-                                          btnAssign: 'reject',
-                                          userRole: PrefUtils.getRole(),
-                                          allCount: selectedIds,
-                                          count: selectedIds.length.toString(),
+                                            btnReject: 'reject',
+                                            pmremark:editController.text.toString(),
+                                            pmCount: selectedIds,
+
                                         ));
                                         Navigator.of(context).pop();
                                       }
@@ -1301,23 +1311,37 @@ class _AdminRequisitionState extends State<AdminRequisition> {
 
   //markDelivery
 
-  Future<bool?> _showMarkDeliveryDialog(
-      AllRequesterBloc of, BuildContext context, int? index)
+  Future<bool?> _showMarkDeliveryDialog(AllRequesterBloc of, BuildContext context, int? index)
   {
     final formKey = GlobalKey<FormState>();
-
     final TextEditingController uploadName = TextEditingController();
-    bool isButtonEnabled = false;
-    String? fileName;
+    bool isShowMarkEnabled = false;
+    bool isMarkedLoading = false;
+    bool _hasPressedSaveButton = false;
+
+    // New variables for dropdown
+    String? selectedStatus;
+    final statusOptions = {
+      "Delivered": 8,
+      "Canceled": 9,
+    };
 
     editController.addListener(() {
-      isButtonEnabled =
-          editController.text.isNotEmpty && uploadName.text.isNotEmpty;
+      isShowMarkEnabled = editController.text.isNotEmpty && uploadName.text.isNotEmpty ;
     });
-
+    void _resetForm() {
+      uploadName.clear();
+      editController.clear();
+      cancelledName.clear();
+      selectedStatus = null;
+      isShowMarkEnabled = false;
+      _hasPressedSaveButton = false;
+    }
     return showDialog(
+
       context: context,
       builder: (BuildContext context) {
+        _resetForm();
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return BlocProvider.value(
@@ -1327,92 +1351,93 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(32.0)),
                 title: Text("Mark Delivery",
-                    style: FTextStyle.preHeading16BoldStyle
-                        .copyWith(fontSize: 20)),
+                    style: FTextStyle.preHeading16BoldStyle.copyWith(fontSize: 20)),
                 content: SizedBox(
                   width: MediaQuery.of(context).size.width * 0.7,
                   child: Form(
-                    onChanged: updateState,
                     key: formKey,
+                    onChanged: updateState,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Purchase Manager Remark",
-                            style: FTextStyle.preHeading16BoldStyle),
-                        const SizedBox(height: 10),
-                        TextFormField(
-                            focusNode: _remarkFocusNode,
-                            key: _remarkKey,
-                            controller: editController,
-                            decoration: FormFieldStyle
-                                .defaultInputEditDecoration
-                                .copyWith(
-                              fillColor: Colors.grey[100],
-                              filled: true,
-                              hintText: "Enter Purchase Manager Remark",
+                        // Dropdown for status selection
+                        Text("Status", style: FTextStyle.preHeading16BoldStyle),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(28.0),
+                              border: Border.all(color: AppColors.formFieldHintColour, width: 1),
+                              color: Colors.grey[100],
                             ),
-                            onTap: () {
-                              setState(() {
-                                isCancelledFieldFocused = false;
-                                isRemarkFieldFocused = true;
-                              });
-                            },
-                            onChanged: (value) {
-                              setState(() {
-                                isCancelledFieldFocused = false;
-                                isRemarkFieldFocused = true;
-                              });
-                              updateState(); // Update button state on change
-                            },
-                            validator: ValidatorUtils.remarkMarkValidator),
-                        const SizedBox(height: 10),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                isExpanded: true,
+                                value: selectedStatus,
+                                hint: const Text(
+                                  "Select Status",
+                                  style: FTextStyle.formhintTxtStyle,
+                                ),
+                                onChanged: (String? newValue) {
+                                  setState(() {
+                                    selectedStatus = newValue;
+
+                                  });
+                                },
+                                items: statusOptions.keys.map<DropdownMenuItem<String>>((String status) {
+                                  return DropdownMenuItem<String>(
+                                    value: status,
+                                    child: Text(status),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (_hasPressedSaveButton && selectedStatus == null)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 6),
+                            child: Text(
+                              "Please select a status",
+                              style: FTextStyle.formErrorTxtStyle,
+                            ),
+                          ),
+                        // Other form fields
                         Text("Upload", style: FTextStyle.formLabelTxtStyle),
                         const SizedBox(height: 10),
                         TextFormField(
                           focusNode: _cancelledFocusNode,
                           key: _cancelledKey,
-                          decoration: FormFieldStyle.defaultInputEditDecoration
-                              .copyWith(
+                          decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
                             fillColor: Colors.grey[100],
                             filled: true,
                             hintText: "Upload Cancelled",
                             suffixIcon: IconButton(
                               icon: const Icon(Icons.attach_file),
                               onPressed: () async {
-                                final result =
-                                    await FilePicker.platform.pickFiles(
+                                final result = await FilePicker.platform.pickFiles(
                                   type: FileType.custom,
-                                  // Specify custom file types
-                                  allowedExtensions: [
-                                    'pdf',
-                                    'jpeg',
-                                    'jpg',
-                                    'png'
-                                  ], // Allowed extensions
+                                  allowedExtensions: ['pdf', 'jpeg', 'jpg', 'png'],
                                 );
                                 if (result != null && result.files.isNotEmpty) {
                                   setState(() {
-                                    cancelledNameFile =
-                                        result.files.single.name;
-                                    imagesIdCancelled =
-                                        File(result.files.single.path!);
+                                    cancelledNameFile = result.files.single.name;
+                                    imagesIdCancelled = File(result.files.single.path!);
                                     cancelledName.text = cancelledNameFile!;
                                   });
-                                  updateState(); // Update button state after selection
+                                  // updateState(); // Update button state after selection
                                 }
                               },
+
+
                             ),
                           ),
                           controller: cancelledName,
                           validator: fileUploadValidator,
-                          onTap: () {
-                            setState(() {
-                              isCancelledFieldFocused = true;
-                              isRemarkFieldFocused = false;
-                            });
-                          },
                           onChanged: (value) {
                             setState(() {
                               isCancelledFieldFocused = true;
@@ -1421,6 +1446,28 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                             updateState(); // Update button state on change
                           },
                         ),
+                        const SizedBox(height: 10),
+                        Text("Delivery Remark", style: FTextStyle.preHeading16BoldStyle),
+                        const SizedBox(height: 10),
+                        TextFormField(
+                          focusNode: _remarkFocusNode,
+                          key: _remarkKey,
+                          controller: editController,
+                          decoration: FormFieldStyle.defaultInputEditDecoration.copyWith(
+                            fillColor: Colors.grey[100],
+                            filled: true,
+                            hintText: "Enter Purchase Manager Remark",
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              isCancelledFieldFocused = false;
+                              isRemarkFieldFocused = true;
+                            });
+
+                          },
+                          validator: ValidatorUtils.remarkMarkValidator,
+                        ),
+                        const SizedBox(height: 10),
                       ],
                     ),
                   ),
@@ -1428,33 +1475,68 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                 actions: [
                   ElevatedButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryColourDark),
-                    child: const Text('Cancel',
-                        style: TextStyle(color: Colors.white)),
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.primaryColourDark),
+                    child: const Text('Cancel', style: TextStyle(color: Colors.white)),
                   ),
                   const SizedBox(width: 10),
                   BlocListener<AllRequesterBloc, AllRequesterState>(
                     listener: (context, state) {
+                      if (state is MarkDeliveryLoading) {
+                        setState(() {
+                          isMarkedLoading = true;
+                        });
+                      } else if (state is MarkDeliverySuccess) {
+                    setState(() {
+                      isMarkedLoading = false;
+                      BlocProvider.of<AllRequesterBloc>(context)
+                          .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
 
+                        });
 
+                    var deleteMessage = state.markList['message'];
+                        print("ErrorMessage>>>>$deleteMessage");
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(deleteMessage),
+                            backgroundColor: AppColors.primaryColour,
+                          ),
+                        );
 
+                        Future.delayed(const Duration(milliseconds: 500), () {
+                          Navigator.pop(context);
+                        });
+                      } else if (state is MarkDeliveryFailure) {
+                        setState(() {
+                          isMarkedLoading = false;
+                        });
+                        print("error>> ${state.markFailure}");
+                        CommonPopups.showCustomPopup(context, state.markFailure.toString());
+                      }
                     },
                     child: ElevatedButton(
                       onPressed: () {
                         if (formKey.currentState?.validate() ?? false) {
-                          // Close the dialog only if the form is valid
-                          Navigator.of(context).pop();
+                          setState(() {
+                            _hasPressedSaveButton = true;
+                          });
+                          of.add(
+                            MarkRequisitionEventHandler(
+                              status: selectedStatus != null ? statusOptions[selectedStatus].toString() : '',
+                              reqID: index.toString(),
+                              remark: editController.text,
+                              userid: PrefUtils.getUserId().toString(),
+                              Image: imagesIdCancelled,
+                            ),
+                          );
+
+
                         } else {
-                          formKey.currentState!
-                              .validate(); // Trigger validation errors
+                          formKey.currentState!.validate(); // Trigger validation errors
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: isShowMarkEnabled
-                              ? AppColors.primaryColourDark
-                              : AppColors.formFieldBorderColour),
-                      child: isLoading
+                          backgroundColor: isShowMarkEnabled ? AppColors.primaryColourDark : AppColors.formFieldBorderColour),
+                      child: isMarkedLoading
                           ? CircularProgressIndicator(color: Colors.white)
                           : Text("Save", style: FTextStyle.loginBtnStyle),
                     ),
@@ -1467,6 +1549,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
       },
     );
   }
+
 
   void updateState() {
     setState(() {

@@ -280,6 +280,7 @@ class _VenderRequisitionState extends State<VenderRequisition> {
               isLoadingApprove = true;
             });
           } else if (state is RejectSuccess) {
+
             isLoadingApprove = false;
             setState(() {
               Navigator.of(context).pop();

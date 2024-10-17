@@ -290,7 +290,8 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
                   child: UserAccountsDrawerHeader(
 
                     accountName:
-                    Text("${PrefUtils.getUserName()}", style: FTextStyle.nameProfile),
+                    Text("${PrefUtils.getUserName()}", style: FTextStyle.nameProfile,maxLines: 1
+                      ,),
                     accountEmail: Text("${PrefUtils.getInsideEmailLogin()}",maxLines: 1,
                         style: FTextStyle.emailProfile),
                     decoration: const BoxDecoration(

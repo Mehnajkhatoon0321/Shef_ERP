@@ -567,6 +567,29 @@ final class VendorAssignFailure extends AllRequesterState{
 
 }
 
+final class VendorRejectSuccess extends AllRequesterState{
+  final Map<String, dynamic> vendorList;
+  VendorRejectSuccess(this.vendorList);
+
+}
+
+//unitVendor
+
+
+final class UnitAssignLoading extends AllRequesterState{}
+final class UnitAssignSuccess extends AllRequesterState{
+  final Map<String, dynamic> UnitList;
+  UnitAssignSuccess(this.UnitList);
+
+}
+
+
+final class UnitAssignFailure extends AllRequesterState{
+  final Map<String, dynamic> vendorFailure;
+  UnitAssignFailure(this.vendorFailure);
+
+}
+
 
 
 //status
@@ -753,3 +776,19 @@ final class  VendorViewFailure extends AllRequesterState{
 
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+//MarkDelivery
+
+final class MarkDeliveryLoading extends AllRequesterState{}
+final class MarkDeliverySuccess extends AllRequesterState{
+  final Map<String, dynamic> markList;
+  MarkDeliverySuccess(this.markList);
+
+}
+
+
+final class MarkDeliveryFailure extends AllRequesterState{
+  final Map<String, dynamic> markFailure;
+  MarkDeliveryFailure(this.markFailure);
+
+}

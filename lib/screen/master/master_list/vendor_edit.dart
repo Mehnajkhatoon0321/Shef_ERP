@@ -306,7 +306,7 @@ class _VendorEditState extends State<VendorEdit> {
   List<dynamic> types = [
     "Proprietorship",
     "Partnership",
-    "Private limited",
+    "Private Limikted",
     "LLP",
     "Public Limited",
     "Society"
@@ -365,7 +365,7 @@ class _VendorEditState extends State<VendorEdit> {
               whatsAppController.text = bankData['whatsapp'] ?? '';
               companyNameController.text = bankData['company_name'] ?? '';
               selectedCategoryItem =
-                  bankData['company_type'] ?? ''; // Adjust if needed
+                  bankData['company_type'] ?? '';
               addressCompanyController.text = bankData['address'] ?? '';
               panCardController.text = bankData['pan'] ?? '';
               panName.text = bankData['pan_file'] ?? '';
@@ -695,14 +695,14 @@ class _VendorEditState extends State<VendorEdit> {
                             if (categoryValue != null) {
                               setState(() {
                                 selectedCategoryItem = categoryValue;
-                                selectedCategoryId = categoryMap[
-                                    categoryValue]; // This can be null
+                                selectedCategoryId = categoryMap[categoryValue]; // This can be null
 
                                 isButtonPartEnabled = categoryValue.isNotEmpty;
                               });
                             }
                           },
                           items: types
+                              .toSet() // Ensure uniqueness
                               .map<DropdownMenuItem<String?>>((dynamic value) {
                             return DropdownMenuItem<String?>(
                               value: value as String?, // Ensure type safety
@@ -713,6 +713,7 @@ class _VendorEditState extends State<VendorEdit> {
                       ),
                     ),
                   ),
+
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child:

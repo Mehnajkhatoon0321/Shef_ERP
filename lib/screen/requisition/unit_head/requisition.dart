@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,6 +15,7 @@ import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
+import 'package:shef_erp/utils/pref_utils.dart';
 import 'package:shef_erp/utils/unit_head_status.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -30,6 +32,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
   int pageSize = 10;
   bool hasMoreData = true;
   List<dynamic> data = [];
+  List<String> selectedIds = [];
   final controller = ScrollController();
   final controllerI = ScrollController();
   TextEditingController _editController = TextEditingController();
@@ -264,7 +267,9 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
             print("messageErrorServer$errorServerMessage");
           }else if (state is DeleteLoading) {
             DeletePopupManager.playLoader();
-          } else if (state is DeleteSuccess) {
+          }
+          else if (state is DeleteSuccess)
+          {
             DeletePopupManager.stopLoader();
 
             var deleteMessage = state.deleteList['message'];
@@ -281,6 +286,46 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
             Future.delayed(const Duration(milliseconds: 500), () {
               Navigator.pop(context);
             });
+          }
+
+        else  if (state is VendorAssignLoading) {
+            setState(() {
+              isLoading = true; // Set loading state
+            });
+          }
+        else if (state is UnitAssignSuccess) {
+            setState(() {
+              isLoading = false; // Reset loading state
+              Navigator.of(context).pop(); // Close dialog
+              var successMessage = state.UnitList['message'];
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(successMessage),
+                  backgroundColor: AppColors.primaryColour,
+                ),
+              );
+            });
+          }
+        else if (state is UnitAssignFailure) {
+            setState(() {
+              isLoading = false; // Reset loading state
+              var errorMessage = state.vendorFailure['message'];
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(errorMessage),
+                  backgroundColor: AppColors.primaryColour,
+                ),
+              );
+            });
+            if (kDebugMode) {
+              print("error>> ${state.vendorFailure}");
+            }
+          }
+        else if (state is CheckNetworkConnection) {
+            CommonPopups.showCustomPopup(
+              context,
+              'Internet is not connected.',
+            );
           }
         },
         child: Column(
@@ -359,7 +404,18 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                               : 38,
                       child: ElevatedButton(
                         onPressed: () async {
-                          // Accepted button functionality
+                          BlocProvider.of<AllRequesterBloc>(context).add(UnitActionHandler(
+                            userID: PrefUtils.getUserId().toString(),
+                            btnAssign: 'assign',
+
+                            // Use selected vendor
+                            userRole: PrefUtils.getRole(),
+                            allCount: selectedIds.length.toString(),
+                            // Pass all selected IDs here
+
+                            // Use selected billing
+                            count: selectedIds, // Count of selected IDs
+                          ));
                         },
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
@@ -533,20 +589,25 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                           Padding(
                                             padding: EdgeInsets.only(top: 10.h),
                                             child: Transform.scale(
-                                              scale: 1.3,
+                                              scale: 1.2,
                                               child: Checkbox(
                                                 value: selectedIndices
                                                     .contains(index),
                                                 activeColor:
-                                                    AppColors.primaryColourDark,
+                                                AppColors.primaryColourDark,
                                                 onChanged: (bool? value) {
                                                   setState(() {
                                                     if (value == true) {
                                                       selectedIndices
                                                           .add(index);
+                                                      selectedIds.add(item['id']
+                                                          .toString()); // Add ID when checked
                                                     } else {
                                                       selectedIndices
                                                           .remove(index);
+                                                      selectedIds.remove(item[
+                                                      'id']
+                                                          .toString()); // Remove ID when unchecked
                                                     }
                                                   });
                                                 },

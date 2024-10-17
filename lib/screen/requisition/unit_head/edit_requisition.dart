@@ -7,6 +7,7 @@ import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 import 'package:shef_erp/screen/requisition/requester/requisition_requester.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
+import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 import 'package:shef_erp/utils/form_field_style.dart';
@@ -233,7 +234,8 @@ class _EditRequisitionState extends State<EditRequisition> {
 
       );
     }
-    else if (state is UpdateLoading) {
+    else
+      if (state is UpdateLoading) {
       isLoading = true;
     } else if (state is UpdateSuccess) {
       isLoading = false;
@@ -265,6 +267,7 @@ class _EditRequisitionState extends State<EditRequisition> {
         isLoading = false;
       });
       print("error>> ${state.addCartDetailFailure}");
+      CommonPopups.showCustomPopup(context, state.addCartDetailFailure.toString());
     }
     // TODO: implement listener
   },
