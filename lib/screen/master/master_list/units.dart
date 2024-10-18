@@ -268,14 +268,13 @@ class _UnitsState extends State<Units> {
             print("messageErrorServer$errorServerMessage");
           } else if (state is UnitDeleteLoading) {
             DeletePopupManager.playLoader();
-          } else if (state is UnitDeleteSuccess) {
+          } else if (state is UnitDeleteSuccess) {setState(() {
             DeletePopupManager.stopLoader();
             BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetUnitHandler("", pageNo, pageSize));
+                .add(GetUnitHandler(searchQuery, pageNo, pageSize));
             var deleteMessage = state.unitDeleteList['message'];
             print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(GetUnitHandler("", pageNo, pageSize));
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(deleteMessage),
@@ -286,6 +285,8 @@ class _UnitsState extends State<Units> {
             Future.delayed(const Duration(milliseconds: 500), () {
               Navigator.pop(context);
             });
+          });
+
           }
 
           // TODO: implement listener
@@ -607,7 +608,7 @@ class _UnitsState extends State<Units> {
   }
 
   void _clearText() {
-    _controller.clear();
+    controllerText.clear();
     setState(() {
       _isTextEmpty = true;
       BlocProvider.of<AllRequesterBloc>(context).add(

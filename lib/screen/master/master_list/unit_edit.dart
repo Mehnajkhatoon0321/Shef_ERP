@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
+import 'package:shef_erp/screen/master/master_list/units.dart';
 
 import 'package:shef_erp/utils/colours.dart';
 
@@ -133,7 +134,9 @@ class _UnitEditState extends State<UnitEdit> {
   bool isEventFieldFocused = false;
   bool isBillingAddressFieldFocused = false;
   bool isAddressFieldFocused = false;
-
+  int pageNo = 1;
+  int totalPages = 0;
+  int pageSize = 10;
 
 
   void initState() {
@@ -196,10 +199,27 @@ class _UnitEditState extends State<UnitEdit> {
               );
             }
 
-            Future.delayed(const Duration(milliseconds: 500),
-                    () {
-                  Navigator.pop(context);
-                });
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BlocProvider(
+                  create: (context) => AllRequesterBloc(),
+                  child:  Units(),
+                ),
+              ),
+            ).then((result) {
+              // Handle any result if needed
+              if (result != null) {
+                BlocProvider.of<AllRequesterBloc>(context)
+                    .add(GetUnitHandler("", pageNo, pageSize));
+              }
+            });
+
+
+            // Future.delayed(const Duration(milliseconds: 500),
+            //         () {
+            //       Navigator.pop(context);
+            //     });
 
 
 
@@ -230,10 +250,21 @@ class _UnitEditState extends State<UnitEdit> {
               );
             }
 
-            Future.delayed(const Duration(milliseconds: 500),
-                    () {
-                  Navigator.pop(context);
-                });
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BlocProvider(
+                  create: (context) => AllRequesterBloc(),
+                  child:  Units(),
+                ),
+              ),
+            ).then((result) {
+              // Handle any result if needed
+              if (result != null) {
+                BlocProvider.of<AllRequesterBloc>(context)
+                    .add(GetUnitHandler("", pageNo, pageSize));
+              }
+            });
 
           } else if (state is UnitUpdateFailure) {
             setState(() {
