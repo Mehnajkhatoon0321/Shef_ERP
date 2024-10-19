@@ -421,7 +421,7 @@ class _BillingListState extends State<BillingList> {
               )
                   : (data.isEmpty)
                   ? const Center(
-                child: Text("No more data.",
+                child: Text("No  data available.",
                     style: FTextStyle.listTitle),
 
               )
@@ -601,11 +601,16 @@ class _BillingListState extends State<BillingList> {
                               return const Center(
                                   child: CircularProgressIndicator());
                             }
-
+                            else if (data.length > 7 && index == data.length) {
+                              // Show the "No more data." text if we are at the end and there are more than 10 items
+                              return const Center(
+                                child: Text("No more data.", style: FTextStyle.listTitle),
+                              );
+                            }
                             // If there's no more data to load, show a message
-                            return const Center(
-                                child: Text("No more data.",
-                                    style: FTextStyle.listTitle));
+                            // return const Center(
+                            //     child: Text("No more data.",
+                            //         style: FTextStyle.listTitle));
                           },
                         ),
             ),

@@ -311,10 +311,12 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
                 await MultipartFile.fromFile(filePath, filename: fileName),
               ));
             }
-
           }
-          // If no image, just continue without adding a file
         }
+
+        // Print the API URL and request data
+        print(">>>>> API URL: ${APIEndPoints.postRequisition}");
+        print(">>>>> Request Data: ${formData.fields.map((entry) => '${entry.key}: ${entry.value}').join(', ')}");
 
         print(">>>>> Image Upload Attempt");
 
@@ -340,6 +342,7 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
         emit(AddCartFailure(const {'error': 'No internet connection'}));
       }
     });
+
 
 
 
@@ -1773,7 +1776,7 @@ print("RequestData>>>>>>>>>>$request");
             'userRole': event.userRole,
             'user_id': event.userID,
             'allCount': event.allCount,
-            'btnAssign': event.btnAssign,
+            'btnApprove': event.btnAssign,
           };
 
           // Check if event.count is not empty
@@ -2423,6 +2426,87 @@ print("RequestData>>>>>>>>>>$request");
         }
       } else {
         emit(MarkDeliveryFailure(const {'error': 'No internet connection'}));
+      }
+    });
+
+    //unit head Reject
+
+    on<UnitRejectHandler>((event, emit) async {
+      // Check for internet connectivity
+      if (await ConnectivityService.isConnected()) {
+        emit(UnitRejectLoading());
+
+        try {
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            'Authorization': 'Bearer $authToken',
+          };
+
+          var request = http.MultipartRequest(
+            'POST',
+            Uri.parse(APIEndPoints.actionRejectUnit),
+          );
+
+          // Log the request details for debugging
+          developer.log("Request URL: ${request.url}");
+          developer.log("Request Method: ${request.method}");
+
+          // Prepare fields to add to the request
+          var fields = {
+
+            'user_id': event.user_id,
+            'btnReject': event.btnReject,
+            'unitremark': event.pmremark,
+
+          };
+
+          // Check if event.allCount is not empty
+          if (event.unitCount.isNotEmpty) {
+            for (int i = 0; i < event.unitCount.length; i++) {
+              fields['unitCount[$i]'] = event.unitCount[i].toString();
+            }
+          } else {
+            developer.log("Warning: event.allCount is empty.");
+          }
+
+          // Add fields to the request
+          request.fields.addAll(fields);
+
+          // Add headers to the request
+          request.headers.addAll(headers);
+
+          // Log the complete request details
+          developer.log("Request Fields: ${request.fields}");
+          developer.log("Request Headers: ${request.headers}");
+
+          // Send the request
+          final response = await request.send();
+          final responseData = await response.stream.bytesToString();
+
+          // Log the response status and data
+          developer.log("Response status: ${response.statusCode}");
+          developer.log("Response data: $responseData");
+
+          // Handle the response based on status code
+          if (response.statusCode == 200) {
+            emit(UnitRejectSuccess(jsonDecode(responseData)));
+          } else {
+            // Handle error responses
+            try {
+              final responseError = jsonDecode(responseData);
+              emit(UnitRejectFailure(responseError));
+              developer.log("Update failure: ${response.statusCode} - ${responseError['message'] ?? responseData}");
+            } catch (e) {
+              emit(UnitRejectFailure(const {'message': 'Failed to process server response.'}));
+              developer.log("Failed to decode error response: ${e.toString()} - Response data: $responseData");
+            }
+          }
+        } catch (e) {
+          emit(AuthFlowServerFailure(e.toString()));
+          developer.log("Error during user update: ${e.toString()}");
+        }
+      } else {
+        emit(CheckNetworkConnection("No internet connection"));
       }
     });
 

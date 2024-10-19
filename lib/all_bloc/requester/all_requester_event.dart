@@ -564,3 +564,16 @@ class MarkRequisitionEventHandler extends AllRequesterEvent {
 
   });
 }
+
+//unitHead Reject
+
+class UnitRejectHandler extends AllRequesterEvent {
+
+  String user_id;
+  String btnReject;
+  String pmremark;
+
+
+  List<dynamic> unitCount;
+  UnitRejectHandler({required this.user_id, required this.btnReject,required this.pmremark,required this.unitCount});
+}

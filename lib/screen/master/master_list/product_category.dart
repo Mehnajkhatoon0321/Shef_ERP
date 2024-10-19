@@ -400,7 +400,7 @@ class _ProductCategoryState extends State<ProductCategory> {
               )
                   : (data.isEmpty)
                   ? const Center(
-                child: Text("No more data.", style: FTextStyle.listTitle),
+                child: Text("No data available.", style: FTextStyle.listTitle),
               )
                   : ListView.builder(
                 itemCount: data.length + 1,
@@ -489,9 +489,12 @@ class _ProductCategoryState extends State<ProductCategory> {
                   if (hasMoreData && index == data.length) {
                     return const Center(child: CircularProgressIndicator());
                   }
-                  return const Center(
-                    child: Text("No more data.", style: FTextStyle.listTitle),
-                  );
+                  else if (data.length > 7 && index == data.length) {
+                    // Show the "No more data." text if we are at the end and there are more than 10 items
+                    return const Center(
+                      child: Text("No more data.", style: FTextStyle.listTitle),
+                    );
+                  }
                 },
               ),
             )

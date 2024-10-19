@@ -404,18 +404,30 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                               : 38,
                       child: ElevatedButton(
                         onPressed: () async {
-                          BlocProvider.of<AllRequesterBloc>(context).add(UnitActionHandler(
-                            userID: PrefUtils.getUserId().toString(),
-                            btnAssign: 'assign',
 
-                            // Use selected vendor
-                            userRole: PrefUtils.getRole(),
-                            allCount: selectedIds.length.toString(),
-                            // Pass all selected IDs here
+                          if (selectedIds.isEmpty) {
 
-                            // Use selected billing
-                            count: selectedIds, // Count of selected IDs
-                          ));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('No items selected. Please select at least one item.'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          } else {
+
+                            BlocProvider.of<AllRequesterBloc>(context).add(UnitActionHandler(
+                              userID: PrefUtils.getUserId().toString(),
+                              btnAssign: 'assign',
+                              userRole: PrefUtils.getRole(),
+                              allCount: selectedIds.length.toString(),
+                              count: selectedIds, // Count of selected IDs
+                            ));
+                          }
+
+
+
+
+
                         },
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
@@ -439,7 +451,24 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                               : 38,
                       child: ElevatedButton(
                         onPressed: () async {
-                          _showEditDialog();
+                          if (selectedIds.isEmpty) {
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('No items selected. Please select at least one item.'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          } else {
+                            // Proceed to show the reject dialog
+
+                            _showRejectDialog(
+                                BlocProvider.of<AllRequesterBloc>(context),
+                                context,
+                                selectedIds);
+                          }
+
+
                           // Rejected button functionality
                         },
                         style: ElevatedButton.styleFrom(
@@ -818,10 +847,17 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                       child: CircularProgressIndicator());
                                 }
 
+                                else if (data.length > 7 && index == data.length) {
+                                  // Show the "No more data." text if we are at the end and there are more than 10 items
+                                  return const Center(
+                                    child: Text("No more data.", style: FTextStyle.listTitle),
+                                  );
+                                }
+
                                 // If there's no more data to load, show a message
-                                return const Center(
-                                    child: Text("No more data.",
-                                        style: FTextStyle.listTitle));
+                                // return const Center(
+                                //     child: Text("No more data.",
+                                //         style: FTextStyle.listTitle));
                               },
                             ),
             ),
@@ -841,95 +877,219 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
           .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
     });
   }
-  void _showEditDialog() {
+
+  void _showRejectDialog(
+      AllRequesterBloc of, BuildContext context, List<String> selectedIds)
+  {
+    final formKey = GlobalKey<FormState>();
+    final TextEditingController editController = TextEditingController();
+    bool isButtonEnabled = false; // Initialize button state
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(32.0),
-          ),
-          title: Text(
-            "Unit Head Remark",
-            style: FTextStyle.preHeadingStyle,
-          ),
-          content: Container(
-            constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: _editController,
-                  decoration: InputDecoration(
-                    hintText: " Enter Unit Head Remark",
-                    hintStyle: FTextStyle.formhintTxtStyle,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.formFieldHintColour, width: 1.0),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.formFieldHintColour, width: 1.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(23.0),
-                      borderSide: const BorderSide(
-                          color: AppColors.primaryColour, width: 1.0),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 13.0, horizontal: 18.0),
-                    fillColor: Colors.grey[100],
-                    filled: true,
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            // Add listener to the TextEditingController to monitor text changes
+            editController.addListener(() {
+              setState(() {
+                isButtonEnabled = editController.text.isNotEmpty;
+              });
+            });
+
+            return BlocProvider.value(
+                value: of, // Use the existing Bloc instance
+                child: AlertDialog(
+                  backgroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(32.0),
                   ),
-                ),
-                const SizedBox(height: 20),
-              ],
-            ),
-          ),
-          actions: [
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.formFieldBackColour,
-                borderRadius: BorderRadius.circular(25.0),
-              ),
-              child: TextButton(
-                child:
-                    const Text("Cancel", style: TextStyle(color: Colors.black)),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-            ),
-            const SizedBox(width: 10), // Add spacing between buttons
-            Container(
-              decoration: BoxDecoration(
-                color: AppColors.primaryColour,
-                borderRadius: BorderRadius.circular(25.0),
-              ),
-              child: TextButton(
-                child: const Text("OK", style: TextStyle(color: Colors.white)),
-                onPressed: () {
-                  if (_editController.text.isNotEmpty) {
-                    setState(() {
-                      // listData[index]["brand_name"] = _editController.text;
-                    });
-                    Navigator.of(context).pop();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text("Brand name cannot be empty.")),
-                    );
-                  }
-                },
-              ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-            ),
-          ],
-        ).animateOnPageLoad(animationsMap['columnOnPageLoadAnimation1']!);
+                  title: Text(
+                    "Reject",
+                    style: FTextStyle.preHeading16BoldStyle,
+                  ),
+                  content: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.7,
+                    child: Form(
+                      key: formKey,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "Unit Head Remark",
+                            style: FTextStyle.preHeadingStyle,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: TextFormField(
+                              controller: editController,
+                              decoration: InputDecoration(
+                                hintText: "Enter Unit Head Remark",
+                                hintStyle: FTextStyle.formhintTxtStyle,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(23.0),
+                                  borderSide: const BorderSide(
+                                      color: AppColors.formFieldHintColour,
+                                      width: 1.0),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(23.0),
+                                  borderSide: const BorderSide(
+                                      color: AppColors.formFieldHintColour,
+                                      width: 1.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(23.0),
+                                  borderSide: const BorderSide(
+                                      color: AppColors.primaryColourDark,
+                                      width: 1.0),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 13.0, horizontal: 18.0),
+                                fillColor: Colors.grey[100],
+                                filled: true,
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter a remark';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  actions: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.formFieldBackColour,
+                        borderRadius: BorderRadius.circular(25.0),
+                      ),
+                      child: TextButton(
+                        child: const Text("Cancel",
+                            style: TextStyle(color: Colors.black)),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ).animateOnPageLoad(
+                          animationsMap['imageOnPageLoadAnimation2']!),
+                    ),
+                    const SizedBox(width: 10),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: isButtonEnabled
+                            ? AppColors.primaryColourDark
+                            : AppColors.formFieldBorderColour,
+                        borderRadius: BorderRadius.circular(25.0),
+                      ),
+                      child:
+                      BlocListener<AllRequesterBloc, AllRequesterState>(
+                        listener: (context, state) {
+                          if (state is UnitRejectLoading) {
+                            setState(() {
+                              isLoading = true; // Set loading state
+                            });
+                          } else if (state is UnitRejectSuccess) {
+
+
+
+
+                            setState(() {
+                              BlocProvider.of<AllRequesterBloc>(context)
+                                  .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
+
+
+
+                              var successMessage = state.unitList['message'];
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(successMessage),
+                                  backgroundColor: AppColors.primaryColour,
+                                ),
+                              );
+
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => BlocProvider(
+                                    create: (context) => AllRequesterBloc(),
+                                    child:  const  RequisitionScreen(),
+                                  ),
+                                ),
+                              ).then((result) {
+                                // Handle any result if needed
+                                if (result != null) {
+                                  BlocProvider.of<AllRequesterBloc>(context)
+                                      .add(AddCartDetailHandler("", pageNo, pageSize));
+                                }
+                              });
+                            });
+
+
+                          } else if (state is UnitRejectFailure) {
+                            setState(() {
+                              isLoading = false; // Reset loading state
+                              var errorMessage =
+                              state.vendorFailure['message'];
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(errorMessage),
+                                  backgroundColor: AppColors.primaryColour,
+                                ),
+                              );
+                            });
+                            if (kDebugMode) {
+                              print("error>> ${state.vendorFailure}");
+                            }
+                          } else if (state is CheckNetworkConnection) {
+                            CommonPopups.showCustomPopup(
+                              context,
+                              'Internet is not connected.',
+                            );
+                          }
+                        },
+                        child: TextButton(
+                          onPressed: isButtonEnabled
+                              ? () {
+                            if (formKey.currentState?.validate() ??
+                                false) {
+                              of.add(UnitRejectHandler(
+                                user_id:
+                                PrefUtils.getUserId().toString(),
+                                btnReject: 'reject',
+                                pmremark:editController.text.toString(),
+                                unitCount: selectedIds,
+
+                              ));
+
+                            }
+                          }
+                              : null,
+                          child:
+
+                          isLoading
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              :  Text("Reject",
+                              style: TextStyle(
+                                  color: isButtonEnabled
+                                      ? Colors.white
+                                      : Colors.white)),
+                        ),
+                      ).animateOnPageLoad(
+                          animationsMap['imageOnPageLoadAnimation2']!),
+                    ),
+                  ],
+                ))
+                .animateOnPageLoad(
+                animationsMap['columnOnPageLoadAnimation1']!);
+          },
+        );
       },
     );
   }
+
 }

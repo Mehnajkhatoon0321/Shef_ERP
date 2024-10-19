@@ -415,7 +415,7 @@ class _UnitsState extends State<Units> {
                         )
                       : (data.isEmpty)
                           ? const Center(
-                              child: Text("No more data.",
+                              child: Text("No data available.",
                                   style: FTextStyle.listTitle),
                             )
                           : ListView.builder(
@@ -465,7 +465,7 @@ class _UnitsState extends State<Units> {
                                                 const Text("ID: ",
                                                     style:
                                                         FTextStyle.listTitle),
-                                                Text("${index + 1}",
+                                                Text("${item["id"]}",
                                                     style: FTextStyle
                                                         .listTitleSub).animateOnPageLoad(
                                                     animationsMap['imageOnPageLoadAnimation2']!),
@@ -594,9 +594,12 @@ class _UnitsState extends State<Units> {
                                 }
 
                                 // If there's no more data to load, show a message
-                                return const Center(
-                                    child: Text("No more data.",
-                                        style: FTextStyle.listTitle));
+                                else if (data.length > 7 && index == data.length) {
+                                  // Show the "No more data." text if we are at the end and there are more than 10 items
+                                  return const Center(
+                                    child: Text("No more data.", style: FTextStyle.listTitle),
+                                  );
+                                }
                               },
                             ),
             ),

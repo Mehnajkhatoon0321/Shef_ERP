@@ -440,7 +440,7 @@ class _ProductServiceState extends State<ProductService> {
               )
                   : (data.isEmpty)
                   ? const Center(
-                child: Text("No more data.",
+                child: Text("No data available.",
                     style: FTextStyle.listTitle),
               ):
               ListView.builder(
@@ -645,9 +645,12 @@ class _ProductServiceState extends State<ProductService> {
                     }
 
                     // If there's no more data to load, show a message
-                    return const Center(
-                        child: Text("No more data.",
-                            style: FTextStyle.listTitle));
+                    else if (data.length > 7 && index == data.length) {
+                      // Show the "No more data." text if we are at the end and there are more than 10 items
+                      return const Center(
+                        child: Text("No more data.", style: FTextStyle.listTitle),
+                      );
+                    }
                 },
               ),
             ),

@@ -170,18 +170,18 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
     {'subtitle': 'Dashboard', 'icon': Icons.dashboard},
     {'subtitle': 'Requisition', 'icon': Icons.list_alt},
 
-    {'subtitle': 'Master', 'icon': Icons.book,"subLine": [{
-      'icon': Icons.padding_rounded,
-      "title": 'Product/Services',
-    },
-      {
-        'icon': Icons.category_rounded,
-        "title": 'Product/Category',
-      },
-      {
-        'icon': Icons.event,
-        "title": 'Events',
-      },],},
+    // {'subtitle': 'Master', 'icon': Icons.book,"subLine": [{
+    //   'icon': Icons.padding_rounded,
+    //   "title": 'Product/Services',
+    // },
+    //   {
+    //     'icon': Icons.category_rounded,
+    //     "title": 'Product/Category',
+    //   },
+    //   {
+    //     'icon': Icons.event,
+    //     "title": 'Events',
+    //   },],},
     {'subtitle': 'Reports', 'icon': Icons.request_page_outlined},
     {'subtitle': 'My Profile', 'icon': Icons.person},
     {'subtitle': 'Logout', 'icon': Icons.logout},

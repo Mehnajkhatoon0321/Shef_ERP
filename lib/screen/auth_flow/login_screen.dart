@@ -538,14 +538,10 @@ class _LogScreenState extends State<LogScreen> {
       case 'Unit Head':
         nextPage = const Dashboard(); // Replace with your Admin screen widget
         break;
-      case 'super-admin':
-        nextPage = const Navigation(); // Replace with your Admin screen widget
-        break;
       case 'Purchase Manager':
         nextPage = const AdminDashboard(); // Replace with your User screen widget
         break;
-
-      case 'Program Director':
+        case 'Program Director':
         nextPage = const AdminDashboard(); // Replace with your User screen widget
         break;
       case 'Vendor':

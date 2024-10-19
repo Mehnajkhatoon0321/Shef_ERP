@@ -214,10 +214,11 @@ class _AddRequisitionState extends State<AddRequisition> {
   List<String> UnitNames = [];
   List<String> productNames = [];
   Map<String, int> categoryMap = {};
+  Map<String, int> unitMap = {};
   Map<String, int> productMap = {};
   List<String> eventNames = [];
 
-  List<dynamic> unitList = ['unitList1', 'unitList2', 'unitList3'];
+  List<dynamic> unitList = [];
   String? selectedItem; // Variable to keep track of selected item
   String? selectedCategoryItem; // Variable to keep track of selected item
   String? selectedProductItem; // Variable to keep track of selected item
@@ -285,6 +286,10 @@ class _AddRequisitionState extends State<AddRequisition> {
               categoryMap = {
                 for (var item in categoryList)
                   item['cate_name'] as String: item['id'] as int
+              };
+              unitMap = {
+                for (var item in UnitsDataList)
+                  item['name'] as String: item['id'] as int
               };
 
               eventNames = eventList
@@ -511,6 +516,9 @@ class _AddRequisitionState extends State<AddRequisition> {
                                   setState(() {
                                     selectedUnitItem =
                                         eventValue;
+                                    selectedUnitId =
+                                    unitMap[
+                                    eventValue];
                                     // Update button enable state
                                     isButtonPartEnabled =
                                         eventValue != null &&
@@ -1241,7 +1249,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                                         .add(
                                       AddRequisitionHandler(
                                         date: dateFrom.text.toString(),
-                                        unit: unitFromList.toString(),
+                                        unit: selectedUnitId.toString(),
                                         // Add your value here
                                         nextDate: selectedUnitItem.toString(),
                                         time: timeFromList.toString(),

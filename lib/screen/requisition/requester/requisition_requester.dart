@@ -26,7 +26,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
   bool _isTextEmpty = true;
   int pageNo = 1;
   int totalPages = 0;
-  int pageSize = 5;
+  int pageSize = 10;
   bool hasMoreData = true;
   List<dynamic> data = [];
   final controller = ScrollController();
@@ -309,7 +309,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                         ? Center(
                             child: isLoading
                                 ? const CircularProgressIndicator() // Show circular progress indicator
-                                : const Text("No more data .",
+                                : const Text("No  data available .",
                                     style: FTextStyle.listTitle),
                           )
                         : ListView.builder(
@@ -491,7 +491,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                                 return Center(
                                   child: isLoading
                                       ? const CircularProgressIndicator() // Show circular progress indicator
-                                      : const Text("No more data.",
+                                      : const Text("No data available.",
                                           style: FTextStyle.listTitle),
                                 );
                               }

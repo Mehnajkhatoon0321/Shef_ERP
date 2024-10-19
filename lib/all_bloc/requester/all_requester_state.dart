@@ -792,3 +792,28 @@ final class MarkDeliveryFailure extends AllRequesterState{
   MarkDeliveryFailure(this.markFailure);
 
 }
+
+
+//+++++++++++++++++++++++++++++++++++++++++++
+final class UnitRejectLoading extends AllRequesterState{}
+final class UnitRejectSuccess extends AllRequesterState{
+  final Map<String, dynamic> unitList;
+  UnitRejectSuccess(this.unitList);
+
+}
+
+
+final class UnitRejectFailure extends AllRequesterState{
+  final Map<String, dynamic> vendorFailure;
+  UnitRejectFailure(this.vendorFailure);
+
+}
+
+
+
+
+
+
+
+
+

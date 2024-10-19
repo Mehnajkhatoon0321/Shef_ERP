@@ -173,7 +173,7 @@ class _VendorViewState extends State<VendorView> {
       ? Center(
     child: isLoading
         ? const CircularProgressIndicator() // Show circular progress indicator
-        : const Text("No more data .",
+        : const Text("No  data  available.",
         style: FTextStyle.listTitle),
   )
       :  SingleChildScrollView(
