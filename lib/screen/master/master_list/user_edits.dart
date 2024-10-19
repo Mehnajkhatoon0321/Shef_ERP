@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
+import 'package:shef_erp/screen/master/master_list/user_list.dart';
 
 import 'package:shef_erp/utils/colours.dart';
 
@@ -146,7 +147,9 @@ class _UserEditsState extends State<UserEdits> {
   final FocusNode _addressFocusedNode = FocusNode();
   final FocusNode _designationFocusedNode = FocusNode();
   final FocusNode _nameFocusedNode = FocusNode();
-
+  int pageNo = 1;
+  int totalPages = 0;
+  int pageSize = 10;
   bool isEmailFieldFocused = false;
   bool isPasswordFieldFocused = false;
   bool isUnitNameFieldFocused = false;
@@ -324,9 +327,25 @@ class _UserEditsState extends State<UserEdits> {
               );
             }
 
-            Future.delayed(const Duration(milliseconds: 500), () {
-              Navigator.pop(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BlocProvider(
+                  create: (context) => AllRequesterBloc(),
+                  child:  UserList(),
+                ),
+              ),
+            ).then((result) {
+              // Handle any result if needed
+              if (result != null) {
+                BlocProvider.of<AllRequesterBloc>(context)
+                    .add(GetUserListHandler("", pageNo, pageSize));
+              }
             });
+
+            // Future.delayed(const Duration(milliseconds: 500), () {
+            //   Navigator.pop(context);
+            // });
           } else if (state is UserCreateFailure) {
             setState(() {
               isLoadingEdit = false;
