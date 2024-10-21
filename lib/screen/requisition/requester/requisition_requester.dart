@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 import 'package:shef_erp/screen/requisition/requester/detailsRequisition.dart';
 import 'package:shef_erp/screen/requisition/unit_head/add_requisition.dart';
+import 'package:shef_erp/screen/requisition/unit_head/view_details.dart';
 import 'package:shef_erp/utils/asign_vector.dart';
 import 'package:shef_erp/utils/colour_status.dart';
 import 'package:shef_erp/utils/colours.dart';
@@ -33,7 +34,9 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
   final controllerI = ScrollController();
   bool isLoading = false;
   String searchQuery = "";
-
+  bool isInitialLoading = false;
+  Map<String, dynamic> errorServerMessage = {};
+  String? errorMessage;
   @override
   void initState() {
     super.initState();
@@ -46,20 +49,34 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
         .add(AddCartDetailHandler("", pageNo, pageSize));
     paginationCall();
   }
-
   void paginationCall() {
     controllerI.addListener(() {
       if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
-        if (pageNo < totalPages && !isLoading) {
-          if (hasMoreData) {
-            pageNo++;
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
-          }
+        if (!isLoading && hasMoreData) {
+          pageNo++;
+
+          isInitialLoading = false;
+          isLoading = true;
+
+          BlocProvider.of<AllRequesterBloc>(context)
+              .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
         }
       }
     });
   }
+  // void paginationCall() {
+  //   controllerI.addListener(() {
+  //     if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
+  //       if (pageNo < totalPages && !isLoading) {
+  //         if (hasMoreData) {
+  //           pageNo++;
+  //           BlocProvider.of<AllRequesterBloc>(context)
+  //               .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
+  //         }
+  //       }
+  //     }
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +161,8 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
               setState(() {
                 var responseData = state.addCartDetails['list']['requisitions'];
                 print(">>>>>>>>>>>ALLDATA$responseData");
-                totalPages = responseData["total"];
+                int totalItemCount = responseData["total"];
+                totalPages = (totalItemCount / pageSize).ceil();
 
                 if (pageNo == 1) {
                   data.clear();
@@ -152,27 +170,45 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
 
                 data.addAll(responseData['data']);
 
-                setState(() {
-                  isLoading = false;
-                  if (pageNo == totalPages) {
-                    hasMoreData = false;
-                  }
-                });
+                isInitialLoading = false;
+                isLoading = false; // Reset loading state
+
+                if (pageNo == totalPages) {
+                  hasMoreData = false;
+                }
               });
+
+
             } else if (state is AddCartFailure) {
+              setState(() {
+                isInitialLoading = false;
+              });
+
+              errorMessage = state.addCartDetailFailure['message'];
+
+              print("messageErrorFailure$errorMessage");
+            } else if (state is ServerFailure) {
               setState(() {
                 isLoading = false;
               });
-              print("error>> ${state.addCartDetailFailure}");
-            } else if (state is DeleteLoading) {
-              DeletePopupManager.playLoader();
+              errorServerMessage = state.serverFailure;
+
+              print("messageErrorServer$errorServerMessage");
+            }else if (state is DeleteLoading) {
+
+                DeletePopupManager.playLoader();
+
+
             } else if (state is DeleteSuccess) {
+              setState(() {
+                BlocProvider.of<AllRequesterBloc>(context)
+                    .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
+              });
+
               DeletePopupManager.stopLoader();
 
               var deleteMessage = state.deleteList['message'];
 
-              BlocProvider.of<AllRequesterBloc>(context)
-                  .add(AddCartDetailHandler("", pageNo, pageSize));
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(deleteMessage),
@@ -249,96 +285,79 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                 ),
               ),
               Expanded(
-                child: isLoading && data.isEmpty
+                child:isInitialLoading && data.isEmpty
                     ? Shimmer.fromColors(
-                        baseColor: Colors.grey[300]!,
-                        highlightColor: Colors.grey[100]!,
-                        child: ListView.builder(
-                          itemCount: 10, // Number of shimmer placeholders
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: screenWidth * 0.03, vertical: 5),
-                              child: Container(
-                                margin: const EdgeInsets.all(8),
-                                padding: const EdgeInsets.all(7),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      spreadRadius: 2,
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 1),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
+                  baseColor: Colors.grey[300]!,
+                  highlightColor: Colors.grey[100]!,
+                  child: ListView.builder(
+                    itemCount: 10, // Number of shimmer placeholders
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.03, vertical: 5),
+                        child: Container(
+                          margin: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                spreadRadius: 2,
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.start,
                                   children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            height: 10,
-                                            color: Colors.grey,
-                                          ),
-                                          const SizedBox(height: 5),
-                                          Container(
-                                            height: 10,
-                                            color: Colors.grey,
-                                          ),
-                                          const SizedBox(height: 5),
-                                          Container(
-                                            height: 10,
-                                            color: Colors.grey,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                    Container(
+                                        height: 10, color: Colors.grey),
+                                    const SizedBox(height: 5),
+                                    Container(
+                                        height: 10, color: Colors.grey),
+                                    const SizedBox(height: 5),
+                                    Container(
+                                        height: 10, color: Colors.grey),
                                   ],
                                 ),
                               ),
-                            );
-                          },
+                            ],
+                          ),
                         ),
-                      )
-                    : data.isEmpty
-                        ? Center(
-                            child: isLoading
-                                ? const CircularProgressIndicator() // Show circular progress indicator
-                                : const Text("No  data available .",
-                                    style: FTextStyle.listTitle),
-                          )
-                        : ListView.builder(
+                      );
+                    },
+                  ),
+                )
+                    : (errorMessage != null || errorServerMessage.isNotEmpty)
+                    ? Center(
+                  child: Text(
+                    errorMessage ?? errorServerMessage.toString(),
+                    style: FTextStyle.listTitle,
+                    textAlign: TextAlign.center,
+                  ),
+                )
+                    : (data.isEmpty)
+                    ? const Center(
+                  child: Text("No data available.",
+                      style: FTextStyle.listTitle),
+                )
+                    : ListView.builder(
                             controller: controllerI,
-                            itemCount: data.length + (hasMoreData ? 1 : 0),
+                            itemCount: data.length +1,
                             // Add one for the loading indicator
                             itemBuilder: (context, index) {
                               if (index < data.length) {
                                 final item = data[index];
                                 return GestureDetector(
                                   onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => RequesterDetails(
-                                          requestDate:
-                                              item["req_date"].toString(),
-                                          unit: item["unit"].toString(),
-                                          product:
-                                              item["product_name"].toString(),
-                                          specification:
-                                              item["specification"].toString(),
-                                          quantity: item["quantity"].toString(),
-                                          delivery:
-                                              item["dl_status"].toString(),
-                                          image: item["image"].toString(),
-                                        ),
-                                      ),
-                                    );
+
                                   },
                                   child: Padding(
                                     padding: EdgeInsets.symmetric(
@@ -367,24 +386,60 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                                         children: [
                                           Row(
                                             children: [
-                                              const Text("Requisition No: ",
-                                                  style: FTextStyle.listTitle),
+                                              const Text("Requisition No. : ", style: FTextStyle.listTitle),
                                               Expanded(
+                                                child: GestureDetector(
+                                                  onTap: () => _showRequisitionDetails(context,item),
                                                   child: Text(
-                                                      "${item["req_no"]}",
-                                                      style: FTextStyle
-                                                          .listTitleSub)),
+                                                    "${item["req_no"] ?? 'N/A'}",
+                                                    style: FTextStyle.listTitleSub.copyWith(color: Colors.blue),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis, // Handle overflow
+                                                  ),
+                                                ),
+                                              ),
                                             ],
                                           ),
+
+
+                                          SizedBox(height: 2,),
                                           Row(
                                             children: [
-                                              const Text("PO No: ",
-                                                  style: FTextStyle.listTitle),
+                                              const Text("PO No.: ", style: FTextStyle.listTitle),
                                               Expanded(
+                                                child: GestureDetector(
+                                                  onTap: () => _showPODetails(context,item),
                                                   child: Text(
-                                                      "${item["po_no"]}",
+                                                    "${item["po_no"] ?? 'N/A'}",
+                                                    style: FTextStyle.listTitleSub.copyWith(color: Colors.blue),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis, // Handle overflow
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+
+
+
+
+                                          Row(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment
+                                                .spaceBetween,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  const Text(
+                                                      "Request Date: ",
                                                       style: FTextStyle
-                                                          .listTitleSub)),
+                                                          .listTitle),
+                                                  Text(
+                                                      "${item["req_date"]}",
+                                                      style: FTextStyle
+                                                          .listTitleSub),
+                                                ],
+                                              ),
                                             ],
                                           ),
                                           Row(
@@ -432,29 +487,43 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
                                                 children: [
-                                                  Row(
-                                                    children: [
-                                                      const Text(
-                                                          "Request Date: ",
-                                                          style: FTextStyle
-                                                              .listTitle),
-                                                      Text(
-                                                          "${item["req_date"]}",
-                                                          style: FTextStyle
-                                                              .listTitleSub),
-                                                    ],
+                                                  IconButton(
+                                                    icon: const Icon(
+                                                        Icons.remove_red_eye,
+                                                        color: Colors
+                                                            .grey,
+                                                        size: 26),
+                                                    onPressed: () {
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) => RequesterDetails(
+                                                            requestDate:
+                                                            item["req_date"].toString(),
+                                                            unit: item["unit"].toString(),
+                                                            product:
+                                                            item["product_name"].toString(),
+                                                            specification:
+                                                            item["specification"].toString(),
+                                                            quantity: item["quantity"].toString(),
+                                                            delivery:
+                                                            item["dl_status"].toString(),
+                                                            image: item["image"].toString(),
+                                                          ),
+                                                        ),
+                                                      );
+
+                                                    },
                                                   ),
                                                 ],
                                               ),
+
                                               Visibility(
-                                                visible: (item['roles'] ==
-                                                        'Requester' &&
+                                                visible: (
                                                     item["uh_status"] == 0),
                                                 child: Row(
+
                                                   children: [
                                                     IconButton(
                                                       icon: const Icon(
@@ -486,13 +555,16 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                                     ),
                                   ),
                                 );
-                              } else {
-                                // This is the loading indicator
-                                return Center(
-                                  child: isLoading
-                                      ? const CircularProgressIndicator() // Show circular progress indicator
-                                      : const Text("No data available.",
-                                          style: FTextStyle.listTitle),
+                              }  if (hasMoreData && index == data.length) {
+                                return const Center(
+                                    child: CircularProgressIndicator());
+                              }
+
+                              // If there's no more data to load, show a message
+                              else if (data.length > 7 && index == data.length) {
+                                // Show the "No more data." text if we are at the end and there are more than 10 items
+                                return const Center(
+                                  child: Text("No more data.", style: FTextStyle.listTitle),
                                 );
                               }
                             },
@@ -509,8 +581,322 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
     _controller.clear();
     setState(() {
       _isTextEmpty = true;
+      searchQuery = '';
       BlocProvider.of<AllRequesterBloc>(context)
-          .add(AddCartDetailHandler("", pageNo, pageSize));
+          .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
     });
   }
+
+
+  void _showPODetails(BuildContext context, Map<String, dynamic> item) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("PO Details", style: FTextStyle.preHeadingStyle),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Container(
+              width:MediaQuery.of(context).size.width *0.9,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: 200.0, // Adjust as necessary
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const Divider(height: 10, color: Colors.grey),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Unit Name : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["unit"] ?? 'N/A',style: FTextStyle.listTitleSub,)),
+                      ],
+                    ),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Address : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+
+                    const Divider(color: Colors.grey),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Company : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["company"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Vendor Adreess : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+
+                    const Divider(color: Colors.grey),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('PO Number : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["po_no"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Requisition No : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["requisitionNo"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Request Date : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["req_date"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    DeliveryStatus(dlStatus: item["dl_status"]?.toString() ?? 'N/A'),
+
+
+
+                    const Divider(color: Colors.grey),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Product/Service: ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["product_name"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),  Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Quantity: ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["quantity"].toString() ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 1,)),
+                      ],
+                    ),Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Specification: ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["specification"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Remarks: ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["staff_remarks"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+
+
+
+                    const Divider(color: Colors.grey),
+
+                  ],
+                ),
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void _showRequisitionDetails(BuildContext context, Map<String, dynamic> item) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Requisition Details", style: FTextStyle.preHeadingStyle),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Container(
+              width:MediaQuery.of(context).size.width *0.9,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: 200.0, // Adjust as necessary
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const Divider(height: 10, color: Colors.grey),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Requisition No : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["req_no"] ?? 'N/A',style: FTextStyle.listTitleSub,)),
+                      ],
+                    ), Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Unit Name : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["unit"] ?? 'N/A',style: FTextStyle.listTitleSub,)),
+                      ],
+                    ),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Address : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+
+                    const Divider(color: Colors.grey),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Company : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["company"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Vendor Adreess : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+
+                    const Divider(color: Colors.grey),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.start,
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //   children: [
+                    //     Text('Requisition No : ',style: FTextStyle.listTitle,),
+                    //     Expanded(child: Text(item["requisitionNo"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                    //   ],
+                    // ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Billing Name : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["requisitionNo"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),  Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Billing Number : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["bill_no"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Request Date : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["req_date"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    // DeliveryStatus(dlStatus: item["dl_status"]?.toString() ?? 'N/A'),
+
+
+
+                    const Divider(color: Colors.grey),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Product/Service: ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["product_name"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),  Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Quantity: ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["quantity"].toString() ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 1,)),
+                      ],
+                    ),Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Specification: ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["specification"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Remarks: ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["staff_remarks"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+
+
+
+                    const Divider(color: Colors.grey),
+
+                  ],
+                ),
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+
 }

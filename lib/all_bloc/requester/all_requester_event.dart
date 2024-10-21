@@ -375,9 +375,9 @@ class UnitActionHandler extends AllRequesterEvent {
   String userRole;
   String btnAssign;
   String userID;
-  String allCount;
+
   List<dynamic> count;
-  UnitActionHandler({required this.userID, required this.btnAssign,required this.userRole,required this.allCount,required this.count});
+  UnitActionHandler({required this.userID, required this.btnAssign,required this.userRole,required this.count});
 }
 //Events list
 

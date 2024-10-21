@@ -1775,7 +1775,6 @@ print("RequestData>>>>>>>>>>$request");
           var fields = {
             'userRole': event.userRole,
             'user_id': event.userID,
-            'allCount': event.allCount,
             'btnApprove': event.btnAssign,
           };
 

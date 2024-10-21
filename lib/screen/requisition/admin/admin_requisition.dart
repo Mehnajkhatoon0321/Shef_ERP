@@ -359,8 +359,6 @@ class _AdminRequisitionState extends State<AdminRequisition> {
 
             var deleteMessage = state.deleteList['message'];
 
-            BlocProvider.of<AllRequesterBloc>(context)
-                .add(AddCartDetailHandler("", pageNo, pageSize));
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(deleteMessage),
@@ -663,20 +661,24 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
+
                                                 Row(
                                                   children: [
-                                                    const Text(
-                                                        "Requisition No: ",
-                                                        style: FTextStyle
-                                                            .listTitle),
+                                                    const Text("Requisition No. : ", style: FTextStyle.listTitle),
                                                     Expanded(
+                                                      child: GestureDetector(
+                                                        onTap: () => _showRequisitionDetails(context,item),
                                                         child: Text(
-                                                            "${item["req_no"] ?? 'N/A'}",
-                                                            style: FTextStyle
-                                                                .listTitleSub,
-                                                            maxLines: 1)),
+                                                          "${item["req_no"] ?? 'N/A'}",
+                                                          style: FTextStyle.listTitleSub.copyWith(color: Colors.blue),
+                                                          maxLines: 1,
+                                                          overflow: TextOverflow.ellipsis, // Handle overflow
+                                                        ),
+                                                      ),
+                                                    ),
                                                   ],
                                                 ),
+
 
                                                 SizedBox(height: 2,),
                                                 Row(
@@ -961,27 +963,281 @@ class _AdminRequisitionState extends State<AdminRequisition> {
             ],
           ),
           content: SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: 200.0, // Adjust as necessary
+            child: Container(
+              width:MediaQuery.of(context).size.width *0.9,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: 200.0, // Adjust as necessary
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const Divider(height: 10, color: Colors.grey),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Unit Name : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["unit"] ?? 'N/A',style: FTextStyle.listTitleSub,)),
+                      ],
+                    ),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Address : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+
+                    const Divider(color: Colors.grey),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Company : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["company"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Vendor Adreess : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+
+                    const Divider(color: Colors.grey),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('PO Number : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["po_no"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Requisition No : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["requisitionNo"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Request Date : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["req_date"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    DeliveryStatus(dlStatus: item["dl_status"]?.toString() ?? 'N/A'),
+
+
+
+                    const Divider(color: Colors.grey),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Product/Service: ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["product_name"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),  Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Quantity: ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["quantity"].toString() ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 1,)),
+                      ],
+                    ),Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Specification: ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["specification"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Remarks: ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["staff_remarks"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+
+
+
+                    const Divider(color: Colors.grey),
+
+                  ],
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  const Divider(height: 10, color: Colors.grey),
-                  Text(item["unit"] ?? 'N/A'),
-                  Text(item["uaddress"] ?? 'N/A'),
-                  const Divider(color: Colors.grey),
-                  Text("Product/Service: ${item["product"] ?? 'N/A'}"),
-                  Text("Specification: ${item["specification"] ?? 'N/A'}"),
-                  Text("Quantity: ${item["quantity"] ?? 'N/A'}"),
-                  const Divider(color: Colors.grey),
-                  Text("PO Number: ${item["po_no"] ?? 'N/A'}"),
-                  Text("Requisition No: ${item["requisitionNo"] ?? 'N/A'}"),
-                  Text("Request Date: ${item["req_date"] ?? 'N/A'}"),
-                  const Divider(color: Colors.grey),
-                  DeliveryStatus(dlStatus: item["dl_status"]?.toString() ?? 'N/A'),
-                ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  void _showRequisitionDetails(BuildContext context, Map<String, dynamic> item) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Requisition Details", style: FTextStyle.preHeadingStyle),
+              IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Container(
+              width:MediaQuery.of(context).size.width *0.9,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: 200.0, // Adjust as necessary
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const Divider(height: 10, color: Colors.grey),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Requisition No : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["req_no"] ?? 'N/A',style: FTextStyle.listTitleSub,)),
+                      ],
+                    ), Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Unit Name : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["unit"] ?? 'N/A',style: FTextStyle.listTitleSub,)),
+                      ],
+                    ),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Address : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+
+                    const Divider(color: Colors.grey),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Company : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["company"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Vendor Adreess : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+
+                    const Divider(color: Colors.grey),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.start,
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //   children: [
+                    //     Text('Requisition No : ',style: FTextStyle.listTitle,),
+                    //     Expanded(child: Text(item["requisitionNo"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                    //   ],
+                    // ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Billing Name : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["requisitionNo"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),  Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Billing Number : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["bill_no"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Request Date : ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["req_date"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+                    // DeliveryStatus(dlStatus: item["dl_status"]?.toString() ?? 'N/A'),
+
+
+
+                    const Divider(color: Colors.grey),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Product/Service: ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["product_name"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),  Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Quantity: ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["quantity"].toString() ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 1,)),
+                      ],
+                    ),Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Specification: ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["specification"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+              Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Remarks: ',style: FTextStyle.listTitle,),
+                        Expanded(child: Text(item["staff_remarks"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                      ],
+                    ),
+
+
+
+                    const Divider(color: Colors.grey),
+
+                  ],
+                ),
               ),
             ),
           ),
@@ -1162,7 +1418,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                           // BlocProvider.of<AllRequesterBloc>(context)
                           //     .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
                           isLoading = false; // Set loading state
-
+                          selectedIndices.clear();
+                          selectedIds.clear();
                           var successMessage = state.vendorList['message'];
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -1375,7 +1632,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                   setState(() {
                                     BlocProvider.of<AllRequesterBloc>(context)
                                         .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
-
+                                    selectedIndices.clear();
+                                    selectedIds.clear();
 
 
                                     var successMessage = state.vendorList['message'];
@@ -1476,7 +1734,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
   Future<bool?> _showMarkDeliveryDialog(AllRequesterBloc of, BuildContext context, int? index) {
     final formKey = GlobalKey<FormState>();
 
-    bool isShowMarkEnabled = false;
+    bool isShowMarkEnabled = true;
     bool isMarkedLoading = false;
     bool _hasPressedSaveButton = false;
 
@@ -1492,7 +1750,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
       editController.clear();
       cancelledName.clear();
       selectedStatus = null;
-      isShowMarkEnabled = false;
+      isShowMarkEnabled = true;
       _hasPressedSaveButton = false;
     }
 
@@ -1531,7 +1789,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                   width: MediaQuery.of(context).size.width * 0.7,
                   child: Form(
                     key: formKey,
-                    onChanged: updateState,
+                    // onChanged: updateState,
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -1558,7 +1816,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                   setState(() {
                                     selectedStatus = newValue;
                                   });
-                                  updateState(); // Update button state on dropdown change
+                                //  updateState(); // Update button state on dropdown change
                                 },
                                 items: statusOptions.keys.map<DropdownMenuItem<String>>((String status) {
                                   return DropdownMenuItem<String>(
@@ -1570,11 +1828,11 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                             ),
                           ),
                         ),
-                        if (_hasPressedSaveButton && selectedStatus == null)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 6),
-                            child: Text("Please select a status", style: FTextStyle.formErrorTxtStyle),
-                          ),
+                        // if (_hasPressedSaveButton && selectedStatus == null)
+                        //   Padding(
+                        //     padding: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 6),
+                        //     child: Text("Please select a status", style: FTextStyle.formErrorTxtStyle),
+                        //   ),
                         // Other form fields
                         Text("Upload", style: FTextStyle.formLabelTxtStyle),
                         const SizedBox(height: 10),
@@ -1598,19 +1856,19 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                     imagesIdCancelled = File(result.files.single.path!);
                                     cancelledName.text = cancelledNameFile!;
                                   });
-                                  updateState(); // Update button state after selection
+                               //   updateState(); // Update button state after selection
                                 }
                               },
                             ),
                           ),
                           controller: cancelledName,
-                          validator: fileUploadValidator,
+                        //  validator: fileUploadValidator,
                           onChanged: (value) {
                             setState(() {
                               isCancelledFieldFocused = true;
                               isRemarkFieldFocused = false;
                             });
-                            updateState(); // Update button state on change
+                           // updateState(); // Update button state on change
                           },
                         ),
                         const SizedBox(height: 10),
@@ -1632,7 +1890,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                             });
                             updateState(); // Update button state on change
                           },
-                          validator: ValidatorUtils.remarkMarkValidator,
+                          //validator: ValidatorUtils.remarkMarkValidator,
                         ),
                         const SizedBox(height: 10),
                       ],

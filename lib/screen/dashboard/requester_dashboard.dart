@@ -618,47 +618,47 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
       MaterialPageRoute(builder: (context) => nextPage),
     );
   }
-  void _navigateOnRole(String role) {
-    Widget nextPage;
-
-    switch (role) {
-      case 'Unit Head':
-        nextPage =  BlocProvider(
-          create: (context) => AllRequesterBloc(),
-          child: const RequisitionScreen(),
-        );
-        break;
-
-      case 'Purchase Manager':
-        nextPage =  BlocProvider(
-          create: (context) => AllRequesterBloc(),
-          child: const AdminRequisition(),
-        );
-        break;
-      case 'Program Director':
-        nextPage =  BlocProvider(
-          create: (context) => AllRequesterBloc(),
-          child: const VenderRequisition(),
-        );
-        break;
-      case 'Vendor':
-        nextPage =  BlocProvider(
-          create: (context) => AllRequesterBloc(),
-          child: const VenderRequisition(),
-        );
-        break;
-      case 'Requester':
-        nextPage =  BlocProvider(
-          create: (context) => AllRequesterBloc(),
-          child: const RequisitionRequester(),
-        );
-        break;
-      default:
-        return;
-    }
-
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => nextPage));
-  }
+  // void _navigateOnRole(String role) {
+  //   Widget nextPage;
+  //
+  //   switch (role) {
+  //     case 'Unit Head':
+  //       nextPage =  BlocProvider(
+  //         create: (context) => AllRequesterBloc(),
+  //         child: const RequisitionScreen(),
+  //       );
+  //       break;
+  //
+  //     case 'Purchase Manager':
+  //       nextPage =  BlocProvider(
+  //         create: (context) => AllRequesterBloc(),
+  //         child: const AdminRequisition(),
+  //       );
+  //       break;
+  //     case 'Program Director':
+  //       nextPage =  BlocProvider(
+  //         create: (context) => AllRequesterBloc(),
+  //         child: const VenderRequisition(),
+  //       );
+  //       break;
+  //     case 'Vendor':
+  //       nextPage =  BlocProvider(
+  //         create: (context) => AllRequesterBloc(),
+  //         child: const VenderRequisition(),
+  //       );
+  //       break;
+  //     case 'Requester':
+  //       nextPage =  BlocProvider(
+  //         create: (context) => AllRequesterBloc(),
+  //         child: const RequisitionRequester(),
+  //       );
+  //       break;
+  //     default:
+  //       return;
+  //   }
+  //
+  //   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => nextPage));
+  // }
   List<Widget> buildMenuItems(List<Map<String, dynamic>> listItem, String userRole) {
     List<Widget> widgets = [];
 

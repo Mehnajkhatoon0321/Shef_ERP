@@ -100,105 +100,108 @@ class _VendorDetailsState extends State<VendorDetails> {
   };
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-        title: Text('Requisition View', style: FTextStyle.HeadingTxtWhiteStyle,
-          textAlign: TextAlign.center,),
-        backgroundColor: AppColors.primaryColourDark,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 15),
-          child: GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: const Icon(
-              Icons.arrow_back_ios,
-              size: 25,
-              color: Colors.white,
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+          title: Text('Requisition View', style: FTextStyle.HeadingTxtWhiteStyle,
+            textAlign: TextAlign.center,),
+          backgroundColor: AppColors.primaryColourDark,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 15),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: const Icon(
+                Icons.arrow_back_ios,
+                size: 25,
+                color: Colors.white,
+              ),
             ),
           ),
+          // You can set this to any color you prefer
         ),
-        // You can set this to any color you prefer
-      ),
-      body: Column(
-        children: [
-          widget.image != null && widget.image!.isNotEmpty
-              ? SizedBox(
-            height: MediaQuery.of(context).size.height / 3,
-            width: MediaQuery.of(context).size.width,
-            child:Image.asset("${widget.image}",fit: BoxFit.cover, ),
-          )
-              : Container(),
-          // SizedBox(
-          //     height:MediaQuery.of(context).size.height/ 3,width: MediaQuery.of(context).size.width,
-          //     // color: Colors.yellow,
-          //
-          //     child: Image.asset("${widget.image}",fit: BoxFit.cover, )).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+        body: Column(
+          children: [
+            widget.image != null && widget.image!.isNotEmpty
+                ? SizedBox(
+              height: MediaQuery.of(context).size.height / 3,
+              width: MediaQuery.of(context).size.width,
+              child:Image.asset("${widget.image}",fit: BoxFit.cover, ),
+            )
+                : Container(),
+            // SizedBox(
+            //     height:MediaQuery.of(context).size.height/ 3,width: MediaQuery.of(context).size.width,
+            //     // color: Colors.yellow,
+            //
+            //     child: Image.asset("${widget.image}",fit: BoxFit.cover, )).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
 
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    const Text("Request Date: ", style: FTextStyle.listTitleBig),
-                    Text(widget.requestDate, style: FTextStyle.listTitleSubBig),
-                  ],
-                ),
-                const SizedBox(height: 5),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      const Text("Request Date: ", style: FTextStyle.listTitleBig),
+                      Text(widget.requestDate, style: FTextStyle.listTitleSubBig),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
 
 
-                Row(
-                  children: [
-                    const Text("Product/Service: ", style: FTextStyle.listTitleBig),
-                    Text(widget.product, style: FTextStyle.listTitleSubBig),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    const Text("Specification: ", style: FTextStyle.listTitleBig),
-                    Text(widget.specification, style: FTextStyle.listTitleSubBig),
-                  ],
-                ),
+                  Row(
+                    children: [
+                      const Text("Product/Service: ", style: FTextStyle.listTitleBig),
+                      Text(widget.product, style: FTextStyle.listTitleSubBig),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      const Text("Specification: ", style: FTextStyle.listTitleBig),
+                      Text(widget.specification, style: FTextStyle.listTitleSubBig),
+                    ],
+                  ),
 
-                const SizedBox(height: 5),
+                  const SizedBox(height: 5),
 
-                Row(
-                  children: [
-                    const Text("Quantity: ", style: FTextStyle.listTitleBig),
-                    Text(widget.quantity, style: FTextStyle.listTitleSubBig),
-                  ],
-                ),
-                const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      const Text("Quantity: ", style: FTextStyle.listTitleBig),
+                      Text(widget.quantity, style: FTextStyle.listTitleSubBig),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
 
 
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    const Text("Delivery Status: ", style: FTextStyle.listTitleBig),
-                    Text(widget.delivery, style:  widget.delivery == 'Pending'
-                        ? FTextStyle.listTitleSubBig.copyWith(color: Colors.red)
-                        : FTextStyle.listTitleSubBig.copyWith(color: Colors.green),),
-                  ],
-                ),
-                const SizedBox(height: 5),
+                  const SizedBox(height: 5),
+                  Row(
+                    children: [
+                      const Text("Delivery Status: ", style: FTextStyle.listTitleBig),
+                      Text(widget.delivery, style:  widget.delivery == 'Pending'
+                          ? FTextStyle.listTitleSubBig.copyWith(color: Colors.red)
+                          : FTextStyle.listTitleSubBig.copyWith(color: Colors.green),),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
 
 
 
 
 
-              ],
-            ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-          )
+                ],
+              ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+            )
 
 
-        ],
+          ],
+        ),
       ),
     );
   }
