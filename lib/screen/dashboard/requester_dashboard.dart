@@ -589,23 +589,40 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
 
     switch (role) {
       case 'Unit Head':
-        nextPage = const Dashboard(); // Replace with your Admin screen widget
-        break;
-      case 'super-admin':
-        nextPage = const Navigation(); // Replace with your Admin screen widget
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: Dashboard(),
+        );
+        // Replace with your Admin screen widget
         break;
       case 'Purchase Manager':
-        nextPage = const AdminDashboard(); // Replace with your User screen widget
+        nextPage =  BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: AdminDashboard(),
+        ); // Replace with your User screen widget
         break;
-
       case 'Program Director':
-        nextPage = const AdminDashboard(); // Replace with your User screen widget
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: AdminDashboard(),
+        ); // Replace // Replace with your User screen widget
         break;
       case 'Vendor':
-        nextPage = const VendorDashboard(); // Replace with your User screen widget
+        nextPage =BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: VendorDashboard(),
+        ); // Replace
+
+
+        // Replace with your User screen widget
         break;
       case 'Requester':
-        nextPage = const RequesterDashboard(); // Replace with your User screen widget
+        nextPage =BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: RequesterDashboard(),
+        ); // Repl
+
+        // Replace with your User screen widget
         break;
       default:
 

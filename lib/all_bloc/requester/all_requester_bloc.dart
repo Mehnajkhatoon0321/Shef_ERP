@@ -2508,7 +2508,43 @@ print("RequestData>>>>>>>>>>$request");
         emit(CheckNetworkConnection("No internet connection"));
       }
     });
+//dashboard
 
+    on<DashBoardHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(DashBoardLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.dashboardApi}$userId");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
+
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(DashBoardSuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(DashBoardFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(DashBoardFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(DashBoardFailure(const {'error': 'Network error'}));
+      }
+    });
 
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shef_erp/all_bloc/authflow/auth_flow_bloc.dart';
+import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 import 'package:shef_erp/screen/auth_flow/forgot_password.dart';
 import 'package:shef_erp/screen/auth_flow/navigation.dart';
 import 'package:shef_erp/screen/dashboard/admin_dashboard.dart';
@@ -34,9 +35,9 @@ class _LogScreenState extends State<LogScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _password = TextEditingController();
   final GlobalKey<FormFieldState<String>> _emailKey =
-      GlobalKey<FormFieldState<String>>();
+  GlobalKey<FormFieldState<String>>();
   final GlobalKey<FormFieldState<String>> _passwordKey =
-      GlobalKey<FormFieldState<String>>();
+  GlobalKey<FormFieldState<String>>();
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
@@ -80,6 +81,7 @@ class _LogScreenState extends State<LogScreen> {
       checkboxChecked = true;
     }
   }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -172,7 +174,10 @@ class _LogScreenState extends State<LogScreen> {
   @override
   Widget build(BuildContext context) {
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
-    var displayType = valueType.toString().split('.').last;
+    var displayType = valueType
+        .toString()
+        .split('.')
+        .last;
     return MediaQuery(
       data: MediaQuery.of(context)
           .copyWith(textScaler: const TextScaler.linear(1.0)),
@@ -197,7 +202,6 @@ class _LogScreenState extends State<LogScreen> {
                 PrefUtils.setRememberMe(false);
                 PrefUtils.setUserEmailLogin(""); // Clear email
                 PrefUtils.setUserPassword("");
-
               }
 
               Map<String, dynamic> data = state.logResponse;
@@ -210,8 +214,8 @@ class _LogScreenState extends State<LogScreen> {
                 if (user.containsKey('role')) {
                   String roleUser = user['role'];
                   int roleId = user['id'];
-                  String email =user['email'];
-                  String name =user['name'];
+                  String email = user['email'];
+                  String name = user['name'];
 
                   // Save token
                   PrefUtils.setToken(bearerToken);
@@ -233,13 +237,7 @@ class _LogScreenState extends State<LogScreen> {
               });
 
               CommonPopups.showCustomPopup(context, state.failureMessage);
-            } else if (state is CheckNetworkConnection) {
-              CommonPopups.showCustomPopup(
-                context,
-                'Internet is not connected.',
-              );
             }
-
           },
           builder: (context, state) {
             return Stack(
@@ -249,7 +247,10 @@ class _LogScreenState extends State<LogScreen> {
                   left: 0,
                   right: 0,
                   child: Container(
-                    height: MediaQuery.of(context).size.height * 0.4,
+                    height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.4,
                     color: AppColors.primaryColourDark,
                     child: Align(
                       alignment: Alignment.topLeft,
@@ -260,11 +261,11 @@ class _LogScreenState extends State<LogScreen> {
                           child: Image.asset(
                             'assets/images/logowhite.png',
                             width: (displayType == 'desktop' ||
-                                    displayType == 'tablet')
+                                displayType == 'tablet')
                                 ? 250.w
                                 : 180,
                             height: (displayType == 'desktop' ||
-                                    displayType == 'tablet')
+                                displayType == 'tablet')
                                 ? 100.h
                                 : 170,
                           ),
@@ -276,7 +277,10 @@ class _LogScreenState extends State<LogScreen> {
                 Center(
                   child: Container(
                     margin: EdgeInsets.only(
-                        top: MediaQuery.of(context).size.height * 0.2),
+                        top: MediaQuery
+                            .of(context)
+                            .size
+                            .height * 0.2),
                     decoration: const BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.only(
@@ -287,7 +291,7 @@ class _LogScreenState extends State<LogScreen> {
                     child: ListView(
                       padding: EdgeInsets.symmetric(
                         horizontal: (displayType == 'desktop' ||
-                                displayType == 'tablet')
+                            displayType == 'tablet')
                             ? 50
                             : 20,
                       ),
@@ -311,7 +315,8 @@ class _LogScreenState extends State<LogScreen> {
                           child: Form(
                             key: formKey,
                             onChanged: () {
-                              if (ValidatorUtils.isValidEmail(_emailController.text) &&
+                              if (ValidatorUtils.isValidEmail(
+                                  _emailController.text) &&
                                   isValidPass(_password.text)) {
                                 setState(() {
                                   isButtonEnabled = true;
@@ -339,14 +344,14 @@ class _LogScreenState extends State<LogScreen> {
                                   Constants.emailLabel,
                                   style: FTextStyle.formLabelTxtStyle,
                                 ).animateOnPageLoad(animationsMap[
-                                    'imageOnPageLoadAnimation2']!),
+                                'imageOnPageLoadAnimation2']!),
                                 const SizedBox(height: 5),
                                 TextFormField(
                                   key: _emailKey,
                                   focusNode: _emailFocusNode,
                                   keyboardType: TextInputType.emailAddress,
                                   decoration:
-                                      FormFieldStyle.defaultemailDecoration,
+                                  FormFieldStyle.defaultemailDecoration,
                                   inputFormatters: [NoSpaceFormatter()],
                                   controller: _emailController,
                                   validator: ValidatorUtils.emailValidator,
@@ -357,13 +362,13 @@ class _LogScreenState extends State<LogScreen> {
                                     });
                                   },
                                 ).animateOnPageLoad(animationsMap[
-                                    'imageOnPageLoadAnimation2']!),
+                                'imageOnPageLoadAnimation2']!),
                                 const SizedBox(height: 15),
                                 Text(
                                   "Password",
                                   style: FTextStyle.formLabelTxtStyle,
                                 ).animateOnPageLoad(animationsMap[
-                                    'imageOnPageLoadAnimation2']!),
+                                'imageOnPageLoadAnimation2']!),
                                 const SizedBox(height: 5),
                                 TextFormField(
                                   keyboardType: TextInputType.visiblePassword,
@@ -377,7 +382,7 @@ class _LogScreenState extends State<LogScreen> {
                                         passwordVisible
                                             ? Icons.visibility
                                             : Icons.visibility_off,
-                                        color:Colors.black45,
+                                        color: Colors.black45,
                                       ),
                                       onPressed: () {
                                         setState(() {
@@ -405,7 +410,7 @@ class _LogScreenState extends State<LogScreen> {
                                     });
                                   },
                                 ).animateOnPageLoad(animationsMap[
-                                    'imageOnPageLoadAnimation2']!),
+                                'imageOnPageLoadAnimation2']!),
                               ],
                             ),
                           ),
@@ -419,17 +424,20 @@ class _LogScreenState extends State<LogScreen> {
                                   onTap: () {
                                     setState(() {
                                       checkboxChecked = !checkboxChecked;
-                                      print('Checkbox checked: $checkboxChecked');
+                                      print(
+                                          'Checkbox checked: $checkboxChecked');
 
                                       if (checkboxChecked) {
                                         PrefUtils.setRememberMe(true);
-                                        PrefUtils.setUserEmailLogin(_emailController.text.toString());
-                                        PrefUtils.setUserPassword(_password.text.toString());
+                                        PrefUtils.setUserEmailLogin(
+                                            _emailController.text.toString());
+                                        PrefUtils.setUserPassword(
+                                            _password.text.toString());
                                       } else {
                                         PrefUtils.setRememberMe(false);
-                                        PrefUtils.setUserEmailLogin(""); // Clear email
+                                        PrefUtils.setUserEmailLogin(
+                                            ""); // Clear email
                                         PrefUtils.setUserPassword("");
-
                                       }
                                     });
                                   },
@@ -441,7 +449,9 @@ class _LogScreenState extends State<LogScreen> {
                                         size: 20,
                                       ),
                                       child: Icon(
-                                        checkboxChecked ? Icons.check_box : Icons.check_box_outline_blank,
+                                        checkboxChecked
+                                            ? Icons.check_box
+                                            : Icons.check_box_outline_blank,
                                       ),
                                     ),
                                   ),
@@ -459,7 +469,7 @@ class _LogScreenState extends State<LogScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        const ForgotPassword(),
+                                    const ForgotPassword(),
                                   ),
                                 );
                               },
@@ -475,7 +485,10 @@ class _LogScreenState extends State<LogScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(18.0),
                             child: SizedBox(
-                              width: MediaQuery.of(context).size.width,
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width,
                               height: 48,
                               child: ElevatedButton(
                                 onPressed: () {
@@ -507,15 +520,14 @@ class _LogScreenState extends State<LogScreen> {
                                       : AppColors.formFieldBorderColour,
                                 ),
                                 child: isLoading
-                                    ? CircularProgressIndicator(color: Colors.white)
-                                    : Text("Login", style: FTextStyle.loginBtnStyle),
+                                    ? CircularProgressIndicator(
+                                    color: Colors.white)
+                                    : Text(
+                                    "Login", style: FTextStyle.loginBtnStyle),
                               ),
                             ),
                           ),
                         )
-
-
-
                             .animateOnPageLoad(
                             animationsMap['imageOnPageLoadAnimation2']!),
                         const SizedBox(height: 20),
@@ -536,23 +548,42 @@ class _LogScreenState extends State<LogScreen> {
 
     switch (role) {
       case 'Unit Head':
-        nextPage = const Dashboard(); // Replace with your Admin screen widget
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: Dashboard(),
+        );
+        // Replace with your Admin screen widget
         break;
       case 'Purchase Manager':
-        nextPage = const AdminDashboard(); // Replace with your User screen widget
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: AdminDashboard(),
+        ); // Replace with your User screen widget
         break;
-        case 'Program Director':
-        nextPage = const AdminDashboard(); // Replace with your User screen widget
+      case 'Program Director':
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: AdminDashboard(),
+        ); // Replace // Replace with your User screen widget
         break;
       case 'Vendor':
-        nextPage = const VendorDashboard(); // Replace with your User screen widget
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: VendorDashboard(),
+        ); // Replace
+
+
+        // Replace with your User screen widget
         break;
       case 'Requester':
-        nextPage = const RequesterDashboard(); // Replace with your User screen widget
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: RequesterDashboard(),
+        ); // Repl
+
+        // Replace with your User screen widget
         break;
       default:
-        developer.log("Role not recognized: $role");
-
         return; // No navigation occurs if the role is not recognized
     }
 

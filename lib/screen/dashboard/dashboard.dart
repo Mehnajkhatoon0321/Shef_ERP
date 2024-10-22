@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -208,6 +209,20 @@ class _DashboardState extends State<Dashboard> {
       ],
     ),
   };
+  Map<String, dynamic> errorServerMessage = {};
+  String? errorMessage;
+  bool isInitialLoading = false;
+  String allRequisition = "0"; // Initialize to an appropriate default
+  String todayRequisition = "0";
+  String pendingRequisition = "0";
+  String deliveredRequisition = "0";
+  @override
+  void initState() {
+    BlocProvider.of<AllRequesterBloc>(context).add(DashBoardHandler());
+    // TODO: implement initState
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
@@ -292,219 +307,527 @@ class _DashboardState extends State<Dashboard> {
               ],
             ),
           ),
-          body: Padding(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 3.0, vertical: 10),
-                      child: Container(
-                        height: MediaQuery.of(context).size.height *0.15,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
+            body: BlocListener<AllRequesterBloc, AllRequesterState>(
+              listener: (context, state) {
+                if (state is DashBoardLoading) {
+                  setState(() {
+                    isInitialLoading = true;
+                  });
+                } else if (state is DashBoardSuccess) {
+                  setState(() {
+                    isInitialLoading = false;
+                    var responseData = state.dashboardList;
 
-                          // Background color
-                          borderRadius: BorderRadius.circular(12),
-                          // Rounded corners
-                          border: Border.all(
-                              color: Colors.yellow.shade700, // Border color
-                              width: 1 // Border width
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.yellow.shade700, // Shadow color
-                              spreadRadius: 0.5, // Spread radius
-                              blurRadius: 5, // Blur radius
-                              offset:
-                              const Offset(0, 3), // Offset from the container
-                            ),
-                          ],
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width / 1.9,
-                                child: Text(
-                                  'Welcome\n'
-                                      '${PrefUtils.getUserName()}'
-                                      '\nlets plan your day',
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 3,
-                                  style: FTextStyle.preHeadingStyle
-                                      .copyWith(fontWeight: FontWeight.w700),
-                                ).animateOnPageLoad(
-                                    animationsMap['imageOnPageLoadAnimation2']!),
+                    allRequisition =
+                        responseData['all_requistion'].toString();
+                    todayRequisition =
+                        responseData['todays_requistion'].toString();
+                    pendingRequisition =
+                        responseData['pending_requistion'].toString();
+                    deliveredRequisition =
+                        responseData['delivered_requistion'].toString();
+
+                    Map<String, dynamic> unitWiseRequisition =
+                    responseData['unit_wise_requistition'];
+
+                    dataMap = unitWiseRequisition.map(
+                            (key, value) => MapEntry(key, value.toDouble()));
+                  });
+                } else if (state is DashBoardFailure) {
+                  setState(() {
+                    isInitialLoading = false;
+                  });
+                  errorMessage = state.dashboardFailure['message'];
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(errorMessage.toString()),
+                      backgroundColor: AppColors.primaryColour,
+                    ),
+                  );
+
+                  if (kDebugMode) {
+                    print("error>> ${state.dashboardFailure}");
+                  }
+                  Future.delayed(const Duration(milliseconds: 500), () {
+                    Navigator.pop(context);
+                  });
+                }
+              },
+              child: SingleChildScrollView(
+                child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12.0, vertical: 10),
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 3.0, vertical: 10),
+                            child: Container(
+                              height:
+                              MediaQuery.of(context).size.height * 0.15,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+
+                                // Background color
+                                borderRadius: BorderRadius.circular(12),
+                                // Rounded corners
+                                border: Border.all(
+                                    color: Colors.yellow.shade700,
+                                    // Border color
+                                    width: 1 // Border width
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.yellow.shade700,
+                                    // Shadow color
+                                    spreadRadius: 0.5,
+                                    // Spread radius
+                                    blurRadius: 5,
+                                    // Blur radius
+                                    offset: const Offset(
+                                        0, 3), // Offset from the container
+                                  ),
+                                ],
                               ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10.0),
+                                child: Row(
+                                  mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment:
+                                  CrossAxisAlignment.center,
+                                  children: [
+                                    SizedBox(
+                                      width: MediaQuery.of(context)
+                                          .size
+                                          .width /
+                                          1.9,
+                                      child: Text(
+                                        'Welcome\n'
+                                            '${PrefUtils.getUserName()}'
+                                            '\nlets plan your day',
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 3,
+                                        style: FTextStyle.preHeadingStyle
+                                            .copyWith(
+                                            fontWeight:
+                                            FontWeight.w700),
+                                      ).animateOnPageLoad(animationsMap[
+                                      'imageOnPageLoadAnimation2']!),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        height: 220,
+                                        // color: Colors.redAccent,
+                                        alignment: Alignment.center,
+                                        child: Image.asset(
+                                          'assets/images/timer.png',
+                                          // color: AppColors.primaryColourDarkDark,
+                                          width: (displayType ==
+                                              'desktop' ||
+                                              displayType == 'tablet')
+                                              ? 150.w
+                                              : 120,
+                                          height: (displayType ==
+                                              'desktop' ||
+                                              displayType == 'tablet')
+                                              ? 100.h
+                                              : 200,
+                                        ),
+                                      ).animateOnPageLoad(animationsMap[
+                                      'imageOnPageLoadAnimation2']!),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ).animateOnPageLoad(
+                              animationsMap['imageOnPageLoadAnimation2']!),
+                          SizedBox(
+                            height: 15,
+                          ),
+                          Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // First Container
                               Expanded(
                                 child: Container(
-                                  height: 220,
-                                  // color: Colors.redAccent,
-                                  alignment: Alignment.center,
-                                  child: Image.asset(
-                                    'assets/images/timer.png',
-                                    // color: AppColors.primaryColourDarkDark,
-                                    width: (displayType == 'desktop' ||
-                                        displayType == 'tablet')
-                                        ? 150.w
-                                        : 120,
-                                    height: (displayType == 'desktop' ||
-                                        displayType == 'tablet')
-                                        ? 100.h
-                                        : 200,
+                                  height: 100,
+                                  // Set your desired height here
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
+                                      color: AppColors.primaryColourDark,
+                                      width: 1,
+                                    ),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: AppColors.primaryColourDark,
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: Offset(0, 0.5),
+                                      ),
+                                    ],
+                                    borderRadius: BorderRadius.circular(12),
                                   ),
-                                ).animateOnPageLoad(
-                                    animationsMap['imageOnPageLoadAnimation2']!),
+                                  child: Stack(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 7.0),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                          children: [
+                                            const SizedBox(height: 10),
+                                            Text(
+                                              "${allRequisition}",
+                                              style: FTextStyle
+                                                  .authlogin_signupTxtStyle
+                                                  .copyWith(
+                                                color: AppColors
+                                                    .primaryColourDark,
+                                                fontSize: 24,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            const SizedBox(height: 10),
+                                            Text(
+                                              "All Requisition",
+                                              style: FTextStyle
+                                                  .authlogin_signupTxtStyle
+                                                  .copyWith(
+                                                  color: AppColors
+                                                      .formFieldHintColour,
+                                                  fontSize: 18),
+                                              overflow:
+                                              TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Positioned(
+                                        right: 14,
+                                        top: 9,
+                                        child: Icon(
+                                          Icons.data_thresholding_rounded,
+                                          size: 29,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(width: 20),
+                              // Space between containers
+
+                              // Second Container
+                              Expanded(
+                                child: Container(
+                                  height: 100,
+                                  // Set your desired height here
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
+                                      color: AppColors.primaryColourDark,
+                                      width: 1,
+                                    ),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: AppColors.primaryColourDark,
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: Offset(0, 0.5),
+                                      ),
+                                    ],
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 7.0),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                          children: [
+                                            const SizedBox(height: 10),
+                                            Text(
+                                              "${todayRequisition}",
+                                              style: FTextStyle
+                                                  .authlogin_signupTxtStyle
+                                                  .copyWith(
+                                                color: AppColors
+                                                    .primaryColourDark,
+                                                fontSize: 24,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            const SizedBox(height: 10),
+                                            Text(
+                                              "Today's Requisition",
+                                              style: FTextStyle
+                                                  .authlogin_signupTxtStyle
+                                                  .copyWith(
+                                                  color: AppColors
+                                                      .formFieldHintColour,
+                                                  fontSize: 18),
+                                              overflow:
+                                              TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Positioned(
+                                        right: 14,
+                                        top: 9,
+                                        child: Icon(
+                                          Icons.today,
+                                          size: 29,
+                                          color: Colors.yellow,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                    ).animateOnPageLoad(
-                        animationsMap['imageOnPageLoadAnimation2']!),
-                    Expanded(
-                      child: Container(
-                        height: MediaQuery.of(context).size.height *4,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 10, top: 15),
-                          child: GridView.builder(
-                            gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 1.7,
-                              crossAxisSpacing: 10,
-                              mainAxisSpacing: 14,
-                            ),
-                            itemCount: _items.length,
-                            itemBuilder: (context, index) {
-                              final item = _items[index];
-
-                              return Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  border: Border.all(
-                                    color: AppColors.primaryColourDark,
-                                    width: 1,
-                                  ),
-                                  boxShadow: const [
-                                    BoxShadow(
+                          SizedBox(
+                            height: 20,
+                          ),
+                          Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // First Container
+                              Expanded(
+                                child: Container(
+                                  height: 100,
+                                  // Set your desired height here
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
                                       color: AppColors.primaryColourDark,
-                                      spreadRadius: 1,
-                                      blurRadius: 3,
-                                      offset: Offset(0, 0.5),
+                                      width: 1,
                                     ),
-                                  ],
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Stack(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 7.0),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                        children: [
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          const SizedBox(height: 10),
-                                          Text(
-                                            item['total'],
-                                            style: FTextStyle
-                                                .authlogin_signupTxtStyle
-                                                .copyWith(
-                                                color:
-                                                AppColors.primaryColourDark,
-                                                fontSize: 24),
-                                            textAlign: TextAlign.center,
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            item['title'],
-                                            style: FTextStyle
-                                                .authlogin_signupTxtStyle
-                                                .copyWith(
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: AppColors.primaryColourDark,
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: Offset(0, 0.5),
+                                      ),
+                                    ],
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 7.0),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                          children: [
+                                            const SizedBox(height: 10),
+                                            Text(
+                                              "${pendingRequisition}",
+                                              style: FTextStyle
+                                                  .authlogin_signupTxtStyle
+                                                  .copyWith(
                                                 color: AppColors
-                                                    .formFieldHintColour),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
+                                                    .primaryColourDark,
+                                                fontSize: 24,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            const SizedBox(height: 10),
+                                            Text(
+                                              "Pending Requisition",
+                                              style: FTextStyle
+                                                  .authlogin_signupTxtStyle
+                                                  .copyWith(
+                                                  color: AppColors
+                                                      .formFieldHintColour,
+                                                  fontSize: 18),
+                                              overflow:
+                                              TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    Positioned(
-                                      right: 14,
-                                      top: 9,
-                                      child: Icon(
-                                        item['icon'],
-                                        size: 29, // Same icon for the corner
-                                        color: item['color'],
+                                      Positioned(
+                                        right: 14,
+                                        top: 9,
+                                        child: Icon(Icons.pending_actions,
+                                            size: 29, color: Colors.red),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              );
-                            },
+                              ),
+
+                              const SizedBox(width: 20),
+                              // Space between containers
+
+                              // Second Container
+                              Expanded(
+                                child: Container(
+                                  height: 100,
+                                  // Set your desired height here
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    border: Border.all(
+                                      color: AppColors.primaryColourDark,
+                                      width: 1,
+                                    ),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: AppColors.primaryColourDark,
+                                        spreadRadius: 1,
+                                        blurRadius: 3,
+                                        offset: Offset(0, 0.5),
+                                      ),
+                                    ],
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            left: 7.0),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                          children: [
+                                            const SizedBox(height: 10),
+                                            Text(
+                                              "${deliveredRequisition}",
+                                              style: FTextStyle
+                                                  .authlogin_signupTxtStyle
+                                                  .copyWith(
+                                                color: AppColors
+                                                    .primaryColourDark,
+                                                fontSize: 24,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            const SizedBox(height: 10),
+                                            Text(
+                                              "Delivered Requisition",
+                                              style: FTextStyle
+                                                  .authlogin_signupTxtStyle
+                                                  .copyWith(
+                                                  color: AppColors
+                                                      .formFieldHintColour,
+                                                  fontSize: 18),
+                                              overflow:
+                                              TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Positioned(
+                                        right: 14,
+                                        top: 9,
+                                        child: Icon(
+                                          Icons.check_circle,
+                                          size: 29,
+                                          color: Colors.green,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
-                    ),
-
-                    Container(
-                      height: MediaQuery.of(context).size.height *0.35,
-                      child: PieChart(
-                        dataMap: dataMap,
-                        animationDuration: const Duration(milliseconds: 800),
-                        chartLegendSpacing: 35,
-                        chartRadius: MediaQuery.of(context).size.width / 2.2,
-                        colorList: colorList,
-                        initialAngleInDegree: 0,
-                        chartType: ChartType.ring,
-                        // Remove the center text
-                        centerText: "Requisition",
-                        centerTextStyle: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                        legendOptions: const LegendOptions(
-                          showLegendsInRow: false,
-                          showLegends: true,
-                          legendTextStyle: TextStyle(
-                            fontWeight: FontWeight.bold,
+                          Container(
+                            width:  MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height * 0.35,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Center(
+                                child: isInitialLoading // Show loading indicator
+                                    ? CircularProgressIndicator()
+                                    : dataMap.isNotEmpty
+                                    ? PieChart(
+                                  dataMap: dataMap,
+                                  animationDuration: const Duration(milliseconds: 800),
+                                  chartLegendSpacing: 35,
+                                  chartRadius: MediaQuery.of(context).size.width / 2.2,
+                                  colorList: colorList,
+                                  initialAngleInDegree: 0,
+                                  chartType: ChartType.ring,
+                                  centerText: "Requisition",
+                                  centerTextStyle: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                  legendOptions: const LegendOptions(
+                                    showLegendsInRow: false,
+                                    showLegends: true,
+                                    legendTextStyle: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  chartValuesOptions: const ChartValuesOptions(
+                                    showChartValueBackground: true,
+                                    showChartValues: true,
+                                    showChartValuesInPercentage: true,
+                                    showChartValuesOutside: true,
+                                    decimalPlaces: 1,
+                                  ),
+                                  gradientList: colorList
+                                      .map((color) => [color, color.withOpacity(0.7)])
+                                      .toList(),
+                                  emptyColorGradient: [
+                                    Colors.blue,
+                                    Colors.blueAccent,
+                                  ],
+                                )
+                                    : Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text("No data available"),
+                                      SizedBox(height: 8),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          // Logic to refresh data
+                                        },
+                                        child: Text("Refresh"),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        chartValuesOptions: const ChartValuesOptions(
-                          showChartValueBackground: true,
-                          showChartValues: true,
-                          showChartValuesInPercentage: true,
-                          showChartValuesOutside: true,
-                          decimalPlaces: 1,
-                        ),
-                        gradientList: [
-                          [Colors.yellow, Colors.yellow[400]!],
-                          [Colors.red, Colors.redAccent],
-                          [Colors.green, Colors.greenAccent],
-                        ],
-                        emptyColorGradient: [Colors.blue, Colors.blueAccent],
-                      ),
-                    ),
 
+                        ])),
+              ),
+            ))));
 
-
-
-                  ]
-              ))
-        ),
-      ),
-    );
   }
 
 
@@ -577,23 +900,40 @@ class _DashboardState extends State<Dashboard> {
 
     switch (role) {
       case 'Unit Head':
-        nextPage = const Dashboard(); // Replace with your Admin screen widget
-        break;
-      case 'super-admin':
-        nextPage = const Navigation(); // Replace with your Admin screen widget
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: Dashboard(),
+        );
+        // Replace with your Admin screen widget
         break;
       case 'Purchase Manager':
-        nextPage = const AdminDashboard(); // Replace with your User screen widget
+        nextPage =  BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: AdminDashboard(),
+        ); // Replace with your User screen widget
         break;
-
       case 'Program Director':
-        nextPage = const AdminDashboard(); // Replace with your User screen widget
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: AdminDashboard(),
+        ); // Replace // Replace with your User screen widget
         break;
       case 'Vendor':
-        nextPage = const VendorDashboard(); // Replace with your User screen widget
+        nextPage =BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: VendorDashboard(),
+        ); // Replace
+
+
+        // Replace with your User screen widget
         break;
       case 'Requester':
-        nextPage = const RequesterDashboard(); // Replace with your User screen widget
+        nextPage =BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: RequesterDashboard(),
+        ); // Repl
+
+        // Replace with your User screen widget
         break;
       default:
 

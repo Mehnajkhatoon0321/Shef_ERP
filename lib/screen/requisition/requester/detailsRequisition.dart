@@ -30,7 +30,7 @@ class _RequesterDetailsState extends State<RequesterDetails> {
   @override
   Widget build(BuildContext context) {
 
-    String imageUrl = 'https://erp.studyhallfoundation.org/public/uploads/requisition/${widget.image}';
+    String imageUrl = 'https://demo.studyhallfoundation.org/public/uploads/requisition/${widget.image}';
 
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
@@ -67,7 +67,7 @@ class _RequesterDetailsState extends State<RequesterDetails> {
                 widget.image.isNotEmpty
                     ? SizedBox(
                   height: MediaQuery.of(context).size.height / 3,
-                  width: MediaQuery.of(context).size.width,
+                  // width: MediaQuery.of(context).size.width,
                   child: Image.network(
                     imageUrl,
                     fit: BoxFit.cover,

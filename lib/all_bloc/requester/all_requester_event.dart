@@ -577,3 +577,9 @@ class UnitRejectHandler extends AllRequesterEvent {
   List<dynamic> unitCount;
   UnitRejectHandler({required this.user_id, required this.btnReject,required this.pmremark,required this.unitCount});
 }
+//dashboard
+
+class DashBoardHandler extends AllRequesterEvent {
+
+  DashBoardHandler();
+}

@@ -4,6 +4,8 @@ class  APIEndPoints{
 
   //demoUrl
   static const String baseUrl = 'https://demo.studyhallfoundation.org/api/';
+  static const String baseUrlImage = 'https://demo.studyhallfoundation.org/public/uploads/requisition/';
+  // static const String baseUrlImage = 'https://erp.studyhallfoundation.org/public/uploads/requisition/';
    // static const String baseUrl = 'https://erp.studyhallfoundation.org/api/';
   static const String login = '${baseUrl}login';
   static const String requesterList = '${baseUrl}req/';
@@ -81,6 +83,7 @@ class  APIEndPoints{
   static const String   editVendorList= '${baseUrl}vendor/edit';
 
   static const String   viewPost= '${baseUrl}vendor/view/';
+  static const String   dashboardApi= '${baseUrl}dashboard/';
 
 
 

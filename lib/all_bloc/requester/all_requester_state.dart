@@ -811,7 +811,19 @@ final class UnitRejectFailure extends AllRequesterState{
 
 
 
+final class DashBoardLoading extends AllRequesterState{}
+final class DashBoardSuccess extends AllRequesterState{
+  final Map<String, dynamic> dashboardList;
+  DashBoardSuccess(this.dashboardList);
 
+}
+
+
+final class DashBoardFailure extends AllRequesterState{
+  final Map<String, dynamic> dashboardFailure;
+  DashBoardFailure(this.dashboardFailure);
+
+}
 
 
 

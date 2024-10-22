@@ -275,30 +275,45 @@ class _NavigationState extends State<Navigation> {
                           if (userRole == 'Vendor' ) {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const VendorDashboard()),
+                              MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: VendorDashboard(),
+)),
                             );
                           }else if (userRole == 'Purchase Manager') {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const AdminDashboard()),
+                              MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: AdminDashboard(),
+)),
                             );
                           }
                           else if (userRole == 'Requester') {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const RequesterDashboard()),
+                              MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: RequesterDashboard(),
+)),
                             );
                           }
                           else if (userRole == 'Program Director') {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const AdminDashboard()),
+                              MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: AdminDashboard(),
+)),
                             );
                           }
                           else {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const Dashboard()),
+                              MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: Dashboard(),
+)),
                             );
                           }
                           break;

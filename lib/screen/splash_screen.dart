@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 import 'package:shef_erp/screen/auth_flow/navigation.dart';
 import 'package:shef_erp/screen/dashboard/admin_dashboard.dart';
 import 'package:shef_erp/screen/dashboard/dashboard.dart';
@@ -72,17 +74,35 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget _navigateBasedOnRole(String role) {
     switch (role) {
       case 'Unit Head':
-        return const Dashboard(); // Navigate to Dashboard if role is Unit Head
+        return  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: Dashboard(),
+); // Navigate to Dashboard if role is Unit Head
       case 'super-admin':
-        return const Navigation(); // Navigate for super-admin
+        return  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: Navigation(),
+); // Navigate for super-admin
       case 'Purchase Manager':
-        return const AdminDashboard(); // Navigate for Purchase Manager
+        return  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: AdminDashboard(),
+); // Navigate for Purchase Manager
       case 'Program Director':
-        return const AdminDashboard(); // Navigate for Program Director
+        return  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: AdminDashboard(),
+); // Navigate for Program Director
       case 'Vendor':
-        return const VendorDashboard(); // Navigate for Vendor
+        return  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: VendorDashboard(),
+); // Navigate for Vendor
       case 'Requester':
-        return const RequesterDashboard(); // Navigate for Requester
+        return  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: RequesterDashboard(),
+); // Navigate for Requester
       default:
         return const WelcomeScreen(); // Default case if role is not recognized
     }

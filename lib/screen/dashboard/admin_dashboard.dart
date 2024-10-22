@@ -28,7 +28,7 @@ import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 import 'package:shef_erp/utils/pref_utils.dart';
-
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 import 'dashboard.dart';
 
@@ -41,32 +41,6 @@ class AdminDashboard extends StatefulWidget {
 
 class _AdminDashboardState extends State<AdminDashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final List<Map<String, dynamic>> _items = [
-    {
-      "title": "All Requisition",
-      "total": "21",
-      "icon": Icons.data_thresholding_rounded,
-      'color': Colors.blue,
-    },
-    {
-      "title": "Today's Requisition",
-      "total": "12",
-      "icon": Icons.today,
-      'color': Colors.yellow,
-    },
-    {
-      "title": "Pending Requisition",
-      "total": "33",
-      "icon": Icons.pending_actions,
-      'color': Colors.red,
-    },
-    {
-      "title": "Delivered Requisition",
-      "total": "4",
-      "icon": Icons.check_circle,
-      'color': Colors.green,
-    }
-  ];
 
   List<Map<String, dynamic>> listItem = [
     {'subtitle': 'Dashboard', 'icon': Icons.dashboard},
@@ -110,39 +84,44 @@ class _AdminDashboardState extends State<AdminDashboard> {
     {'subtitle': 'Logout', 'icon': Icons.logout},
   ];
   int? _expandedIndex;
+
   Future<bool> _showExitConfirmation(BuildContext context) async {
     return (await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.exit_to_app, color: Theme.of(context).primaryColor),
-            const SizedBox(width: 8), // Add some space between icon and title
-            Text(
-              'Exit Confirmation',
-              style: FTextStyle.FaqsTxtStyle,
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Row(
+              children: [
+                Icon(Icons.exit_to_app, color: Theme.of(context).primaryColor),
+                const SizedBox(width: 8),
+                // Add some space between icon and title
+                Text(
+                  'Exit Confirmation',
+                  style: FTextStyle.FaqsTxtStyle,
+                ),
+              ],
             ),
-          ],
-        ),
-        content: const Text(
-          'Do you really want to exit the app?',
-          style: FTextStyle.listTitle,
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false), // Don't exit
-            child: const Text('No'),
+            content: const Text(
+              'Do you really want to exit the app?',
+              style: FTextStyle.listTitle,
+            ),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false), // Don't exit
+                child: const Text('No'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true), // Exit
+                child: const Text('Yes'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true), // Exit
-            child: const Text('Yes'),
-          ),
-        ],
-      ),
-    )) ?? false; // Return false if the dialog was dismissed without a choice
+        )) ??
+        false; // Return false if the dialog was dismissed without a choice
   }
 
-
+  Map<String, dynamic> errorServerMessage = {};
+  String? errorMessage;
+  bool isInitialLoading = false;
   final animationsMap = {
     'columnOnPageLoadAnimation1': AnimationInfo(
       trigger: AnimationTrigger.onPageLoad,
@@ -221,328 +200,330 @@ class _AdminDashboardState extends State<AdminDashboard> {
       ],
     ),
   };
-  Map<String, double> dataMap = {
-    "All ": 30,
-    "Today's ": 25,
-    "Pending ": 20,
-    "Delivered ": 25,
-  };
+  Map<String, double> dataMap = {};
 
-  // Define the colors for each segment
+// Define the colors for each segment
   List<Color> colorList = [
     Colors.yellow,
     Colors.red,
     Colors.green,
     Colors.blue,
+    Colors.orange,
+    Colors.purple,
+    Colors.cyan,
+    Colors.teal,
+    Colors.amber,
+    Colors.lime,
+    Colors.indigo,
+    Colors.pink,
+    Colors.brown,
   ];
 
+// Make sure the number of colors matches the number of segments
 
+  @override
+  void initState() {
+    BlocProvider.of<AllRequesterBloc>(context).add(DashBoardHandler());
+    // TODO: implement initState
+    super.initState();
+  }
+
+  String allRequisition = "0"; // Initialize to an appropriate default
+  String todayRequisition = "0";
+  String pendingRequisition = "0";
+  String deliveredRequisition = "0";
 
   @override
   Widget build(BuildContext context) {
-    final List<double> values = [25, 35, 20, 20]; // Values can be any non-negative numbers
-    final List<String> categories = ['Yellow', 'Red', 'Green', 'Blue'];
-
-    // Calculate total for percentage allocation
-    final total = values.reduce((a, b) => a + b);
-
-    // Create pie data with percentages
-    final List<PieChartData> pieData = List.generate(
-      values.length,
-          (index) => PieChartData(categories[index], (values[index] / total) * 100),
-    );
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
     var displayType = valueType.toString().split('.').last;
 
-    return
-      WillPopScope(
+    return WillPopScope(
         onWillPop: () async {
-          bool shouldExit=(await _showExitConfirmation(context)) as bool;
+          bool shouldExit = (await _showExitConfirmation(context)) as bool;
           return shouldExit;
-
-
         },
         child: MediaQuery(
-          data: MediaQuery.of(context)
-              .copyWith(textScaler: const TextScaler.linear(1.0)),
-          child: Scaffold(
-            key: _scaffoldKey,
-            backgroundColor: Colors.white,
-            appBar: AppBar(
-              centerTitle: true,
-              automaticallyImplyLeading: false,
-              title: Text(
-                'Dashboard',
-                style: FTextStyle.HeadingTxtWhiteStyle,
-                textAlign: TextAlign.center,
-              ),
-              backgroundColor: AppColors.primaryColourDark,
-              leading: Padding(
-                padding: const EdgeInsets.only(left: 15),
-                child: GestureDetector(
-                  onTap: () {
-                    _scaffoldKey.currentState!
-                        .openDrawer(); // Open the end drawer
-                  },
-                  child: const Icon(
-                    Icons.menu,
-                    size: 35,
-                    color: Colors.white,
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: const TextScaler.linear(1.0)),
+            child: Scaffold(
+                key: _scaffoldKey,
+                backgroundColor: Colors.white,
+                appBar: AppBar(
+                  centerTitle: true,
+                  automaticallyImplyLeading: false,
+                  title: Text(
+                    'Dashboard',
+                    style: FTextStyle.HeadingTxtWhiteStyle,
+                    textAlign: TextAlign.center,
                   ),
-                ),
-              ),
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 15),
-                  child: GestureDetector(
-                    onTap: () {
-                      // Add your action here
-                      print("Bell icon tapped!");
-                      // You can navigate to another page or show a dialog, etc.
-                    },
-                    child: const Icon(
-                      Icons.notifications,
-                      size: 35,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            drawer: Drawer(
-              backgroundColor: Colors.white,
-              child: ListView(
-                padding: EdgeInsets.zero,
-                children: <Widget>[
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height / 3.9,
-                    child: UserAccountsDrawerHeader(
-                      accountName: Text(PrefUtils.getUserName(),
-                          style: FTextStyle.nameProfile),
-                      accountEmail: Text(PrefUtils.getInsideEmailLogin(),
-                          maxLines: 1, style: FTextStyle.emailProfile),
-                      decoration: const BoxDecoration(
-                        color: AppColors.primaryColourDark,
-                      ),
-                    ),
-                  ),
-                  ...buildMenuItems(listItem, PrefUtils.getRole()),
-                ],
-              ),
-            ),
-            body: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12.0, vertical: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 3.0, vertical: 10),
-                    child: Container(
-                      height: MediaQuery.of(context).size.height *0.15,
-                      decoration: BoxDecoration(
+                  backgroundColor: AppColors.primaryColourDark,
+                  leading: Padding(
+                    padding: const EdgeInsets.only(left: 15),
+                    child: GestureDetector(
+                      onTap: () {
+                        _scaffoldKey.currentState!
+                            .openDrawer(); // Open the end drawer
+                      },
+                      child: const Icon(
+                        Icons.menu,
+                        size: 35,
                         color: Colors.white,
-
-                        // Background color
-                        borderRadius: BorderRadius.circular(12),
-                        // Rounded corners
-                        border: Border.all(
-                            color: Colors.yellow.shade700, // Border color
-                            width: 1 // Border width
-                            ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.yellow.shade700, // Shadow color
-                            spreadRadius: 0.5, // Spread radius
-                            blurRadius: 5, // Blur radius
-                            offset:
-                                const Offset(0, 3), // Offset from the container
-                          ),
-                        ],
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: MediaQuery.of(context).size.width / 1.9,
-                              child: Text(
-                                'Welcome\n'
-                                '${PrefUtils.getUserName()}'
-                                '\nlets plan your day',
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 3,
-                                style: FTextStyle.preHeadingStyle
-                                    .copyWith(fontWeight: FontWeight.w700),
-                              ).animateOnPageLoad(
-                                  animationsMap['imageOnPageLoadAnimation2']!),
-                            ),
-                            Expanded(
-                              child: Container(
-                                height: 220,
-                                // color: Colors.redAccent,
-                                alignment: Alignment.center,
-                                child: Image.asset(
-                                  'assets/images/timer.png',
-                                  // color: AppColors.primaryColourDarkDark,
-                                  width: (displayType == 'desktop' ||
-                                          displayType == 'tablet')
-                                      ? 150.w
-                                      : 120,
-                                  height: (displayType == 'desktop' ||
-                                          displayType == 'tablet')
-                                      ? 100.h
-                                      : 200,
-                                ),
-                              ).animateOnPageLoad(
-                                  animationsMap['imageOnPageLoadAnimation2']!),
-                            ),
-                          ],
+                    ),
+                  ),
+                  actions: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 15),
+                      child: GestureDetector(
+                        onTap: () {
+                          // Add your action here
+                          print("Bell icon tapped!");
+                          // You can navigate to another page or show a dialog, etc.
+                        },
+                        child: const Icon(
+                          Icons.notifications,
+                          size: 35,
+                          color: Colors.white,
                         ),
                       ),
                     ),
-                  ).animateOnPageLoad(
-                      animationsMap['imageOnPageLoadAnimation2']!),
-                  Expanded(
-                    child: Container(
-                      height: MediaQuery.of(context).size.height *4,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 10, top: 15),
-                        child: GridView.builder(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 1.7,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 14,
+                  ],
+                ),
+                drawer: Drawer(
+                  backgroundColor: Colors.white,
+                  child: ListView(
+                    padding: EdgeInsets.zero,
+                    children: <Widget>[
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height / 3.9,
+                        child: UserAccountsDrawerHeader(
+                          accountName: Text(PrefUtils.getUserName(),
+                              style: FTextStyle.nameProfile),
+                          accountEmail: Text(PrefUtils.getInsideEmailLogin(),
+                              maxLines: 1, style: FTextStyle.emailProfile),
+                          decoration: const BoxDecoration(
+                            color: AppColors.primaryColourDark,
                           ),
-                          itemCount: _items.length,
-                          itemBuilder: (context, index) {
-                            final item = _items[index];
+                        ),
+                      ),
+                      ...buildMenuItems(listItem, PrefUtils.getRole()),
+                    ],
+                  ),
+                ),
+                body: BlocListener<AllRequesterBloc, AllRequesterState>(
+                  listener: (context, state) {
+                    if (state is DashBoardLoading) {
+                      setState(() {
+                        isInitialLoading = true;
+                      });
+                    } else if (state is DashBoardSuccess) {
+                      setState(() {
+                        isInitialLoading = false;
+                        var responseData = state.dashboardList;
 
-                            return Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                border: Border.all(
-                                  color: AppColors.primaryColourDark,
-                                  width: 1,
-                                ),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: AppColors.primaryColourDark,
-                                    spreadRadius: 1,
-                                    blurRadius: 3,
-                                    offset: Offset(0, 0.5),
+                        allRequisition =
+                            responseData['all_requistion'].toString();
+                        todayRequisition =
+                            responseData['todays_requistion'].toString();
+                        pendingRequisition =
+                            responseData['pending_requistion'].toString();
+                        deliveredRequisition =
+                            responseData['delivered_requistion'].toString();
+
+                        Map<String, dynamic> unitWiseRequisition =
+                            responseData['unit_wise_requistition'];
+
+                        dataMap = unitWiseRequisition.map(
+                            (key, value) => MapEntry(key, value.toDouble()));
+                      });
+                    } else if (state is DashBoardFailure) {
+                      setState(() {
+                        isInitialLoading = false;
+                      });
+                      errorMessage = state.dashboardFailure['message'];
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(errorMessage.toString()),
+                          backgroundColor: AppColors.primaryColour,
+                        ),
+                      );
+
+                      if (kDebugMode) {
+                        print("error>> ${state.dashboardFailure}");
+                      }
+                      Future.delayed(const Duration(milliseconds: 500), () {
+                        Navigator.pop(context);
+                      });
+                    }
+                  },
+                  child: SingleChildScrollView(
+                    child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12.0, vertical: 10),
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 3.0, vertical: 10),
+                                child: Container(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.15,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+
+                                    // Background color
+                                    borderRadius: BorderRadius.circular(12),
+                                    // Rounded corners
+                                    border: Border.all(
+                                        color: Colors.yellow.shade700,
+                                        // Border color
+                                        width: 1 // Border width
+                                        ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.yellow.shade700,
+                                        // Shadow color
+                                        spreadRadius: 0.5,
+                                        // Spread radius
+                                        blurRadius: 5,
+                                        // Blur radius
+                                        offset: const Offset(
+                                            0, 3), // Offset from the container
+                                      ),
+                                    ],
                                   ),
-                                ],
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Stack(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 7.0),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.start,
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10.0),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                          CrossAxisAlignment.center,
                                       children: [
-                                        const SizedBox(
-                                          height: 10,
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width /
+                                              1.9,
+                                          child: Text(
+                                            'Welcome\n'
+                                            '${PrefUtils.getUserName()}'
+                                            '\nlets plan your day',
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 3,
+                                            style: FTextStyle.preHeadingStyle
+                                                .copyWith(
+                                                    fontWeight:
+                                                        FontWeight.w700),
+                                          ).animateOnPageLoad(animationsMap[
+                                              'imageOnPageLoadAnimation2']!),
                                         ),
-                                        const SizedBox(height: 10),
-                                        Text(
-                                          item['total'],
-                                          style: FTextStyle
-                                              .authlogin_signupTxtStyle
-                                              .copyWith(
-                                                  color:
-                                                      AppColors.primaryColourDark,
-                                                  fontSize: 24),
-                                          textAlign: TextAlign.center,
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          item['title'],
-                                          style: FTextStyle
-                                              .authlogin_signupTxtStyle
-                                              .copyWith(
-                                                  color: AppColors
-                                                      .formFieldHintColour),
-                                          overflow: TextOverflow.ellipsis,
+                                        Expanded(
+                                          child: Container(
+                                            height: 220,
+                                            // color: Colors.redAccent,
+                                            alignment: Alignment.center,
+                                            child: Image.asset(
+                                              'assets/images/timer.png',
+                                              // color: AppColors.primaryColourDarkDark,
+                                              width: (displayType ==
+                                                          'desktop' ||
+                                                      displayType == 'tablet')
+                                                  ? 150.w
+                                                  : 120,
+                                              height: (displayType ==
+                                                          'desktop' ||
+                                                      displayType == 'tablet')
+                                                  ? 100.h
+                                                  : 200,
+                                            ),
+                                          ).animateOnPageLoad(animationsMap[
+                                              'imageOnPageLoadAnimation2']!),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  Positioned(
-                                    right: 14,
-                                    top: 9,
-                                    child: Icon(
-                                      item['icon'],
-                                      size: 29, // Same icon for the corner
-                                      color: item['color'],
+                                ),
+                              ).animateOnPageLoad(
+                                  animationsMap['imageOnPageLoadAnimation2']!),
+
+
+
+                              Container(
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height * 0.35,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Center(
+                                    child: isInitialLoading
+                                        ? CircularProgressIndicator()
+                                        : dataMap.isNotEmpty
+                                        ? SfCartesianChart(
+                                      primaryXAxis: CategoryAxis(
+                                        title: AxisTitle(text: 'Requisition Types'),
+                                      ),
+                                      primaryYAxis: NumericAxis(
+                                        title: AxisTitle(text: 'Count'),
+                                        minimum: 0,
+                                        maximum: dataMap.values.reduce((a, b) => a > b ? a : b),
+                                        interval: 1,
+                                      ),
+                                      title: ChartTitle(text: 'Requisitions Overview'),
+                                      tooltipBehavior: TooltipBehavior(enable: true),
+                                      series: <CartesianSeries>[
+                                        ColumnSeries<MapEntry<String, double>, String>(
+                                          dataSource: dataMap.entries.toList(),
+                                          xValueMapper: (MapEntry<String, double> data, _) => data.key,
+                                          yValueMapper: (MapEntry<String, double> data, _) => data.value,
+                                          pointColorMapper: (MapEntry<String, double> data, _) {
+                                            // Define a list of colors
+                                            List<Color> colors = [
+                                              Colors.blue,
+                                              Colors.green,
+                                              Colors.red,
+                                              Colors.orange,
+                                              Colors.purple,
+                                              Colors.teal,
+                                              Colors.amber,
+                                              Colors.pink,
+                                              Colors.brown,
+                                              Colors.cyan,
+                                              Colors.indigo,
+                                              Colors.yellow,
+                                            ];
+                                            // Get the index of the current entry
+                                            int index = dataMap.keys.toList().indexOf(data.key);
+                                            return colors[index % colors.length]; // Cycle through colors
+                                          },
+                                        ),
+                                      ],
+                                    )
+                                        : Center(
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text("No data available"),
+                                          SizedBox(height: 8),
+                                        ],
+                                      ),
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
+
+
+
+
+
+
+                            ])),
                   ),
-
-            Container(
-              height: MediaQuery.of(context).size.height *0.35,
-              child: PieChart(
-                dataMap: dataMap,
-                animationDuration: const Duration(milliseconds: 800),
-                chartLegendSpacing: 35,
-                chartRadius: MediaQuery.of(context).size.width / 2.2,
-                colorList: colorList,
-                initialAngleInDegree: 0,
-                chartType: ChartType.ring,
-                // Remove the center text
-                 centerText: "Requisition",
-                centerTextStyle: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-                legendOptions: const LegendOptions(
-                  showLegendsInRow: false,
-                  showLegends: true,
-                  legendTextStyle: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                chartValuesOptions: const ChartValuesOptions(
-                  showChartValueBackground: true,
-                  showChartValues: true,
-                  showChartValuesInPercentage: true,
-                  showChartValuesOutside: true,
-                  decimalPlaces: 1,
-                ),
-                gradientList: [
-                  [Colors.yellow, Colors.yellow[400]!],
-                  [Colors.red, Colors.redAccent],
-                  [Colors.green, Colors.greenAccent],
-                ],
-                emptyColorGradient: [Colors.blue, Colors.blueAccent],
-              ),
-            ),
-
-
-
-
-                ]
-    ))
-          )
-        ));
-
+                ))));
   }
 
   void _showLogDialog(int index) {
@@ -610,27 +591,39 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
     switch (role) {
       case 'Unit Head':
-        nextPage = const Dashboard(); // Replace with your Admin screen widget
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: Dashboard(),
+        );
+        // Replace with your Admin screen widget
         break;
-      // case 'super-admin':
-      //   nextPage = const Navigation(); // Replace with your Admin screen widget
-      //   break;
       case 'Purchase Manager':
-        nextPage =
-            const AdminDashboard(); // Replace with your User screen widget
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: AdminDashboard(),
+        ); // Replace with your User screen widget
         break;
-
-      // case 'Program Director':
-      //   nextPage =
-      //       const AdminDashboard(); // Replace with your User screen widget
-      //   break;
+      case 'Program Director':
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: AdminDashboard(),
+        ); // Replace // Replace with your User screen widget
+        break;
       case 'Vendor':
-        nextPage =
-            const VendorDashboard(); // Replace with your User screen widget
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: VendorDashboard(),
+        ); // Replace
+
+        // Replace with your User screen widget
         break;
       case 'Requester':
-        nextPage =
-            const RequesterDashboard(); // Replace with your User screen widget
+        nextPage = BlocProvider(
+          create: (context) => AllRequesterBloc(),
+          child: RequesterDashboard(),
+        ); // Repl
+
+        // Replace with your User screen widget
         break;
       default:
         return; // No navigation occurs if the role is not recognized
@@ -885,10 +878,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
         break;
     }
   }
-
 }
-
-
 
 class PieChartData {
   final String category;

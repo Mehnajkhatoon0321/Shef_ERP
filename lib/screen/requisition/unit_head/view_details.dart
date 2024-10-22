@@ -18,6 +18,7 @@ class ViewDetails extends StatefulWidget {
   String delivery;
   String vender;
   final String image;
+
   ViewDetails(
       {required this.requisition,
       required this.poNumber,
@@ -119,10 +120,14 @@ class _ViewDetailsState extends State<ViewDetails> {
 
   @override
   Widget build(BuildContext context) {
+    String imageUrl =
+        'https://demo.studyhallfoundation.org/public/uploads/requisition/${widget.image}';
+    print(">>>>>>widget${widget.image}");
+    print(">>>>>>url>>>>${imageUrl}");
 
-    String imageUrl = 'https://erp.studyhallfoundation.org/public/uploads/requisition/${widget.image}';
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
+      data: MediaQuery.of(context)
+          .copyWith(textScaler: const TextScaler.linear(1.0)),
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -149,141 +154,142 @@ class _ViewDetailsState extends State<ViewDetails> {
           ),
           // You can set this to any color you prefer
         ),
-        body: Column(
-          children: [
-        Stack(
-        children: [
-        widget.image.isNotEmpty
-        ? SizedBox(
-        height: MediaQuery.of(context).size.height / 3,
-        width: MediaQuery.of(context).size.width,
-        child: Image.network(
-          imageUrl,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              height: MediaQuery.of(context).size.height / 3,
-              width: MediaQuery.of(context).size.width,
-              color: Colors.grey[200],
-              child: Center(
-                child: Text(
-                  'Failed to load image',
-                  style: TextStyle(color: Colors.red, fontSize: 16),
-                ),
-              ),
-            );
-          },
-        ),
-      )
-          : Container(
-      height: MediaQuery.of(context).size.height / 3,
-      width: MediaQuery.of(context).size.width,
-      color: Colors.grey[200], // Light grey background for no image
-      child: Center(
-      child: Text(
-      'No Image Available',
-      style: TextStyle(color: Colors.black, fontSize: 16),
-      ),
-      ),
-      ),
-      if (widget.image.isEmpty)
-      Positioned.fill(
-      child: Center(
-      child: Text(
-      'No Image Available',
-      style: TextStyle(color: Colors.black, fontSize: 16),
-      ),
-      ),
-      ),
-      ],
-      ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Stack(
                 children: [
-                  Row(
-                    children: [
-                      const Text("Requisition No: ",
-                          style: FTextStyle.listTitleBig),
-                      Text(widget.requisition,
-                          style: FTextStyle.listTitleSubBig),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  Row(
-                    children: [
-                      const Text("PO No. : ", style: FTextStyle.listTitleBig),
-                      Expanded(
-                          child: Text(widget.poNumber,
-                              style: FTextStyle.listTitleSubBig)),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  Row(
-                    children: [
-                      const Text("Request Date: ",
-                          style: FTextStyle.listTitleBig),
-                      Text(widget.requestDate,
-                          style: FTextStyle.listTitleSubBig),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  Row(
-                    children: [
-                      const Text("Unit: ", style: FTextStyle.listTitleBig),
-                      Text(widget.unit, style: FTextStyle.listTitleSubBig),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  Row(
-                    children: [
-                      const Text("Product/Service: ",
-                          style: FTextStyle.listTitleBig),
-                      Text(widget.product,
-                          style: FTextStyle.listTitleSubBig),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-
-
-                  Row(
-                    children: [
-                      const Text("Quantity: ", style: FTextStyle.listTitleBig),
-                      Text(widget.quantity,
-                          style: FTextStyle.listTitleSubBig),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-
-
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Vendor Name: ", style: FTextStyle.listTitleBig),
-                      Text(widget.vender, style: FTextStyle.listTitleSubBig),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Specification: ",
-                          style: FTextStyle.listTitleBig),
-                      Expanded(
-                        child: Text(widget.specification,
-                            style: FTextStyle.listTitleSubBig,),
+                  widget.image.isNotEmpty
+                      ? SizedBox(
+                    height: MediaQuery.of(context).size.height / 2.5,
+                    child: Image.network(
+                      'https://demo.studyhallfoundation.org/public/uploads/requisition/${widget.image}',
+                      fit: BoxFit.fill, // Change to BoxFit.contain for a clearer view without cropping
+                      errorBuilder: (context, error, stackTrace) {
+                        print("Image failed to load: $error");
+                        return Container(
+                          height: MediaQuery.of(context).size.height / 3,
+                          width: MediaQuery.of(context).size.width,
+                          color: Colors.grey[200],
+                          child: Center(
+                            child: Text(
+                              'Failed to load image',
+                              style: TextStyle(color: Colors.red, fontSize: 16),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                      : Container(
+                    height: MediaQuery.of(context).size.height / 3,
+                    width: MediaQuery.of(context).size.width,
+                    color: Colors.grey[200],
+                    child: Center(
+                      child: Text(
+                        'No Image Available',
+                        style: TextStyle(color: Colors.black, fontSize: 16),
                       ),
-                    ],
+                    ),
                   ),
+                  // Optionally display a message if the image is empty
+                  if (widget.image.isEmpty)
+                    Positioned.fill(
+                      child: Center(
+                        child: Text(
+                          'No Image Available',
+                          style: TextStyle(color: Colors.black, fontSize: 16),
+                        ),
+                      ),
+                    ),
                 ],
               ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
-            )
-          ],
+
+
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Text("Requisition No: ",
+                            style: FTextStyle.listTitleBig),
+                        Text(widget.requisition,
+                            style: FTextStyle.listTitleSubBig),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        const Text("PO No. : ", style: FTextStyle.listTitleBig),
+                        Expanded(
+                            child: Text(widget.poNumber,
+                                style: FTextStyle.listTitleSubBig)),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        const Text("Request Date: ",
+                            style: FTextStyle.listTitleBig),
+                        Text(widget.requestDate,
+                            style: FTextStyle.listTitleSubBig),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        const Text("Unit: ", style: FTextStyle.listTitleBig),
+                        Text(widget.unit, style: FTextStyle.listTitleSubBig),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        const Text("Product/Service: ",
+                            style: FTextStyle.listTitleBig),
+                        Text(widget.product, style: FTextStyle.listTitleSubBig),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: [
+                        const Text("Quantity: ", style: FTextStyle.listTitleBig),
+                        Text(widget.quantity, style: FTextStyle.listTitleSubBig),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("Vendor Name: ",
+                            style: FTextStyle.listTitleBig),
+                        Text(widget.vender, style: FTextStyle.listTitleSubBig),
+                      ],
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("Specification: ",
+                            style: FTextStyle.listTitleBig),
+                        Expanded(
+                          child: Text(
+                            widget.specification,
+                            style: FTextStyle.listTitleSubBig,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ).animateOnPageLoad(animationsMap['imageOnPageLoadAnimation2']!),
+              )
+            ],
+          ),
         ),
       ),
     );
