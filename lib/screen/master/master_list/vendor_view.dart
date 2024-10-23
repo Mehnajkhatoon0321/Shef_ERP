@@ -476,10 +476,7 @@ class _VendorViewState extends State<VendorView> {
   //       );
   //
   //     default:
-  //       return const Text('Unsupported file type.');
-  //   }
-  // }
-
+  //       return const Text('Unsupported file ty
 
 
 }

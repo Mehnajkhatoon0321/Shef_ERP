@@ -303,15 +303,16 @@ class _VendorEditState extends State<VendorEdit> {
 
   Map<String, dynamic> personalData = {};
   Map<String, dynamic> bankData = {};
-  List<dynamic> types = [
+  List<String> types = [
     "Proprietorship",
     "Partnership",
     "Private Limikted",
-    "LLP",
+    "Private Limited",
+    "Limited Liability Partnership",
     "Public Limited",
-    "Society"
+    "Society",
+    "Other"
   ];
-
   @override
   Widget build(BuildContext context) {
     return MediaQuery(
@@ -688,7 +689,10 @@ class _VendorEditState extends State<VendorEdit> {
                           child: DropdownButton<String?>(
                             key: _typeKey,
                             focusNode: _typeFocusNode,
-                            value: selectedCategoryItem,
+                            value:
+
+
+                            types.contains(selectedCategoryItem) ? selectedCategoryItem : null,
                             hint: const Text(
                               "Select Type",
                               style: FTextStyle.formhintTxtStyle,
