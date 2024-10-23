@@ -25,6 +25,7 @@ import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 import 'package:shef_erp/utils/pref_utils.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 
 class Dashboard extends StatefulWidget {
@@ -218,6 +219,7 @@ class _DashboardState extends State<Dashboard> {
   String deliveredRequisition = "0";
   @override
   void initState() {
+    userRole = PrefUtils.getRole();
     BlocProvider.of<AllRequesterBloc>(context).add(DashBoardHandler());
     // TODO: implement initState
     super.initState();
@@ -761,68 +763,139 @@ class _DashboardState extends State<Dashboard> {
                             ],
                           ),
                           Container(
-                            width:  MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height * 0.35,
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Center(
-                                child: isInitialLoading // Show loading indicator
-                                    ? CircularProgressIndicator()
-                                    : dataMap.isNotEmpty
-                                    ? PieChart(
-                                  dataMap: dataMap,
-                                  animationDuration: const Duration(milliseconds: 800),
-                                  chartLegendSpacing: 35,
-                                  chartRadius: MediaQuery.of(context).size.width / 2.2,
-                                  colorList: colorList,
-                                  initialAngleInDegree: 0,
-                                  chartType: ChartType.ring,
-                                  centerText: "Requisition",
-                                  centerTextStyle: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                            height: MediaQuery.of(context).size.height * 0.39,
+                            child: Center(
+                              child: isInitialLoading
+                                  ? CircularProgressIndicator()
+                                  : dataMap.isNotEmpty
+                                  ? SfCartesianChart(
+                                primaryXAxis: CategoryAxis(
+                                  title: AxisTitle(text: 'Unit wise Requisitions'),
+                                  isVisible: true,
+                                  interval: 1,
+                                  labelStyle: TextStyle(
+                                    color: Colors.transparent,
+                                    fontSize: 8,
                                   ),
-                                  legendOptions: const LegendOptions(
-                                    showLegendsInRow: false,
-                                    showLegends: true,
-                                    legendTextStyle: TextStyle(
-                                      fontWeight: FontWeight.bold,
+                                  labelAlignment: LabelAlignment.start,
+                                  // maximumLabels: 20,
+                                  // labelRotation: 90, // Set the label rotation here
+                                  // Hides the labels
+                                ),
+                                primaryYAxis: NumericAxis(
+                                  title: AxisTitle(text: 'Count'),
+                                  minimum: 0,
+                                  maximum: dataMap.values.reduce((a, b) => a > b ? a : b),
+                                  interval: 1,
+                                ),
+                                title: ChartTitle(text: 'Unit wise Overview'),
+                                tooltipBehavior: TooltipBehavior(enable: true),
+
+                                series: <CartesianSeries>[
+                                  ColumnSeries<MapEntry<String, double>, String>(
+                                    name: "Unit Requisitions",
+                                    dataSource: dataMap.entries.toList(),
+                                    xValueMapper: (MapEntry<String, double> data, _) => data.key,
+                                    yValueMapper: (MapEntry<String, double> data, _) => data.value,
+                                    pointColorMapper: (MapEntry<String, double> data, _) {
+                                      List<Color> colors = [
+                                        Colors.blue,
+                                        Colors.green,
+                                        Colors.red,
+                                        Colors.orange,
+                                        Colors.purple,
+                                        Colors.teal,
+                                        Colors.amber,
+                                        Colors.pink,
+                                        Colors.brown,
+                                        Colors.cyan,
+                                        Colors.indigo,
+                                        Colors.yellow,
+                                      ];
+                                      int index = dataMap.keys.toList().indexOf(data.key);
+                                      return colors[index % colors.length]; // Cycle through colors
+                                    },
+                                    dataLabelSettings: DataLabelSettings(
+                                        isVisible: true,
+                                        labelPosition:ChartDataLabelPosition.inside
                                     ),
                                   ),
-                                  chartValuesOptions: const ChartValuesOptions(
-                                    showChartValueBackground: true,
-                                    showChartValues: true,
-                                    showChartValuesInPercentage: true,
-                                    showChartValuesOutside: true,
-                                    decimalPlaces: 1,
-                                  ),
-                                  gradientList: colorList
-                                      .map((color) => [color, color.withOpacity(0.7)])
-                                      .toList(),
-                                  emptyColorGradient: [
-                                    Colors.blue,
-                                    Colors.blueAccent,
+                                ],
+                              )
+                                  : Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text("No data available"),
+                                    SizedBox(height: 8),
                                   ],
-                                )
-                                    : Center(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text("No data available"),
-                                      SizedBox(height: 8),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          // Logic to refresh data
-                                        },
-                                        child: Text("Refresh"),
-                                      ),
-                                    ],
-                                  ),
                                 ),
                               ),
                             ),
                           ),
+                          // Container(
+                          //   width:  MediaQuery.of(context).size.width,
+                          //   height: MediaQuery.of(context).size.height * 0.35,
+                          //   child: SingleChildScrollView(
+                          //     scrollDirection: Axis.horizontal,
+                          //     child: Center(
+                          //       child: isInitialLoading // Show loading indicator
+                          //           ? CircularProgressIndicator()
+                          //           : dataMap.isNotEmpty
+                          //           ? PieChart(
+                          //         dataMap: dataMap,
+                          //         animationDuration: const Duration(milliseconds: 800),
+                          //         chartLegendSpacing: 35,
+                          //         chartRadius: MediaQuery.of(context).size.width / 2.2,
+                          //         colorList: colorList,
+                          //         initialAngleInDegree: 0,
+                          //         chartType: ChartType.ring,
+                          //         centerText: "Requisition",
+                          //         centerTextStyle: const TextStyle(
+                          //           fontSize: 18,
+                          //           fontWeight: FontWeight.bold,
+                          //           color: Colors.black,
+                          //         ),
+                          //         legendOptions: const LegendOptions(
+                          //           showLegendsInRow: false,
+                          //           showLegends: true,
+                          //           legendTextStyle: TextStyle(
+                          //             fontWeight: FontWeight.bold,
+                          //           ),
+                          //         ),
+                          //         chartValuesOptions: const ChartValuesOptions(
+                          //           showChartValueBackground: true,
+                          //           showChartValues: true,
+                          //           showChartValuesInPercentage: true,
+                          //           showChartValuesOutside: true,
+                          //           decimalPlaces: 1,
+                          //         ),
+                          //         gradientList: colorList
+                          //             .map((color) => [color, color.withOpacity(0.7)])
+                          //             .toList(),
+                          //         emptyColorGradient: [
+                          //           Colors.blue,
+                          //           Colors.blueAccent,
+                          //         ],
+                          //       )
+                          //           : Center(
+                          //         child: Column(
+                          //           mainAxisAlignment: MainAxisAlignment.center,
+                          //           children: [
+                          //             Text("No data available"),
+                          //             SizedBox(height: 8),
+                          //             ElevatedButton(
+                          //               onPressed: () {
+                          //                 // Logic to refresh data
+                          //               },
+                          //               child: Text("Refresh"),
+                          //             ),
+                          //           ],
+                          //         ),
+                          //       ),
+                          //     ),
+                          //   ),
+                          // ),
 
                         ])),
               ),

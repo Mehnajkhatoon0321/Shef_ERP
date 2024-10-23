@@ -2287,7 +2287,7 @@ print("RequestData>>>>>>>>>>$request");
             if (event.gstImage != null)
               'gst_upl': await MultipartFile.fromFile(event.gstImage!.path),
             if (event.cancelledImage != null)
-              'gst_upl': await MultipartFile.fromFile(event.cancelledImage!.path)
+              'cheque': await MultipartFile.fromFile(event.cancelledImage!.path)
           });
 
           var response = await dio.post(APIEndPoints.updateVendorList,
@@ -2346,7 +2346,7 @@ print("RequestData>>>>>>>>>>$request");
             if (event.gstImage != null)
               'gst_upl': await MultipartFile.fromFile(event.gstImage!.path),
             if (event.cancelledImage != null)
-              'cancelled_upl': await MultipartFile.fromFile(event.cancelledImage!.path),
+              'cheque': await MultipartFile.fromFile(event.cancelledImage!.path),
           });
 
           // Log the request data

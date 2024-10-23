@@ -202,27 +202,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
   };
   Map<String, double> dataMap = {};
 
-// Define the colors for each segment
-  List<Color> colorList = [
-    Colors.yellow,
-    Colors.red,
-    Colors.green,
-    Colors.blue,
-    Colors.orange,
-    Colors.purple,
-    Colors.cyan,
-    Colors.teal,
-    Colors.amber,
-    Colors.lime,
-    Colors.indigo,
-    Colors.pink,
-    Colors.brown,
-  ];
 
 // Make sure the number of colors matches the number of segments
 
   @override
   void initState() {
+
     BlocProvider.of<AllRequesterBloc>(context).add(DashBoardHandler());
     // TODO: implement initState
     super.initState();
@@ -451,75 +436,391 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                 ),
                               ).animateOnPageLoad(
                                   animationsMap['imageOnPageLoadAnimation2']!),
-
-
-
-                              Container(
-                                width: MediaQuery.of(context).size.width,
-                                height: MediaQuery.of(context).size.height * 0.35,
-                                child: SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Center(
-                                    child: isInitialLoading
-                                        ? CircularProgressIndicator()
-                                        : dataMap.isNotEmpty
-                                        ? SfCartesianChart(
-                                      primaryXAxis: CategoryAxis(
-                                        title: AxisTitle(text: 'Requisition Types'),
-                                      ),
-                                      primaryYAxis: NumericAxis(
-                                        title: AxisTitle(text: 'Count'),
-                                        minimum: 0,
-                                        maximum: dataMap.values.reduce((a, b) => a > b ? a : b),
-                                        interval: 1,
-                                      ),
-                                      title: ChartTitle(text: 'Requisitions Overview'),
-                                      tooltipBehavior: TooltipBehavior(enable: true),
-                                      series: <CartesianSeries>[
-                                        ColumnSeries<MapEntry<String, double>, String>(
-                                          dataSource: dataMap.entries.toList(),
-                                          xValueMapper: (MapEntry<String, double> data, _) => data.key,
-                                          yValueMapper: (MapEntry<String, double> data, _) => data.value,
-                                          pointColorMapper: (MapEntry<String, double> data, _) {
-                                            // Define a list of colors
-                                            List<Color> colors = [
-                                              Colors.blue,
-                                              Colors.green,
-                                              Colors.red,
-                                              Colors.orange,
-                                              Colors.purple,
-                                              Colors.teal,
-                                              Colors.amber,
-                                              Colors.pink,
-                                              Colors.brown,
-                                              Colors.cyan,
-                                              Colors.indigo,
-                                              Colors.yellow,
-                                            ];
-                                            // Get the index of the current entry
-                                            int index = dataMap.keys.toList().indexOf(data.key);
-                                            return colors[index % colors.length]; // Cycle through colors
-                                          },
+                              SizedBox(
+                                height: 15,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // First Container
+                                  Expanded(
+                                    child: Container(
+                                      height: 100,
+                                      // Set your desired height here
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        border: Border.all(
+                                          color: AppColors.primaryColourDark,
+                                          width: 1,
                                         ),
-                                      ],
-                                    )
-                                        : Center(
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        boxShadow: const [
+                                          BoxShadow(
+                                            color: AppColors.primaryColourDark,
+                                            spreadRadius: 1,
+                                            blurRadius: 3,
+                                            offset: Offset(0, 0.5),
+                                          ),
+                                        ],
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Stack(
                                         children: [
-                                          Text("No data available"),
-                                          SizedBox(height: 8),
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 7.0),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                              children: [
+                                                const SizedBox(height: 10),
+                                                Text(
+                                                  "${allRequisition}",
+                                                  style: FTextStyle
+                                                      .authlogin_signupTxtStyle
+                                                      .copyWith(
+                                                    color: AppColors
+                                                        .primaryColourDark,
+                                                    fontSize: 24,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                                const SizedBox(height: 10),
+                                                Text(
+                                                  "All Requisition",
+                                                  style: FTextStyle
+                                                      .authlogin_signupTxtStyle
+                                                      .copyWith(
+                                                      color: AppColors
+                                                          .formFieldHintColour,
+                                                      fontSize: 18),
+                                                  overflow:
+                                                  TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Positioned(
+                                            right: 14,
+                                            top: 9,
+                                            child: Icon(
+                                              Icons.data_thresholding_rounded,
+                                              size: 29,
+                                              color: Colors.blue,
+                                            ),
+                                          ),
                                         ],
                                       ),
                                     ),
                                   ),
-                                ),
+
+                                  const SizedBox(width: 20),
+                                  // Space between containers
+
+                                  // Second Container
+                                  Expanded(
+                                    child: Container(
+                                      height: 100,
+                                      // Set your desired height here
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        border: Border.all(
+                                          color: AppColors.primaryColourDark,
+                                          width: 1,
+                                        ),
+                                        boxShadow: const [
+                                          BoxShadow(
+                                            color: AppColors.primaryColourDark,
+                                            spreadRadius: 1,
+                                            blurRadius: 3,
+                                            offset: Offset(0, 0.5),
+                                          ),
+                                        ],
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 7.0),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                              children: [
+                                                const SizedBox(height: 10),
+                                                Text(
+                                                  "${todayRequisition}",
+                                                  style: FTextStyle
+                                                      .authlogin_signupTxtStyle
+                                                      .copyWith(
+                                                    color: AppColors
+                                                        .primaryColourDark,
+                                                    fontSize: 24,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                                const SizedBox(height: 10),
+                                                Text(
+                                                  "Today's Requisition",
+                                                  style: FTextStyle
+                                                      .authlogin_signupTxtStyle
+                                                      .copyWith(
+                                                      color: AppColors
+                                                          .formFieldHintColour,
+                                                      fontSize: 18),
+                                                  overflow:
+                                                  TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Positioned(
+                                            right: 14,
+                                            top: 9,
+                                            child: Icon(
+                                              Icons.today,
+                                              size: 29,
+                                              color: Colors.yellow,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // First Container
+                                  Expanded(
+                                    child: Container(
+                                      height: 100,
+                                      // Set your desired height here
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        border: Border.all(
+                                          color: AppColors.primaryColourDark,
+                                          width: 1,
+                                        ),
+                                        boxShadow: const [
+                                          BoxShadow(
+                                            color: AppColors.primaryColourDark,
+                                            spreadRadius: 1,
+                                            blurRadius: 3,
+                                            offset: Offset(0, 0.5),
+                                          ),
+                                        ],
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 7.0),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                              children: [
+                                                const SizedBox(height: 10),
+                                                Text(
+                                                  "${pendingRequisition}",
+                                                  style: FTextStyle
+                                                      .authlogin_signupTxtStyle
+                                                      .copyWith(
+                                                    color: AppColors
+                                                        .primaryColourDark,
+                                                    fontSize: 24,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                                const SizedBox(height: 10),
+                                                Text(
+                                                  "Pending Requisition",
+                                                  style: FTextStyle
+                                                      .authlogin_signupTxtStyle
+                                                      .copyWith(
+                                                      color: AppColors
+                                                          .formFieldHintColour,
+                                                      fontSize: 18),
+                                                  overflow:
+                                                  TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Positioned(
+                                            right: 14,
+                                            top: 9,
+                                            child: Icon(Icons.pending_actions,
+                                                size: 29, color: Colors.red),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+
+                                  const SizedBox(width: 20),
+                                  // Space between containers
+
+                                  // Second Container
+                                  Expanded(
+                                    child: Container(
+                                      height: 100,
+                                      // Set your desired height here
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        border: Border.all(
+                                          color: AppColors.primaryColourDark,
+                                          width: 1,
+                                        ),
+                                        boxShadow: const [
+                                          BoxShadow(
+                                            color: AppColors.primaryColourDark,
+                                            spreadRadius: 1,
+                                            blurRadius: 3,
+                                            offset: Offset(0, 0.5),
+                                          ),
+                                        ],
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 7.0),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                              children: [
+                                                const SizedBox(height: 10),
+                                                Text(
+                                                  "${deliveredRequisition}",
+                                                  style: FTextStyle
+                                                      .authlogin_signupTxtStyle
+                                                      .copyWith(
+                                                    color: AppColors
+                                                        .primaryColourDark,
+                                                    fontSize: 24,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                                const SizedBox(height: 10),
+                                                Text(
+                                                  "Delivered Requisition",
+                                                  style: FTextStyle
+                                                      .authlogin_signupTxtStyle
+                                                      .copyWith(
+                                                      color: AppColors
+                                                          .formFieldHintColour,
+                                                      fontSize: 18),
+                                                  overflow:
+                                                  TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Positioned(
+                                            right: 14,
+                                            top: 9,
+                                            child: Icon(
+                                              Icons.check_circle,
+                                              size: 29,
+                                              color: Colors.green,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
 
+                              Container(
+                                height: MediaQuery.of(context).size.height * 0.39,
+                                child: Center(
+                                  child: isInitialLoading
+                                      ? CircularProgressIndicator()
+                                      : dataMap.isNotEmpty
+                                      ? SfCartesianChart(
+                                    primaryXAxis: CategoryAxis(
+                                      title: AxisTitle(text: 'Unit wise Requisitions'),
+                                      isVisible: true,
+                                      interval: 1,
+                                      labelStyle: TextStyle(
+                                        color: Colors.transparent,
+                                        fontSize: 8,
+                                      ),
+                                      labelAlignment: LabelAlignment.start,
+                                      // maximumLabels: 20,
+                                      // labelRotation: 90, // Set the label rotation here
+                                      // Hides the labels
+                                    ),
+                                    primaryYAxis: NumericAxis(
+                                      title: AxisTitle(text: 'Count'),
+                                      minimum: 0,
+                                      maximum: dataMap.values.reduce((a, b) => a > b ? a : b),
+                                      interval: 1,
+                                    ),
+                                    title: ChartTitle(text: 'Unit wise Overview'),
+                                    tooltipBehavior: TooltipBehavior(enable: true),
 
-
-
-
+                                    series: <CartesianSeries>[
+                                      ColumnSeries<MapEntry<String, double>, String>(
+                                        name: "Unit Requisitions",
+                                        dataSource: dataMap.entries.toList(),
+                                        xValueMapper: (MapEntry<String, double> data, _) => data.key,
+                                        yValueMapper: (MapEntry<String, double> data, _) => data.value,
+                                        pointColorMapper: (MapEntry<String, double> data, _) {
+                                          List<Color> colors = [
+                                            Colors.blue,
+                                            Colors.green,
+                                            Colors.red,
+                                            Colors.orange,
+                                            Colors.purple,
+                                            Colors.teal,
+                                            Colors.amber,
+                                            Colors.pink,
+                                            Colors.brown,
+                                            Colors.cyan,
+                                            Colors.indigo,
+                                            Colors.yellow,
+                                          ];
+                                          int index = dataMap.keys.toList().indexOf(data.key);
+                                          return colors[index % colors.length]; // Cycle through colors
+                                        },
+                                        dataLabelSettings: DataLabelSettings(
+                                            isVisible: true,
+                                            labelPosition:ChartDataLabelPosition.inside
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                      : Center(
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text("No data available"),
+                                        SizedBox(height: 8),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
 
                             ])),
                   ),

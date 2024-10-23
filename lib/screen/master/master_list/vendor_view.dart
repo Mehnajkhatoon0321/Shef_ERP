@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
@@ -31,6 +32,7 @@ class _VendorViewState extends State<VendorView> {
   @override
   void initState() {
     BlocProvider.of<AllRequesterBloc>(context).add(VendorViewHandler(widget.id));
+
     super.initState();
   }
 
@@ -283,7 +285,8 @@ class _VendorViewState extends State<VendorView> {
                     Expanded(child: Text(bankData['address'] ?? 'N/A', style: FTextStyle.listTitleSubBig)),
                   ],
                 ),
-                const SizedBox(height: 5),    Row(
+                const SizedBox(height: 5),
+                Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -308,6 +311,7 @@ class _VendorViewState extends State<VendorView> {
                 Text("GST Upload : ", style: FTextStyle.listTitleBig),
 
                 _buildImage(bankData['gst_file']),
+
                 const SizedBox(height: 5),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -318,7 +322,7 @@ class _VendorViewState extends State<VendorView> {
                   ],
                 ),
                 const SizedBox(height: 5),
-                Text("TAN Upload : ", style: FTextStyle.listTitleBig),
+                Text("Cheque Upload : ", style: FTextStyle.listTitleBig),
 
                 _buildImage(bankData['cheque']),
                 const SizedBox(height: 10),//
@@ -391,6 +395,10 @@ class _VendorViewState extends State<VendorView> {
       ),
     );
   }
+
+
+
+
   Widget _buildImage(String? fileName) {
     if (fileName == null || fileName.isEmpty) {
       return const Text('No upload available.');
@@ -400,7 +408,7 @@ class _VendorViewState extends State<VendorView> {
     String extension = fileName.split('.').last.toLowerCase();
 
     // Assuming the fileName is a complete URL for network images
-    String fileUrl = 'https://erp.studyhallfoundation.org/public/uploads/vendor/$fileName';
+    String fileUrl = 'https://demo.studyhallfoundation.org/public/uploads/vendor/$fileName';
 
     if (extension == 'jpeg' || extension == 'jpg' || extension == 'png') {
       return Image.network(fileUrl, width: 200, height: 200); // Increased size
@@ -413,10 +421,11 @@ class _VendorViewState extends State<VendorView> {
               if (await canLaunch(fileUrl)) {
                 await launch(fileUrl);
               } else {
+                // Optionally show an error message or alert to the user
                 throw 'Could not launch $fileUrl';
               }
             },
-            child: const Text('View Pdf'),
+            child: const Text('View Pdf', style: TextStyle(color: Colors.blue)),
           ),
         ],
       );
@@ -424,6 +433,53 @@ class _VendorViewState extends State<VendorView> {
       return const Text('Unsupported file type.');
     }
   }
+  // Widget _buildImage(String? fileName) {
+  //   if (fileName == null || fileName.isEmpty) {
+  //     return const Text('No upload available.');
+  //   }
+  //
+  //   // Extract file extension
+  //   String extension = fileName.split('.').last.toLowerCase();
+  //   String fileUrl = 'https://demo.studyhallfoundation.org/public/uploads/vendor/$fileName';
+  //
+  //   switch (extension) {
+  //     case 'jpeg':
+  //     case 'jpg':
+  //     case 'png':
+  //       return Image.network(
+  //         fileUrl,
+  //         width: 200,
+  //         height: 200,
+  //         errorBuilder: (context, error, stackTrace) {
+  //           return const Text('Error loading image.');
+  //         },
+  //       );
+  //
+  //     case 'pdf':
+  //       return Container(
+  //         height: 200,
+  //         child: PDFView(
+  //           filePath: fileUrl,
+  //           autoSpacing: true,
+  //           enableSwipe: true,
+  //           pageSnap: true,
+  //           swipeHorizontal: true,
+  //           onError: (error) {
+  //             // Handle error for PDF
+  //             print('PDF Error: $error');
+  //           },
+  //           onPageError: (page, error) {
+  //             // Handle page error
+  //             print('Page $page Error: ${error.toString()}');
+  //           },
+  //         ),
+  //       );
+  //
+  //     default:
+  //       return const Text('Unsupported file type.');
+  //   }
+  // }
+
 
 
 }

@@ -155,7 +155,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
           listener: (context, state) {
             if (state is AddCartLoading) {
               setState(() {
-                isLoading = true;
+                isInitialLoading = true;
               });
             } else if (state is AddCartSuccess) {
               setState(() {
@@ -369,7 +369,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                                       decoration: BoxDecoration(
                                         color: index % 2 == 0
                                             ? Colors.white
-                                            : Colors.grey[200],
+                                            : Colors.white,
                                         borderRadius: BorderRadius.circular(10),
                                         boxShadow: [
                                           BoxShadow(
