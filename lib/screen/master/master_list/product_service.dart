@@ -24,7 +24,7 @@ class ProductService extends StatefulWidget {
 class _ProductServiceState extends State<ProductService> {
   int pageNo = 1;
   int totalPages = 0;
-  int pageSize = 10;
+  int pageSize = 20;
   bool hasMoreData = true;
   List<dynamic> data = [
 
@@ -253,6 +253,8 @@ class _ProductServiceState extends State<ProductService> {
 
                 data.addAll(responseData['data']);
 
+
+
                 isInitialLoading = false;
                 isLoading = false; // Reset loading state
 
@@ -281,20 +283,34 @@ class _ProductServiceState extends State<ProductService> {
             else if (state is DeleteServiceLoading) {
               DeletePopupManager.playLoader();
             } else if (state is DeleteServiceSuccess) {
-              DeletePopupManager.stopLoader();
-
-              var deleteMessage = state.deleteServiceList['message'];
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(deleteMessage),
-                  backgroundColor: AppColors.primaryColour,
-                ),
-              );
-
-              Future.delayed(const Duration(milliseconds: 500), () {
-                Navigator.pop(context);
+              setState(() {
+                pageNo=1;
+                BlocProvider.of<AllRequesterBloc>(context)
+                    .add(MasterServiceHandler("", pageNo, pageSize));
               });
+
+
+
+                DeletePopupManager.stopLoader();
+
+                var deleteMessage = state.deleteServiceList['message'];
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(deleteMessage),
+                    backgroundColor: AppColors.primaryColour,
+                  ),
+                );
+
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  Navigator.pop(context);
+                });
+
+
             } else if (state is DeleteEventServiceFailure) {
+
+
+
+
               DeletePopupManager.stopLoader();
 
               var deleteMessage = state.deleteEventServiceFailure['message'];
@@ -588,20 +604,25 @@ class _ProductServiceState extends State<ProductService> {
                                                   Navigator.push(
                                                     context,
                                                     MaterialPageRoute(
-                                                        builder:
-                                                            (context) =>
-                                                            BlocProvider(
-                                                              create: (context) =>
-                                                                  AllRequesterBloc(),
-                                                              child:
-                                                              ProductServiceEdit(
-                                                                screenflag:
-                                                                "Edit",
-                                                                id: item["id"]
-                                                                    .toString(),
-                                                              ),
-                                                            )),
-                                                  );
+                                                      builder: (context) => BlocProvider(
+                                                        create: (context) => AllRequesterBloc(),
+                                                        child: ProductServiceEdit(
+                                                          screenflag: "Edit",
+                                                          id: item["id"].toString(),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ).then((result) {
+                                                    // Handle the result from the edit screen
+                                                    if (result[0]) {
+                                                     pageNo=1;
+                                                      BlocProvider.of<AllRequesterBloc>(context)
+                                                          .add(MasterServiceHandler("", pageNo, pageSize));
+                                                    }
+                                                  });
+
+
+
                                                 },
                                               ),
                                               IconButton(

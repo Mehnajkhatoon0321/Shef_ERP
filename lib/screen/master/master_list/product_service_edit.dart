@@ -28,6 +28,7 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
       GlobalKey<FormFieldState<String>>();
   String? selectedUnitItem;
   String? selectedUnitId;
+  bool isAnyChanges =false;
   List<dynamic> listData = [];
   List<dynamic> UnitsDataList = [];
   late final FocusNode _unitNameNode = FocusNode();
@@ -272,9 +273,12 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
                 context,
                 'Internet is not connected.',
               );
-            } else if (state is CreateProductSuccess) {
+            }
+
+            else if (state is CreateProductSuccess) {
               setState(() {
                 isLoadingEdit = false;
+                isAnyChanges = true;
                 var     messageSuccess=state.createList['message'];
 
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -283,21 +287,19 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
                     backgroundColor: AppColors.primaryColour,
                   ),
                 );
-
+                //
                 Future.delayed(const Duration(milliseconds: 500), () {
-                  Navigator.pop(context);
+                  Navigator.pop(context, [true]); // Pass the changes status back
                 });
 
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //       builder: (context) => BlocProvider(
-                //             create: (context) => AllRequesterBloc(),
-                //             child: const ProductService(),
-                //           )),
-                // );
+
+
+
+
+
               });
-            } else if (state is CreateProductFailure) {
+            }
+            else if (state is CreateProductFailure) {
               setState(() {
                 isLoadingEdit = false;
               });
@@ -308,14 +310,11 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
               setState(() {
                 isLoadingEdit = false;
 
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => BlocProvider(
-                            create: (context) => AllRequesterBloc(),
-                            child: const ProductService(),
-                          )),
-                );
+
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  Navigator.pop(context,[true]);
+                });
+
               });
             } else if (state is UpdateProductFailure) {
               setState(() {
@@ -420,12 +419,12 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
                         hintText: "Enter Product Name",
                       ),
                       onTap: (){
-                        isNameFieldFocused=true;
-                        isSpecificationFieldFocused=false;
+                        // isNameFieldFocused=true;
+                        // isSpecificationFieldFocused=false;
 
 
                       },
-                      validator: ValidatorUtils.productNameValidator
+                      // validator: ValidatorUtils.productNameValidator
                     ),
                     Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -442,12 +441,12 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
                         hintText: "Enter Specification",
                       ),
                       onTap: (){
-                        isNameFieldFocused=false;
-                        isSpecificationFieldFocused=true;
+                        // isNameFieldFocused=false;
+                        // isSpecificationFieldFocused=true;
 
 
                       },
-                      validator: ValidatorUtils.specificationProductValidator
+                      // validator: ValidatorUtils.specificationProductValidator
                     ),
                     const SizedBox(height: 40),
 
@@ -532,16 +531,15 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
   }
   void _updateButtonState() {
     setState(() {
-      isButtonEnabled = ValidatorUtils.isValidProductName(descriptionController.text) &&
-          ValidatorUtils.isValidSpecification(addressController.text);
+      isButtonEnabled = ValidatorUtils.isValidProductName(descriptionController.text) ;
 
 
       if (isNameFieldFocused == true) {
         _nameKey.currentState!.validate();
       }
-      if (isSpecificationFieldFocused == true) {
-        _specificationKey.currentState!.validate();
-      }
+      // if (isSpecificationFieldFocused == true) {
+      //   _specificationKey.currentState!.validate();
+      // }
     });
   }
 }

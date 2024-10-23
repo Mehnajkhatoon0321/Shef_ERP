@@ -187,7 +187,14 @@ class _UserListState extends State<UserList> {
                           id:PrefUtils.getUserId().toString(),
                         ),
                       )),
-                    )
+                    ).then((result) {
+                      // Handle the result from the edit screen
+                      if (result[0]) {
+                        pageNo=1;
+                        BlocProvider.of<AllRequesterBloc>(context)
+                            .add(GetUserListHandler("", pageNo, pageSize));
+                      }
+                    })
 
                   },
                   style: ElevatedButton.styleFrom(
@@ -514,7 +521,14 @@ class _UserListState extends State<UserList> {
 
                                                       ),
                                                     )),
-                                                  )
+                                                  ).then((result) {
+                                                    // Handle the result from the edit screen
+                                                    if (result[0]) {
+                                                      pageNo=1;
+                                                      BlocProvider.of<AllRequesterBloc>(context)
+                                                          .add(GetUserListHandler("", pageNo, pageSize));
+                                                    }
+                                                  })
                                                 },
                                               ),
                                               IconButton(

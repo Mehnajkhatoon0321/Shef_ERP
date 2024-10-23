@@ -90,12 +90,12 @@ class ValidatorUtils {
     return null;
   }
 
-  static String? quantityValidator(String? value) {
-    if (value == null || value.isEmpty || int.tryParse(value) == null) {
-      return 'Valid quantity is required';
-    }
-    return null;
-  }
+  // static String? quantityValidator(String? value) {
+  //   if (value == null || value.isEmpty || int.tryParse(value) == null) {
+  //     return 'Valid quantity is required';
+  //   }
+  //   return null;
+  // }
 
   static String? remarkValidator(String? value) {
     if (value == null || value.isEmpty) {
@@ -867,24 +867,51 @@ static  bool isValidAddress(String value) {
     return true;
   }
 
+  // static String? quantityValidator(String? value) {
+  //   if (value == null || value.isEmpty || int.tryParse(value) == null) {
+  //     return 'Valid quantity is required';
+  //   }
+  //
+  //   final int quantity = int.parse(value);
+  //   if (quantity > 1000) {
+  //     return 'Quantity cannot exceed 1000';
+  //   }
+  //
+  //   return null;
+  // }
+
+
+  static String? quantityValidator(String? value) {
+    if (value == null || value.isEmpty || int.tryParse(value) == null) {
+      return 'Valid quantity is required';
+    }
+
+    final int quantity = int.parse(value);
+    if (quantity > 1000) {
+      return 'Quantity cannot exceed 1000';
+    }
+
+    return null;
+  }
+
   static bool isValidQuantity(String value) {
     if (value.isEmpty) {
       return false;
     }
 
-    // Attempt to parse the value as an integer
-    final intValue = int.tryParse(value);
-    if (intValue == null) {
-      return false; // Not a valid number
-    }
-
-    // Check if the number is within the range 1 to 1000
-    if (intValue < 1 || intValue > 1000) {
+    final int? quantity = int.tryParse(value);
+    if (quantity == null || quantity > 1000) {
       return false;
     }
 
-    return true; // The number is valid
+    return true;
   }
+
+
+
+
+  // Attempt to parse the value as an integer
+
   static bool isValidDate(String value) {
     if (value.isEmpty) {
       return false; // Date field should not be empty

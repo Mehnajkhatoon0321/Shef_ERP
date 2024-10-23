@@ -173,12 +173,26 @@ class _BillingEditState extends State<BillingEdit> {
                 isLoadingEdit = true;
               });
             } else if (state is BillingCreateSuccess) {
-              setState(() {
+
                 setState(() {
                   isLoadingEdit = false;
+                  var     messageSuccess=state.createResponse['message'];
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(messageSuccess),
+                      backgroundColor: AppColors.primaryColour,
+                    ),
+                  );
+                  //
+                  Future.delayed(const Duration(milliseconds: 500), () {
+                    Navigator.pop(context, [true]); // Pass the changes status back
+                  });
+
+                  Navigator.pop(context,[true]);
                 });
-                Navigator.pop(context);
-              });
+
+
             } else if (state is BillingCreateFailure) {
               setState(() {
                 isLoadingEdit = false;
@@ -192,7 +206,21 @@ class _BillingEditState extends State<BillingEdit> {
               );
             } else if (state is BillingUpdateSuccess) {
               setState(() {
-                Navigator.pop(context);
+                var     messageSuccess=state.updateResponse['message'];
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(messageSuccess),
+                    backgroundColor: AppColors.primaryColour,
+                  ),
+                );
+                //
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  Navigator.pop(context, [true]); // Pass the changes status back
+                });
+
+
+                Navigator.pop(context,[true]);
               });
             } else if (state is BillingUpdateFailure) {
               setState(() {

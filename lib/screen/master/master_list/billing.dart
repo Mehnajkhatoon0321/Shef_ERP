@@ -188,7 +188,14 @@ class _BillingListState extends State<BillingList> {
                                   id: '',
                                 ),
                               )),
-                    )
+                    ).then((result) {
+                  // Handle the result from the edit screen
+                  if (result[0]) {
+                  pageNo=1;
+                  BlocProvider.of<AllRequesterBloc>(context)
+                      .add(GetBillingListHandler("", pageNo, pageSize));
+                  }
+                  })
                   },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
@@ -278,12 +285,17 @@ class _BillingListState extends State<BillingList> {
                 Navigator.pop(context);
               });
             } else if (state is UserBillingDeleteFailure) {
+
+               setState(() {
+                 pageNo=1;
+                 BlocProvider.of<AllRequesterBloc>(context)
+                     .add(GetBillingListHandler("", pageNo, pageSize));
+               });
               DeletePopupManager.stopLoader();
 
               var deleteMessage = state.billingFailure['message'];
               print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
-              BlocProvider.of<AllRequesterBloc>(context)
-                  .add(GetBillingListHandler("", pageNo, pageSize));
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(deleteMessage),
@@ -559,7 +571,14 @@ class _BillingListState extends State<BillingList> {
                                                                               id: item["id"].toString(),
                                                                             ),
                                                                           )),
-                                                            )
+                                                            ).then((result) {
+                                                              // Handle the result from the edit screen
+                                                              if (result[0]) {
+                                                                pageNo=1;
+                                                                BlocProvider.of<AllRequesterBloc>(context)
+                                                                    .add(GetBillingListHandler("", pageNo, pageSize));
+                                                              }
+                                                            })
                                                           },
                                                         ),
                                                         IconButton(

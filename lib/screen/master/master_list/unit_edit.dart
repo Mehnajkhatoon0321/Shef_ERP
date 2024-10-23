@@ -200,28 +200,28 @@ class _UnitEditState extends State<UnitEdit> {
                   ),
                 );
               }
+              //
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => BlocProvider(
+              //       create: (context) => AllRequesterBloc(),
+              //       child:  Units(),
+              //     ),
+              //   ),
+              // ).then((result) {
+              //   // Handle any result if needed
+              //   if (result != null) {
+              //     BlocProvider.of<AllRequesterBloc>(context)
+              //         .add(GetUnitHandler("", pageNo, pageSize));
+              //   }
+              // });
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BlocProvider(
-                    create: (context) => AllRequesterBloc(),
-                    child:  Units(),
-                  ),
-                ),
-              ).then((result) {
-                // Handle any result if needed
-                if (result != null) {
-                  BlocProvider.of<AllRequesterBloc>(context)
-                      .add(GetUnitHandler("", pageNo, pageSize));
-                }
-              });
 
-
-              // Future.delayed(const Duration(milliseconds: 500),
-              //         () {
-              //       Navigator.pop(context);
-              //     });
+              Future.delayed(const Duration(milliseconds: 500),
+                      () {
+                    Navigator.pop(context,[true]);
+                  });
 
 
 
@@ -251,22 +251,27 @@ class _UnitEditState extends State<UnitEdit> {
                   ),
                 );
               }
+              Future.delayed(const Duration(milliseconds: 500),
+                      () {
+                    Navigator.pop(context,[true]);
+                  });
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BlocProvider(
-                    create: (context) => AllRequesterBloc(),
-                    child:  Units(),
-                  ),
-                ),
-              ).then((result) {
-                // Handle any result if needed
-                if (result != null) {
-                  BlocProvider.of<AllRequesterBloc>(context)
-                      .add(GetUnitHandler("", pageNo, pageSize));
-                }
-              });
+
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => BlocProvider(
+              //       create: (context) => AllRequesterBloc(),
+              //       child:  Units(),
+              //     ),
+              //   ),
+              // ).then((result) {
+              //   // Handle any result if needed
+              //   if (result != null) {
+              //     BlocProvider.of<AllRequesterBloc>(context)
+              //         .add(GetUnitHandler("", pageNo, pageSize));
+              //   }
+              // });
 
             } else if (state is UnitUpdateFailure) {
               setState(() {

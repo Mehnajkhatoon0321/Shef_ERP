@@ -348,7 +348,8 @@ class _VendorEditState extends State<VendorEdit> {
               setState(() {
                 isLoading = true;
               });
-            } else if (state is VendorDetailsSuccess) {
+            }
+            else if (state is VendorDetailsSuccess) {
               setState(() {
                 responseData = state.vendorDetailsList;
 
@@ -1056,7 +1057,8 @@ class _VendorEditState extends State<VendorEdit> {
                     TextFormField(
                       controller: accountNumberController,
                       key: _accountNumberKey,
-                      keyboardType: TextInputType.name,
+                      keyboardType: TextInputType.number
+                      ,
                       focusNode: _accountNumberNameFocusNode,
                       decoration:
                           FormFieldStyle.defaultInputEditDecoration.copyWith(

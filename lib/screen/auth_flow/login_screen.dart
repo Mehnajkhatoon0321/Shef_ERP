@@ -194,15 +194,15 @@ class _LogScreenState extends State<LogScreen> {
                 isLoading = false;
                 PrefUtils.setIsLogin(true);
               });
-              if (checkboxChecked) {
-                PrefUtils.setRememberMe(true);
-                PrefUtils.setUserEmailLogin(_emailController.text.toString());
-                PrefUtils.setUserPassword(_password.text.toString());
-              } else {
-                PrefUtils.setRememberMe(false);
-                PrefUtils.setUserEmailLogin(""); // Clear email
-                PrefUtils.setUserPassword("");
-              }
+              // if (checkboxChecked) {
+              //   PrefUtils.setRememberMe(true);
+              //   PrefUtils.setUserEmailLogin(_emailController.text.toString());
+              //   PrefUtils.setUserPassword(_password.text.toString());
+              // } else {
+              //   PrefUtils.setRememberMe(false);
+              //   PrefUtils.setUserEmailLogin(""); // Clear email
+              //   PrefUtils.setUserPassword("");
+              // }
 
               Map<String, dynamic> data = state.logResponse;
 

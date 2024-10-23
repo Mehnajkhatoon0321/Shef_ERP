@@ -198,7 +198,14 @@ class _UnitsState extends State<Units> {
                                     billingAddress: "",
                                     address: ""),
                               )),
-                    )
+                    ).then((result) {
+                  // Handle the result from the edit screen
+                  if (result[0]) {
+                  pageNo=1;
+                  BlocProvider.of<AllRequesterBloc>(context)
+                      .add(GetUnitHandler("", pageNo, pageSize));
+                  }
+                  })
                   },
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
@@ -557,7 +564,14 @@ class _UnitsState extends State<Units> {
                                                             ),
                                                           ),
                                                         ),
-                                                      );
+                                                      ).then((result) {
+                                                        // Handle the result from the edit screen
+                                                        if (result[0]) {
+                                                          pageNo=1;
+                                                          BlocProvider.of<AllRequesterBloc>(context)
+                                                              .add(GetUnitHandler("", pageNo, pageSize));
+                                                        }
+                                                      });
                                                     },
                                                   ),
                                                   IconButton(

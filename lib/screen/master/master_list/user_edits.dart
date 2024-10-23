@@ -329,25 +329,25 @@ class _UserEditsState extends State<UserEdits> {
                 );
               }
 
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BlocProvider(
-                    create: (context) => AllRequesterBloc(),
-                    child:  UserList(),
-                  ),
-                ),
-              ).then((result) {
-                // Handle any result if needed
-                if (result != null) {
-                  BlocProvider.of<AllRequesterBloc>(context)
-                      .add(GetUserListHandler("", pageNo, pageSize));
-                }
-              });
-
-              // Future.delayed(const Duration(milliseconds: 500), () {
-              //   Navigator.pop(context);
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => BlocProvider(
+              //       create: (context) => AllRequesterBloc(),
+              //       child:  UserList(),
+              //     ),
+              //   ),
+              // ).then((result) {
+              //   // Handle any result if needed
+              //   if (result != null) {
+              //     BlocProvider.of<AllRequesterBloc>(context)
+              //         .add(GetUserListHandler("", pageNo, pageSize));
+              //   }
               // });
+
+              Future.delayed(const Duration(milliseconds: 500), () {
+                Navigator.pop(context,[true]);
+              });
             } else if (state is UserCreateFailure) {
               setState(() {
                 isLoadingEdit = false;
@@ -372,24 +372,24 @@ class _UserEditsState extends State<UserEdits> {
                   ),
                 );
               }
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BlocProvider(
-                    create: (context) => AllRequesterBloc(),
-                    child:  UserList(),
-                  ),
-                ),
-              ).then((result) {
-                // Handle any result if needed
-                if (result != null) {
-                  BlocProvider.of<AllRequesterBloc>(context)
-                      .add(GetUserListHandler("", pageNo, pageSize));
-                }
-              });
-              // Future.delayed(const Duration(milliseconds: 500), () {
-              //   Navigator.pop(context);
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => BlocProvider(
+              //       create: (context) => AllRequesterBloc(),
+              //       child:  UserList(),
+              //     ),
+              //   ),
+              // ).then((result) {
+              //   // Handle any result if needed
+              //   if (result != null) {
+              //     BlocProvider.of<AllRequesterBloc>(context)
+              //         .add(GetUserListHandler("", pageNo, pageSize));
+              //   }
               // });
+              Future.delayed(const Duration(milliseconds: 500), () {
+                Navigator.pop(context,[true]);
+              });
             } else if (state is UserUpdateFailure) {
               setState(() {
                 isLoadingEdit = false;
