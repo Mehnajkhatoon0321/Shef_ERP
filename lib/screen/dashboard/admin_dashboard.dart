@@ -202,12 +202,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
   };
   Map<String, double> dataMap = {};
 
-
 // Make sure the number of colors matches the number of segments
 
   @override
   void initState() {
-
     BlocProvider.of<AllRequesterBloc>(context).add(DashBoardHandler());
     // TODO: implement initState
     super.initState();
@@ -441,7 +439,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                               ),
                               Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   // First Container
@@ -472,9 +470,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                                 left: 7.0),
                                             child: Column(
                                               mainAxisAlignment:
-                                              MainAxisAlignment.start,
+                                                  MainAxisAlignment.start,
                                               crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 const SizedBox(height: 10),
                                                 Text(
@@ -494,11 +492,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                                   style: FTextStyle
                                                       .authlogin_signupTxtStyle
                                                       .copyWith(
-                                                      color: AppColors
-                                                          .formFieldHintColour,
-                                                      fontSize: 18),
+                                                          color: AppColors
+                                                              .formFieldHintColour,
+                                                          fontSize: 18),
                                                   overflow:
-                                                  TextOverflow.ellipsis,
+                                                      TextOverflow.ellipsis,
                                                 ),
                                               ],
                                             ),
@@ -548,9 +546,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                                 left: 7.0),
                                             child: Column(
                                               mainAxisAlignment:
-                                              MainAxisAlignment.start,
+                                                  MainAxisAlignment.start,
                                               crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 const SizedBox(height: 10),
                                                 Text(
@@ -570,11 +568,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                                   style: FTextStyle
                                                       .authlogin_signupTxtStyle
                                                       .copyWith(
-                                                      color: AppColors
-                                                          .formFieldHintColour,
-                                                      fontSize: 18),
+                                                          color: AppColors
+                                                              .formFieldHintColour,
+                                                          fontSize: 18),
                                                   overflow:
-                                                  TextOverflow.ellipsis,
+                                                      TextOverflow.ellipsis,
                                                 ),
                                               ],
                                             ),
@@ -599,7 +597,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                               ),
                               Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   // First Container
@@ -630,9 +628,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                                 left: 7.0),
                                             child: Column(
                                               mainAxisAlignment:
-                                              MainAxisAlignment.start,
+                                                  MainAxisAlignment.start,
                                               crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 const SizedBox(height: 10),
                                                 Text(
@@ -652,11 +650,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                                   style: FTextStyle
                                                       .authlogin_signupTxtStyle
                                                       .copyWith(
-                                                      color: AppColors
-                                                          .formFieldHintColour,
-                                                      fontSize: 18),
+                                                          color: AppColors
+                                                              .formFieldHintColour,
+                                                          fontSize: 18),
                                                   overflow:
-                                                  TextOverflow.ellipsis,
+                                                      TextOverflow.ellipsis,
                                                 ),
                                               ],
                                             ),
@@ -703,9 +701,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                                 left: 7.0),
                                             child: Column(
                                               mainAxisAlignment:
-                                              MainAxisAlignment.start,
+                                                  MainAxisAlignment.start,
                                               crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 const SizedBox(height: 10),
                                                 Text(
@@ -725,11 +723,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                                   style: FTextStyle
                                                       .authlogin_signupTxtStyle
                                                       .copyWith(
-                                                      color: AppColors
-                                                          .formFieldHintColour,
-                                                      fontSize: 18),
+                                                          color: AppColors
+                                                              .formFieldHintColour,
+                                                          fontSize: 18),
                                                   overflow:
-                                                  TextOverflow.ellipsis,
+                                                      TextOverflow.ellipsis,
                                                 ),
                                               ],
                                             ),
@@ -749,79 +747,112 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                   ),
                                 ],
                               ),
-
                               Container(
-                                height: MediaQuery.of(context).size.height * 0.39,
+                                width: double.infinity,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.39,
                                 child: Center(
                                   child: isInitialLoading
                                       ? CircularProgressIndicator()
                                       : dataMap.isNotEmpty
-                                      ? SfCartesianChart(
-                                    primaryXAxis: CategoryAxis(
-                                      title: AxisTitle(text: 'Unit wise Requisitions'),
-                                      isVisible: true,
-                                      interval: 1,
-                                      labelStyle: TextStyle(
-                                        color: Colors.transparent,
-                                        fontSize: 8,
-                                      ),
-                                      labelAlignment: LabelAlignment.start,
-                                      // maximumLabels: 20,
-                                      // labelRotation: 90, // Set the label rotation here
-                                      // Hides the labels
-                                    ),
-                                    primaryYAxis: NumericAxis(
-                                      title: AxisTitle(text: 'Count'),
-                                      minimum: 0,
-                                      maximum: dataMap.values.reduce((a, b) => a > b ? a : b),
-                                      interval: 1,
-                                    ),
-                                    title: ChartTitle(text: 'Unit wise Overview'),
-                                    tooltipBehavior: TooltipBehavior(enable: true),
-
-                                    series: <CartesianSeries>[
-                                      ColumnSeries<MapEntry<String, double>, String>(
-                                        name: "Unit Requisitions",
-                                        dataSource: dataMap.entries.toList(),
-                                        xValueMapper: (MapEntry<String, double> data, _) => data.key,
-                                        yValueMapper: (MapEntry<String, double> data, _) => data.value,
-                                        pointColorMapper: (MapEntry<String, double> data, _) {
-                                          List<Color> colors = [
-                                            Colors.blue,
-                                            Colors.green,
-                                            Colors.red,
-                                            Colors.orange,
-                                            Colors.purple,
-                                            Colors.teal,
-                                            Colors.amber,
-                                            Colors.pink,
-                                            Colors.brown,
-                                            Colors.cyan,
-                                            Colors.indigo,
-                                            Colors.yellow,
-                                          ];
-                                          int index = dataMap.keys.toList().indexOf(data.key);
-                                          return colors[index % colors.length]; // Cycle through colors
-                                        },
-                                        dataLabelSettings: DataLabelSettings(
-                                            isVisible: true,
-                                            labelPosition:ChartDataLabelPosition.inside
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                      : Center(
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text("No data available"),
-                                        SizedBox(height: 8),
-                                      ],
-                                    ),
-                                  ),
+                                          ? Container(
+                                              child: SfCartesianChart(
+                                                primaryXAxis: CategoryAxis(
+                                                  title: AxisTitle(
+                                                      text:
+                                                          'Unit wise Requisitions'),
+                                                  // isVisible: true,
+                                                  // interval: 1,
+                                                  labelStyle: TextStyle(
+                                                    color: Colors.transparent,
+                                                    fontSize: 8,
+                                                  ),
+                                                  labelAlignment:
+                                                      LabelAlignment.start,
+                                                  // maximumLabels: 20,
+                                                  // labelRotation: 90, // Set the label rotation here
+                                                  // Hides the labels
+                                                ),
+                                                primaryYAxis: NumericAxis(
+                                                  // title:
+                                                  //     AxisTitle(text: 'Count'),
+                                                  minimum: 0,
+                                                  maximum: dataMap.values
+                                                      .reduce((a, b) =>
+                                                          a > b ? a : b),
+                                                  interval: 1,
+                                                ),
+                                                title: ChartTitle(
+                                                    text: 'Unit wise Overview'),
+                                                tooltipBehavior:
+                                                    TooltipBehavior(
+                                                        enable: true),
+                                                series: <CartesianSeries>[
+                                                  ColumnSeries<
+                                                      MapEntry<String, double>,
+                                                      String>(
+                                                    name: "Unit Requisitions",
+                                                    dataSource: dataMap.entries
+                                                        .toList(),
+                                                    xValueMapper: (MapEntry<
+                                                                    String,
+                                                                    double>
+                                                                data,
+                                                            _) =>
+                                                        data.key,
+                                                    yValueMapper: (MapEntry<
+                                                                    String,
+                                                                    double>
+                                                                data,
+                                                            _) =>
+                                                        data.value,
+                                                    pointColorMapper: (MapEntry<
+                                                                String, double>
+                                                            data,
+                                                        _) {
+                                                      List<Color> colors = [
+                                                        Colors.blue,
+                                                        Colors.green,
+                                                        Colors.red,
+                                                        Colors.orange,
+                                                        Colors.purple,
+                                                        Colors.teal,
+                                                        Colors.amber,
+                                                        Colors.pink,
+                                                        Colors.brown,
+                                                        Colors.cyan,
+                                                        Colors.indigo,
+                                                        Colors.yellow,
+                                                      ];
+                                                      int index = dataMap.keys
+                                                          .toList()
+                                                          .indexOf(data.key);
+                                                      return colors[index %
+                                                          colors
+                                                              .length]; // Cycle through colors
+                                                    },
+                                                    dataLabelSettings:
+                                                        DataLabelSettings(
+                                                            isVisible: true,
+                                                            labelPosition:
+                                                                ChartDataLabelPosition
+                                                                    .inside),
+                                                  ),
+                                                ],
+                                              ),
+                                            )
+                                          : Center(
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Text("No data available"),
+                                                  SizedBox(height: 8),
+                                                ],
+                                              ),
+                                            ),
                                 ),
                               ),
-
                             ])),
                   ),
                 ))));
