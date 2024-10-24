@@ -133,7 +133,13 @@ class _EventScreenState extends State<EventScreen> {
         .add(EventListHandler("", pageNo, pageSize));
     paginationCall();
   }
-
+  void _refreshVendorList() {
+    setState(() {
+      pageNo=1;
+      BlocProvider.of<AllRequesterBloc>(context)
+          .add(EventListHandler(searchQuery, pageNo, pageSize));
+    });
+  }
   void paginationCall() {
     controller.addListener(() {
       // Check if we've scrolled to the bottom
@@ -189,7 +195,7 @@ class _EventScreenState extends State<EventScreen> {
                     : 43,
                 child: ElevatedButton(
                   onPressed: () => _showCategoryDialog(
-                      BlocProvider.of<AllRequesterBloc>(context), context),
+                      BlocProvider.of<AllRequesterBloc>(context), context, _refreshVendorList,),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(26),
@@ -269,8 +275,7 @@ class _EventScreenState extends State<EventScreen> {
               DeletePopupManager.stopLoader();
 
               var deleteMessage = state.deleteEventList['message'];
-              BlocProvider.of<AllRequesterBloc>(context)
-                  .add(EventListHandler(searchQuery, pageNo, pageSize));
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(deleteMessage),
@@ -484,9 +489,9 @@ class _EventScreenState extends State<EventScreen> {
                                                 icon: const Icon(Icons.edit, color: Colors.black),
                                                 onPressed: () => _showCategoryDialog(
                                                     BlocProvider.of<AllRequesterBloc>(context),
-                                                    context,
+                                                    context,_refreshVendorList,
                                                     isEditing: true,
-                                                    index: index),
+                                                    index: index,),
                                               ),
                                               IconButton(
                                                 icon: const Icon(Icons.delete, color: Colors.red),
@@ -554,8 +559,9 @@ class _EventScreenState extends State<EventScreen> {
     });
   }
 
-  Future<bool?> _showCategoryDialog(AllRequesterBloc of, BuildContext context,
-      {bool isEditing = false, int? index}) async {
+  Future<bool?> _showCategoryDialog(AllRequesterBloc of, BuildContext context, Function refreshCallback,
+      {bool isEditing = false, int? index}) async
+  {
     final _formKey = GlobalKey<FormState>();
     final _editController =
     TextEditingController(text: isEditing ? data[index!]["name"] : '');
@@ -667,8 +673,7 @@ class _EventScreenState extends State<EventScreen> {
                           } else if (state is EventCreateSuccess) {
 
                             isLoadingCreate = false;
-                            BlocProvider.of<AllRequesterBloc>(context)
-                                .add(EventListHandler(searchQuery, pageNo, pageSize));
+
                             if (state.createResponse.containsKey('message')) {
                               var deleteMessage =
                               state.createResponse['message'];
@@ -679,11 +684,12 @@ class _EventScreenState extends State<EventScreen> {
                                 ),
                               );
                             }
-
-                            Future.delayed(const Duration(milliseconds: 500),
-                                    () {
-                                  Navigator.pop(context);
-                                });
+                            refreshCallback();
+                            // Navigator.pop(context);
+                            // Future.delayed(const Duration(milliseconds: 500),
+                            //         () {
+                            //       Navigator.pop(context);
+                            //     });
                           } else if (state is EventCreateFailure) {
                             var deleteMessage = state.failureMessage;
 
@@ -708,8 +714,7 @@ class _EventScreenState extends State<EventScreen> {
                             });
                           } else if (state is UpdateEventsSuccess) {
                             isLoadingCreate = false;
-                            BlocProvider.of<AllRequesterBloc>(context)
-                                .add(EventListHandler(searchQuery, pageNo, pageSize));
+
                             var update = state.updateResponse['message'];
 
                             ScaffoldMessenger.of(context).showSnackBar(

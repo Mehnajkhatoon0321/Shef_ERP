@@ -131,11 +131,12 @@ class _ProductCategoryState extends State<ProductCategory> {
   }
   void _refreshVendorList() {
     setState(() {
-      pageNo=1;
+
       BlocProvider.of<AllRequesterBloc>(context)
           .add(GetProductCategoryHandler(searchQuery, pageNo, pageSize));
     });
   }
+
   void paginationCall() {
     controllerI.addListener(() {
       if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
@@ -700,10 +701,12 @@ class _ProductCategoryState extends State<ProductCategory> {
 
                         setState(() {
                           isLoadingCreate = false;
-                          BlocProvider.of<AllRequesterBloc>(context)
-                              .add(GetProductCategoryHandler(searchQuery, pageNo, pageSize));
+
                           var update = state.updateResponse['message'];
 
+
+                          var responseData = state.updateResponse['list'];
+                          print("responce data${responseData}");
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(update),

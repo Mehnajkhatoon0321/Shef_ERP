@@ -612,14 +612,7 @@ class _ProductServiceState extends State<ProductService> {
                                                         ),
                                                       ),
                                                     ),
-                                                  ).then((result) {
-                                                    // Handle the result from the edit screen
-                                                    if (result[0]) {
-                                                     pageNo=1;
-                                                      BlocProvider.of<AllRequesterBloc>(context)
-                                                          .add(MasterServiceHandler("", pageNo, pageSize));
-                                                    }
-                                                  });
+                                                  );
 
 
 
@@ -699,7 +692,8 @@ class _ProductServiceState extends State<ProductService> {
       BuildContext context,
       Map<String, dynamic> item,
       String id // New parameter for id
-      ) {
+      )
+  {
     String? selectedStatus = item["status"] == 0
         ? "Active"
         : "Inactive"; // Default value
