@@ -4,7 +4,7 @@ class  APIEndPoints{
 
   //demoUrl
   static const String baseUrl = 'https://demo.studyhallfoundation.org/api/';
-  static const String baseUrlImage = 'https://demo.studyhallfoundation.org/public/uploads/requisition/';
+   static const String baseUrlImage = 'https://demo.studyhallfoundation.org/public/uploads/requisition/';
   // static const String baseUrlImage = 'https://erp.studyhallfoundation.org/public/uploads/requisition/';
    // static const String baseUrl = 'https://erp.studyhallfoundation.org/api/';
   static const String login = '${baseUrl}login';

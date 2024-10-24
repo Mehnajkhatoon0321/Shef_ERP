@@ -284,11 +284,6 @@ class _ProductServiceState extends State<ProductService> {
               DeletePopupManager.playLoader();
             } else if (state is DeleteServiceSuccess) {
               setState(() {
-                pageNo=1;
-                BlocProvider.of<AllRequesterBloc>(context)
-                    .add(MasterServiceHandler("", pageNo, pageSize));
-              });
-
 
 
                 DeletePopupManager.stopLoader();
@@ -300,10 +295,16 @@ class _ProductServiceState extends State<ProductService> {
                     backgroundColor: AppColors.primaryColour,
                   ),
                 );
-
+          data.clear();
+                BlocProvider.of<AllRequesterBloc>(context)
+                    .add(MasterServiceHandler("", 1, pageSize));
                 Future.delayed(const Duration(milliseconds: 500), () {
                   Navigator.pop(context);
                 });
+
+              });
+
+
 
 
             } else if (state is DeleteEventServiceFailure) {

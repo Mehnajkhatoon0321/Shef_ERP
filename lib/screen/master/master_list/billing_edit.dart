@@ -189,7 +189,7 @@ class _BillingEditState extends State<BillingEdit> {
                     Navigator.pop(context, [true]); // Pass the changes status back
                   });
 
-                  Navigator.pop(context,[true]);
+                  // Navigator.pop(context,[true]);
                 });
 
 
@@ -220,7 +220,7 @@ class _BillingEditState extends State<BillingEdit> {
                 });
 
 
-                Navigator.pop(context,[true]);
+                // Navigator.pop(context,[true]);
               });
             } else if (state is BillingUpdateFailure) {
               setState(() {

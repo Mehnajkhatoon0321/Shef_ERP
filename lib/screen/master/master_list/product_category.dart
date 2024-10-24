@@ -281,15 +281,16 @@ class _ProductCategoryState extends State<ProductCategory> {
               DeletePopupManager.stopLoader();
 
               var deleteMessage = state.deleteEventCategoryList['message'];
-              BlocProvider.of<AllRequesterBloc>(context)
-                  .add(GetProductCategoryHandler("", pageNo, pageSize));
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(deleteMessage),
                   backgroundColor: AppColors.primaryColour,
                 ),
               );
-
+              data.clear();
+              BlocProvider.of<AllRequesterBloc>(context)
+                  .add(GetProductCategoryHandler("", 1, pageSize));
               Future.delayed(const Duration(milliseconds: 500), () {
                 Navigator.pop(context);
               });
@@ -543,8 +544,9 @@ class _ProductCategoryState extends State<ProductCategory> {
     _controller.clear();
     setState(() {
       _isTextEmpty = true;
+      data.clear();
       BlocProvider.of<AllRequesterBloc>(context)
-          .add(GetProductCategoryHandler("", pageNo, pageSize));
+          .add(GetProductCategoryHandler("", 1, pageSize));
     });
   }
 
@@ -657,8 +659,7 @@ class _ProductCategoryState extends State<ProductCategory> {
                         });
                       } else if (state is CreateCategorySuccess) {
                         isLoadingCreate = false;
-                        BlocProvider.of<AllRequesterBloc>(context)
-                            .add(GetProductCategoryHandler(searchQuery, pageNo, pageSize));
+
                         if (state.createResponse is Map &&
                             state.createResponse.containsKey('message')) {
                           var deleteMessage = state.createResponse['message'];
@@ -669,7 +670,9 @@ class _ProductCategoryState extends State<ProductCategory> {
                             ),
                           );
                         }
-
+                        data.clear();
+                        BlocProvider.of<AllRequesterBloc>(context)
+                            .add(GetProductCategoryHandler("", 1, pageSize));
                         Future.delayed(const Duration(milliseconds: 500), () {
                           Navigator.pop(context);
                         });
@@ -713,7 +716,9 @@ class _ProductCategoryState extends State<ProductCategory> {
                               backgroundColor: AppColors.primaryColour,
                             ),
                           );
-
+                          data.clear();
+                          BlocProvider.of<AllRequesterBloc>(context)
+                              .add(GetProductCategoryHandler("", 1, pageSize));
                           Future.delayed(const Duration(milliseconds: 500), () {
                             Navigator.pop(context);
                           });

@@ -195,7 +195,7 @@ class _EventScreenState extends State<EventScreen> {
                     : 43,
                 child: ElevatedButton(
                   onPressed: () => _showCategoryDialog(
-                      BlocProvider.of<AllRequesterBloc>(context), context, _refreshVendorList,),
+                      BlocProvider.of<AllRequesterBloc>(context), context,),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(26),
@@ -229,7 +229,8 @@ class _EventScreenState extends State<EventScreen> {
               setState(() {
                 isInitialLoading = true;
               });
-            } else if (state is EventListSuccess) {
+            }
+            else if (state is EventListSuccess) {
               setState(() {
                 var responseData = state.eventList['list'];
                 print(">>>>>>>>>>>ALLDATA$responseData");
@@ -249,7 +250,8 @@ class _EventScreenState extends State<EventScreen> {
                   hasMoreData = false;
                 }
               });
-            } else if (state is EventListFailure) {
+            }
+            else if (state is EventListFailure) {
               setState(() {
                 isLoading = false;
                 isInitialLoading = false;
@@ -269,24 +271,33 @@ class _EventScreenState extends State<EventScreen> {
               Future.delayed(const Duration(milliseconds: 500), () {
                 Navigator.pop(context);
               });
-            } else if (state is EventDeleteLoading) {
+            }
+            else if (state is EventDeleteLoading) {
               DeletePopupManager.playLoader();
-            } else if (state is EventDeleteSuccess) {
-              DeletePopupManager.stopLoader();
+            }
+            else if (state is EventDeleteSuccess) {
+              setState(() {
 
-              var deleteMessage = state.deleteEventList['message'];
+                DeletePopupManager.stopLoader();
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(deleteMessage),
-                  backgroundColor: AppColors.primaryColour,
-                ),
-              );
+                var deleteMessage = state.deleteEventList['message'];
 
-              Future.delayed(const Duration(milliseconds: 500), () {
-                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(deleteMessage),
+                    backgroundColor: AppColors.primaryColour,
+                  ),
+                );
+                data.clear();
+                BlocProvider.of<AllRequesterBloc>(context)
+                    .add(EventListHandler("", 1, pageSize));
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  Navigator.pop(context);
+                });
               });
-            } else if (state is EventDeleteFailure) {
+
+            }
+            else if (state is EventDeleteFailure) {
               DeletePopupManager.stopLoader();
 
               var deleteMessage = state.deleteEventFailure['message'];
@@ -489,7 +500,7 @@ class _EventScreenState extends State<EventScreen> {
                                                 icon: const Icon(Icons.edit, color: Colors.black),
                                                 onPressed: () => _showCategoryDialog(
                                                     BlocProvider.of<AllRequesterBloc>(context),
-                                                    context,_refreshVendorList,
+                                                    context,
                                                     isEditing: true,
                                                     index: index,),
                                               ),
@@ -559,7 +570,9 @@ class _EventScreenState extends State<EventScreen> {
     });
   }
 
-  Future<bool?> _showCategoryDialog(AllRequesterBloc of, BuildContext context, Function refreshCallback,
+
+
+  Future<bool?> _showCategoryDialog(AllRequesterBloc of, BuildContext context,
       {bool isEditing = false, int? index}) async
   {
     final _formKey = GlobalKey<FormState>();
@@ -684,12 +697,14 @@ class _EventScreenState extends State<EventScreen> {
                                 ),
                               );
                             }
-                            refreshCallback();
+                            data.clear();
+                            BlocProvider.of<AllRequesterBloc>(context)
+                                .add(EventListHandler("", 1, pageSize));
                             // Navigator.pop(context);
-                            // Future.delayed(const Duration(milliseconds: 500),
-                            //         () {
-                            //       Navigator.pop(context);
-                            //     });
+                            Future.delayed(const Duration(milliseconds: 500),
+                                    () {
+                                  Navigator.pop(context);
+                                });
                           } else if (state is EventCreateFailure) {
                             var deleteMessage = state.failureMessage;
 
@@ -723,7 +738,9 @@ class _EventScreenState extends State<EventScreen> {
                                 backgroundColor: AppColors.primaryColour,
                               ),
                             );
-
+                            data.clear();
+                            BlocProvider.of<AllRequesterBloc>(context)
+                                .add(EventListHandler("", 1, pageSize));
                             Future.delayed(const Duration(milliseconds: 500),
                                     () {
                                   Navigator.pop(context);

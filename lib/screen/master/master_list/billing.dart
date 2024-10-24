@@ -272,8 +272,9 @@ class _BillingListState extends State<BillingList> {
 
               var deleteMessage = state.deleteBillingList['message'];
               print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
+              data.clear();
               BlocProvider.of<AllRequesterBloc>(context)
-                  .add(GetBillingListHandler("", pageNo, pageSize));
+                  .add(GetBillingListHandler("", 1, pageSize));
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(deleteMessage),
@@ -647,8 +648,9 @@ class _BillingListState extends State<BillingList> {
     controllerText.clear();
     setState(() {
       _isTextEmpty = true;
+
       BlocProvider.of<AllRequesterBloc>(context)
-          .add(GetBillingListHandler("", pageNo, pageSize));
+          .add(GetBillingListHandler("", 1, pageSize));
     });
   }
 }
