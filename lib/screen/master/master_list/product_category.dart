@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
@@ -126,7 +129,13 @@ class _ProductCategoryState extends State<ProductCategory> {
         .add(GetProductCategoryHandler("", pageNo, pageSize));
     paginationCall();
   }
-
+  void _refreshVendorList() {
+    setState(() {
+      pageNo=1;
+      BlocProvider.of<AllRequesterBloc>(context)
+          .add(GetProductCategoryHandler(searchQuery, pageNo, pageSize));
+    });
+  }
   void paginationCall() {
     controllerI.addListener(() {
       if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
@@ -142,7 +151,31 @@ class _ProductCategoryState extends State<ProductCategory> {
       }
     });
   }
+  @override
+  void dispose() {
+    controllerI.removeListener(paginationCall);
+    controllerI.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+  Timer? _debounce;
+  void _onSearchChanged(String value) {
+    setState(() {
+      _isTextEmpty = value.isEmpty;
+      searchQuery = value;
+    });
 
+    // Cancel the previous timer
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    // Start a new timer
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      pageNo=1;
+      // Call the API only after the user has stopped typing for 500 milliseconds
+      BlocProvider.of<AllRequesterBloc>(context).add(
+          GetProductCategoryHandler(searchQuery, pageNo, pageSize));
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -307,6 +340,10 @@ class _ProductCategoryState extends State<ProductCategory> {
                   ),
                   child: TextFormField(
                     controller: _controller,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.deny(RegExp(r'\n')), // Deny new lines
+                        LengthLimitingTextInputFormatter(200), // Limit to 250 characters
+                      ],
                     decoration: InputDecoration(
                       hintText: 'Search',
                       hintStyle: FTextStyle.formhintTxtStyle,
@@ -338,14 +375,7 @@ class _ProductCategoryState extends State<ProductCategory> {
                       fillColor: Colors.grey[100],
                       filled: true,
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        _isTextEmpty = value.isEmpty;
-                        searchQuery = value;
-                        BlocProvider.of<AllRequesterBloc>(context).add(
-                            GetProductCategoryHandler(searchQuery, pageNo, pageSize));
-                      });
-                    },
+                    onChanged: _onSearchChanged
                   ),
                 ),
               ),
@@ -642,6 +672,8 @@ class _ProductCategoryState extends State<ProductCategory> {
                         Future.delayed(const Duration(milliseconds: 500), () {
                           Navigator.pop(context);
                         });
+
+
                       } else if (state is CreateCategoryFailure) {
                         var deleteMessage = state.failureMessage;
 

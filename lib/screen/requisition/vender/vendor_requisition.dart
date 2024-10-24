@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
@@ -128,7 +131,31 @@ class _VenderRequisitionState extends State<VenderRequisition> {
   // Map<String , dynamic> errorMessage={};
   Map<String, dynamic> errorServerMessage = {};
   String? errorMessage;
+  @override
+  void dispose() {
+    controllerI.removeListener(paginationCall);
+    controllerI.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
+  Timer? _debounce;
+  void _onSearchChanged(String value) {
+    setState(() {
+      _isTextEmpty = value.isEmpty;
+      searchQuery = value;
+    });
 
+    // Cancel the previous timer
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    // Start a new timer
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      pageNo=1;
+      // Call the API only after the user has stopped typing for 500 milliseconds
+      BlocProvider.of<AllRequesterBloc>(context).add(
+          AddCartDetailHandler(searchQuery, pageNo, pageSize));
+    });
+  }
   @override
   void initState() {
     super.initState();
@@ -301,6 +328,10 @@ class _VenderRequisitionState extends State<VenderRequisition> {
                   ),
                   child: TextFormField(
                     controller: _controller,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.deny(RegExp(r'\n')), // Deny new lines
+                        LengthLimitingTextInputFormatter(200), // Limit to 250 characters
+                      ],
                     decoration: InputDecoration(
                       hintText: 'Search Requisition',
                       hintStyle: FTextStyle.formhintTxtStyle,
@@ -332,14 +363,7 @@ class _VenderRequisitionState extends State<VenderRequisition> {
                       fillColor: Colors.grey[100],
                       filled: true,
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        _isTextEmpty = value.isEmpty;
-                        searchQuery = value;
-                        BlocProvider.of<AllRequesterBloc>(context).add(
-                            AddCartDetailHandler(searchQuery, pageNo, pageSize));
-                      });
-                    },
+                    onChanged: _onSearchChanged
                   ),
                 ),
               ),
@@ -647,7 +671,6 @@ class _VenderRequisitionState extends State<VenderRequisition> {
   }
 
 
-
   void _showPODetails(BuildContext context, Map<String, dynamic> item) {
     showDialog(
       context: context,
@@ -665,9 +688,9 @@ class _VenderRequisitionState extends State<VenderRequisition> {
               ),
             ],
           ),
-          content: SingleChildScrollView(
-            child: Container(
-              width:MediaQuery.of(context).size.width *0.9,
+          content: Container(
+            width:MediaQuery.of(context).size.width *0.9,// Set your desired width here
+            child: SingleChildScrollView(
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight: 200.0, // Adjust as necessary
@@ -680,104 +703,78 @@ class _VenderRequisitionState extends State<VenderRequisition> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Unit Name : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["unit"] ?? 'N/A',style: FTextStyle.listTitleSub,)),
+                        Text('Unit Name : ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["unit"] ?? 'N/A', style: FTextStyle.listTitleSub)),
                       ],
                     ),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Address : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                        Text('Address : ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["vaddress"] ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 2)),
                       ],
                     ),
-
                     const Divider(color: Colors.grey),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Company : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["company"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                        Text('PO Number : ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["po_no"] ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 2)),
                       ],
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Vendor Adreess : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
-                      ],
-                    ),
-
-                    const Divider(color: Colors.grey),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('PO Number : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["po_no"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                        Text('Requisition No : ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["req_no"] ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 2)),
                       ],
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Requisition No : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["requisitionNo"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Request Date : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["req_date"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                        Text('Request Date : ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["req_date"] ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 2)),
                       ],
                     ),
                     DeliveryStatus(dlStatus: item["dl_status"]?.toString() ?? 'N/A'),
-
-
-
                     const Divider(color: Colors.grey),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Product/Service: ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["product_name"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
-                      ],
-                    ),  Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Quantity: ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["quantity"].toString() ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 1,)),
-                      ],
-                    ),Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Specification: ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["specification"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                        Text('Product/Service: ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["product"] ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 2)),
                       ],
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Remarks: ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["staff_remarks"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                        Text('Quantity: ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["quantity"].toString() ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 1)),
                       ],
                     ),
-
-
-
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Specification: ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["specification"] ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 2)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Remarks: ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["staff_remarks"] ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 2)),
+                      ],
+                    ),
                     const Divider(color: Colors.grey),
-
                   ],
                 ),
               ),
@@ -967,6 +964,7 @@ class _VenderRequisitionState extends State<VenderRequisition> {
     setState(() {
       _isTextEmpty = true;
       searchQuery = '';
+      pageNo=1;
       BlocProvider.of<AllRequesterBloc>(context)
           .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
     });

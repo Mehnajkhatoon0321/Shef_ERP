@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -65,7 +67,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
   bool isButtonPartEnabled = false;
   int pageNo = 1;
   int totalPages = 0;
-  int pageSize = 10;
+  int pageSize = 20;
   int index=0;
   bool hasMoreData = true;
   List<dynamic> data = [];
@@ -175,6 +177,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
   @override
   void initState() {
     super.initState();
+
     controller.addListener(() {
       setState(() {
         _isTextEmpty = controller.text.isEmpty;
@@ -200,11 +203,19 @@ class _AdminRequisitionState extends State<AdminRequisition> {
       }
     });
   }
+  void _refreshVendorList() {
+    setState(() {
+      pageNo=1;
+      BlocProvider.of<AllRequesterBloc>(context)
+          .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
+    });
+  }
 
   @override
   void dispose() {
     controllerI.removeListener(paginationCall);
     controllerI.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -212,6 +223,24 @@ class _AdminRequisitionState extends State<AdminRequisition> {
   List<String> productNames = [];
   List<String> billingNames = [];
   final TextEditingController uploadName = TextEditingController();
+  Timer? _debounce;
+  void _onSearchChanged(String value) {
+    setState(() {
+      _isTextEmpty = value.isEmpty;
+      searchQuery = value;
+    });
+
+    // Cancel the previous timer
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    // Start a new timer
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      pageNo=1;
+      // Call the API only after the user has stopped typing for 500 milliseconds
+      BlocProvider.of<AllRequesterBloc>(context).add(
+          AddCartDetailHandler(searchQuery, pageNo, pageSize));
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -238,9 +267,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                   : 43,
               child: ElevatedButton(
                   onPressed: () async {
-                    // setState(() {
-                    //   isLoading = true;
-                    // });
+
 
                     Navigator.push(
                       context,
@@ -252,7 +279,14 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                           ),
                         ),
                       ),
-                    );
+                    ).then((result) {
+                      // Handle the result from the edit screen
+                      if (result[0]) {
+                        pageNo=1;
+                        BlocProvider.of<AllRequesterBloc>(context)
+                            .add(AddCartDetailHandler("", pageNo, pageSize));
+                      }
+                    });
 
                     // );
                   },
@@ -389,9 +423,15 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                     ),
                   ],
                 ),
-                child: TextFormField(
+                child:
+                TextFormField(
                   controller: _controller,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.deny(RegExp(r'\n')), // Deny new lines
+                    LengthLimitingTextInputFormatter(200), // Limit to 250 characters
+                  ],
                   decoration: InputDecoration(
+
                     hintText: 'Search Requisition',
                     hintStyle: FTextStyle.formhintTxtStyle,
                     border: OutlineInputBorder(
@@ -422,14 +462,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                     fillColor: Colors.grey[100],
                     filled: true,
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      _isTextEmpty = value.isEmpty;
-                      searchQuery = value;
-                      BlocProvider.of<AllRequesterBloc>(context).add(
-                          AddCartDetailHandler(searchQuery, pageNo, pageSize));
-                    });
-                  },
+                  onChanged: _onSearchChanged,
                 ),
               ),
             ),
@@ -457,9 +490,13 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                         } else {
                           // Proceed to show the reject dialog
                           _showBrandDialog(
-                              BlocProvider.of<AllRequesterBloc>(context),
-                              context,
-                              selectedIds);
+                            BlocProvider.of<AllRequesterBloc>(context),
+                            context,
+                            selectedIds,
+                            _refreshVendorList,  // Pass the callback function here
+                          );
+
+
                         }
 
                       },
@@ -492,7 +529,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                             _showRejectDialog(
                                 BlocProvider.of<AllRequesterBloc>(context),
                                 context,
-                                selectedIds);
+                                selectedIds,_refreshVendorList);
                           }
                         },
                         style: ElevatedButton.styleFrom(
@@ -596,7 +633,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                               child: Text("No data available.",
                                   style: FTextStyle.listTitle),
                             )
-                          : ListView.builder(
+                          :
+              ListView.builder(
                               controller: controllerI,
                               itemCount: data.length + 1,
                               itemBuilder: (context, index)
@@ -803,7 +841,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                                               delivery:
                                                               item["dl_status"].toString() ??
                                                                   "N/A",
-                                                              vender: item["vender"] ?? "N/A",
+                                                              vender: item["company"] ?? "N/A",
                                                               image: item["image"].toString(),
                                                             ),
                                                           ),
@@ -938,6 +976,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
     setState(() {
       _isTextEmpty = true;
       searchQuery = '';
+      pageNo=1;
       BlocProvider.of<AllRequesterBloc>(context)
           .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
     });
@@ -962,9 +1001,9 @@ class _AdminRequisitionState extends State<AdminRequisition> {
               ),
             ],
           ),
-          content: SingleChildScrollView(
-            child: Container(
-              width:MediaQuery.of(context).size.width *0.9,
+          content: Container(
+            width:MediaQuery.of(context).size.width *0.9,// Set your desired width here
+            child: SingleChildScrollView(
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight: 200.0, // Adjust as necessary
@@ -977,104 +1016,78 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Unit Name : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["unit"] ?? 'N/A',style: FTextStyle.listTitleSub,)),
+                        Text('Unit Name : ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["unit"] ?? 'N/A', style: FTextStyle.listTitleSub)),
                       ],
                     ),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Address : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                        Text('Address : ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["vaddress"] ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 2)),
                       ],
                     ),
-
                     const Divider(color: Colors.grey),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Company : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["company"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                        Text('PO Number : ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["po_no"] ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 2)),
                       ],
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Vendor Adreess : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
-                      ],
-                    ),
-
-                    const Divider(color: Colors.grey),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('PO Number : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["po_no"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                        Text('Requisition No : ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["req_no"] ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 2)),
                       ],
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Requisition No : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["requisitionNo"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Request Date : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["req_date"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                        Text('Request Date : ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["req_date"] ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 2)),
                       ],
                     ),
                     DeliveryStatus(dlStatus: item["dl_status"]?.toString() ?? 'N/A'),
-
-
-
                     const Divider(color: Colors.grey),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Product/Service: ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["product_name"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
-                      ],
-                    ),  Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Quantity: ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["quantity"].toString() ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 1,)),
-                      ],
-                    ),Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Specification: ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["specification"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                        Text('Product/Service: ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["product"] ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 2)),
                       ],
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Remarks: ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["staff_remarks"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                        Text('Quantity: ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["quantity"].toString() ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 1)),
                       ],
                     ),
-
-
-
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Specification: ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["specification"] ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 2)),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Remarks: ', style: FTextStyle.listTitle),
+                        Expanded(child: Text(item["staff_remarks"] ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 2)),
+                      ],
+                    ),
                     const Divider(color: Colors.grey),
-
                   ],
                 ),
               ),
@@ -1136,32 +1149,14 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                       ],
                     ),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Address : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
-                      ],
-                    ),
-
-                    const Divider(color: Colors.grey),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Company : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["company"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Vendor Adreess : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
-                      ],
-                    ),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.start,
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //   children: [
+                    //     Text('Address : ',style: FTextStyle.listTitle,),
+                    //     Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                    //   ],
+                    // ),
 
                     const Divider(color: Colors.grey),
                     // Row(
@@ -1206,7 +1201,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Product/Service: ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["product_name"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                        Expanded(child: Text(item["product"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
                       ],
                     ),  Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -1223,7 +1218,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                         Expanded(child: Text(item["specification"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
                       ],
                     ),
-              Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1258,10 +1253,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
 
 
 
-
   Future<bool?> _showBrandDialog(
-      AllRequesterBloc of, BuildContext context, List<String> selectedIds)
-  {
+      AllRequesterBloc of, BuildContext context, List<String> selectedIds, Function refreshCallback) {
     final formKey = GlobalKey<FormState>();
     String? selectedItem; // Initialize with null
     String? selectedBilling; // Initialize with null
@@ -1272,236 +1265,169 @@ class _AdminRequisitionState extends State<AdminRequisition> {
         builder: (BuildContext context) {
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
-            // Helper function to check if the button should be enabled
-            void updateButtonState() {
-              setState(() {
-                isButtonPartEnabled = (selectedItem != null &&
-                        selectedItem!.isNotEmpty) &&
-                    (selectedBilling != null && selectedBilling!.isNotEmpty);
-              });
-            }
+                void updateButtonState() {
+                  setState(() {
+                    isButtonPartEnabled = (selectedItem != null && selectedItem!.isNotEmpty) &&
+                        (selectedBilling != null && selectedBilling!.isNotEmpty);
+                  });
+                }
 
-            return BlocProvider.value(
-              value: of, // Use the existing Bloc instance
-              child: AlertDialog(
-                backgroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(26.0),
-                ),
-                title: Text(
-                  "Vendor Assign",
-                  style: FTextStyle.preHeading16BoldStyle,
-                ),
-                content: SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.98,
-                  child: Form(
-                    key: formKey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Select Vendor",
-                          style: FTextStyle.preHeadingStyle,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Container(
-                            width: double.infinity,
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(28.0),
-                              border:
-                                  Border.all(color: AppColors.boarderColour),
-                              color: AppColors.formFieldBackColour,
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                isExpanded: true,
-                                value: selectedItem,
-                                hint: const Text(
-                                  "Select Vendor",
-                                  style: FTextStyle.formhintTxtStyle,
-                                ),
-                                onChanged: (String? eventValue) {
-                                  setState(() {
-                                    selectedItem = eventValue;
-
-                                    selectedProductId = productMap[eventValue];
-
-                                    selectedProductId = productMap[eventValue];
-
-                                    updateButtonState(); // Call the helper function
-                                  });
-                                },
-                                items: productNames
-                                    .map<DropdownMenuItem<String>>(
-                                        (String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Text(
-                          "Select Billing Name",
-                          style: FTextStyle.preHeadingStyle,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Container(
-                            width: double.infinity,
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(28.0),
-                              border:
-                                  Border.all(color: AppColors.boarderColour),
-                              color: AppColors.formFieldBackColour,
-                            ),
-                            child: DropdownButtonHideUnderline(
-                              child: DropdownButton<String>(
-                                isExpanded: true,
-                                value: selectedBilling,
-                                hint: const Text(
-                                  "Select Billing Name",
-                                  style: FTextStyle.formhintTxtStyle,
-                                ),
-                                onChanged: (String? eventValue) {
-                                  setState(() {
-                                    selectedBilling = eventValue;
-
-                                    selectedBillingId = billingMap[eventValue];
-
-                                    updateButtonState(); // Call the helper function
-                                  });
-                                },
-                                items: billingNames
-                                    .map<DropdownMenuItem<String>>(
-                                        (String value) {
-                                  return DropdownMenuItem<String>(
-                                    value: value,
-                                    child: Text(value),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                return BlocProvider.value(
+                  value: of, // Use the existing Bloc instance
+                  child: AlertDialog(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(26.0),
                     ),
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    child: const Text("Cancel",
-                        style: TextStyle(color: Colors.black)),
-                    onPressed: () {
-                      Navigator.of(context).pop(false); // Return false
-                    },
-                  ),
-                  const SizedBox(width: 10),
-                  BlocListener<AllRequesterBloc, AllRequesterState>(
-                    listener: (context, state) {
-                      if (state is VendorAssignLoading) {
-                        setState(() {
-                          isLoading = true; // Set loading state
-                        });
-                      } else if (state is VendorAssignSuccess) {
-
-                        setState(() {
-                          // BlocProvider.of<AllRequesterBloc>(context)
-                          //     .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
-                          isLoading = false; // Set loading state
-                          selectedIndices.clear();
-                          selectedIds.clear();
-                          var successMessage = state.vendorList['message'];
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(successMessage),
-                              backgroundColor: AppColors.primaryColour,
-                            ),
-                          );
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BlocProvider(
-                                create: (context) => AllRequesterBloc(),
-                                child:  const AdminRequisition(),
+                    title: Text(
+                      "Vendor Assign",
+                      style: FTextStyle.preHeading16BoldStyle,
+                    ),
+                    content: SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.98,
+                      child: Form(
+                        key: formKey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Vendor selection
+                            Text("Select Vendor", style: FTextStyle.preHeadingStyle),
+                            // Vendor dropdown
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(28.0),
+                                  border: Border.all(color: AppColors.boarderColour),
+                                  color: AppColors.formFieldBackColour,
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    isExpanded: true,
+                             value:        productNames.contains(selectedItem) ? selectedItem : null,
+                                    // value: selectedItem,
+                                    hint: const Text("Select Vendor", style: FTextStyle.formhintTxtStyle),
+                                    onChanged: (String? eventValue) {
+                                      setState(() {
+                                        selectedItem = eventValue;
+                                        selectedProductId = productMap[eventValue];
+                                        updateButtonState();
+                                      });
+                                    },
+                                    items: productNames.map<DropdownMenuItem<String>>((String value) {
+                                      return DropdownMenuItem<String>(value: value, child: Text(value));
+                                    }).toList(),
+                                  ),
+                                ),
                               ),
                             ),
-                          ).then((result) {
-                            // Handle any result if needed
-                            if (result != null) {
-                              BlocProvider.of<AllRequesterBloc>(context)
-                                  .add(AddCartDetailHandler("", pageNo, pageSize));
-                            }
-                          });
+                            // Billing name selection
+                            Text("Select Billing Name", style: FTextStyle.preHeadingStyle),
+                            // Billing dropdown
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(28.0),
+                                  border: Border.all(color: AppColors.boarderColour),
+                                  color: AppColors.formFieldBackColour,
+                                ),
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    isExpanded: true,
+                                    value:        billingNames.contains(selectedBilling) ? selectedBilling : null,
 
-                        } );
-                      }else if (state is VendorAssignFailure) {
-                        setState(() {
-                          isLoading = false; // Reset loading state
-                          var errorMessage = state.vendorFailure['message'];
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(errorMessage),
-                              backgroundColor: AppColors.primaryColour,
+                                    hint: const Text("Select Billing Name", style: FTextStyle.formhintTxtStyle),
+                                    onChanged: (String? eventValue) {
+                                      setState(() {
+                                        selectedBilling = eventValue;
+                                        selectedBillingId = billingMap[eventValue];
+                                        updateButtonState();
+                                      });
+                                    },
+                                    items: billingNames.map<DropdownMenuItem<String>>((String value) {
+                                      return DropdownMenuItem<String>(value: value, child: Text(value));
+                                    }).toList(),
+                                  ),
+                                ),
+                              ),
                             ),
-                          );
-                        });
-                        if (kDebugMode) {
-                          print("error>> ${state.vendorFailure}");
-                        }
-                      } else if (state is CheckNetworkConnection) {
-                        CommonPopups.showCustomPopup(
-                          context,
-                          'Internet is not connected.',
-                        );
-                      }
-                    },
-                    child: TextButton(
-                      onPressed: isButtonPartEnabled
-                          ? () {
-                              // Pass all selected IDs in allCount
-                              of.add(VendorActionHandler(
-                                userID: PrefUtils.getUserId().toString(),
-                                btnAssign: 'assign',
-                                vendor: selectedProductId.toString() ?? '2',
-                                // Use selected vendor
-                                userRole: PrefUtils.getRole(),
-                                allCount: selectedIds,
-                                // Pass all selected IDs here
-                                billing: selectedBillingId.toString() ?? '2',
-                                // Use selected billing
-                                count: selectedIds.length
-                                    .toString(), // Count of selected IDs
-                              ));
-
-                            }
-                          : null,
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all(
-                            isButtonPartEnabled
-                                ? AppColors.primaryColourDark
-                                : AppColors.dividerColor),
-                        shape: WidgetStateProperty.all(RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25.0))),
+                          ],
+                        ),
                       ),
-                      child: const Text("OK",
-                          style: TextStyle(color: Colors.white)),
                     ),
+                    actions: [
+                      TextButton(
+                        child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+                        onPressed: () {
+                          Navigator.of(context).pop(false); // Return false
+                        },
+                      ),
+                      const SizedBox(width: 10),
+                      BlocListener<AllRequesterBloc, AllRequesterState>(
+                        listener: (context, state) {
+                          if (state is VendorAssignLoading) {
+                            setState(() {
+                              isLoading = true; // Set loading state
+                            });
+                          } else if (state is VendorAssignSuccess) {
+                            setState(() {
+                              isLoading = false; // Set loading state
+                              selectedIndices.clear();
+                              selectedIds.clear();
+                              var successMessage = state.vendorList['message'];
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(successMessage),
+                                backgroundColor: AppColors.primaryColour,
+                              ));
+                              refreshCallback(); // Call the refresh callback here
+                              Navigator.pop(context);
+                            });
+                          } else if (state is VendorAssignFailure) {
+                            setState(() {
+                              isLoading = false; // Reset loading state
+                              var errorMessage = state.vendorFailure['message'];
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(errorMessage),
+                                backgroundColor: AppColors.primaryColour,
+                              ));
+                            });
+                          } else if (state is CheckNetworkConnection) {
+                            CommonPopups.showCustomPopup(context, 'Internet is not connected.');
+                          }
+                        },
+                        child: TextButton(
+                          onPressed: isButtonPartEnabled
+                              ? () {
+                            of.add(VendorActionHandler(
+                              userID: PrefUtils.getUserId().toString(),
+                              btnAssign: 'assign',
+                              vendor: selectedProductId.toString() ?? '2',
+                              userRole: PrefUtils.getRole(),
+                              allCount: selectedIds,
+                              billing: selectedBillingId.toString() ?? '2',
+                              count: selectedIds.length.toString(),
+                            ));
+                          }
+                              : null,
+                          style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all(
+                                isButtonPartEnabled ? AppColors.primaryColourDark : AppColors.dividerColor),
+                            shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.0))),
+                          ),
+                          child: const Text("OK", style: TextStyle(color: Colors.white)),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          });
+                );
+              });
         });
   }
 
@@ -1510,7 +1436,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
 
 
   void _showRejectDialog(
-      AllRequesterBloc of, BuildContext context, List<String> selectedIds)
+      AllRequesterBloc of, BuildContext context, List<String> selectedIds, Function refreshCallback)
   {
     final formKey = GlobalKey<FormState>();
     final TextEditingController editController = TextEditingController();
@@ -1643,22 +1569,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                         backgroundColor: AppColors.primaryColour,
                                       ),
                                     );
-
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => BlocProvider(
-                                          create: (context) => AllRequesterBloc(),
-                                          child:  const AdminRequisition(),
-                                        ),
-                                      ),
-                                    ).then((result) {
-                                      // Handle any result if needed
-                                      if (result != null) {
-                                        BlocProvider.of<AllRequesterBloc>(context)
-                                            .add(AddCartDetailHandler("", pageNo, pageSize));
-                                      }
-                                    });
+                                    refreshCallback();
+                                 Navigator.pop(context);
                                   });
                                   // BlocProvider.of<AllRequesterBloc>(context)
                                   //     .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
@@ -1928,7 +1840,9 @@ class _AdminRequisitionState extends State<AdminRequisition> {
 
                         Future.delayed(const Duration(milliseconds: 500), () {
                           Navigator.pop(context);
-                        });
+                        })
+
+                        ;
                       } else if (state is MarkDeliveryFailure) {
                         setState(() {
                           isMarkedLoading = false;

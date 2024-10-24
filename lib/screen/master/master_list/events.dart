@@ -747,10 +747,10 @@ class _EventScreenState extends State<EventScreen> {
                         child: TextButton(
 
                           child: isLoadingCreate
-                              ? CircularProgressIndicator(color: Colors.white)
+                              ? const CircularProgressIndicator(color: Colors.white)
                               : Text(
                             isEditing ? "Save" : "Add",
-                            style: TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Colors.white),
                           ),
 
                           onPressed: isButtonEnabled

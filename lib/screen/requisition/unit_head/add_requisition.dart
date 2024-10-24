@@ -194,11 +194,11 @@ class _AddRequisitionState extends State<AddRequisition> {
     DateTime? selectedDate = await showDatePicker(
       context: context,
       initialDate: currentDate,
-      firstDate: DateTime(1900),
+      firstDate: currentDate, // Set firstDate to currentDate to prevent past selection
       lastDate: DateTime(2100),
     );
 
-    if (selectedDate != null && selectedDate != currentDate) {
+    if (selectedDate != null) {
       // Format the date to dd-MM-yyyy
       String formattedDate = DateFormat('dd-MM-yyyy').format(selectedDate);
 
@@ -207,6 +207,7 @@ class _AddRequisitionState extends State<AddRequisition> {
       });
     }
   }
+
 
   List<dynamic> list = ['Female', 'data', 'items'];
 
@@ -350,40 +351,43 @@ class _AddRequisitionState extends State<AddRequisition> {
               setState(() {
                 var Add = state.addRequisition;
 
-             if  ( PrefUtils.getRole() == 'Unit Head'){
-               Navigator.push(
-                 context,
-                 MaterialPageRoute(
-                   builder: (context) => BlocProvider(
-                     create: (context) => AllRequesterBloc(),
-                     child: const RequisitionScreen(),
-                   ),
-                 ),
-               );
-             }else if  ( PrefUtils.getRole() == 'Purchase Manager'){
-               Navigator.push(
-                 context,
-                 MaterialPageRoute(
-                   builder: (context) => BlocProvider(
-                     create: (context) => AllRequesterBloc(),
-                     child: const AdminRequisition(),
-                   ),
-                 ),
-               );
-             }
-             else{
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BlocProvider(
-                      create: (context) => AllRequesterBloc(),
-                      child: const RequisitionRequester(),
-                    ),
-                  ),
-                );}
-                if (kDebugMode) {
-                  print(">>>>>AddSucess$Add");
-                }
+                Navigator.pop(context, [true]);
+
+             // if  ( PrefUtils.getRole() == 'Unit Head'){
+             //   Navigator.push(
+             //     context,
+             //     MaterialPageRoute(
+             //       builder: (context) => BlocProvider(
+             //         create: (context) => AllRequesterBloc(),
+             //         child: const RequisitionScreen(),
+             //       ),
+             //     ),
+             //   );
+             // }else if  ( PrefUtils.getRole() == 'Purchase Manager'){
+             //   Navigator.push(
+             //     context,
+             //     MaterialPageRoute(
+             //       builder: (context) => BlocProvider(
+             //         create: (context) => AllRequesterBloc(),
+             //         child: const AdminRequisition(),
+             //       ),
+             //     ),
+             //   );
+             // }
+             // else{
+             //    Navigator.push(
+             //      context,
+             //      MaterialPageRoute(
+             //        builder: (context) => BlocProvider(
+             //          create: (context) => AllRequesterBloc(),
+             //          child: const RequisitionRequester(),
+             //        ),
+             //      ),
+             //    );
+             // }
+             //    if (kDebugMode) {
+             //      print(">>>>>AddSucess$Add");
+             //    }
                 // if (widget.flag=="unit") {
                 //   Navigator.push(
                 //     context,
@@ -508,7 +512,10 @@ class _AddRequisitionState extends State<AddRequisition> {
                                   focusNode: _unitNameNode,
                                   isExpanded: true,
                                   // Make the DropdownButton expand to fill the width of the container
-                                  value: selectedUnitItem,
+                                  value:
+
+                                  UnitNames.contains(selectedUnitItem) ? selectedUnitItem : null,
+
                                   hint: const Text(
                                     "Select Unit",
                                     style:
@@ -544,6 +551,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                               ),
                             ),
                           ),
+
 
                         ],
                       ),
@@ -677,7 +685,11 @@ class _AddRequisitionState extends State<AddRequisition> {
                                             child: DropdownButton<String?>(
                                               key: _categoryNameKey,
                                               focusNode: _categoryNameNode,
-                                              value: selectedCategoryItem,
+
+                                              value:
+
+                                              categoryNames.contains(selectedCategoryItem) ? selectedCategoryItem : null,
+                                              // value: selectedCategoryItem,
                                               hint: const Text(
                                                 "Select Product Category",
                                                 style:
@@ -751,7 +763,9 @@ class _AddRequisitionState extends State<AddRequisition> {
                                         child: DropdownButton<String?>(
                                           key: _productNameKey,
                                           focusNode: _productNameNode,
-                                          value: selectedItem,
+                                          value:
+
+                                          productNames.contains(selectedItem) ? selectedItem : null,
                                           hint: const Text(
                                               "Select Product/Service",
                                               style: FTextStyle.formhintTxtStyle),
@@ -800,6 +814,8 @@ class _AddRequisitionState extends State<AddRequisition> {
                                     ),
                                   ),
 
+
+
                                   Text(
                                     "Specification",
                                     style: FTextStyle.formLabelTxtStyle,
@@ -832,11 +848,15 @@ class _AddRequisitionState extends State<AddRequisition> {
                                     animationsMap['imageOnPageLoadAnimation2']!,
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(
+                                    padding:  EdgeInsets.symmetric(
                                         vertical: 10.0),
                                     child: TextFormField(
                                       focusNode: _quantityNameNode,
                                       key: _quantityNameKey,
+                                      inputFormatters: [
+                                        NoSpaceFormatter(), // Remove spaces
+                                    LengthLimitingTextInputFormatter(5), // Limit input to 3 characters
+                                      ],
                                       keyboardType: TextInputType.number,
                                       decoration: FormFieldStyle
                                           .defaultInputDecoration
@@ -844,7 +864,7 @@ class _AddRequisitionState extends State<AddRequisition> {
                                         hintText: "Enter Quantity",
                                         fillColor: Colors.white,
                                       ),
-                                      inputFormatters: [NoSpaceFormatter()],
+
                                       controller: quantityName,
                                       validator: ValidatorUtils.model,
                                     ).animateOnPageLoad(
@@ -912,7 +932,10 @@ class _AddRequisitionState extends State<AddRequisition> {
                                               focusNode: _eventNameNode,
                                               isExpanded: true,
                                               // Make the DropdownButton expand to fill the width of the container
-                                              value: selectedEventItem,
+                                              // value: selectedEventItem,
+                                              value:
+
+                                              eventNames.contains(selectedEventItem) ? selectedEventItem : null,
                                               hint: const Text(
                                                 "Select Event",
                                                 style:

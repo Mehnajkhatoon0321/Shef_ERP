@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
@@ -105,7 +108,7 @@ class _UnitsState extends State<Units> {
   String searchQuery = "";
   int pageNo = 1;
   int totalPages = 0;
-  int pageSize = 10;
+  int pageSize = 20;
   bool hasMoreData = true;
   List<dynamic> data = [];
   final controller = ScrollController();
@@ -154,9 +157,27 @@ class _UnitsState extends State<Units> {
   void dispose() {
     controller.removeListener(paginationCall);
     controller.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
+  Timer? _debounce;
+  void _onSearchChanged(String value) {
+    setState(() {
+      _isTextEmpty = value.isEmpty;
+      searchQuery = value;
+    });
 
+    // Cancel the previous timer
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    // Start a new timer
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      pageNo=1;
+      // Call the API only after the user has stopped typing for 500 milliseconds
+      BlocProvider.of<AllRequesterBloc>(context).add(
+          GetUnitHandler(searchQuery, pageNo, pageSize));
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -320,6 +341,10 @@ class _UnitsState extends State<Units> {
                   ),
                   child: TextFormField(
                     controller: controllerText,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.deny(RegExp(r'\n')), // Deny new lines
+                      LengthLimitingTextInputFormatter(200), // Limit to 250 characters
+                    ],
                     decoration: InputDecoration(
                       hintText: 'Search',
                       hintStyle: FTextStyle.formhintTxtStyle,
@@ -351,15 +376,8 @@ class _UnitsState extends State<Units> {
                       fillColor: Colors.grey[100],
                       filled: true,
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        _isTextEmpty = value.isEmpty;
-                        searchQuery = value;
-                        BlocProvider.of<AllRequesterBloc>(context).add(
-                            GetUnitHandler(
-                                searchQuery, pageNo, pageSize));
-                      });
-                    },
+                    onChanged:
+                    _onSearchChanged,
                   ),
                 ),
               ),
@@ -567,7 +585,7 @@ class _UnitsState extends State<Units> {
                                                       ).then((result) {
                                                         // Handle the result from the edit screen
                                                         if (result[0]) {
-                                                          pageNo=1;
+                                                          pageNo == 1;
                                                           BlocProvider.of<AllRequesterBloc>(context)
                                                               .add(GetUnitHandler("", pageNo, pageSize));
                                                         }
@@ -608,8 +626,6 @@ class _UnitsState extends State<Units> {
                                     return const Center(
                                         child: CircularProgressIndicator());
                                   }
-
-                                  // If there's no more data to load, show a message
                                   else if (data.length > 7 && index == data.length) {
                                     // Show the "No more data." text if we are at the end and there are more than 10 items
                                     return const Center(
@@ -631,6 +647,7 @@ class _UnitsState extends State<Units> {
     controllerText.clear();
     setState(() {
       _isTextEmpty = true;
+      pageNo=1;
       BlocProvider.of<AllRequesterBloc>(context).add(
           GetUnitHandler(
               "", pageNo, pageSize));

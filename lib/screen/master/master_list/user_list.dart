@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
@@ -104,7 +107,7 @@ class _UserListState extends State<UserList> {
 
   int pageNo = 1;
   int totalPages = 0;
-  int pageSize = 10;
+  int pageSize = 20;
   bool hasMoreData = true;
   List<dynamic> data = [
 
@@ -119,8 +122,28 @@ class _UserListState extends State<UserList> {
   @override
   void dispose() {
     _controller.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
+  Timer? _debounce;
+  void _onSearchChanged(String value) {
+    setState(() {
+      _isTextEmpty = value.isEmpty;
+      searchQuery = value;
+    });
+
+    // Cancel the previous timer
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    // Start a new timer
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      pageNo=1;
+      // Call the API only after the user has stopped typing for 500 milliseconds
+      BlocProvider.of<AllRequesterBloc>(context).add(
+          AddCartDetailHandler(searchQuery, pageNo, pageSize));
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -141,7 +164,6 @@ class _UserListState extends State<UserList> {
           pageNo++;
 
           isInitialLoading = false;
-          isLoading = true;
 
           BlocProvider.of<AllRequesterBloc>(context)
               .add(GetUserListHandler(searchQuery, pageNo, pageSize));
@@ -177,6 +199,25 @@ class _UserListState extends State<UserList> {
                 height: (displayType == 'desktop' || displayType == 'tablet') ? 70 : 43,
                 child: ElevatedButton(
                   onPressed: () => {
+                    // Navigator.push(
+                    //   context,
+                    //   MaterialPageRoute(builder: (context) =>  BlocProvider(
+                    //     create: (context) => AllRequesterBloc(),
+                    //     child:  UserEdits(
+                    //
+                    //       screenflag:"",
+                    //       id:PrefUtils.getUserId().toString(),
+                    //     ),
+                    //   )),
+                    // ).then((result) {
+                    //   // Handle the result from the edit screen
+                    //   if (result[0]) {
+                    //     pageNo=1;
+                    //     BlocProvider.of<AllRequesterBloc>(context)
+                    //         .add(GetUserListHandler("", pageNo, pageSize));
+                    //   }
+                    // })
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) =>  BlocProvider(
@@ -188,13 +229,12 @@ class _UserListState extends State<UserList> {
                         ),
                       )),
                     ).then((result) {
-                      // Handle the result from the edit screen
-                      if (result[0]) {
-                        pageNo=1;
-                        BlocProvider.of<AllRequesterBloc>(context)
-                            .add(GetUserListHandler("", pageNo, pageSize));
-                      }
-                    })
+                  // Handle any result if needed
+                  if (result != null) {
+                  BlocProvider.of<AllRequesterBloc>(context)
+                      .add(GetUserListHandler("", pageNo, pageSize));
+                  }
+                  })
 
                   },
                   style: ElevatedButton.styleFrom(
@@ -321,6 +361,10 @@ class _UserListState extends State<UserList> {
                   ),
                   child: TextFormField(
                     controller: _controller,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.deny(RegExp(r'\n')), // Deny new lines
+                      LengthLimitingTextInputFormatter(200), // Limit to 250 characters
+                    ],
                     decoration: InputDecoration(
                       hintText: 'Search',
                       hintStyle: FTextStyle.formhintTxtStyle,
@@ -346,15 +390,7 @@ class _UserListState extends State<UserList> {
                       fillColor: Colors.grey[100],
                       filled: true,
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        _isTextEmpty = value.isEmpty;
-                        searchQuery = value;
-                        BlocProvider.of<AllRequesterBloc>(context).add(
-                            GetUserListHandler(
-                                searchQuery, pageNo, pageSize));
-                      });
-                    },
+                    onChanged:_onSearchChanged,
                   ),
                 ),
               ),
@@ -521,14 +557,18 @@ class _UserListState extends State<UserList> {
 
                                                       ),
                                                     )),
-                                                  ).then((result) {
-                                                    // Handle the result from the edit screen
-                                                    if (result[0]) {
-                                                      pageNo=1;
-                                                      BlocProvider.of<AllRequesterBloc>(context)
-                                                          .add(GetUserListHandler("", pageNo, pageSize));
-                                                    }
-                                                  })
+                                                  ).then((_) {
+                                             setState(() {
+                                               pageNo=1;
+                                               BlocProvider.of<AllRequesterBloc>(context)
+                                                   .add(GetUserListHandler("", pageNo, pageSize));
+                                               paginationCall();
+                                             });
+
+
+                                                // Call your method to refresh the data
+                                                })
+
                                                 },
                                               ),
                                               IconButton(
@@ -572,10 +612,7 @@ class _UserListState extends State<UserList> {
                         child: Text("No more data.", style: FTextStyle.listTitle),
                       );
                     }
-                    // If there's no more data to load, show a message
-                    // return const Center(
-                    //     child: Text("No more data.",
-                    //         style: FTextStyle.listTitle));
+
 
 
                   },

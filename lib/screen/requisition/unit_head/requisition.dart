@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -133,7 +136,13 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
         .add(AddCartDetailHandler("", pageNo, pageSize));
     paginationCall();
   }
-
+  @override
+  void dispose() {
+    controllerI.removeListener(paginationCall);
+    controllerI.dispose();
+    _debounce?.cancel();
+    super.dispose();
+  }
   void paginationCall() {
     controllerI.addListener(() {
       if (controllerI.position.pixels == controllerI.position.maxScrollExtent) {
@@ -149,7 +158,32 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
       }
     });
   }
+  Timer? _debounce;
+  void _onSearchChanged(String value) {
+    setState(() {
+      _isTextEmpty = value.isEmpty;
+      searchQuery = value;
+    });
 
+    // Cancel the previous timer
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    // Start a new timer
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      pageNo=1;
+      // Call the API only after the user has stopped typing for 500 milliseconds
+      BlocProvider.of<AllRequesterBloc>(context).add(
+          AddCartDetailHandler(searchQuery, pageNo, pageSize));
+    });
+  }
+
+  void _refreshVendorList() {
+    setState(() {
+      pageNo=1;
+      BlocProvider.of<AllRequesterBloc>(context)
+          .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
+    });
+  }
   Set<int> selectedIndices = {};
   String searchQuery = "";
   bool isInitialLoading = false;
@@ -195,7 +229,14 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                             ),
                           ),
                         ),
-                      );
+                      ).then((result) {
+                        // Handle the result from the edit screen
+                        if (result[0]) {
+                          pageNo=1;
+                          BlocProvider.of<AllRequesterBloc>(context)
+                              .add(AddCartDetailHandler("", pageNo, pageSize));
+                        }
+                      });
 
                       // );
                     },
@@ -355,6 +396,10 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                   ),
                   child: TextFormField(
                     controller: _controller,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.deny(RegExp(r'\n')), // Deny new lines
+                      LengthLimitingTextInputFormatter(200), // Limit to 250 characters
+                    ],
                     decoration: InputDecoration(
                       hintText: 'Search requisition',
                       hintStyle: FTextStyle.formhintTxtStyle,
@@ -386,14 +431,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                       fillColor: Colors.grey[100],
                       filled: true,
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        _isTextEmpty = value.isEmpty;
-                        searchQuery = value;
-                        BlocProvider.of<AllRequesterBloc>(context).add(
-                            AddCartDetailHandler(searchQuery, pageNo, pageSize));
-                      });
-                    },
+                    onChanged:_onSearchChanged
                   ),
                 ),
               ),
@@ -471,7 +509,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                               _showRejectDialog(
                                   BlocProvider.of<AllRequesterBloc>(context),
                                   context,
-                                  selectedIds);
+                                  selectedIds,_refreshVendorList);
                             }
 
 
@@ -793,7 +831,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                                                                   .toString() ??
                                                                                   "N/A",
                                                                               vender:
-                                                                              item["vender"] ?? "N/A",
+                                                                              item["company"] ?? "N/A",
                                                                               image: item["image"]
                                                                                   .toString(),
 
@@ -899,13 +937,14 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
     setState(() {
       _isTextEmpty = true;
       searchQuery = '';
+      pageNo=1;
       BlocProvider.of<AllRequesterBloc>(context)
           .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
     });
   }
 
   void _showRejectDialog(
-      AllRequesterBloc of, BuildContext context, List<String> selectedIds)
+      AllRequesterBloc of, BuildContext context, List<String> selectedIds,Function refreshCallback)
   {
     final formKey = GlobalKey<FormState>();
     final TextEditingController editController = TextEditingController();
@@ -1039,21 +1078,8 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                 ),
                               );
 
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => BlocProvider(
-                                    create: (context) => AllRequesterBloc(),
-                                    child:  const  RequisitionScreen(),
-                                  ),
-                                ),
-                              ).then((result) {
-                                // Handle any result if needed
-                                if (result != null) {
-                                  BlocProvider.of<AllRequesterBloc>(context)
-                                      .add(AddCartDetailHandler("", pageNo, pageSize));
-                                }
-                              });
+                              refreshCallback();
+                              Navigator.pop(context);
                             });
 
 
@@ -1177,7 +1203,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Requisition No : ', style: FTextStyle.listTitle),
-                        Expanded(child: Text(item["requisitionNo"] ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 2)),
+                        Expanded(child: Text(item["req_no"] ?? 'N/A', style: FTextStyle.listTitleSub, maxLines: 2)),
                       ],
                     ),
                     Row(
@@ -1285,14 +1311,14 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                       ],
                     ),
 
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Address : ',style: FTextStyle.listTitle,),
-                        Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
-                      ],
-                    ),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.start,
+                    //   crossAxisAlignment: CrossAxisAlignment.start,
+                    //   children: [
+                    //     Text('Address : ',style: FTextStyle.listTitle,),
+                    //     Expanded(child: Text(item["vaddress"] ?? 'N/A',style: FTextStyle.listTitleSub,maxLines: 2,)),
+                    //   ],
+                    // ),
 
                     const Divider(color: Colors.grey),
                     // Row(

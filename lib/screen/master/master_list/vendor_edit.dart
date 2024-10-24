@@ -132,6 +132,7 @@ class _VendorEditState extends State<VendorEdit> {
   final FocusNode _addressCompanyFocusNode = FocusNode();
   final FocusNode _companyNameFocusNode = FocusNode();
   final FocusNode _panCardNameFocusNode = FocusNode();
+  final FocusNode _gstCardNameFocusNode = FocusNode();
   final FocusNode _tanCardNameFocusNode = FocusNode();
   final FocusNode _typeFocusNode = FocusNode();
 
@@ -863,7 +864,7 @@ class _VendorEditState extends State<VendorEdit> {
                       controller: gstCardController,
                       key: _gstNameKey,
                       keyboardType: TextInputType.name,
-                      focusNode: _panCardNameFocusNode,
+                      focusNode: _gstCardNameFocusNode,
                       decoration:
                           FormFieldStyle.defaultInputEditDecoration.copyWith(
                         fillColor: Colors.grey[100],
@@ -1285,7 +1286,7 @@ class _VendorEditState extends State<VendorEdit> {
                         ),
                         child: isLoadingEdit
                             ? CircularProgressIndicator(color: Colors.blue)
-                            : Text("Update", style: FTextStyle.loginBtnStyle),
+                            : Text(widget.screenFlag.isEmpty ? 'Create' : "Update", style: FTextStyle.loginBtnStyle),
                       ),
                     ),
                   ),
