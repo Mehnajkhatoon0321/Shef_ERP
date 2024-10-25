@@ -989,7 +989,7 @@ print("RequestData>>>>>>>>>>$request");
             'password': event.password,
             'roles': event.role,
             'id': event.id,
-            'unitid': event.unitID,
+            'unitId': event.unitID,
           });
 
           // Add headers to the request
@@ -1051,7 +1051,7 @@ print("RequestData>>>>>>>>>>$request");
             'password': event.password,
             'roles': event.role,
             'id': event.id,
-            'unitid': event.unitID,
+            'unitId': event.unitID,
           });
 
           // Add headers to the request
@@ -2260,6 +2260,7 @@ print("RequestData>>>>>>>>>>$request");
             "Authorization": 'Bearer $authToken',
           };
 
+          // Step 1: Create FormData
           var formData = FormData.fromMap({
             'name': event.name,
             'contact': event.contact,
@@ -2275,29 +2276,32 @@ print("RequestData>>>>>>>>>>$request");
             'tan': event.tan,
             'comapny_email': event.companyEmail,
             'account_name': event.accountName,
-
             'account_no': event.accountNo,
             'ifsc': event.ifsc,
             'vendor_id': event.vendorId,
-
             'bank_name': event.bankName,
             'branch': event.branch,
-            if (event.panImage != null)
+
+            // Step 2: Conditionally add image fields only if they are not null or empty
+            if (event.panImage != null && event.panImage!.path.isNotEmpty)
               'pan_upl': await MultipartFile.fromFile(event.panImage!.path),
-            if (event.gstImage != null)
+            if (event.gstImage != null && event.gstImage!.path.isNotEmpty)
               'gst_upl': await MultipartFile.fromFile(event.gstImage!.path),
-            if (event.cancelledImage != null)
-              'cheque': await MultipartFile.fromFile(event.cancelledImage!.path)
+            if (event.cancelledImage != null && event.cancelledImage!.path.isNotEmpty)
+              'cheque': await MultipartFile.fromFile(event.cancelledImage!.path),
           });
 
-          var response = await dio.post(APIEndPoints.updateVendorList,
-              data: formData,
-              options: Options(headers: headers)
+          // Step 3: Make the API request
+          var response = await dio.post(
+            APIEndPoints.updateVendorList,
+            data: formData,
+            options: Options(headers: headers),
           );
-          print(">>>>RequestData>>>>${formData}");
 
+          print(">>>>RequestData>>>>${formData}");
           print(">>>>Response>>>>${response}");
 
+          // Step 4: Handle the response
           if (response.statusCode == 200) {
             emit(UpdateVendorSuccess(response.data));
           } else {
@@ -2310,6 +2314,8 @@ print("RequestData>>>>>>>>>>$request");
         emit(UpdateVendorFailure(const {'error': 'No internet connection'}));
       }
     });
+
+
 //vendor create
     on<VendorCreateHandler>((event, emit) async {
       if (await ConnectivityService.isConnected()) {

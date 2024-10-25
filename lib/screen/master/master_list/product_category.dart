@@ -289,8 +289,12 @@ class _ProductCategoryState extends State<ProductCategory> {
                 ),
               );
               data.clear();
+              pageNo = 1;
+              hasMoreData = true;
+              totalPages = 0;
               BlocProvider.of<AllRequesterBloc>(context)
-                  .add(GetProductCategoryHandler("", 1, pageSize));
+                  .add(GetProductCategoryHandler("", pageNo, pageSize));
+
               Future.delayed(const Duration(milliseconds: 500), () {
                 Navigator.pop(context);
               });
@@ -491,7 +495,8 @@ class _ProductCategoryState extends State<ProductCategory> {
                                               BlocProvider.of<AllRequesterBloc>(context),
                                               context,
                                               isEditing: true,
-                                              index: index),
+                                              index: index
+                                          ),
                                         ),
                                         IconButton(
                                           icon: const Icon(Icons.delete, color: Colors.red),
@@ -657,11 +662,10 @@ class _ProductCategoryState extends State<ProductCategory> {
                         setState(() {
                           isLoadingCreate = true;
                         });
-                      } else if (state is CreateCategorySuccess) {
-                        isLoadingCreate = false;
-
-                        if (state.createResponse is Map &&
-                            state.createResponse.containsKey('message')) {
+                      }
+                      else if (state is CreateCategorySuccess) {
+                        setState(() {
+                          isLoadingCreate = false;
                           var deleteMessage = state.createResponse['message'];
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -669,12 +673,20 @@ class _ProductCategoryState extends State<ProductCategory> {
                               backgroundColor: AppColors.primaryColour,
                             ),
                           );
-                        }
-                        data.clear();
-                        BlocProvider.of<AllRequesterBloc>(context)
-                            .add(GetProductCategoryHandler("", 1, pageSize));
-                        Future.delayed(const Duration(milliseconds: 500), () {
-                          Navigator.pop(context);
+                          // if (state.createResponse is Map &&
+                          //     state.createResponse.containsKey('message')) {
+                          //
+                          // }
+                          data.clear();
+                          pageNo = 1;
+                          hasMoreData = true;
+                          totalPages = 0;
+                          BlocProvider.of<AllRequesterBloc>(context)
+                              .add(GetProductCategoryHandler("", pageNo, pageSize));
+                          Future.delayed(const Duration(milliseconds: 500), () {
+                            Navigator.pop(context);
+                          });
+
                         });
 
 
@@ -708,8 +720,8 @@ class _ProductCategoryState extends State<ProductCategory> {
                           var update = state.updateResponse['message'];
 
 
-                          var responseData = state.updateResponse['list'];
-                          print("responce data${responseData}");
+                          // var responseData = state.updateResponse['list'];
+                          // print("responce data${responseData}");
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(update),
@@ -717,8 +729,11 @@ class _ProductCategoryState extends State<ProductCategory> {
                             ),
                           );
                           data.clear();
+                          pageNo = 1;
+                          hasMoreData = true;
+                          totalPages = 0;
                           BlocProvider.of<AllRequesterBloc>(context)
-                              .add(GetProductCategoryHandler("", 1, pageSize));
+                              .add(GetProductCategoryHandler("", pageNo, pageSize));
                           Future.delayed(const Duration(milliseconds: 500), () {
                             Navigator.pop(context);
                           });

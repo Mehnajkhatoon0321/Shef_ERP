@@ -222,7 +222,11 @@ class _UnitsState extends State<Units> {
                     ).then((result) {
                   // Handle the result from the edit screen
                   if (result[0]) {
-                  pageNo=1;
+
+                    data.clear();
+                    pageNo = 1;
+                    hasMoreData = true;
+                    totalPages = 0;
                   BlocProvider.of<AllRequesterBloc>(context)
                       .add(GetUnitHandler("", pageNo, pageSize));
                   }
@@ -300,6 +304,10 @@ class _UnitsState extends State<Units> {
               DeletePopupManager.playLoader();
             } else if (state is UnitDeleteSuccess) {setState(() {
               DeletePopupManager.stopLoader();
+              data.clear();
+              pageNo = 1;
+              hasMoreData = true;
+              totalPages = 0;
               BlocProvider.of<AllRequesterBloc>(context)
                   .add(GetUnitHandler(searchQuery, pageNo, pageSize));
               var deleteMessage = state.unitDeleteList['message'];
@@ -647,7 +655,11 @@ class _UnitsState extends State<Units> {
     controllerText.clear();
     setState(() {
       _isTextEmpty = true;
-      pageNo=1;
+      data.clear();
+      pageNo = 1;
+      hasMoreData = true;
+      totalPages = 0;
+
       BlocProvider.of<AllRequesterBloc>(context).add(
           GetUnitHandler(
               "", pageNo, pageSize));

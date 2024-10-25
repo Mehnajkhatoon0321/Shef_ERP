@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -26,9 +28,7 @@ class _ProductServiceState extends State<ProductService> {
   int totalPages = 0;
   int pageSize = 20;
   bool hasMoreData = true;
-  List<dynamic> data = [
-
-  ];
+  List<dynamic> data = [];
   String searchQuery = "";
   final controller = ScrollController();
   final controllerI = ScrollController();
@@ -44,6 +44,7 @@ class _ProductServiceState extends State<ProductService> {
   void dispose() {
     controllerI.removeListener(paginationCall);
     controllerI.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -157,23 +158,35 @@ class _ProductServiceState extends State<ProductService> {
     });
   }
 
+  Timer? _debounce;
+
+  void _onSearchChanged(String value) {
+    setState(() {
+      _isTextEmpty = value.isEmpty;
+      searchQuery = value;
+    });
+
+    // Cancel the previous timer
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    // Start a new timer
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      pageNo = 1;
+      // Call the API only after the user has stopped typing for 500 milliseconds
+      BlocProvider.of<AllRequesterBloc>(context)
+          .add(MasterServiceHandler(searchQuery, pageNo, pageSize));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
-    final screenHeight = MediaQuery
-        .of(context)
-        .size
-        .height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     var valueType = CommonFunction.getMyDeviceType(MediaQuery.of(context));
-    var displayType = valueType
-        .toString()
-        .split('.')
-        .last;
+    var displayType = valueType.toString().split('.').last;
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),
+      data: MediaQuery.of(context)
+          .copyWith(textScaler: const TextScaler.linear(1.0)),
       child: Scaffold(
         backgroundColor: AppColors.formFieldBorderColour,
         appBar: AppBar(
@@ -193,19 +206,26 @@ class _ProductServiceState extends State<ProductService> {
                     ? 70
                     : 43,
                 child: ElevatedButton(
-                    onPressed: () async {
+                    onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>
-                                BlocProvider(
+                            builder: (context) => BlocProvider(
                                   create: (context) => AllRequesterBloc(),
                                   child: ProductServiceEdit(
                                     screenflag: "",
                                     id: PrefUtils.getUserId().toString(),
                                   ),
                                 )),
-                      );
+                      ).then((result) {
+                        // Handle the result from the edit screen
+                        data.clear();
+                        pageNo = 1;
+                        hasMoreData = true;
+                        totalPages = 0;
+                        BlocProvider.of<AllRequesterBloc>(context)
+                            .add(MasterServiceHandler("", pageNo, pageSize));
+                      });
                     },
                     style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
@@ -253,15 +273,12 @@ class _ProductServiceState extends State<ProductService> {
 
                 data.addAll(responseData['data']);
 
-
-
                 isInitialLoading = false;
                 isLoading = false; // Reset loading state
 
                 if (pageNo == totalPages) {
                   hasMoreData = false;
                 }
-
               });
             } else if (state is ServiceCategoryFailure) {
               setState(() {
@@ -270,7 +287,6 @@ class _ProductServiceState extends State<ProductService> {
               errorMessage = state.serviceCategoryFailure['message'];
 
               print("messageErrorFailure$errorMessage");
-
             } else if (state is ServerFailure) {
               setState(() {
                 isLoading = false;
@@ -284,8 +300,6 @@ class _ProductServiceState extends State<ProductService> {
               DeletePopupManager.playLoader();
             } else if (state is DeleteServiceSuccess) {
               setState(() {
-
-
                 DeletePopupManager.stopLoader();
 
                 var deleteMessage = state.deleteServiceList['message'];
@@ -295,23 +309,19 @@ class _ProductServiceState extends State<ProductService> {
                     backgroundColor: AppColors.primaryColour,
                   ),
                 );
-          data.clear();
+                data.clear();
+                pageNo = 1;
+                hasMoreData = true;
+                totalPages = 0;
+
+                // Dispatch event to load the refreshed list
                 BlocProvider.of<AllRequesterBloc>(context)
-                    .add(MasterServiceHandler("", 1, pageSize));
+                    .add(MasterServiceHandler("", pageNo, pageSize));
                 Future.delayed(const Duration(milliseconds: 500), () {
                   Navigator.pop(context);
                 });
-
               });
-
-
-
-
             } else if (state is DeleteEventServiceFailure) {
-
-
-
-
               DeletePopupManager.stopLoader();
 
               var deleteMessage = state.deleteEventServiceFailure['message'];
@@ -371,305 +381,349 @@ class _ProductServiceState extends State<ProductService> {
                           vertical: 13.0, horizontal: 18.0),
                       suffixIcon: _isTextEmpty
                           ? const Icon(Icons.search,
-                          color: AppColors.primaryColourDark)
+                              color: AppColors.primaryColourDark)
                           : IconButton(
-                        icon: const Icon(Icons.clear,
-                            color: AppColors.primaryColourDark),
-                        onPressed: _clearText,
-                      ),
+                              icon: const Icon(Icons.clear,
+                                  color: AppColors.primaryColourDark),
+                              onPressed: _clearText,
+                            ),
                       fillColor: Colors.grey[100],
                       filled: true,
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        _isTextEmpty = value.isEmpty;
-                        searchQuery = value;
-                        BlocProvider.of<AllRequesterBloc>(context).add(
-                            MasterServiceHandler(
-                                searchQuery, pageNo, pageSize));
-                      });
-                    },
+                    onChanged: _onSearchChanged,
                   ),
                 ),
               ),
               Expanded(
                 child: isInitialLoading && data.isEmpty
                     ? Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
-                  child: ListView.builder(
-                    itemCount: 10, // Number of shimmer placeholders
-                    itemBuilder: (context, index) {
-                      return Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.03, vertical: 5),
-                        child: Container(
-                          margin: const EdgeInsets.all(8),
-                          padding: const EdgeInsets.all(7),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                spreadRadius: 2,
-                                blurRadius: 4,
-                                offset: const Offset(0, 1),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                        baseColor: Colors.grey[300]!,
+                        highlightColor: Colors.grey[100]!,
+                        child: ListView.builder(
+                          itemCount: 10, // Number of shimmer placeholders
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.03, vertical: 5),
+                              child: Container(
+                                margin: const EdgeInsets.all(8),
+                                padding: const EdgeInsets.all(7),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      spreadRadius: 2,
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
                                   children: [
-                                    Container(
-                                      height: 10,
-                                      color: Colors.grey,
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Container(
-                                      height: 10,
-                                      color: Colors.grey,
-                                    ),
-                                    const SizedBox(height: 5),
-                                    Container(
-                                      height: 10,
-                                      color: Colors.grey,
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            height: 10,
+                                            color: Colors.grey,
+                                          ),
+                                          const SizedBox(height: 5),
+                                          Container(
+                                            height: 10,
+                                            color: Colors.grey,
+                                          ),
+                                          const SizedBox(height: 5),
+                                          Container(
+                                            height: 10,
+                                            color: Colors.grey,
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
-                )
+                      )
                     : (errorMessage != null || errorServerMessage.isNotEmpty)
-                    ? Center(
-                  child: Text(
-                    errorMessage ?? errorServerMessage.toString(),
-                    style: FTextStyle.listTitle,
-                    textAlign: TextAlign.center,
-                  ),
-                )
-                    : (data.isEmpty)
-                    ? const Center(
-                  child: Text("No data available.",
-                      style: FTextStyle.listTitle),
-                ):
-                ListView.builder(
-
-                  controller: controllerI,
-                  itemCount: data.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index < data.length) {
-                        final item = data[index];
-                        return GestureDetector(
-                            onTap: () {},
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: screenWidth * 0.03,
-                                  vertical: 5),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Container(
-                                      margin: const EdgeInsets.all(2),
-                                      padding: const EdgeInsets.all(7),
-                                      decoration: BoxDecoration(
-                                        color: index % 2 == 0
-                                            ? Colors.white
-                                            : Colors.white,
-                                        borderRadius:
-                                        BorderRadius.circular(10),
-                                        boxShadow: const [
-                                          BoxShadow(
-                                            color:
-                                            AppColors.primaryColourDark,
-                                            spreadRadius: 1.5,
-                                            blurRadius: 0.4,
-                                            offset: Offset(0, 0.9),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
+                        ? Center(
+                            child: Text(
+                              errorMessage ?? errorServerMessage.toString(),
+                              style: FTextStyle.listTitle,
+                              textAlign: TextAlign.center,
+                            ),
+                          )
+                        : (data.isEmpty)
+                            ? const Center(
+                                child: Text("No data available.",
+                                    style: FTextStyle.listTitle),
+                              )
+                            : ListView.builder(
+                                controller: controllerI,
+                                itemCount: data.length + 1,
+                                itemBuilder: (context, index) {
+                                  if (index < data.length) {
+                                    final item = data[index];
+                                    return GestureDetector(
+                                        onTap: () {},
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: screenWidth * 0.03,
+                                              vertical: 5),
+                                          child: Row(
                                             children: [
-                                              const Text("Sr. No: ",
-                                                  style:
-                                                  FTextStyle.listTitle),
-                                              Text("${index + 1}",
-                                                  style: FTextStyle
-                                                      .listTitleSub).animateOnPageLoad(
-                                                  animationsMap['imageOnPageLoadAnimation2']!),
-                                            ],
-                                          ),
-
-                                          Row(
-                                            children: [
-                                              const Text("Category: ",
-                                                  style:
-                                                  FTextStyle.listTitle),
                                               Expanded(
-                                                  child: Text(
-                                                      "${item["cate_name"]}",
-                                                      style: FTextStyle
-                                                          .listTitleSub)).animateOnPageLoad(
-                                                  animationsMap['imageOnPageLoadAnimation2']!),
-                                            ],
-                                          ),
+                                                child: Container(
+                                                  margin:
+                                                      const EdgeInsets.all(2),
+                                                  padding:
+                                                      const EdgeInsets.all(7),
+                                                  decoration: BoxDecoration(
+                                                    color: index % 2 == 0
+                                                        ? Colors.white
+                                                        : Colors.white,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10),
+                                                    boxShadow: const [
+                                                      BoxShadow(
+                                                        color: AppColors
+                                                            .primaryColourDark,
+                                                        spreadRadius: 1.5,
+                                                        blurRadius: 0.4,
+                                                        offset: Offset(0, 0.9),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          const Text("Sr. No: ",
+                                                              style: FTextStyle
+                                                                  .listTitle),
+                                                          Text("${index + 1}",
+                                                                  style: FTextStyle
+                                                                      .listTitleSub)
+                                                              .animateOnPageLoad(
+                                                                  animationsMap[
+                                                                      'imageOnPageLoadAnimation2']!),
+                                                        ],
+                                                      ),
 
-                                          Row(
-                                            children: [
-                                              const Text("Name: ",
-                                                  style:
-                                                  FTextStyle.listTitle),
-                                              Text("${item["name"]}",
-                                                  style: FTextStyle
-                                                      .listTitleSub).animateOnPageLoad(
-                                                  animationsMap['imageOnPageLoadAnimation2']!),
-                                            ],
-                                          ),
-                                          Row(
-                                            children: [
-                                              const Text("Specification: ",
-                                                  style:
-                                                  FTextStyle.listTitle),
-                                              Text(
-                                                  "${item["specification"]}",
-                                                  style: FTextStyle
-                                                      .listTitleSub).animateOnPageLoad(
-                                                  animationsMap['imageOnPageLoadAnimation2']!),
-                                            ],
-                                          ),
+                                                      Row(
+                                                        children: [
+                                                          const Text(
+                                                              "Category: ",
+                                                              style: FTextStyle
+                                                                  .listTitle),
+                                                          Expanded(
+                                                                  child: Text(
+                                                                      "${item["cate_name"]}",
+                                                                      style: FTextStyle
+                                                                          .listTitleSub))
+                                                              .animateOnPageLoad(
+                                                                  animationsMap[
+                                                                      'imageOnPageLoadAnimation2']!),
+                                                        ],
+                                                      ),
 
-                                          Row(
-                                            mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                            crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                            children: [
-                                              const Text("Status: ",
-                                                  style:
-                                                  FTextStyle.listTitle),
-                                              GestureDetector(
-                                                onTap: () {
-                                                  _showStatusDialog(
-                                                    BlocProvider.of<
-                                                        AllRequesterBloc>(
-                                                        context),
-                                                    context,
-                                                    item,
-                                                    item["id"]
-                                                        .toString(), // Pass the id here
-                                                  );
-                                                },
-                                                child: Text(
-                                                  item["status"] == 0
-                                                      ? "Active"
-                                                      : item["status"] == 4
-                                                      ? "Inactive"
-                                                      : "${item["status"]}",
-                                                  style: (item["status"] == 0
-                                                      ? FTextStyle.listTitleSub
-                                                      .copyWith(
-                                                      color: Colors.green)
-                                                      : item["status"] == 4
-                                                      ? FTextStyle.listTitleSub
-                                                      .copyWith(color: Colors.red)
-                                                      : FTextStyle.listTitleSub),
+                                                      Row(
+                                                        children: [
+                                                          const Text("Name: ",
+                                                              style: FTextStyle
+                                                                  .listTitle),
+                                                          Text("${item["name"]}",
+                                                                  style: FTextStyle
+                                                                      .listTitleSub)
+                                                              .animateOnPageLoad(
+                                                                  animationsMap[
+                                                                      'imageOnPageLoadAnimation2']!),
+                                                        ],
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          const Text(
+                                                              "Specification: ",
+                                                              style: FTextStyle
+                                                                  .listTitle),
+                                                          Text("${item["specification"]}",
+                                                                  style: FTextStyle
+                                                                      .listTitleSub)
+                                                              .animateOnPageLoad(
+                                                                  animationsMap[
+                                                                      'imageOnPageLoadAnimation2']!),
+                                                        ],
+                                                      ),
+
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .start,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          const Text("Status: ",
+                                                              style: FTextStyle
+                                                                  .listTitle),
+                                                          GestureDetector(
+                                                            onTap: () {
+                                                              _showStatusDialog(
+                                                                BlocProvider.of<
+                                                                        AllRequesterBloc>(
+                                                                    context),
+                                                                context,
+                                                                item,
+                                                                item["id"]
+                                                                    .toString(), // Pass the id here
+                                                              );
+                                                            },
+                                                            child: Text(
+                                                              item["status"] ==
+                                                                      0
+                                                                  ? "Active"
+                                                                  : item["status"] ==
+                                                                          4
+                                                                      ? "Inactive"
+                                                                      : "${item["status"]}",
+                                                              style: (item[
+                                                                          "status"] ==
+                                                                      0
+                                                                  ? FTextStyle
+                                                                      .listTitleSub
+                                                                      .copyWith(
+                                                                          color: Colors
+                                                                              .green)
+                                                                  : item["status"] ==
+                                                                          4
+                                                                      ? FTextStyle
+                                                                          .listTitleSub
+                                                                          .copyWith(
+                                                                              color: Colors
+                                                                                  .red)
+                                                                      : FTextStyle
+                                                                          .listTitleSub),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .end,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .end,
+                                                        children: [
+                                                          IconButton(
+                                                            icon: const Icon(
+                                                                Icons.edit,
+                                                                color: Colors
+                                                                    .black),
+                                                            onPressed: () {
+                                                              Navigator.push(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                  builder:
+                                                                      (context) =>
+                                                                          BlocProvider(
+                                                                    create: (context) =>
+                                                                        AllRequesterBloc(),
+                                                                    child:
+                                                                        ProductServiceEdit(
+                                                                      screenflag:
+                                                                          "Edit",
+                                                                      id: item[
+                                                                              "id"]
+                                                                          .toString(),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ).then((result) {
+                                                                // Handle the result from the edit screen
+                                                                if (result[0]) {
+                                                                  data.clear();
+                                                                  pageNo = 1;
+                                                                  hasMoreData =
+                                                                      true;
+                                                                  totalPages =
+                                                                      0;
+                                                                  BlocProvider.of<
+                                                                              AllRequesterBloc>(
+                                                                          context)
+                                                                      .add(MasterServiceHandler(
+                                                                          "",
+                                                                          pageNo,
+                                                                          pageSize));
+                                                                }
+                                                              });
+                                                            },
+                                                          ),
+                                                          IconButton(
+                                                            icon: const Icon(
+                                                                Icons.delete,
+                                                                color:
+                                                                    Colors.red),
+                                                            onPressed: () => {
+                                                              CommonPopups
+                                                                  .showDeleteCustomPopup(
+                                                                context,
+                                                                "Are you sure you want to delete?",
+                                                                () {
+                                                                  BlocProvider.of<
+                                                                              AllRequesterBloc>(
+                                                                          context)
+                                                                      .add(DeleteMasterServiceHandlers(
+                                                                          data[index]
+                                                                              [
+                                                                              'id']));
+                                                                },
+                                                              )
+                                                            },
+                                                          ),
+                                                        ],
+                                                      ).animateOnPageLoad(
+                                                          animationsMap[
+                                                              'imageOnPageLoadAnimation2']!),
+                                                      // const SizedBox(height: 5),
+
+                                                      // const SizedBox(height: 5),
+                                                    ],
+                                                  ).animateOnPageLoad(animationsMap[
+                                                      'imageOnPageLoadAnimation2']!),
                                                 ),
                                               ),
-
                                             ],
                                           ),
+                                        ));
+                                  }
+                                  if (hasMoreData && index == data.length) {
+                                    return const Center(
+                                        child: CircularProgressIndicator());
+                                  }
 
-                                          Row(
-                                            mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                            crossAxisAlignment:
-                                            CrossAxisAlignment.end,
-                                            children: [
-                                              IconButton(
-                                                icon: const Icon(Icons.edit,
-                                                    color: Colors.black),
-                                                onPressed: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) => BlocProvider(
-                                                        create: (context) => AllRequesterBloc(),
-                                                        child: ProductServiceEdit(
-                                                          screenflag: "Edit",
-                                                          id: item["id"].toString(),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  );
-
-
-
-                                                },
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(
-                                                    Icons.delete,
-                                                    color: Colors.red),
-                                                onPressed: () =>
-                                                {
-                                                  CommonPopups
-                                                      .showDeleteCustomPopup(
-                                                    context,
-                                                    "Are you sure you want to delete?",
-                                                        () {
-                                                      BlocProvider.of<
-                                                          AllRequesterBloc>(
-                                                          context)
-                                                          .add(
-                                                          DeleteMasterServiceHandlers(
-                                                              data[index]
-                                                              ['id']));
-                                                    },
-                                                  )
-                                                },
-                                              ),
-                                            ],
-                                          ).animateOnPageLoad(animationsMap[
-                                          'imageOnPageLoadAnimation2']!),
-                                          // const SizedBox(height: 5),
-
-                                          // const SizedBox(height: 5),
-                                        ],
-                                      ).animateOnPageLoad(animationsMap[
-                                      'imageOnPageLoadAnimation2']!),
-                                    ),
-                                  ),
-                                ],
+                                  // If there's no more data to load, show a message
+                                  else if (data.length > 7 &&
+                                      index == data.length) {
+                                    // Show the "No more data." text if we are at the end and there are more than 10 items
+                                    return const Center(
+                                      child: Text("No more data.",
+                                          style: FTextStyle.listTitle),
+                                    );
+                                  }
+                                },
                               ),
-                            ));
-                      }
-                      if (hasMoreData && index == data.length) {
-                        return const Center(
-                            child: CircularProgressIndicator());
-                      }
-
-                      // If there's no more data to load, show a message
-                      else if (data.length > 7 && index == data.length) {
-                        // Show the "No more data." text if we are at the end and there are more than 10 items
-                        return const Center(
-                          child: Text("No more data.", style: FTextStyle.listTitle),
-                        );
-                      }
-                  },
-                ),
               ),
               const SizedBox(height: 20),
             ],
@@ -683,21 +737,16 @@ class _ProductServiceState extends State<ProductService> {
     _controller.clear();
     setState(() {
       _isTextEmpty = true;
-      BlocProvider.of<AllRequesterBloc>(context).add(
-          MasterServiceHandler(
-              "", pageNo, pageSize));
+      BlocProvider.of<AllRequesterBloc>(context)
+          .add(MasterServiceHandler("", pageNo, pageSize));
     });
   }
 
-  Future<void> _showStatusDialog(AllRequesterBloc of,
-      BuildContext context,
-      Map<String, dynamic> item,
-      String id // New parameter for id
-      )
-  {
-    String? selectedStatus = item["status"] == 0
-        ? "Active"
-        : "Inactive"; // Default value
+  Future<void> _showStatusDialog(AllRequesterBloc of, BuildContext context,
+      Map<String, dynamic> item, String id // New parameter for id
+      ) {
+    String? selectedStatus =
+        item["status"] == 0 ? "Active" : "Inactive"; // Default value
     bool isLoading = false; // Start with not loading
 
     return showDialog<void>(
@@ -793,10 +842,11 @@ class _ProductServiceState extends State<ProductService> {
                   child: TextButton(
                     child: isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text("OK", style: TextStyle(color: Colors
-                        .white)),
+                        : const Text("OK",
+                            style: TextStyle(color: Colors.white)),
                     onPressed: () {
-                      if (!isLoading) { // Prevent multiple presses
+                      if (!isLoading) {
+                        // Prevent multiple presses
                         String newStatus = selectedStatus == "Active"
                             ? '0'
                             : '4'; // Convert to String

@@ -140,7 +140,7 @@ class _UserListState extends State<UserList> {
       pageNo=1;
       // Call the API only after the user has stopped typing for 500 milliseconds
       BlocProvider.of<AllRequesterBloc>(context).add(
-          AddCartDetailHandler(searchQuery, pageNo, pageSize));
+          GetUserListHandler(searchQuery, pageNo, pageSize));
     });
   }
 
@@ -229,12 +229,19 @@ class _UserListState extends State<UserList> {
                         ),
                       )),
                     ).then((result) {
-                  // Handle any result if needed
-                  if (result != null) {
-                  BlocProvider.of<AllRequesterBloc>(context)
-                      .add(GetUserListHandler("", pageNo, pageSize));
-                  }
-                  })
+                      // Handle the result from the edit screen
+                      if (result[0]) {
+
+                        data.clear();
+                        pageNo = 1;
+                        hasMoreData = true;
+                        totalPages = 0;
+                        BlocProvider.of<AllRequesterBloc>(context)
+                            .add(GetUserListHandler("", pageNo, pageSize));
+                      }
+                    })
+
+
 
                   },
                   style: ElevatedButton.styleFrom(
@@ -299,24 +306,35 @@ class _UserListState extends State<UserList> {
               });
               errorMessage = state.failureMessage.toString();
             }  else if (state is UserDeleteLoading) {
-              DeletePopupManager.playLoader();
-            } else if (state is UserDeleteSuccess) {
-              DeletePopupManager.stopLoader();
-
-              var deleteMessage = state.userDeleteList['message'];
-              print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
-              BlocProvider.of<AllRequesterBloc>(context)
-                  .add(GetUnitHandler("", pageNo, pageSize));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(deleteMessage),
-                  backgroundColor: AppColors.primaryColour,
-                ),
-              );
-
-              Future.delayed(const Duration(milliseconds: 500), () {
-                Navigator.pop(context);
+              setState(() {
+                DeletePopupManager.playLoader();
               });
+
+            } else if (state is UserDeleteSuccess) {
+              setState(() {
+                DeletePopupManager.stopLoader();
+
+                var deleteMessage = state.userDeleteList['message'];
+                print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(deleteMessage),
+                    backgroundColor: AppColors.primaryColour,
+                  ),
+                );
+                data.clear();
+                pageNo = 1;
+                hasMoreData = true;
+                totalPages = 0;
+                BlocProvider.of<AllRequesterBloc>(context).add(GetUserListHandler("", pageNo, pageSize));
+
+
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  Navigator.pop(context);
+                });
+              });
+
+
             }
             else if (state is UserDeleteFailure) {
 
@@ -557,17 +575,18 @@ class _UserListState extends State<UserList> {
 
                                                       ),
                                                     )),
-                                                  ).then((_) {
-                                             setState(() {
-                                               pageNo=1;
-                                               BlocProvider.of<AllRequesterBloc>(context)
-                                                   .add(GetUserListHandler("", pageNo, pageSize));
-                                               paginationCall();
-                                             });
+                                                  ).then((result) {
+                                                    // Handle the result from the edit screen
+                                                    if (result[0]) {
 
-
-                                                // Call your method to refresh the data
-                                                })
+                                                      data.clear();
+                                                      pageNo = 1;
+                                                      hasMoreData = true;
+                                                      totalPages = 0;
+                                                      BlocProvider.of<AllRequesterBloc>(context)
+                                                          .add(GetUserListHandler("", pageNo, pageSize));
+                                                    }
+                                                  })
 
                                                 },
                                               ),

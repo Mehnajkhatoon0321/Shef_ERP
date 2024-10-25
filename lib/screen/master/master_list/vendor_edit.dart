@@ -205,28 +205,12 @@ class _VendorEditState extends State<VendorEdit> {
 
   void _updateButtonState() {
     setState(() {
-      if (panName.text.isNotEmpty &&
-          gstName.text.isNotEmpty &&
-          cancelledName.text.isNotEmpty &&
-          fileUploadValidator(panName.text) == null &&
-          fileUploadValidator(gstName.text) == null &&
-          fileUploadValidator(cancelledName.text) == null &&
+      if (
           ValidatorUtils.isValidEmail(emailController.text) &&
           ValidatorUtils.isValidSimpleName(nameController.text) &&
-          ValidatorUtils.isValidCompanyName(companyNameController.text) &&
           ValidatorUtils.isValidPhone(contactController.text) &&
           ValidatorUtils.isValidPhone(whatsAppController.text) &&
-          ValidatorUtils.isValidAddress(addressController.text) &&
-          ValidatorUtils.isValidAddress(addressCompanyController.text) &&
-          ValidatorUtils.isValidPincode(panCardController.text) &&
-          ValidatorUtils.isValidGst(gstCardController.text) &&
-          ValidatorUtils.isValidTan(tanCardController.text) &&
-          ValidatorUtils.isValidAccountName(accountNameController.text) &&
-          ValidatorUtils.isValidAccountNumber(accountNumberController.text) &&
-          ValidatorUtils.isValidIfsc(accountIFCIController.text) &&
-          ValidatorUtils.isValidBankName(bankNameController.text) &&
-          ValidatorUtils.isValidPassword(passwordController.text) &&
-          ValidatorUtils.isValidBankName(bankBranchController.text)) {
+          ValidatorUtils.isValidPassword(passwordController.text) ) {
         isButtonPartEnabled = true;
       } else {
         isButtonPartEnabled = false;
@@ -373,11 +357,11 @@ class _VendorEditState extends State<VendorEdit> {
                     bankData['company_type'] ?? '';
                 addressCompanyController.text = bankData['address'] ?? '';
                 panCardController.text = bankData['pan'] ?? '';
-                panName.text = bankData['pan_file'] ?? '';
+                // panName.text = bankData['pan_file'] ?? '';
                 gstCardController.text = bankData['gst'] ?? '';
-                gstName.text = bankData['gst_file'] ?? '';
+                // gstName.text = bankData['gst_file'] ?? '';
                 tanCardController.text = bankData['tan'] ?? '';
-                cancelledName.text = bankData['cheque'] ?? '';
+                // cancelledName.text = bankData['cheque'] ?? '';
                 accountNameController.text =
                     bankData['account_holder_name'] ?? '';
                 accountNumberController.text = bankData['account_no'] ?? '';
@@ -657,16 +641,7 @@ class _VendorEditState extends State<VendorEdit> {
                       maxLines: 4,
                       decoration: FormFieldStyle.defaultInputEditAddressDecoration
                           .copyWith(),
-                      onTap: () {
-                        isPanFieldFocused = false;
-                        isGSTFieldFocused = false;
-                        isCancelledFieldFocused = false;
-                        isNameFieldFocused = false;
-                        isEmailFieldFocused = false;
-                        isContactFieldFocused = false;
-                        isAddressFieldFocused = true;
-                      },
-                      validator: ValidatorUtils.addressValidator,
+
                     ),
                     const SizedBox(height: 10),
                     Text("Company Details:",
@@ -738,17 +713,7 @@ class _VendorEditState extends State<VendorEdit> {
                         filled: true,
                         hintText: "Enter Company Name",
                       ),
-                      validator: ValidatorUtils.companyNameValidator,
-                      onTap: () {
-                        isPanFieldFocused = false;
-                        isGSTFieldFocused = false;
-                        isCancelledFieldFocused = false;
-                        isCompanyNameFieldFocused = true;
-                        isNameFieldFocused = false;
-                        isEmailFieldFocused = false;
-                        isContactFieldFocused = false;
-                        isAddressFieldFocused = false;
-                      },
+
                     ),
                     Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -762,17 +727,7 @@ class _VendorEditState extends State<VendorEdit> {
                       maxLines: 4,
                       decoration: FormFieldStyle.defaultInputEditAddressDecoration
                           .copyWith(),
-                      onTap: () {
-                        isPanFieldFocused = false;
-                        isGSTFieldFocused = false;
-                        isCancelledFieldFocused = false;
-                        isNameFieldFocused = false;
-                        isEmailFieldFocused = false;
-                        isCompanyAddressFocused = true;
-                        isContactFieldFocused = false;
-                        isAddressFieldFocused = false;
-                      },
-                      validator: ValidatorUtils.addressValidator,
+
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -789,17 +744,7 @@ class _VendorEditState extends State<VendorEdit> {
                         filled: true,
                         hintText: "Enter Pan Name",
                       ),
-                      validator: ValidatorUtils.panCardValidator,
-                      onTap: () {
-                        isPanFieldFocused = false;
-                        isGSTFieldFocused = false;
-                        isCancelledFieldFocused = false;
-                        isNameFieldFocused = false;
-                        isEmailFieldFocused = false;
-                        isContactFieldFocused = false;
-                        isAddressFieldFocused = false;
-                        isPanCardFieldFocused = true;
-                      },
+
                     ),
                     Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -838,14 +783,7 @@ class _VendorEditState extends State<VendorEdit> {
                         ),
                       ),
                       controller: panName,
-                      validator: fileUploadValidator,
-                      onTap: () {
-                        setState(() {
-                          isPanFieldFocused = true;
-                          isGSTFieldFocused = false;
-                          isCancelledFieldFocused = false;
-                        });
-                      },
+
                       onChanged: (value) {
                         setState(() {
                           isPanFieldFocused = true;
@@ -871,18 +809,7 @@ class _VendorEditState extends State<VendorEdit> {
                         filled: true,
                         hintText: "Enter GST",
                       ),
-                      validator: ValidatorUtils.gstValidator,
-                      onTap: () {
-                        isPanFieldFocused = false;
-                        isGSTFieldFocused = false;
-                        isCancelledFieldFocused = false;
-                        isNameFieldFocused = false;
-                        isEmailFieldFocused = false;
-                        isContactFieldFocused = false;
-                        isAddressFieldFocused = false;
-                        isGSTNameFieldFocused = true;
-                        isPanFieldFocused = false;
-                      },
+
                     ),
                     Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -921,14 +848,7 @@ class _VendorEditState extends State<VendorEdit> {
                         ),
                       ),
                       controller: gstName,
-                      validator: fileUploadValidator,
-                      onTap: () {
-                        setState(() {
-                          isPanFieldFocused = false;
-                          isGSTFieldFocused = true;
-                          isCancelledFieldFocused = false;
-                        });
-                      },
+
                       onChanged: (value) {
                         _updateButtonState(); // Update button state on change
                       },
@@ -949,18 +869,7 @@ class _VendorEditState extends State<VendorEdit> {
                         filled: true,
                         hintText: "Enter TAN",
                       ),
-                      validator: ValidatorUtils.tanValidator,
-                      onTap: () {
-                        isPanFieldFocused = false;
-                        isGSTFieldFocused = false;
-                        isCancelledFieldFocused = false;
-                        isNameFieldFocused = false;
-                        isEmailFieldFocused = false;
-                        isContactFieldFocused = false;
-                        isCancelledNameFieldFocused = true;
-                        isAddressFieldFocused = false;
-                        isPanFieldFocused = false;
-                      },
+                     
                     ),
                     Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -971,6 +880,7 @@ class _VendorEditState extends State<VendorEdit> {
                     TextFormField(
                       focusNode: _cancelledFocusNode,
                       key: _cancelledKey,
+                      readOnly: true,
                       decoration:
                           FormFieldStyle.defaultInputEditDecoration.copyWith(
                         fillColor: Colors.grey[100],
@@ -979,6 +889,7 @@ class _VendorEditState extends State<VendorEdit> {
                         suffixIcon: IconButton(
                           icon: const Icon(Icons.attach_file),
                           onPressed: () async {
+
                             final result = await FilePicker.platform.pickFiles(
                               type: FileType.custom, // Specify custom file types
                               allowedExtensions: [
@@ -1001,14 +912,7 @@ class _VendorEditState extends State<VendorEdit> {
                         ),
                       ),
                       controller: cancelledName,
-                      validator: fileUploadValidator,
-                      onTap: () {
-                        setState(() {
-                          isPanFieldFocused = false;
-                          isGSTFieldFocused = false;
-                          isCancelledFieldFocused = true;
-                        });
-                      },
+
                       onChanged: (value) {
                         setState(() {
                           isPanFieldFocused = false;
@@ -1038,17 +942,7 @@ class _VendorEditState extends State<VendorEdit> {
                         filled: true,
                         hintText: "Enter Account Name",
                       ),
-                      validator: ValidatorUtils.accountNameValidator,
-                      onTap: () {
-                        isPanFieldFocused = false;
-                        isGSTFieldFocused = false;
-                        isCancelledFieldFocused = false;
-                        isNameFieldFocused = false;
-                        isAccountNameFieldFocused = true;
-                        isEmailFieldFocused = false;
-                        isContactFieldFocused = false;
-                        isAddressFieldFocused = false;
-                      },
+             
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -1067,18 +961,7 @@ class _VendorEditState extends State<VendorEdit> {
                         filled: true,
                         hintText: "Enter Account Number",
                       ),
-                      validator: ValidatorUtils.accountNumberValidator,
-                      onTap: () {
-                        isPanFieldFocused = false;
-                        isGSTFieldFocused = false;
-                        isCancelledFieldFocused = false;
-                        isNameFieldFocused = false;
-                        isAccountNameFieldFocused = false;
-                        isAccountNumberFieldFocused = true;
-                        isEmailFieldFocused = false;
-                        isContactFieldFocused = false;
-                        isAddressFieldFocused = false;
-                      },
+                 
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -1095,18 +978,7 @@ class _VendorEditState extends State<VendorEdit> {
                         filled: true,
                         hintText: "Enter IFSC",
                       ),
-                      validator: ValidatorUtils.ifscValidator,
-                      onTap: () {
-                        isPanFieldFocused = false;
-                        isGSTFieldFocused = false;
-                        isCancelledFieldFocused = false;
-                        isNameFieldFocused = false;
-                        isAccountNameFieldFocused = false;
-                        isAccountIFSIFieldFocused = true;
-                        isEmailFieldFocused = false;
-                        isContactFieldFocused = false;
-                        isAddressFieldFocused = false;
-                      },
+                  
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -1123,18 +995,7 @@ class _VendorEditState extends State<VendorEdit> {
                         filled: true,
                         hintText: "Enter Bank Name",
                       ),
-                      validator: ValidatorUtils.bankNameValidator,
-                      onTap: () {
-                        isPanFieldFocused = false;
-                        isGSTFieldFocused = false;
-                        isCancelledFieldFocused = false;
-                        isNameFieldFocused = false;
-                        isAccountNameFieldFocused = false;
-                        isBankNameFocused = true;
-                        isEmailFieldFocused = false;
-                        isContactFieldFocused = false;
-                        isAddressFieldFocused = false;
-                      },
+              
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -1151,18 +1012,7 @@ class _VendorEditState extends State<VendorEdit> {
                         filled: true,
                         hintText: "Enter Branch",
                       ),
-                      validator: ValidatorUtils.bankBranchValidator,
-                      onTap: () {
-                        isPanFieldFocused = false;
-                        isGSTFieldFocused = false;
-                        isCancelledFieldFocused = false;
-                        isNameFieldFocused = false;
-                        isAccountNameFieldFocused = false;
-                        isBankBranchFocused = true;
-                        isEmailFieldFocused = false;
-                        isContactFieldFocused = false;
-                        isAddressFieldFocused = false;
-                      },
+                   
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -1203,8 +1053,8 @@ class _VendorEditState extends State<VendorEdit> {
                         });
                       },
                     ),
-                    const SizedBox(height: 15),
-                Center(
+                      const SizedBox(height: 15),
+                      Center(
                   child: Padding(
                     padding: const EdgeInsets.all(18.0),
                     child: SizedBox(
@@ -1219,27 +1069,28 @@ class _VendorEditState extends State<VendorEdit> {
                             });
 
                             final vendorData = VendorUpdateHandler(
-                              name: nameController.text.trim(),
-                              contact: contactController.text.trim(),
-                              address: addressController.text.trim(),
-                              whatsapp: whatsAppController.text.trim(),
+                              name: nameController.text.toString(),
+                              contact: contactController.text.toString(),
+                              address: addressController.text.toString(),
+                              whatsapp: whatsAppController.text.toString(),
                               companyType: selectedCategoryItem.toString(),
-                              companyName: companyNameController.text.trim(),
-                              caddress: addressCompanyController.text.trim(),
-                              pan: panCardController.text.trim(),
-                              gst: gstCardController.text.trim(),
-                              tan: tanCardController.text.trim(),
+                              companyName: companyNameController.text.toString(),
+                              caddress: addressCompanyController.text.toString(),
+                              pan: panCardController.text.toString(),
+                              gst: gstCardController.text.toString(),
+                              tan: tanCardController.text.toString(),
                               companyEmail: '', // Consider getting this from a controller if necessary
-                              accountName: accountNameController.text.trim(),
-                              ifsc: accountIFCIController.text.trim(),
-                              accountNo: accountNumberController.text.trim(),
-                              bankName: bankNameController.text.trim(),
+                              accountName: accountNameController.text.toString(),
+                              ifsc: accountIFCIController.text.toString(),
+                              accountNo: accountNumberController.text.toString(),
+                              bankName: bankNameController.text.toString(),
                               vendorId: widget.id, // Ensure you have a value for this
-                              branch: bankBranchController.text.trim(),
+                              branch: bankBranchController.text.toString(),
                               panImage: imagesIdPan,
                               gstImage: imagesIdGST,
                               cancelledImage: imagesIdCancelled,
-                              email: emailController.text.toString(), password: passwordController.text.toString(),
+                              email: emailController.text.toString(),
+                              password: passwordController.text.toString(),
                             );
 
                             // Determine whether to update or create a vendor
@@ -1247,22 +1098,22 @@ class _VendorEditState extends State<VendorEdit> {
                               BlocProvider.of<AllRequesterBloc>(context).add(vendorData);
                             } else {
                               BlocProvider.of<AllRequesterBloc>(context).add(VendorCreateHandler(
-                                name: nameController.text.trim(),
-                                contact: contactController.text.trim(),
-                                address: addressController.text.trim(),
-                                whatsapp: whatsAppController.text.trim(),
+                                name: nameController.text.toString(),
+                                contact: contactController.text.toString(),
+                                address: addressController.text.toString(),
+                                whatsapp: whatsAppController.text.toString(),
                                 companyType: selectedCategoryItem.toString(),
-                                companyName: companyNameController.text.trim(),
-                                caddress: addressCompanyController.text.trim(),
-                                pan: panCardController.text.trim(),
-                                gst: gstCardController.text.trim(),
-                                tan: tanCardController.text.trim(),
-                                accountName: accountNameController.text.trim(),
-                                ifsc: accountIFCIController.text.trim(),
-                                accountNo: accountNumberController.text.trim(),
-                                bankName: bankNameController.text.trim(),
+                                companyName: companyNameController.text.toString(),
+                                caddress: addressCompanyController.text.toString(),
+                                pan: panCardController.text.toString(),
+                                gst: gstCardController.text.toString(),
+                                tan: tanCardController.text.toString(),
+                                accountName: accountNameController.text.toString(),
+                                ifsc: accountIFCIController.text.toString(),
+                                accountNo: accountNumberController.text.toString(),
+                                bankName: bankNameController.text.toString(),
                                 roles: 'Vendor', // Ensure you have a value for this if creating
-                                branch: bankBranchController.text.trim(),
+                                branch: bankBranchController.text.toString(),
                                 panImage: imagesIdPan,
                                 gstImage: imagesIdGST,
                                 cancelledImage: imagesIdCancelled,

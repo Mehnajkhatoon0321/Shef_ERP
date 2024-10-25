@@ -217,7 +217,7 @@ class _UserEditsState extends State<UserEdits> {
   List<String> UnitNames = [];
   List<String> RolesNames = [];
   List<dynamic> RoleDataList = [];
-  List<dynamic> UnitsDataList = [];
+
   String? selectedUnitId;
 
   @override
@@ -250,7 +250,8 @@ class _UserEditsState extends State<UserEdits> {
         body: BlocListener<AllRequesterBloc, AllRequesterState>(
           listener: (context, state) {
             if (state is UserEditDetailsLoading) {
-            } else if (state is UserEditDetailsSuccess) {
+            }
+            else if (state is UserEditDetailsSuccess) {
               setState(() {
                 isLoadingEdit = false;
 
@@ -282,25 +283,25 @@ class _UserEditsState extends State<UserEdits> {
                       ? user['roles'][0]['name']
                       : '';
 
-                  // Set the selected unit based on user unit ID
-                  String userUnitId = user['unit'] ?? '';
+
+                  String userUnitId = user['roles'][0]['unit']?.toString() ?? ''; // Get the user unit ID as a string
                   var unit = listData.firstWhere(
-                    (u) => u['id'].toString() == userUnitId,
-                    orElse: () => null,
+                        (u) => u['id'].toString() == userUnitId, // Find the unit with the matching ID
+                    orElse: () => null, // If not found, return null
                   );
 
                   if (unit != null) {
-                    selectedUnitItem = unit['name'];
-                    selectedUnitId = unit['id']
-                        .toString(); // Set the ID directly if the unit is found
+                    selectedUnitItem = unit['name']; // Set the unit name if found
+                    selectedUnitId = unit['id'].toString(); // Set the unit ID as a string
                   } else {
-                    selectedUnitItem = null;
-                    selectedUnitId =
-                        null; // Ensure ID is also null if no unit is found
+                    selectedUnitItem = null; // Clear the name if no match found
+                    selectedUnitId = null; // Clear the ID if no match found
                   }
+
                 }
               });
-            } else if (state is UserEditDetailsFailure) {
+            }
+            else if (state is UserEditDetailsFailure) {
               setState(() {
                 isLoadingEdit = false;
               });
@@ -329,21 +330,6 @@ class _UserEditsState extends State<UserEdits> {
                 );
               }
 
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => BlocProvider(
-              //       create: (context) => AllRequesterBloc(),
-              //       child:  UserList(),
-              //     ),
-              //   ),
-              // ).then((result) {
-              //   // Handle any result if needed
-              //   if (result != null) {
-              //     BlocProvider.of<AllRequesterBloc>(context)
-              //         .add(GetUserListHandler("", pageNo, pageSize));
-              //   }
-              // });
 
               Future.delayed(const Duration(milliseconds: 500), () {
                 Navigator.pop(context,[true]);
@@ -354,7 +340,7 @@ class _UserEditsState extends State<UserEdits> {
               });
 
               CommonPopups.showCustomPopup(
-                  context, state.failureMessage.toString());
+                  context, state.failureMessage['message'].toString());
             } else if (state is CheckNetworkConnection) {
               CommonPopups.showCustomPopup(
                 context,
@@ -372,21 +358,7 @@ class _UserEditsState extends State<UserEdits> {
                   ),
                 );
               }
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => BlocProvider(
-              //       create: (context) => AllRequesterBloc(),
-              //       child:  UserList(),
-              //     ),
-              //   ),
-              // ).then((result) {
-              //   // Handle any result if needed
-              //   if (result != null) {
-              //     BlocProvider.of<AllRequesterBloc>(context)
-              //         .add(GetUserListHandler("", pageNo, pageSize));
-              //   }
-              // });
+
               Future.delayed(const Duration(milliseconds: 500), () {
                 Navigator.pop(context,[true]);
               });
@@ -479,8 +451,7 @@ class _UserEditsState extends State<UserEdits> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(28.0),
-                        border: Border.all(
-                            color: AppColors.formFieldHintColour, width: 1.3),
+                        border: Border.all(color: AppColors.formFieldHintColour, width: 1.3),
                         color: AppColors.formFieldBackColour,
                       ),
                       child: DropdownButtonHideUnderline(
@@ -488,7 +459,9 @@ class _UserEditsState extends State<UserEdits> {
                           key: _unitNameKey,
                           focusNode: _unitNameNode,
                           isExpanded: true,
-                          value: selectedUnitItem,
+                          value: selectedUnitItem != null && UnitNames.contains(selectedUnitItem)
+                              ? selectedUnitItem
+                              : null,
                           // This should reflect the current user's unit
                           hint: const Text(
                             "Select Unit",
@@ -496,21 +469,17 @@ class _UserEditsState extends State<UserEdits> {
                           ),
                           onChanged: (String? eventValue) {
                             setState(() {
-                              selectedUnitItem =
-                                  eventValue; // Update the selected unit
+                              selectedUnitItem = eventValue; // Update the selected unit
                               _updateButtonState();
                               // Update the selectedUnitId based on the selected unit
-                              selectedUnitId = UnitsDataList.firstWhere(
-                                (unit) => unit['name'] == eventValue,
+                              var selectedUnit = listData.firstWhere(
+                                    (unit) => unit['name'] == eventValue,
                                 orElse: () => {'id': '', 'name': ''},
-                              )['id']
-                                  as String; // Ensure we safely cast to String
-
-
+                              );
+                              selectedUnitId = selectedUnit['id'].toString(); // Ensure ID is set correctly
                             });
                           },
-                          items: UnitNames.map<DropdownMenuItem<String>>(
-                              (String unitName) {
+                          items: UnitNames.map<DropdownMenuItem<String>>((String unitName) {
                             return DropdownMenuItem<String>(
                               value: unitName,
                               // Use the unit name as the value
@@ -520,6 +489,7 @@ class _UserEditsState extends State<UserEdits> {
                         ),
                       ),
                     ),
+
                     if (_hasPressedSaveButton && selectedUnitItem == null)
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2.0,horizontal: 6),

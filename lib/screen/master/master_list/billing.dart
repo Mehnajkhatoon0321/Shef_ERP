@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -115,6 +117,7 @@ class _BillingListState extends State<BillingList> {
   @override
   void dispose() {
     controllerText.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -147,7 +150,24 @@ class _BillingListState extends State<BillingList> {
       }
     });
   }
+  Timer? _debounce;
+  void _onSearchChanged(String value) {
+    setState(() {
+      _isTextEmpty = value.isEmpty;
+      searchQuery = value;
+    });
 
+    // Cancel the previous timer
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    // Start a new timer
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      pageNo=1;
+      // Call the API only after the user has stopped typing for 500 milliseconds
+      BlocProvider.of<AllRequesterBloc>(context).add(
+          GetBillingListHandler(searchQuery, pageNo, pageSize));
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -191,7 +211,10 @@ class _BillingListState extends State<BillingList> {
                     ).then((result) {
                   // Handle the result from the edit screen
                   if (result[0]) {
-                  pageNo=1;
+                    data.clear();
+                    pageNo = 1;
+                    hasMoreData = true;
+                    totalPages = 0;
                   BlocProvider.of<AllRequesterBloc>(context)
                       .add(GetBillingListHandler("", pageNo, pageSize));
                   }
@@ -268,11 +291,16 @@ class _BillingListState extends State<BillingList> {
               });
               DeletePopupManager.playLoader();
             } else if (state is UserBillingDeleteSuccess) {
+
+
               DeletePopupManager.stopLoader();
 
               var deleteMessage = state.deleteBillingList['message'];
               print(">>>>>>>>>>>ALLDATADelete$deleteMessage");
               data.clear();
+              pageNo = 1;
+              hasMoreData = true;
+              totalPages = 0;
               BlocProvider.of<AllRequesterBloc>(context)
                   .add(GetBillingListHandler("", 1, pageSize));
               ScaffoldMessenger.of(context).showSnackBar(
@@ -362,14 +390,7 @@ class _BillingListState extends State<BillingList> {
                       fillColor: Colors.grey[100],
                       filled: true,
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        _isTextEmpty = value.isEmpty;
-                        searchQuery = value;
-                        BlocProvider.of<AllRequesterBloc>(context).add(
-                            GetBillingListHandler(searchQuery, pageNo, pageSize));
-                      });
-                    },
+                    onChanged:_onSearchChanged,
                   ),
                 ),
               ),
@@ -575,7 +596,11 @@ class _BillingListState extends State<BillingList> {
                                                             ).then((result) {
                                                               // Handle the result from the edit screen
                                                               if (result[0]) {
-                                                                pageNo=1;
+                                                                data.clear();
+                                                                pageNo = 1;
+                                                                hasMoreData = true;
+                                                                totalPages = 0;
+
                                                                 BlocProvider.of<AllRequesterBloc>(context)
                                                                     .add(GetBillingListHandler("", pageNo, pageSize));
                                                               }
@@ -648,9 +673,12 @@ class _BillingListState extends State<BillingList> {
     controllerText.clear();
     setState(() {
       _isTextEmpty = true;
-
+      data.clear();
+      pageNo = 1;
+      hasMoreData = true;
+      totalPages = 0;
       BlocProvider.of<AllRequesterBloc>(context)
-          .add(GetBillingListHandler("", 1, pageSize));
+          .add(GetBillingListHandler("", pageNo, pageSize));
     });
   }
 }

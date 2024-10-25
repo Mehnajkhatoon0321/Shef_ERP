@@ -232,7 +232,10 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                       ).then((result) {
                         // Handle the result from the edit screen
                         if (result[0]) {
-                          pageNo=1;
+                          data.clear();
+                          pageNo = 1;
+                          hasMoreData = true;
+                          totalPages = 0;
                           BlocProvider.of<AllRequesterBloc>(context)
                               .add(AddCartDetailHandler("", pageNo, pageSize));
                         }

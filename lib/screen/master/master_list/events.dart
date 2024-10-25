@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -118,6 +120,7 @@ class _EventScreenState extends State<EventScreen> {
   @override
   void dispose() {
     _controller.dispose();
+    _debounce?.cancel();
     super.dispose();
   }
 
@@ -163,7 +166,24 @@ class _EventScreenState extends State<EventScreen> {
       }
     });
   }
+  Timer? _debounce;
+  void _onSearchChanged(String value) {
+    setState(() {
+      _isTextEmpty = value.isEmpty;
+      searchQuery = value;
+    });
 
+    // Cancel the previous timer
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    // Start a new timer
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      pageNo=1;
+      // Call the API only after the user has stopped typing for 500 milliseconds
+      BlocProvider.of<AllRequesterBloc>(context).add(
+          EventListHandler(searchQuery, pageNo, pageSize));
+    });
+  }
 
   Map<String, dynamic> errorServerMessage = {};
   String? errorMessage;
@@ -289,6 +309,9 @@ class _EventScreenState extends State<EventScreen> {
                   ),
                 );
                 data.clear();
+                pageNo = 1;
+                hasMoreData = true;
+                totalPages = 0;
                 BlocProvider.of<AllRequesterBloc>(context)
                     .add(EventListHandler("", 1, pageSize));
                 Future.delayed(const Duration(milliseconds: 500), () {
@@ -366,15 +389,7 @@ class _EventScreenState extends State<EventScreen> {
                       fillColor: Colors.grey[100],
                       filled: true,
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        _isTextEmpty = value.isEmpty;
-                        searchQuery = value;
-                        BlocProvider.of<AllRequesterBloc>(context).add(
-                            EventListHandler(
-                                searchQuery, pageNo, pageSize));
-                      });
-                    },
+                    onChanged: _onSearchChanged,
                   ),
                 ),
               ),
@@ -698,6 +713,9 @@ class _EventScreenState extends State<EventScreen> {
                               );
                             }
                             data.clear();
+                            pageNo = 1;
+                            hasMoreData = true;
+                            totalPages = 0;
                             BlocProvider.of<AllRequesterBloc>(context)
                                 .add(EventListHandler("", 1, pageSize));
                             // Navigator.pop(context);
@@ -739,6 +757,9 @@ class _EventScreenState extends State<EventScreen> {
                               ),
                             );
                             data.clear();
+                            pageNo = 1;
+                            hasMoreData = true;
+                            totalPages = 0;
                             BlocProvider.of<AllRequesterBloc>(context)
                                 .add(EventListHandler("", 1, pageSize));
                             Future.delayed(const Duration(milliseconds: 500),
