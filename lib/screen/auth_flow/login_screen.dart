@@ -86,6 +86,15 @@ class _LogScreenState extends State<LogScreen> {
   //     checkboxChecked = true;
   //   }
   // }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   checkboxChecked = PrefUtils.getRememberMe();
+  //   if (checkboxChecked) {
+  //     _emailController.text = PrefUtils.getInsideEmailLogin();
+  //     _password.text = PrefUtils.getUserPassword();
+  //   }
+  // }
   @override
   void initState() {
     super.initState();
@@ -94,8 +103,19 @@ class _LogScreenState extends State<LogScreen> {
       _emailController.text = PrefUtils.getInsideEmailLogin();
       _password.text = PrefUtils.getUserPassword();
     }
+
+    _emailController.addListener(_updateButtonState);
+    _password.addListener(_updateButtonState);
+    _updateButtonState();
   }
 
+  void _updateButtonState() {
+    setState(() {
+      isButtonEnabled = checkboxChecked &&
+          _emailController.text.isNotEmpty &&
+          _password.text.isNotEmpty;
+    });
+  }
   @override
   void dispose() {
     _emailController.dispose();

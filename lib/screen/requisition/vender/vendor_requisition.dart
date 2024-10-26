@@ -292,6 +292,11 @@ class _VenderRequisitionState extends State<VenderRequisition> {
 
               var deleteMessage = state.deleteList['message'];
               setState(() {
+                data.clear();
+                pageNo = 1;
+                hasMoreData = true;
+                totalPages = 0;
+
                 BlocProvider.of<AllRequesterBloc>(context)
                     .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
               });

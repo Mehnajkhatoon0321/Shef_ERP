@@ -389,6 +389,11 @@ class _AdminRequisitionState extends State<AdminRequisition> {
             DeletePopupManager.playLoader();
           } else if (state is DeleteSuccess) {
             setState(() {
+              data.clear();
+              pageNo = 1;
+              hasMoreData = true;
+              totalPages = 0;
+
               BlocProvider.of<AllRequesterBloc>(context)
                   .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
             });

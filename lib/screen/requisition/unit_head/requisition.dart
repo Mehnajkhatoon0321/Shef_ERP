@@ -346,9 +346,13 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                 selectedIds.clear();// Reset loading state
                 // Navigator.of(context).pop(); // Close dialog
                 var successMessage = state.UnitList['message'];
-                BlocProvider.of<AllRequesterBloc>(context)
-                    .add(AddCartDetailHandler("", pageNo, pageSize));
+                data.clear();
+                pageNo = 1;
+                hasMoreData = true;
+                totalPages = 0;
 
+                BlocProvider.of<AllRequesterBloc>(context)
+                    .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(successMessage),
@@ -1067,6 +1071,8 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
 
 
                             setState(() {
+
+
                               BlocProvider.of<AllRequesterBloc>(context)
                                   .add(AddCartDetailHandler(searchQuery, pageNo, pageSize));
 

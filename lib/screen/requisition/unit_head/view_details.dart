@@ -213,6 +213,8 @@ class _ViewDetailsState extends State<ViewDetails> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text("Requisition No: ",
                             style: FTextStyle.listTitleBig),
@@ -222,6 +224,8 @@ class _ViewDetailsState extends State<ViewDetails> {
                     ),
                     const SizedBox(height: 5),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text("PO No. : ", style: FTextStyle.listTitleBig),
                         Expanded(
@@ -231,33 +235,43 @@ class _ViewDetailsState extends State<ViewDetails> {
                     ),
                     const SizedBox(height: 5),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text("Request Date: ",
                             style: FTextStyle.listTitleBig),
-                        Text(widget.requestDate,
-                            style: FTextStyle.listTitleSubBig),
+                        Expanded(
+                          child: Text(widget.requestDate,
+                              style: FTextStyle.listTitleSubBig),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 5),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text("Unit: ", style: FTextStyle.listTitleBig),
-                        Text(widget.unit, style: FTextStyle.listTitleSubBig),
+                        Expanded(child: Text(widget.unit, style: FTextStyle.listTitleSubBig)),
                       ],
                     ),
                     const SizedBox(height: 5),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text("Product/Service: ",
                             style: FTextStyle.listTitleBig),
-                        Text(widget.product, style: FTextStyle.listTitleSubBig),
+                        Expanded(child: Text(widget.product, style: FTextStyle.listTitleSubBig)),
                       ],
                     ),
                     const SizedBox(height: 5),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text("Quantity: ", style: FTextStyle.listTitleBig),
-                        Text(widget.quantity, style: FTextStyle.listTitleSubBig),
+                        Expanded(child: Text(widget.quantity, style: FTextStyle.listTitleSubBig)),
                       ],
                     ),
                     const SizedBox(height: 5),
@@ -267,7 +281,7 @@ class _ViewDetailsState extends State<ViewDetails> {
                       children: [
                         const Text("Vendor Name: ",
                             style: FTextStyle.listTitleBig),
-                        Text(widget.vender, style: FTextStyle.listTitleSubBig),
+                        Expanded(child: Text(widget.vender, style: FTextStyle.listTitleSubBig)),
                       ],
                     ),
                     const SizedBox(height: 5),

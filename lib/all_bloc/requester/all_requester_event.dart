@@ -456,13 +456,20 @@ class VendorUpdateHandler extends AllRequesterEvent {
   final String ifsc;
   final String bankName;
   final String branch; // Now required
+  final String panNameView; // Now required
+  final String gstNameView; // Now required
+  final String cancelledNameView; // Now required
   final String vendorId;
   final File? panImage;
   final File? gstImage;
   final File? cancelledImage;
 
+
   VendorUpdateHandler({
     required this.name,
+    required this.panNameView,
+    required this.gstNameView,
+    required this.cancelledNameView,
     required this.contact,
     required this.address,
     required this.whatsapp,

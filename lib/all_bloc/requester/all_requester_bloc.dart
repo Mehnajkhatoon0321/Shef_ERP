@@ -1628,7 +1628,7 @@ print("RequestData>>>>>>>>>>$request");
 
           var request = http.MultipartRequest(
             'POST',
-            Uri.parse(APIEndPoints.getStatusChangeProductList),
+            Uri.parse(APIEndPoints.getStatusProductList),
           );
 
           // Log the request details for debugging
@@ -2250,7 +2250,8 @@ print("RequestData>>>>>>>>>>$request");
     });
 //vendor update
 
-    on<VendorUpdateHandler>((event, emit) async {
+    on<VendorUpdateHandler>((event, emit) async
+    {
       if (await ConnectivityService.isConnected()) {
         emit(UpdateVendorLoading());
         try {
@@ -2281,26 +2282,28 @@ print("RequestData>>>>>>>>>>$request");
             'vendor_id': event.vendorId,
             'bank_name': event.bankName,
             'branch': event.branch,
+             'hiddenpan':event.panNameView,
+             'hiddengst':event.gstNameView,
+             'hiddencheque':event.cancelledNameView,
 
-            // Step 2: Conditionally add image fields only if they are not null or empty
-            if (event.panImage != null && event.panImage!.path.isNotEmpty)
+            if (event.panImage != null)
               'pan_upl': await MultipartFile.fromFile(event.panImage!.path),
-            if (event.gstImage != null && event.gstImage!.path.isNotEmpty)
+            if (event.gstImage != null)
               'gst_upl': await MultipartFile.fromFile(event.gstImage!.path),
-            if (event.cancelledImage != null && event.cancelledImage!.path.isNotEmpty)
+            if (event.cancelledImage != null)
               'cheque': await MultipartFile.fromFile(event.cancelledImage!.path),
           });
 
-          // Step 3: Make the API request
+
           var response = await dio.post(
             APIEndPoints.updateVendorList,
             data: formData,
             options: Options(headers: headers),
           );
 
-          print(">>>>RequestData>>>>${formData}");
-          print(">>>>Response>>>>${response}");
 
+          print(">>>> Response Status Code: ${response.statusCode}");
+          print(">>>> Response Data: ${jsonEncode(response.data)}");
           // Step 4: Handle the response
           if (response.statusCode == 200) {
             emit(UpdateVendorSuccess(response.data));
@@ -2357,7 +2360,9 @@ print("RequestData>>>>>>>>>>$request");
 
           // Log the request data
           print(">>>>RequestData>>>>${formData.fields.map((field) => '${field.key}: ${field.value}').join(', ')}");
-
+          print(">>>> Request URL: ${APIEndPoints.updateVendorList}");
+          print(">>>> Request Headers: $headers");
+          print(">>>> Request Data: $formData");
           var response = await dio.post(
             APIEndPoints.createVendorList,
             data: formData,

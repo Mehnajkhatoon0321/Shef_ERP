@@ -285,7 +285,9 @@ class _VendorEditState extends State<VendorEdit> {
       }
     });
   }
-
+String? panView;
+String? gstView;
+String? cancelledView;
   Map<String, dynamic> personalData = {};
   Map<String, dynamic> bankData = {};
   List<String> types = [
@@ -357,11 +359,23 @@ class _VendorEditState extends State<VendorEdit> {
                     bankData['company_type'] ?? '';
                 addressCompanyController.text = bankData['address'] ?? '';
                 panCardController.text = bankData['pan'] ?? '';
-                // panName.text = bankData['pan_file'] ?? '';
+                panView = bankData['pan_file'] ?? '';
+                panName.text= bankData['pan_file'] ?? '';
+                cancelledName.text = bankData['cheque'] ?? '';
+
+               // panView="https://demo.studyhallfoundation.org/public/uploads/vendor/${bankData['pan_file']}";
+
+
+               print(">>>>>>>>>>>>>panImage$panView");
                 gstCardController.text = bankData['gst'] ?? '';
-                // gstName.text = bankData['gst_file'] ?? '';
+                cancelledName.text = bankData['gst_file'] ?? '';
+                gstView = bankData['gst_file'] ?? '';
+                gstName.text=bankData['gst_file'] ?? '';
+                  // gstView="https://demo.studyhallfoundation.org/public/uploads/vendor/${bankData['gst_file']}";
                 tanCardController.text = bankData['tan'] ?? '';
                 // cancelledName.text = bankData['cheque'] ?? '';
+                cancelledView = bankData['cheque'] ?? '';
+                //  cancelledView="https://demo.studyhallfoundation.org/public/uploads/vendor/${bankData['cheque']}";
                 accountNameController.text =
                     bankData['account_holder_name'] ?? '';
                 accountNumberController.text = bankData['account_no'] ?? '';
@@ -1068,7 +1082,8 @@ class _VendorEditState extends State<VendorEdit> {
                               isLoadingEdit = true; // Start loading
                             });
 
-                            final vendorData = VendorUpdateHandler(
+                            final vendorData =
+                            VendorUpdateHandler(
                               name: nameController.text.toString(),
                               contact: contactController.text.toString(),
                               address: addressController.text.toString(),
@@ -1091,6 +1106,9 @@ class _VendorEditState extends State<VendorEdit> {
                               cancelledImage: imagesIdCancelled,
                               email: emailController.text.toString(),
                               password: passwordController.text.toString(),
+                              panNameView: panView.toString(),
+                              gstNameView: gstView.toString(),
+                              cancelledNameView: cancelledView.toString(),
                             );
 
                             // Determine whether to update or create a vendor
@@ -1114,7 +1132,7 @@ class _VendorEditState extends State<VendorEdit> {
                                 bankName: bankNameController.text.toString(),
                                 roles: 'Vendor', // Ensure you have a value for this if creating
                                 branch: bankBranchController.text.toString(),
-                                panImage: imagesIdPan,
+                                panImage: imagesIdPan ,
                                 gstImage: imagesIdGST,
                                 cancelledImage: imagesIdCancelled,
                                 email: emailController.text.toString(), password: passwordController.text.toString(),

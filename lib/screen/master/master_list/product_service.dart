@@ -470,6 +470,8 @@ class _ProductServiceState extends State<ProductService> {
                                 itemBuilder: (context, index) {
                                   if (index < data.length) {
                                     final item = data[index];
+
+                                    print(">>>>statusItem >>>>${item['status']}");
                                     return GestureDetector(
                                         onTap: () {},
                                         child: Padding(
@@ -589,13 +591,7 @@ class _ProductServiceState extends State<ProductService> {
                                                               );
                                                             },
                                                             child: Text(
-                                                              item["status"] ==
-                                                                      0
-                                                                  ? "Active"
-                                                                  : item["status"] ==
-                                                                          4
-                                                                      ? "Inactive"
-                                                                      : "${item["status"]}",
+                                                              item["status"] == 0 ? "Active" : item["status"] == 3 ? "Inactive" : "${item["status"]}",
                                                               style: (item[
                                                                           "status"] ==
                                                                       0
@@ -605,7 +601,7 @@ class _ProductServiceState extends State<ProductService> {
                                                                           color: Colors
                                                                               .green)
                                                                   : item["status"] ==
-                                                                          4
+                                                                          3
                                                                       ? FTextStyle
                                                                           .listTitleSub
                                                                           .copyWith(
@@ -686,8 +682,7 @@ class _ProductServiceState extends State<ProductService> {
                                                                           context)
                                                                       .add(DeleteMasterServiceHandlers(
                                                                           data[index]
-                                                                              [
-                                                                              'id']));
+                                                                              ['id']));
                                                                 },
                                                               )
                                                             },
@@ -742,11 +737,13 @@ class _ProductServiceState extends State<ProductService> {
     });
   }
 
-  Future<void> _showStatusDialog(AllRequesterBloc of, BuildContext context,
-      Map<String, dynamic> item, String id // New parameter for id
+  Future<void> _showStatusDialog(
+      AllRequesterBloc of,
+      BuildContext context,
+      Map<String, dynamic> item,
+      String id, // New parameter for id
       ) {
-    String? selectedStatus =
-        item["status"] == 0 ? "Active" : "Inactive"; // Default value
+    String? selectedStatus = item["status"] == 0 ? "Active" : "Inactive"; // Default value
     bool isLoading = false; // Start with not loading
 
     return showDialog<void>(
@@ -754,121 +751,146 @@ class _ProductServiceState extends State<ProductService> {
       builder: (BuildContext context) {
         return BlocProvider.value(
           value: of, // Use the existing Bloc instance
-          child: AlertDialog(
-            title: const Text('Change Status'),
-            content: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30.0),
-                border: Border.all(color: Colors.grey),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<String>(
-                  value: selectedStatus,
-                  items: [
-                    _buildDropdownItem("Active"),
-                    _buildDropdownItem("Inactive"),
-                  ],
-                  onChanged: (String? newValue) {
-                    if (newValue != null) {
-                      selectedStatus = newValue;
-                    }
-                  },
-                  isExpanded: true,
-                  padding: EdgeInsets.zero,
-                ),
-              ),
-            ),
-            actions: [
-              Container(
-                height: 42,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryColourDark,
-                  borderRadius: BorderRadius.circular(25.0),
-                ),
-                child: TextButton(
-                  child: const Text("Cancel",
-                      style: TextStyle(color: Colors.white)),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ).animateOnPageLoad(
-                    animationsMap['imageOnPageLoadAnimation2']!),
-              ),
-              BlocListener<AllRequesterBloc, AllRequesterState>(
-                listener: (context, state) {
-                  if (state is StatusChangeLoading) {
-                    setState(() {
-                      isLoading = true; // Set loading state
-                    });
-                  } else if (state is StatusChangeSuccess) {
-                    setState(() {
-                      isLoading = false; // Reset loading state
-                      Navigator.of(context).pop(); // Close dialog
-                      var successMessage = state.statusChangeList['message'];
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(successMessage),
-                          backgroundColor: AppColors.primaryColour,
-                        ),
-                      );
-                    });
-                  } else if (state is StatusChangeFailure) {
-                    setState(() {
-                      isLoading = false; // Reset loading state
-                      var errorMessage = state.statusChangeFailure['message'];
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(errorMessage),
-                          backgroundColor: AppColors.primaryColour,
-                        ),
-                      );
-                    });
-                    if (kDebugMode) {
-                      print("error>> ${state.statusChangeFailure}");
-                    }
-                  } else if (state is CheckNetworkConnection) {
-                    CommonPopups.showCustomPopup(
-                      context,
-                      'Internet is not connected.',
-                    );
-                  }
-                },
-                child: Container(
-                  height: 42,
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                title: const Text('Change Status'),
+                content: Container(
                   decoration: BoxDecoration(
-                    color: AppColors.primaryColourDark,
-                    borderRadius: BorderRadius.circular(25.0),
+                    borderRadius: BorderRadius.circular(30.0),
+                    border: Border.all(color: Colors.grey),
                   ),
-                  child: TextButton(
-                    child: isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text("OK",
-                            style: TextStyle(color: Colors.white)),
-                    onPressed: () {
-                      if (!isLoading) {
-                        // Prevent multiple presses
-                        String newStatus = selectedStatus == "Active"
-                            ? '0'
-                            : '4'; // Convert to String
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: selectedStatus,
+                      items: [
+                        _buildDropdownItem("Active"),
+                        _buildDropdownItem("Inactive"),
+                      ],
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          setState(() {
+                            selectedStatus = newValue; // Update the selected value
+                          });
+                        }
+                      },
+                      isExpanded: true,
+                      padding: EdgeInsets.zero,
+                    ),
+                  ),
+                ),
+                actions: [
+                  Container(
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryColourDark,
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
+                    child: TextButton(
+                      child: const Text(
+                        "Cancel",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ).animateOnPageLoad(
+                      animationsMap['imageOnPageLoadAnimation2']!,
+                    ),
+                  ),
+                  BlocListener<AllRequesterBloc, AllRequesterState>(
+                    listener: (context, state) {
+                      if (state is StatusChangeLoading) {
+                        setState(() {
+                          isLoading = true; // Set loading state
+                        });
+                      } else if (state is StatusChangeSuccess) {
+                        setState(() {
+                          isLoading = false; // Reset loading state
+                          Navigator.of(context).pop(); // Close dialog
+                          var successMessage = state.statusChangeList['message'];
+                          data.clear();
+                          pageNo = 1;
+                          hasMoreData = true;
+                          totalPages = 0;
 
-                        // Update the item's status here based on the selected value
-                        of.add(ProductStatusChangeHandler(
-                          userID: PrefUtils.getUserId().toString(),
-                          status: newStatus, // Pass the status as a String
-                          id: id, // Pass the id here
-                        ));
+                          // Dispatch event to load the refreshed list
+                          BlocProvider.of<AllRequesterBloc>(context)
+                              .add(MasterServiceHandler("", pageNo, pageSize));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(successMessage),
+                              backgroundColor: AppColors.primaryColour,
+                            ),
+                          );
+                        });
+                      } else if (state is StatusChangeFailure) {
+                        setState(() {
+                          isLoading = false; // Reset loading state
+
+                          var errorMessage = state.statusChangeFailure['message'];
+                          CommonPopups.showCustomPopup(context, errorMessage);
+
+                          // ScaffoldMessenger.of(context).showSnackBar(
+                          //   SnackBar(
+                          //     content: Text(errorMessage),
+                          //     backgroundColor: AppColors.primaryColour,
+                          //   ),
+                          // );
+                        });
+                        if (kDebugMode) {
+                          print("error>> ${state.statusChangeFailure}");
+                        }
+                      } else if (state is CheckNetworkConnection) {
+                        CommonPopups.showCustomPopup(
+                          context,
+                          'Internet is not connected.',
+                        );
                       }
                     },
-                  ).animateOnPageLoad(
-                      animationsMap['imageOnPageLoadAnimation2']!),
-                ),
-              ),
-            ],
+                    child: Container(
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryColourDark,
+                        borderRadius: BorderRadius.circular(25.0),
+                      ),
+                      child: TextButton(
+                        child: isLoading
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const Text(
+                          "OK",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        onPressed: () {
+                          if (!isLoading) {
+                            setState(() {
+                              String newStatus = selectedStatus == "Active"
+                                  ? '0'
+                                  : '3'; // Convert to String
+                              // Update the item's status here based on the selected value
+                              of.add(ProductStatusChangeHandler(
+                                userID: PrefUtils.getUserId().toString(),
+                                status: newStatus, // Pass the status as a String
+                                id: id, // Pass the id here
+                              ));
+                            });
+                            // Prevent multiple presses
+                          }
+                        },
+                      ).animateOnPageLoad(
+                        animationsMap['imageOnPageLoadAnimation2']!,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         );
       },
     );
   }
+
 
 // Helper method to create a dropdown item with padding
   DropdownMenuItem<String> _buildDropdownItem(String value) {

@@ -147,34 +147,42 @@ class _VendorDetailsState extends State<VendorDetails> {
 
                   const SizedBox(height: 5),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text("Request Date: ", style: FTextStyle.listTitleBig),
-                      Text(widget.requestDate, style: FTextStyle.listTitleSubBig),
+                      Expanded(child: Text(widget.requestDate, style: FTextStyle.listTitleSubBig)),
                     ],
                   ),
                   const SizedBox(height: 5),
 
 
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text("Product/Service: ", style: FTextStyle.listTitleBig),
-                      Text(widget.product, style: FTextStyle.listTitleSubBig),
+                      Expanded(child: Text(widget.product, style: FTextStyle.listTitleSubBig)),
                     ],
                   ),
                   const SizedBox(height: 5),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text("Specification: ", style: FTextStyle.listTitleBig),
-                      Text(widget.specification, style: FTextStyle.listTitleSubBig),
+                      Expanded(child: Text(widget.specification, style: FTextStyle.listTitleSubBig)),
                     ],
                   ),
 
                   const SizedBox(height: 5),
 
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text("Quantity: ", style: FTextStyle.listTitleBig),
-                      Text(widget.quantity, style: FTextStyle.listTitleSubBig),
+                      Expanded(child: Text(widget.quantity, style: FTextStyle.listTitleSubBig)),
                     ],
                   ),
                   const SizedBox(height: 5),
@@ -182,6 +190,8 @@ class _VendorDetailsState extends State<VendorDetails> {
 
                   const SizedBox(height: 5),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text("Delivery Status: ", style: FTextStyle.listTitleBig),
                       Text(widget.delivery, style:  widget.delivery == 'Pending'
