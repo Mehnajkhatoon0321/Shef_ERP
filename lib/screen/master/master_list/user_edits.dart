@@ -160,8 +160,9 @@ class _UserEditsState extends State<UserEdits> {
   bool isNameFieldFocused = false;
   void _updateButtonState() {
     setState(() {
-      isButtonEnabled = selectedUnitItem != null &&
-          selectedUnitItem!.isNotEmpty &&
+      isButtonEnabled =widget.screenflag.isEmpty? (
+          selectedUnitItem != null &&
+              selectedUnitItem!.isNotEmpty &&
           selectedRoleItem != null &&
           selectedRoleItem!.isNotEmpty &&
           nameController.text.isNotEmpty &&
@@ -169,7 +170,16 @@ class _UserEditsState extends State<UserEdits> {
           passwordController.text.isNotEmpty &&
           contactController.text.isNotEmpty &&
           addressController.text.isNotEmpty &&
-          designationController.text.isNotEmpty;
+          designationController.text.isNotEmpty):(selectedUnitItem != null &&
+      selectedUnitItem!.isNotEmpty &&
+      selectedRoleItem != null &&
+      selectedRoleItem!.isNotEmpty &&
+      nameController.text.isNotEmpty &&
+      emailController.text.isNotEmpty &&
+
+      contactController.text.isNotEmpty &&
+      addressController.text.isNotEmpty &&
+      designationController.text.isNotEmpty);
 
       // Validate fields
       if (isEmailFieldFocused) {
@@ -648,51 +658,62 @@ class _UserEditsState extends State<UserEdits> {
                         return null;
                       },
                     ),
-                    Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child:
-                            Text("Password", style: FTextStyle.preHeadingStyle)),
-                    TextFormField(
-                      keyboardType: TextInputType.visiblePassword,
-                      key: _passwordKey,
-                      focusNode: _passwordFocusNode,
-                      controller: passwordController,
-                      onChanged: (value) => _updateButtonState(),
-                      decoration:
-                          FormFieldStyle.defaultInputEditDecoration.copyWith(
-                        hintText: "Enter Password",
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            passwordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: Colors.black,
+
+                    Visibility(
+                      visible:  widget.screenflag.isEmpty,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child:
+                              Text("Password", style: FTextStyle.preHeadingStyle)),
+                          TextFormField(
+                            keyboardType: TextInputType.visiblePassword,
+                            key: _passwordKey,
+                            focusNode: _passwordFocusNode,
+                            controller: passwordController,
+                            onChanged: (value) => _updateButtonState(),
+                            decoration:
+                            FormFieldStyle.defaultInputEditDecoration.copyWith(
+                              hintText: "Enter Password",
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  passwordVisible
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: Colors.black,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    passwordVisible = !passwordVisible;
+                                  });
+                                },
+                              ),
+                              filled: true,
+                              fillColor: AppColors.formFieldBackColour,
+                            ),
+                            validator: ValidatorUtils.passwordValidator,
+                            obscureText: !passwordVisible,
+                            inputFormatters: [NoSpaceFormatter()],
+                            onTap: () {
+                              setState(() {
+                                isPasswordFieldFocused = true;
+                                isEmailFieldFocused = false;
+                                isUnitNameFieldFocused = false;
+                                isRoleNameFieldFocused = false;
+                                isContactFieldFocused = false;
+                                isAddressFieldFocused = false;
+                                isDesignationFieldFocused = true;
+                                isNameFieldFocused = false;
+                              });
+                            },
                           ),
-                          onPressed: () {
-                            setState(() {
-                              passwordVisible = !passwordVisible;
-                            });
-                          },
-                        ),
-                        filled: true,
-                        fillColor: AppColors.formFieldBackColour,
+                        ],
                       ),
-                      validator: ValidatorUtils.passwordValidator,
-                      obscureText: !passwordVisible,
-                      inputFormatters: [NoSpaceFormatter()],
-                      onTap: () {
-                        setState(() {
-                          isPasswordFieldFocused = true;
-                          isEmailFieldFocused = false;
-                          isUnitNameFieldFocused = false;
-                          isRoleNameFieldFocused = false;
-                          isContactFieldFocused = false;
-                          isAddressFieldFocused = false;
-                          isDesignationFieldFocused = true;
-                          isNameFieldFocused = false;
-                        });
-                      },
-                    ),
+                    )
+                   ,
                     const SizedBox(height: 40),
                     Center(
                       child: Padding(

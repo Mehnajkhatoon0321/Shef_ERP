@@ -37,7 +37,7 @@ class VendorDashboard extends StatefulWidget {
 class _VendorDashboardState extends State<VendorDashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-
+  bool _isLogoutDialogVisible = false;
 
   Map<String, double> dataMap = {
 
@@ -828,6 +828,10 @@ class _VendorDashboardState extends State<VendorDashboard> {
 
 
   void _showLogDialog(int index) {
+    if (_isLogoutDialogVisible) return; // Prevent showing multiple dialogs
+
+    _isLogoutDialogVisible = true; // Set the flag when showing the dialog
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -837,8 +841,7 @@ class _VendorDashboardState extends State<VendorDashboard> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("Are you sure you want to logout?",
-                    style: FTextStyle.preHeadingStyle),
+                Text("Are you sure you want to logout?", style: FTextStyle.preHeadingStyle),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -850,10 +853,10 @@ class _VendorDashboardState extends State<VendorDashboard> {
                           borderRadius: BorderRadius.circular(25.0),
                         ),
                       ),
-                      child: const Text("Cancel",
-                          style: TextStyle(color: Colors.black)),
+                      child: const Text("Cancel", style: TextStyle(color: Colors.black)),
                       onPressed: () {
                         Navigator.of(context).pop();
+                        _isLogoutDialogVisible = false; // Reset the flag when closed
                       },
                     ),
                     const SizedBox(width: 8),
@@ -864,17 +867,11 @@ class _VendorDashboardState extends State<VendorDashboard> {
                           borderRadius: BorderRadius.circular(25.0),
                         ),
                       ),
-                      child: const Text("OK",
-                          style: TextStyle(color: Colors.white)),
+                      child: const Text("OK", style: TextStyle(color: Colors.white)),
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => BlocProvider(
-                                create: (context) => AuthFlowBloc(),
-                                child: const LogScreen(),
-                              )),
-                        );
+
+                        Navigator.of(context).pop(); // Close the dialog
+                        _isLogoutDialogVisible = false; // Reset the flag
                       },
                     ),
                   ],
@@ -884,7 +881,9 @@ class _VendorDashboardState extends State<VendorDashboard> {
           ),
         );
       },
-    );
+    ).then((_) {
+      _isLogoutDialogVisible = false; // Reset the flag when the dialog is closed
+    });
   }
   void _navigateBasedOnRole(String role) {
     Widget nextPage;

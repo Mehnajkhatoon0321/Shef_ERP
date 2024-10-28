@@ -319,7 +319,10 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
               DeletePopupManager.stopLoader();
 
               var deleteMessage = state.deleteList['message'];
-
+              data.clear();
+              pageNo = 1;
+              hasMoreData = true;
+              totalPages = 0;
               BlocProvider.of<AllRequesterBloc>(context)
                   .add(AddCartDetailHandler("", pageNo, pageSize));
               ScaffoldMessenger.of(context).showSnackBar(

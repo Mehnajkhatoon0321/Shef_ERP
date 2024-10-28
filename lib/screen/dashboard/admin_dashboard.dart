@@ -41,7 +41,7 @@ class AdminDashboard extends StatefulWidget {
 
 class _AdminDashboardState extends State<AdminDashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
+  bool _isLogoutDialogVisible = false;
   List<Map<String, dynamic>> listItem = [
     {'subtitle': 'Dashboard', 'icon': Icons.dashboard},
     {'subtitle': 'Requisition', 'icon': Icons.list_alt},
@@ -211,7 +211,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     super.initState();
   }
 
-  String allRequisition = "0"; // Initialize to an appropriate default
+  String allRequisition = "0";
   String todayRequisition = "0";
   String pendingRequisition = "0";
   String deliveredRequisition = "0";
@@ -858,7 +858,70 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 ))));
   }
 
+  // void _showLogDialog(int index) {
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return Dialog(
+  //         child: Padding(
+  //           padding: const EdgeInsets.all(16.0),
+  //           child: Column(
+  //             mainAxisSize: MainAxisSize.min,
+  //             children: [
+  //               Text("Are you sure you want to logout?",
+  //                   style: FTextStyle.preHeadingStyle),
+  //               const SizedBox(height: 16),
+  //               Row(
+  //                 mainAxisAlignment: MainAxisAlignment.end,
+  //                 children: [
+  //                   TextButton(
+  //                     style: TextButton.styleFrom(
+  //                       backgroundColor: AppColors.formFieldBackColour,
+  //                       shape: RoundedRectangleBorder(
+  //                         borderRadius: BorderRadius.circular(25.0),
+  //                       ),
+  //                     ),
+  //                     child: const Text("Cancel",
+  //                         style: TextStyle(color: Colors.black)),
+  //                     onPressed: () {
+  //                       Navigator.of(context).pop();
+  //                     },
+  //                   ),
+  //                   const SizedBox(width: 8),
+  //                   TextButton(
+  //                     style: TextButton.styleFrom(
+  //                       backgroundColor: AppColors.primaryColourDark,
+  //                       shape: RoundedRectangleBorder(
+  //                         borderRadius: BorderRadius.circular(25.0),
+  //                       ),
+  //                     ),
+  //                     child: const Text("OK",
+  //                         style: TextStyle(color: Colors.white)),
+  //                     onPressed: () {
+  //                       Navigator.push(
+  //                         context,
+  //                         MaterialPageRoute(
+  //                             builder: (context) => BlocProvider(
+  //                                   create: (context) => AuthFlowBloc(),
+  //                                   child: const LogScreen(),
+  //                                 )),
+  //                       );
+  //                     },
+  //                   ),
+  //                 ],
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
   void _showLogDialog(int index) {
+    if (_isLogoutDialogVisible) return; // Prevent showing multiple dialogs
+
+    _isLogoutDialogVisible = true; // Set the flag when showing the dialog
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -868,8 +931,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("Are you sure you want to logout?",
-                    style: FTextStyle.preHeadingStyle),
+                Text("Are you sure you want to logout?", style: FTextStyle.preHeadingStyle),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -881,10 +943,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           borderRadius: BorderRadius.circular(25.0),
                         ),
                       ),
-                      child: const Text("Cancel",
-                          style: TextStyle(color: Colors.black)),
+                      child: const Text("Cancel", style: TextStyle(color: Colors.black)),
                       onPressed: () {
                         Navigator.of(context).pop();
+                        _isLogoutDialogVisible = false; // Reset the flag when closed
                       },
                     ),
                     const SizedBox(width: 8),
@@ -895,17 +957,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           borderRadius: BorderRadius.circular(25.0),
                         ),
                       ),
-                      child: const Text("OK",
-                          style: TextStyle(color: Colors.white)),
+                      child: const Text("OK", style: TextStyle(color: Colors.white)),
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => BlocProvider(
-                                    create: (context) => AuthFlowBloc(),
-                                    child: const LogScreen(),
-                                  )),
-                        );
+
+                        Navigator.of(context).pop(); // Close the dialog
+                        _isLogoutDialogVisible = false; // Reset the flag
                       },
                     ),
                   ],
@@ -915,9 +971,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
         );
       },
-    );
+    ).then((_) {
+      _isLogoutDialogVisible = false; // Reset the flag when the dialog is closed
+    });
   }
-
   void _navigateBasedOnRole(String role) {
     Widget nextPage;
 

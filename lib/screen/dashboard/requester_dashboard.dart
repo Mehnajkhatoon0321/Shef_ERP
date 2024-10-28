@@ -38,7 +38,7 @@ class RequesterDashboard extends StatefulWidget {
 
 class _RequesterDashboardState extends State<RequesterDashboard> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
+  bool _isLogoutDialogVisible = false;
 
   String? userRole;
 
@@ -840,8 +840,11 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
 
 
 
-
   void _showLogDialog(int index) {
+    if (_isLogoutDialogVisible) return; // Prevent showing multiple dialogs
+
+    _isLogoutDialogVisible = true; // Set the flag when showing the dialog
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -851,8 +854,7 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("Are you sure you want to logout?",
-                    style: FTextStyle.preHeadingStyle),
+                Text("Are you sure you want to logout?", style: FTextStyle.preHeadingStyle),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -864,10 +866,10 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
                           borderRadius: BorderRadius.circular(25.0),
                         ),
                       ),
-                      child: const Text("Cancel",
-                          style: TextStyle(color: Colors.black)),
+                      child: const Text("Cancel", style: TextStyle(color: Colors.black)),
                       onPressed: () {
                         Navigator.of(context).pop();
+                        _isLogoutDialogVisible = false; // Reset the flag when closed
                       },
                     ),
                     const SizedBox(width: 8),
@@ -878,17 +880,11 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
                           borderRadius: BorderRadius.circular(25.0),
                         ),
                       ),
-                      child: const Text("OK",
-                          style: TextStyle(color: Colors.white)),
+                      child: const Text("OK", style: TextStyle(color: Colors.white)),
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => BlocProvider(
-                                create: (context) => AuthFlowBloc(),
-                                child: const LogScreen(),
-                              )),
-                        );
+
+                        Navigator.of(context).pop(); // Close the dialog
+                        _isLogoutDialogVisible = false; // Reset the flag
                       },
                     ),
                   ],
@@ -898,7 +894,9 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
           ),
         );
       },
-    );
+    ).then((_) {
+      _isLogoutDialogVisible = false; // Reset the flag when the dialog is closed
+    });
   }
   void _navigateBasedOnRole(String role) {
     Widget nextPage;
