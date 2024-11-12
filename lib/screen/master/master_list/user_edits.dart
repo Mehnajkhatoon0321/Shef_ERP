@@ -160,7 +160,8 @@ class _UserEditsState extends State<UserEdits> {
   bool isNameFieldFocused = false;
   void _updateButtonState() {
     setState(() {
-      isButtonEnabled =widget.screenflag.isEmpty? (
+      isButtonEnabled =widget.screenflag.isEmpty?
+      (
           selectedUnitItem != null &&
               selectedUnitItem!.isNotEmpty &&
           selectedRoleItem != null &&
@@ -170,7 +171,8 @@ class _UserEditsState extends State<UserEdits> {
           passwordController.text.isNotEmpty &&
           contactController.text.isNotEmpty &&
           addressController.text.isNotEmpty &&
-          designationController.text.isNotEmpty):(selectedUnitItem != null &&
+          designationController.text.isNotEmpty):
+      (selectedUnitItem != null &&
       selectedUnitItem!.isNotEmpty &&
       selectedRoleItem != null &&
       selectedRoleItem!.isNotEmpty &&

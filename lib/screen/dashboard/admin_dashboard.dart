@@ -858,65 +858,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 ))));
   }
 
-  // void _showLogDialog(int index) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return Dialog(
-  //         child: Padding(
-  //           padding: const EdgeInsets.all(16.0),
-  //           child: Column(
-  //             mainAxisSize: MainAxisSize.min,
-  //             children: [
-  //               Text("Are you sure you want to logout?",
-  //                   style: FTextStyle.preHeadingStyle),
-  //               const SizedBox(height: 16),
-  //               Row(
-  //                 mainAxisAlignment: MainAxisAlignment.end,
-  //                 children: [
-  //                   TextButton(
-  //                     style: TextButton.styleFrom(
-  //                       backgroundColor: AppColors.formFieldBackColour,
-  //                       shape: RoundedRectangleBorder(
-  //                         borderRadius: BorderRadius.circular(25.0),
-  //                       ),
-  //                     ),
-  //                     child: const Text("Cancel",
-  //                         style: TextStyle(color: Colors.black)),
-  //                     onPressed: () {
-  //                       Navigator.of(context).pop();
-  //                     },
-  //                   ),
-  //                   const SizedBox(width: 8),
-  //                   TextButton(
-  //                     style: TextButton.styleFrom(
-  //                       backgroundColor: AppColors.primaryColourDark,
-  //                       shape: RoundedRectangleBorder(
-  //                         borderRadius: BorderRadius.circular(25.0),
-  //                       ),
-  //                     ),
-  //                     child: const Text("OK",
-  //                         style: TextStyle(color: Colors.white)),
-  //                     onPressed: () {
-  //                       Navigator.push(
-  //                         context,
-  //                         MaterialPageRoute(
-  //                             builder: (context) => BlocProvider(
-  //                                   create: (context) => AuthFlowBloc(),
-  //                                   child: const LogScreen(),
-  //                                 )),
-  //                       );
-  //                     },
-  //                   ),
-  //                 ],
-  //               ),
-  //             ],
-  //           ),
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
+
   void _showLogDialog(int index) {
     if (_isLogoutDialogVisible) return; // Prevent showing multiple dialogs
 

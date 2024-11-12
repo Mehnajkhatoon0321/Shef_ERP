@@ -496,7 +496,7 @@ class _EventScreenState extends State<EventScreen> {
                                           Row(
                                             children: [
                                               const Text("ID: ", style: FTextStyle.listTitle),
-                                              Text("${item["id"]}", style: FTextStyle.listTitleSub).animateOnPageLoad(
+                                              Text("${index+1}", style: FTextStyle.listTitleSub).animateOnPageLoad(
                                                   animationsMap['imageOnPageLoadAnimation2']!),
                                             ],
                                           ),

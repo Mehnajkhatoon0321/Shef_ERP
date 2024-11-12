@@ -176,7 +176,8 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
             )
           ],
         ),
-        body: BlocListener<AllRequesterBloc, AllRequesterState>(
+        body:
+        BlocListener<AllRequesterBloc, AllRequesterState>(
           listener: (context, state) {
             if (state is AddCartLoading) {
               setState(() {

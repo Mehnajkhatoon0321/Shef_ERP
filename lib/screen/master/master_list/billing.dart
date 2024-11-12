@@ -515,7 +515,7 @@ class _BillingListState extends State<BillingList> {
                                                         const Text("ID: ",
                                                             style: FTextStyle
                                                                 .listTitle),
-                                                        Text("${item["id"]}",
+                                                        Text("${index+1}",
                                                             style: FTextStyle
                                                                 .listTitleSub),
                                                       ],

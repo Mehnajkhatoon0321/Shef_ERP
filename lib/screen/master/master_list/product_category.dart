@@ -474,7 +474,7 @@ class _ProductCategoryState extends State<ProductCategory> {
                                 Row(
                                   children: [
                                     const Text("ID: ", style: FTextStyle.listTitle),
-                                    Text("${item["id"]}", style: FTextStyle.listTitleSub),
+                                    Text("${index+1}", style: FTextStyle.listTitleSub),
                                   ],
                                 ),
                                 Row(
