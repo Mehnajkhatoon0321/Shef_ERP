@@ -107,10 +107,11 @@ class _UserEditsState extends State<UserEdits> {
   };
   bool isButtonEnabled = false;
   bool isLoadingEdit = false;
-  String? selectedUnitItem;
+  // String? selectedUnitItem;
   String? selectedRoleItem;
-
-  String? selectedRoleId;
+  List<String> selectedUnitItem = [];
+  List<dynamic> selectedUnitId = [];
+  // String? selectedRoleId;
   final formKey = GlobalKey<FormState>();
   bool passwordVisible = true;
 
@@ -160,7 +161,8 @@ class _UserEditsState extends State<UserEdits> {
   bool isNameFieldFocused = false;
   void _updateButtonState() {
     setState(() {
-      isButtonEnabled =widget.screenflag.isEmpty?
+      isButtonEnabled =widget.screenflag.isEmpty
+          ?
       (
           selectedUnitItem != null &&
               selectedUnitItem!.isNotEmpty &&
@@ -171,7 +173,9 @@ class _UserEditsState extends State<UserEdits> {
           passwordController.text.isNotEmpty &&
           contactController.text.isNotEmpty &&
           addressController.text.isNotEmpty &&
-          designationController.text.isNotEmpty):
+          designationController.text.isNotEmpty
+      )
+          :
       (selectedUnitItem != null &&
       selectedUnitItem!.isNotEmpty &&
       selectedRoleItem != null &&
@@ -219,6 +223,18 @@ class _UserEditsState extends State<UserEdits> {
   void initState() {
     BlocProvider.of<AllRequesterBloc>(context)
         .add(EditDetailUserHandler(widget.id));
+    isButtonEnabled = selectedUnitItem != null &&
+        selectedUnitItem!.isNotEmpty &&
+        selectedRoleItem != null &&
+        selectedRoleItem!.isNotEmpty &&
+        nameController.text.isNotEmpty &&
+        emailController.text.isNotEmpty &&
+
+        contactController.text.isNotEmpty &&
+        addressController.text.isNotEmpty &&
+        designationController.text.isNotEmpty;
+
+
     super.initState();
   }
 
@@ -230,7 +246,7 @@ class _UserEditsState extends State<UserEdits> {
   List<String> RolesNames = [];
   List<dynamic> RoleDataList = [];
 
-  String? selectedUnitId;
+  // String? selectedUnitId;
 
   @override
   Widget build(BuildContext context) {
@@ -276,7 +292,6 @@ class _UserEditsState extends State<UserEdits> {
                         .toList();
                 print("AllData>>>>${responseData}");
                 var user = state.userEditDeleteList['user'] ?? {};
-
                 listData = state.userEditDeleteList['units'];
                 UnitNames = listData
                     .map<String>((item) => item['name'] as String)
@@ -295,22 +310,28 @@ class _UserEditsState extends State<UserEdits> {
                       ? user['roles'][0]['name']
                       : '';
 
+                  // Get the user unit IDs from the 'unit' field, which is a comma-separated string
+                  String userUnitIds = user['unit'] ?? '';
+                  List<String> unitIds = userUnitIds.split(',');
 
-                  String userUnitId = user['roles'][0]['unit']?.toString() ?? ''; // Get the user unit ID as a string
-                  var unit = listData.firstWhere(
-                        (u) => u['id'].toString() == userUnitId, // Find the unit with the matching ID
-                    orElse: () => null, // If not found, return null
-                  );
+                  // Find the corresponding unit names and IDs based on the unitIds
+                  var selectedUnits = listData.where((unit) =>
+                      unitIds.contains(unit['id'].toString())).toList();
 
-                  if (unit != null) {
-                    selectedUnitItem = unit['name']; // Set the unit name if found
-                    selectedUnitId = unit['id'].toString(); // Set the unit ID as a string
+                  if (selectedUnits.isNotEmpty) {
+                    selectedUnitItem = selectedUnits
+                        .map<String>((unit) => unit['name'] as String)
+                        .toList(); // Set the list of unit names
+
+                    selectedUnitId = selectedUnits
+                        .map<String>((unit) => unit['id'].toString())
+                        .toList(); // Set the list of unit IDs as strings
                   } else {
-                    selectedUnitItem = null; // Clear the name if no match found
-                    selectedUnitId = null; // Clear the ID if no match found
+                    selectedUnitItem = []; // Clear the list if no units found
+                    selectedUnitId = [];   // Clear the list if no units found
                   }
-
                 }
+
               });
             }
             else if (state is UserEditDetailsFailure) {
@@ -458,6 +479,7 @@ class _UserEditsState extends State<UserEdits> {
                         animationsMap['imageOnPageLoadAnimation2']!,
                       ),
                     ),
+
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -466,41 +488,36 @@ class _UserEditsState extends State<UserEdits> {
                         border: Border.all(color: AppColors.formFieldHintColour, width: 1.3),
                         color: AppColors.formFieldBackColour,
                       ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          key: _unitNameKey,
-                          focusNode: _unitNameNode,
-                          isExpanded: true,
-                          value: selectedUnitItem != null && UnitNames.contains(selectedUnitItem)
-                              ? selectedUnitItem
-                              : null,
-                          // This should reflect the current user's unit
-                          hint: const Text(
-                            "Select Unit",
-                            style: FTextStyle.formhintTxtStyle,
-                          ),
-                          onChanged: (String? eventValue) {
-                            setState(() {
-                              selectedUnitItem = eventValue; // Update the selected unit
-                              _updateButtonState();
-                              // Update the selectedUnitId based on the selected unit
-                              var selectedUnit = listData.firstWhere(
-                                    (unit) => unit['name'] == eventValue,
-                                orElse: () => {'id': '', 'name': ''},
-                              );
-                              selectedUnitId = selectedUnit['id'].toString(); // Ensure ID is set correctly
-                            });
-                          },
-                          items: UnitNames.map<DropdownMenuItem<String>>((String unitName) {
-                            return DropdownMenuItem<String>(
-                              value: unitName,
-                              // Use the unit name as the value
-                              child: Text(unitName),
-                            );
-                          }).toList(),
+                      child: InkWell(
+                        onTap: () => _showMultiSelectDialog(context),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Text(
+                                    selectedUnitItem.isNotEmpty
+                                        ? selectedUnitItem.join(', ') // Display selected items as comma-separated text
+                                        : "Select Unit",
+                                    style: FTextStyle.formhintTxtStyle,
+                                    overflow: TextOverflow.ellipsis, // Show "..." if text exceeds available space
+                                  ),
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.arrow_drop_down),
+                              onPressed: () => _showMultiSelectDialog(context), // Open dialog on icon tap
+                            ),
+                          ],
                         ),
                       ),
                     ),
+
+
 
                     if (_hasPressedSaveButton && selectedUnitItem == null)
                       Padding(
@@ -749,10 +766,11 @@ class _UserEditsState extends State<UserEdits> {
                                             contact:
                                                 contactController.text.toString(),
 
-                                            unitID: selectedRoleItem ==
-                                                    'Purchase Manager'
-                                                ? '0'
-                                                : (selectedUnitId ?? '0'),
+
+                                            unitID: selectedRoleItem == 'Purchase Manager'
+                                                ? ['0']  // Pass ['0'] as a list for 'Purchase Manager'
+                                                : selectedUnitId.isNotEmpty ? selectedUnitId : [],
+
                                             // Pass the selected unit ID
                                             role: selectedRoleItem.toString(),
                                             // Pass the selected role name
@@ -778,11 +796,12 @@ class _UserEditsState extends State<UserEdits> {
                                             contact:
                                                 contactController.text.toString(),
 
-                                            unitID: selectedRoleItem ==
-                                                    'Purchase Manager'
-                                                ? '0'
-                                                : (selectedUnitId ?? '0'),
-                                            // Pass the selected unit ID
+                                            unitID: selectedRoleItem == 'Purchase Manager'
+                                                ? ['0']  // Pass ['0'] as a list for 'Purchase Manager'
+                                                : selectedUnitId.isNotEmpty ? selectedUnitId : [], //
+
+
+                                              // Pass the selected unit ID
                                             role: selectedRoleItem.toString(),
                                             // Pass the selected role name
 
@@ -828,6 +847,87 @@ class _UserEditsState extends State<UserEdits> {
       ),
     );
   }
+
+
+
+
+  void _showMultiSelectDialog(BuildContext context) {
+    // Ensure default selection is populated
+    List<String> defaultSelectedUnitNames = selectedUnitItem;
+    List<dynamic> defaultSelectedUnitIds = selectedUnitId;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Select Units"),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: UnitNames.map((unitName) {
+                return StatefulBuilder(
+                  builder: (context, setState) {
+                    // Check if the unit is already selected
+                    bool isSelected = defaultSelectedUnitNames.contains(unitName);
+
+                    return CheckboxListTile(
+                      value: isSelected,
+                      title: Text(unitName),
+                      onChanged: (bool? selected) {
+                        setState(() {
+                          if (selected == true) {
+                            // Add to selectedUnitItem and selectedUnitId
+                            if (!defaultSelectedUnitNames.contains(unitName)) {
+                              defaultSelectedUnitNames.add(unitName);
+                              var selectedUnit = listData.firstWhere(
+                                    (unit) => unit['name'] == unitName,
+                                orElse: () => {'id': '', 'name': ''},
+                              );
+                              if (selectedUnit['id'] != null) {
+                                defaultSelectedUnitIds.add(selectedUnit['id'].toString());
+                              }
+                            }
+                          } else {
+                            // Remove from selectedUnitItem and selectedUnitId
+                            defaultSelectedUnitNames.remove(unitName);
+                            var selectedUnit = listData.firstWhere(
+                                  (unit) => unit['name'] == unitName,
+                              orElse: () => {'id': '', 'name': ''},
+                            );
+                            if (selectedUnit['id'] != null) {
+                              defaultSelectedUnitIds.remove(selectedUnit['id'].toString());
+                            }
+                          }
+                          _updateButtonState();
+                        });
+                      },
+                    );
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+          actions: <Widget>[
+            // OK Button
+            TextButton(
+              child: const Text("OK"),
+              onPressed: () {
+                setState(() {
+                  // Update the actual selectedUnitItem and selectedUnitId after dialog
+                  selectedUnitItem = List.from(defaultSelectedUnitNames);
+                  selectedUnitId = List.from(defaultSelectedUnitIds);
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+
+
 
 
 }

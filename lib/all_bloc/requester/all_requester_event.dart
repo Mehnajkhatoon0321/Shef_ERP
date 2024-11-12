@@ -237,7 +237,7 @@ class UserUpdateEventHandler extends AllRequesterEvent {
   final String contact;
   final String address;
   final String role;
-  final String unitID;
+  List<dynamic>  unitID;
   final String id;
   final String password;
   final String designation;
@@ -249,15 +249,15 @@ class UserUpdateEventHandler extends AllRequesterEvent {
 
 class UserCreateEventHandler extends AllRequesterEvent {
 
-  final String name;
-  final String email;
-  final String contact;
-  final String address;
-  final String role;
-  final String unitID;
-  final String id;
-  final String password;
-  final String designation;
+   String name;
+   String email;
+   String contact;
+   String address;
+   String role;
+List<dynamic> unitID;
+   String id;
+   String password;
+   String designation;
   UserCreateEventHandler({ required this.name, required this.email, required this.contact,required this.address,required this.role, required this.unitID, required this.id, required this.password, required this.designation});
 }
 //Edit Details

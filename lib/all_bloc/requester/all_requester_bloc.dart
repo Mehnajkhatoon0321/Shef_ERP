@@ -989,9 +989,11 @@ print("RequestData>>>>>>>>>>$request");
             'password': event.password,
             'roles': event.role,
             'id': event.id,
-            'unitId': event.unitID,
+            // 'unitId': event.unitID,
           });
-
+          for (int i = 0; i < event.unitID.length; i++) {
+            request.fields['unit[$i]'] = event.unitID[i];
+          }
           // Add headers to the request
           request.headers.addAll(headers);
 
@@ -1051,9 +1053,11 @@ print("RequestData>>>>>>>>>>$request");
             'password': event.password,
             'roles': event.role,
             'id': event.id,
-            'unitId': event.unitID,
+             // 'unit': event.unitID,
           });
-
+          for (int i = 0; i < event.unitID.length; i++) {
+            request.fields['unit[$i]'] = event.unitID[i];
+          }
           // Add headers to the request
           request.headers.addAll(headers);
 
@@ -1063,7 +1067,7 @@ print("RequestData>>>>>>>>>>$request");
 
           // Log the response status and data
           developer.log("Response status: ${response.statusCode}");
-          developer.log("Update response: $responseData");
+          developer.log("Create response: $responseData");
 
           // Handle the response based on status code
           if (response.statusCode == 200) {
@@ -1072,7 +1076,7 @@ print("RequestData>>>>>>>>>>$request");
             // Assuming the error response format is JSON
             final responseError = jsonDecode(responseData);
             emit(UserCreateFailure(responseError));
-            developer.log("Update failure: ${response.statusCode} - ${responseError['message'] ?? responseData}");
+            developer.log("Create failure: ${response.statusCode} - ${responseError['message'] ?? responseData}");
           }
         } catch (e) {
           emit(AuthFlowServerFailure(e.toString()));

@@ -354,7 +354,7 @@ class _UnitsState extends State<Units> {
                       LengthLimitingTextInputFormatter(200), // Limit to 250 characters
                     ],
                     decoration: InputDecoration(
-                      hintText: 'Search',
+                      hintText: 'Search Unit Name',
                       hintStyle: FTextStyle.formhintTxtStyle,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(23.0),
