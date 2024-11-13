@@ -61,40 +61,7 @@ class _LogScreenState extends State<LogScreen> {
   bool isLoading = false;
   bool rememberMe = false;
   String? userRole;
-  //
-  // @override
-  // void initState() {
-  //   super.initState();
-  //
-  //
-  //
-  //
-  //
-  //   String password = PrefUtils.getUserPassword();
-  //   String email = PrefUtils.getInsideEmailLogin();
-  //   rememberMe = PrefUtils.getRememberMe();
-  //
-  //   if (password.isNotEmpty) {
-  //     _password.text = password;
-  //   }
-  //
-  //   if (email.isNotEmpty) {
-  //     _emailController.text = email;
-  //   }
-  //   if (rememberMe) {
-  //     isButtonEnabled = true;
-  //     checkboxChecked = true;
-  //   }
-  // }
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   checkboxChecked = PrefUtils.getRememberMe();
-  //   if (checkboxChecked) {
-  //     _emailController.text = PrefUtils.getInsideEmailLogin();
-  //     _password.text = PrefUtils.getUserPassword();
-  //   }
-  // }
+
   @override
   void initState() {
     super.initState();
@@ -232,15 +199,6 @@ class _LogScreenState extends State<LogScreen> {
                   PrefUtils.setUserPassword(_password.text);
                 }
               });
-              // if (checkboxChecked) {
-              //   PrefUtils.setRememberMe(true);
-              //   PrefUtils.setInsideEmailLogin(_emailController.text);
-              //   PrefUtils.setUserPassword(_password.text);
-              // } else {
-              //   PrefUtils.setRememberMe(false);
-              //   PrefUtils.setInsideEmailLogin("");
-              //   PrefUtils.setUserPassword("");
-              // }
 
               Map<String, dynamic> data = state.logResponse;
 
@@ -464,19 +422,9 @@ class _LogScreenState extends State<LogScreen> {
                                       checkboxChecked = !checkboxChecked;
                                       print(
                                           'Checkbox checked: $checkboxChecked');
-                                      // Only save the checkbox state; avoid saving credentials here
+
                                       PrefUtils.setRememberMe(checkboxChecked);
-                                      // if (checkboxChecked) {
-                                      //   PrefUtils.setRememberMe(true);
-                                      //   PrefUtils.setInsideEmailLogin(
-                                      //       _emailController.text.toString());
-                                      //   PrefUtils.setUserPassword(
-                                      //       _password.text.toString());
-                                      // } else {
-                                      //   PrefUtils.setRememberMe(false);
-                                      //   PrefUtils.setInsideEmailLogin(""); // Clear email
-                                      //   PrefUtils.setUserPassword("");
-                                      // }
+
                                     });
                                   },
                                   child: Padding(
