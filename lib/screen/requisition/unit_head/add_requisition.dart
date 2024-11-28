@@ -353,58 +353,7 @@ class _AddRequisitionState extends State<AddRequisition> {
 
                 Navigator.pop(context, [true]);
 
-             // if  ( PrefUtils.getRole() == 'Unit Head'){
-             //   Navigator.push(
-             //     context,
-             //     MaterialPageRoute(
-             //       builder: (context) => BlocProvider(
-             //         create: (context) => AllRequesterBloc(),
-             //         child: const RequisitionScreen(),
-             //       ),
-             //     ),
-             //   );
-             // }else if  ( PrefUtils.getRole() == 'Purchase Manager'){
-             //   Navigator.push(
-             //     context,
-             //     MaterialPageRoute(
-             //       builder: (context) => BlocProvider(
-             //         create: (context) => AllRequesterBloc(),
-             //         child: const AdminRequisition(),
-             //       ),
-             //     ),
-             //   );
-             // }
-             // else{
-             //    Navigator.push(
-             //      context,
-             //      MaterialPageRoute(
-             //        builder: (context) => BlocProvider(
-             //          create: (context) => AllRequesterBloc(),
-             //          child: const RequisitionRequester(),
-             //        ),
-             //      ),
-             //    );
-             // }
-             //    if (kDebugMode) {
-             //      print(">>>>>AddSucess$Add");
-             //    }
-                // if (widget.flag=="unit") {
-                //   Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //       builder: (context) =>
-                //       const AdminRequisition(),
-                //     ),
-                //   );
-                // } else {
-                //   Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //       builder: (context) =>
-                //       const RequisitionScreen(),
-                //     ),
-                //   );
-                // }
+
               });
             }
             else if (state is AddCartFailure) {
@@ -1285,6 +1234,12 @@ class _AddRequisitionState extends State<AddRequisition> {
                                         ),
                                       );
                                     }
+
+                             else if(PrefUtils.getRole() == 'Purchase Director'){
+
+
+
+                              }
                               else{
                                 BlocProvider.of<AllRequesterBloc>(context)
                                     .add(

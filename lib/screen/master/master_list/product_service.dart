@@ -360,7 +360,7 @@ class _ProductServiceState extends State<ProductService> {
                   child: TextFormField(
                     controller: _controller,
                     decoration: InputDecoration(
-                      hintText: 'Search ',
+                      hintText: 'Search service name',
                       hintStyle: FTextStyle.formhintTxtStyle,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(23.0),

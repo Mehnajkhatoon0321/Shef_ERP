@@ -164,8 +164,8 @@ class _UserEditsState extends State<UserEdits> {
       isButtonEnabled =widget.screenflag.isEmpty
           ?
       (
-          selectedUnitItem != null &&
-              selectedUnitItem!.isNotEmpty &&
+
+              selectedUnitItem.isNotEmpty &&
           selectedRoleItem != null &&
           selectedRoleItem!.isNotEmpty &&
           nameController.text.isNotEmpty &&
@@ -176,8 +176,8 @@ class _UserEditsState extends State<UserEdits> {
           designationController.text.isNotEmpty
       )
           :
-      (selectedUnitItem != null &&
-      selectedUnitItem!.isNotEmpty &&
+      (
+      selectedUnitItem.isNotEmpty &&
       selectedRoleItem != null &&
       selectedRoleItem!.isNotEmpty &&
       nameController.text.isNotEmpty &&
@@ -223,8 +223,8 @@ class _UserEditsState extends State<UserEdits> {
   void initState() {
     BlocProvider.of<AllRequesterBloc>(context)
         .add(EditDetailUserHandler(widget.id));
-    isButtonEnabled = selectedUnitItem != null &&
-        selectedUnitItem!.isNotEmpty &&
+    isButtonEnabled ==
+        selectedUnitItem.isNotEmpty &&
         selectedRoleItem != null &&
         selectedRoleItem!.isNotEmpty &&
         nameController.text.isNotEmpty &&
@@ -233,7 +233,6 @@ class _UserEditsState extends State<UserEdits> {
         contactController.text.isNotEmpty &&
         addressController.text.isNotEmpty &&
         designationController.text.isNotEmpty;
-
 
     super.initState();
   }
@@ -485,7 +484,10 @@ class _UserEditsState extends State<UserEdits> {
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(28.0),
-                        border: Border.all(color: AppColors.formFieldHintColour, width: 1.3),
+                        border: Border.all(
+                          color: AppColors.formFieldHintColour,
+                          width: 1.3,
+                        ),
                         color: AppColors.formFieldBackColour,
                       ),
                       child: InkWell(
@@ -498,24 +500,39 @@ class _UserEditsState extends State<UserEdits> {
                                 padding: const EdgeInsets.symmetric(vertical: 12.0),
                                 child: SingleChildScrollView(
                                   scrollDirection: Axis.horizontal,
-                                  child: Text(
-                                    selectedUnitItem.isNotEmpty
-                                        ? selectedUnitItem.join(', ') // Display selected items as comma-separated text
-                                        : "Select Unit",
-                                    style: FTextStyle.formhintTxtStyle,
+                                  child: Text.rich(
+                                    TextSpan(
+                                      children: selectedUnitItem.isNotEmpty
+                                          ? selectedUnitItem.map((unit) {
+                                        return TextSpan(
+                                          text: unit + ', ', // Add a comma and space
+                                          style: FTextStyle.formhintTxtStyle.copyWith(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black54,fontSize: 16.2// Make text bold
+                                          ),
+                                        );
+                                      }).toList()
+                                          : [
+                                        TextSpan(
+                                          text: "Select Unit",
+                                          style: FTextStyle.formhintTxtStyle,
+                                        ),
+                                      ],
+                                    ),
                                     overflow: TextOverflow.ellipsis, // Show "..." if text exceeds available space
                                   ),
                                 ),
                               ),
                             ),
                             IconButton(
-                              icon: Icon(Icons.arrow_drop_down),
+                              icon: const Icon(Icons.arrow_drop_down),
                               onPressed: () => _showMultiSelectDialog(context), // Open dialog on icon tap
                             ),
                           ],
                         ),
                       ),
-                    ),
+                    )
+,
 
 
 
@@ -825,7 +842,7 @@ class _UserEditsState extends State<UserEdits> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(26),
                               ),
-                              backgroundColor: isButtonEnabled
+                              backgroundColor: isButtonEnabled ||widget.screenflag.isNotEmpty
                                   ? AppColors.primaryColourDark
                                   : AppColors.formFieldBackColour,
                             ),
@@ -848,13 +865,10 @@ class _UserEditsState extends State<UserEdits> {
     );
   }
 
-
-
-
   void _showMultiSelectDialog(BuildContext context) {
-    // Ensure default selection is populated
-    List<String> defaultSelectedUnitNames = selectedUnitItem;
-    List<dynamic> defaultSelectedUnitIds = selectedUnitId;
+    // Create temporary variables to manage selection in the dialog
+    List<String> tempSelectedUnitNames = List.from(selectedUnitItem);
+    List<dynamic> tempSelectedUnitIds = List.from(selectedUnitId);
 
     showDialog(
       context: context,
@@ -867,7 +881,7 @@ class _UserEditsState extends State<UserEdits> {
                 return StatefulBuilder(
                   builder: (context, setState) {
                     // Check if the unit is already selected
-                    bool isSelected = defaultSelectedUnitNames.contains(unitName);
+                    bool isSelected = tempSelectedUnitNames.contains(unitName);
 
                     return CheckboxListTile(
                       value: isSelected,
@@ -875,29 +889,28 @@ class _UserEditsState extends State<UserEdits> {
                       onChanged: (bool? selected) {
                         setState(() {
                           if (selected == true) {
-                            // Add to selectedUnitItem and selectedUnitId
-                            if (!defaultSelectedUnitNames.contains(unitName)) {
-                              defaultSelectedUnitNames.add(unitName);
+                            // Add to temporary selection
+                            if (!tempSelectedUnitNames.contains(unitName)) {
+                              tempSelectedUnitNames.add(unitName);
                               var selectedUnit = listData.firstWhere(
                                     (unit) => unit['name'] == unitName,
                                 orElse: () => {'id': '', 'name': ''},
                               );
                               if (selectedUnit['id'] != null) {
-                                defaultSelectedUnitIds.add(selectedUnit['id'].toString());
+                                tempSelectedUnitIds.add(selectedUnit['id'].toString());
                               }
                             }
                           } else {
-                            // Remove from selectedUnitItem and selectedUnitId
-                            defaultSelectedUnitNames.remove(unitName);
+                            // Remove from temporary selection
+                            tempSelectedUnitNames.remove(unitName);
                             var selectedUnit = listData.firstWhere(
                                   (unit) => unit['name'] == unitName,
                               orElse: () => {'id': '', 'name': ''},
                             );
                             if (selectedUnit['id'] != null) {
-                              defaultSelectedUnitIds.remove(selectedUnit['id'].toString());
+                              tempSelectedUnitIds.remove(selectedUnit['id'].toString());
                             }
                           }
-                          _updateButtonState();
                         });
                       },
                     );
@@ -912,9 +925,10 @@ class _UserEditsState extends State<UserEdits> {
               child: const Text("OK"),
               onPressed: () {
                 setState(() {
-                  // Update the actual selectedUnitItem and selectedUnitId after dialog
-                  selectedUnitItem = List.from(defaultSelectedUnitNames);
-                  selectedUnitId = List.from(defaultSelectedUnitIds);
+                  // Update the actual selectedUnitItem and selectedUnitId
+                  selectedUnitItem = List.from(tempSelectedUnitNames);
+                  selectedUnitId = List.from(tempSelectedUnitIds);
+                  _updateButtonState(); // Ensure button state is updated
                 });
                 Navigator.of(context).pop();
               },
@@ -924,6 +938,82 @@ class _UserEditsState extends State<UserEdits> {
       },
     );
   }
+
+
+
+  // void _showMultiSelectDialog(BuildContext context) {
+  //   // Ensure default selection is populated
+  //   List<String> defaultSelectedUnitNames = selectedUnitItem;
+  //   List<dynamic> defaultSelectedUnitIds = selectedUnitId;
+  //
+  //   showDialog(
+  //     context: context,
+  //     builder: (BuildContext context) {
+  //       return AlertDialog(
+  //         title: const Text("Select Units"),
+  //         content: SingleChildScrollView(
+  //           child: ListBody(
+  //             children: UnitNames.map((unitName) {
+  //               return StatefulBuilder(
+  //                 builder: (context, setState) {
+  //                   // Check if the unit is already selected
+  //                   bool isSelected = defaultSelectedUnitNames.contains(unitName);
+  //
+  //                   return CheckboxListTile(
+  //                     value: isSelected,
+  //                     title: Text(unitName),
+  //                     onChanged: (bool? selected) {
+  //                       setState(() {
+  //                         if (selected == true) {
+  //                           // Add to selectedUnitItem and selectedUnitId
+  //                           if (!defaultSelectedUnitNames.contains(unitName)) {
+  //                             defaultSelectedUnitNames.add(unitName);
+  //                             var selectedUnit = listData.firstWhere(
+  //                                   (unit) => unit['name'] == unitName,
+  //                               orElse: () => {'id': '', 'name': ''},
+  //                             );
+  //                             if (selectedUnit['id'] != null) {
+  //                               defaultSelectedUnitIds.add(selectedUnit['id'].toString());
+  //                             }
+  //                           }
+  //                         } else {
+  //                           // Remove from selectedUnitItem and selectedUnitId
+  //                           defaultSelectedUnitNames.remove(unitName);
+  //                           var selectedUnit = listData.firstWhere(
+  //                                 (unit) => unit['name'] == unitName,
+  //                             orElse: () => {'id': '', 'name': ''},
+  //                           );
+  //                           if (selectedUnit['id'] != null) {
+  //                             defaultSelectedUnitIds.remove(selectedUnit['id'].toString());
+  //                           }
+  //                         }
+  //                         _updateButtonState();
+  //                       });
+  //                     },
+  //                   );
+  //                 },
+  //               );
+  //             }).toList(),
+  //           ),
+  //         ),
+  //         actions: <Widget>[
+  //           // OK Button
+  //           TextButton(
+  //             child: const Text("OK"),
+  //             onPressed: () {
+  //               setState(() {
+  //                 // Update the actual selectedUnitItem and selectedUnitId after dialog
+  //                 selectedUnitItem = List.from(defaultSelectedUnitNames);
+  //                 selectedUnitId = List.from(defaultSelectedUnitIds);
+  //               });
+  //               Navigator.of(context).pop();
+  //             },
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
 
 

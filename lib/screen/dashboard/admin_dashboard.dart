@@ -901,8 +901,20 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       ),
                       child: const Text("OK", style: TextStyle(color: Colors.white)),
                       onPressed: () {
-
-                        Navigator.of(context).pop(); // Close the dialog
+                        PrefUtils.setToken("");
+                        // Save user
+                        PrefUtils.setRole("");
+                        // Save  role
+                        PrefUtils.setUserId(0);
+                        PrefUtils.setUserName("");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => BlocProvider(
+                                create: (context) => AuthFlowBloc(),
+                                child: const LogScreen(),
+                              )),
+                        ); // Close the dialog
                         _isLogoutDialogVisible = false; // Reset the flag
                       },
                     ),

@@ -433,50 +433,7 @@ class _VendorViewState extends State<VendorView> {
       return const Text('Unsupported file type.');
     }
   }
-  // Widget _buildImage(String? fileName) {
-  //   if (fileName == null || fileName.isEmpty) {
-  //     return const Text('No upload available.');
-  //   }
-  //
-  //   // Extract file extension
-  //   String extension = fileName.split('.').last.toLowerCase();
-  //   String fileUrl = 'https://demo.studyhallfoundation.org/public/uploads/vendor/$fileName';
-  //
-  //   switch (extension) {
-  //     case 'jpeg':
-  //     case 'jpg':
-  //     case 'png':
-  //       return Image.network(
-  //         fileUrl,
-  //         width: 200,
-  //         height: 200,
-  //         errorBuilder: (context, error, stackTrace) {
-  //           return const Text('Error loading image.');
-  //         },
-  //       );
-  //
-  //     case 'pdf':
-  //       return Container(
-  //         height: 200,
-  //         child: PDFView(
-  //           filePath: fileUrl,
-  //           autoSpacing: true,
-  //           enableSwipe: true,
-  //           pageSnap: true,
-  //           swipeHorizontal: true,
-  //           onError: (error) {
-  //             // Handle error for PDF
-  //             print('PDF Error: $error');
-  //           },
-  //           onPageError: (page, error) {
-  //             // Handle page error
-  //             print('Page $page Error: ${error.toString()}');
-  //           },
-  //         ),
-  //       );
-  //
-  //     default:
-  //       return const Text('Unsupported file ty
+
 
 
 }

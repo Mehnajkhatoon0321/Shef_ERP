@@ -359,7 +359,7 @@ class _EventScreenState extends State<EventScreen> {
                   child: TextFormField(
                     controller: _controller,
                     decoration: InputDecoration(
-                      hintText: 'Search',
+                      hintText: 'Search event name',
                       hintStyle: FTextStyle.formhintTxtStyle,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(23.0),

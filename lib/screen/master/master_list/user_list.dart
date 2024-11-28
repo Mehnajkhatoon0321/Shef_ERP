@@ -384,7 +384,7 @@ class _UserListState extends State<UserList> {
                       LengthLimitingTextInputFormatter(200), // Limit to 250 characters
                     ],
                     decoration: InputDecoration(
-                      hintText: 'Search',
+                      hintText: 'Search user name',
                       hintStyle: FTextStyle.formhintTxtStyle,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(23.0),

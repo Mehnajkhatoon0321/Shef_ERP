@@ -16,6 +16,7 @@ import 'package:shef_erp/utils/colour_status.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/common_popups.dart';
+import 'package:shef_erp/utils/director_program.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 import 'package:shef_erp/utils/form_field_style.dart';
@@ -440,7 +441,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                   ],
                   decoration: InputDecoration(
 
-                    hintText: 'Search Requisition',
+                    hintText: 'Search unit',
                     hintStyle: FTextStyle.formhintTxtStyle,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(23.0),
@@ -551,29 +552,7 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                     ),
                   )
 
-                  // Expanded(
-                  //   child: SizedBox(
-                  //     height:
-                  //         (displayType == 'desktop' || displayType == 'tablet')
-                  //             ? 70
-                  //             : 38,
-                  //     child: ElevatedButton(
-                  //       onPressed: () async {
-                  //         _showRejectDialog(
-                  //             BlocProvider.of<AllRequesterBloc>(context),
-                  //             context,
-                  //             selectedIds);
-                  //       },
-                  //       style: ElevatedButton.styleFrom(
-                  //         shape: RoundedRectangleBorder(
-                  //           borderRadius: BorderRadius.circular(26),
-                  //         ),
-                  //         backgroundColor: AppColors.errorColor,
-                  //       ),
-                  //       child: Text("Reject", style: FTextStyle.loginBtnStyle),
-                  //     ),
-                  //   ),
-                  // ),
+
                 ],
               ),
             ),
@@ -805,6 +784,15 @@ class _AdminRequisitionState extends State<AdminRequisition> {
                                                         child: PurchaseManager(
                                                             pmStatus: item[
                                                                     "pm_status"]
+                                                                .toString())),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    Expanded(
+                                                        child: ProgramDirector(
+                                                            pdStatus: item[
+                                                            "pd_status"]
                                                                 .toString())),
                                                   ],
                                                 ),
@@ -1262,7 +1250,8 @@ class _AdminRequisitionState extends State<AdminRequisition> {
 
 
   Future<bool?> _showBrandDialog(
-      AllRequesterBloc of, BuildContext context, List<String> selectedIds, Function refreshCallback) {
+      AllRequesterBloc of, BuildContext context, List<String> selectedIds, Function refreshCallback)
+  {
     final formKey = GlobalKey<FormState>();
     String? selectedItem; // Initialize with null
     String? selectedBilling; // Initialize with null

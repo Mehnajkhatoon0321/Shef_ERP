@@ -593,6 +593,14 @@ class _NavigationState extends State<Navigation> {
                       child: const Text("OK",
                           style: TextStyle(color: Colors.white)),
                       onPressed: () {
+                        PrefUtils.setToken("");
+                        // Save user
+                        PrefUtils.setRole("");
+                        // Save  role
+                        PrefUtils.setUserId(0);
+
+                        PrefUtils.setInsideEmailLogin("");
+                        PrefUtils.setUserName("");
                         Navigator.push(
                           context,
                           MaterialPageRoute(

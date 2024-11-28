@@ -771,19 +771,20 @@ print("RequestData>>>>>>>>>>$request");
           }
           else if (response.statusCode == 500) {
             final responseError = jsonDecode(response.body);
-            emit(CreateCategoryFailure(responseError));
-          } else {
-            emit(CreateCategoryFailure('Failed to upload requisition'));
+            emit(ServerProductCategoryFailure(responseError));
+          }
+          else {
+            emit(CreateCategoryFailure({'error': 'Exception occurred'}));
           } // Print request details
 
         } catch (e) {
           if (kDebugMode) {
             developer.log(e.toString());
           }
-          emit(CreateCategoryFailure('Exception occurred: ${e.toString()}'));
+          emit(CreateCategoryFailure({'error': 'Exception occurred: $e'}));
         }
       } else {
-        emit(CreateCategoryFailure('No internet connection'));
+        emit(CreateCategoryFailure({'error': 'Exception occurred'}));
       }
 
     });
@@ -1426,9 +1427,9 @@ print("RequestData>>>>>>>>>>$request");
             emit(ProductEditListSuccess(responseData));
 
           }
-          else {
+          else if(response.statusCode == 500) {
             final responseError = jsonDecode(response.body);
-            emit(ProductEditListFailure(responseError));
+            emit(ProductEditServerListFailure(responseError));
           }
         } catch (e) {
           print('Exception: $e');
@@ -1544,7 +1545,14 @@ print("RequestData>>>>>>>>>>$request");
           // Handle the response based on status code
           if (response.statusCode == 200) {
             emit(UpdateProductSuccess(jsonDecode(responseData)));
-          } else {
+          }
+          else if(response.statusCode == 500) {
+            final responseError = jsonDecode(responseData);
+            emit(ProductEditServerListFailure(responseError));
+          }
+
+
+          else {
             // Assuming the error response format is JSON
             final responseError = jsonDecode(responseData);
             emit(UpdateProductFailure(responseError));
@@ -1748,6 +1756,162 @@ print("RequestData>>>>>>>>>>$request");
           }
         } catch (e) {
           emit(AuthFlowServerFailure(e.toString()));
+          developer.log("Error during user update: ${e.toString()}");
+        }
+      } else {
+        emit(CheckNetworkConnection("No internet connection"));
+      }
+    });
+    on<ProgramDirectorActionHandler>((event, emit) async {
+      // Check for internet connectivity
+      if (await ConnectivityService.isConnected()) {
+        emit(ProgramDirectorAssignLoading());
+
+        try {
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            'Authorization': 'Bearer $authToken',
+          };
+
+          var request = http.MultipartRequest(
+            'POST',
+            Uri.parse(APIEndPoints.actionProgramApproved),
+          );
+
+          // Log the request details for debugging
+          developer.log("Request URL: ${request.url}");
+          developer.log("Request Method: ${request.method}");
+
+          // Prepare fields to add to the request
+          var fields = {
+            'userRole': event.userRole,
+            'user_id': event.userID,
+            'btnPDApprove': event.btnAssign,
+
+          };
+
+          // Check if event.allCount is not empty
+          if (event.allCount.isNotEmpty) {
+            for (int i = 0; i < event.allCount.length; i++) {
+              fields['hiddenProgramDirector[$i]'] = event.allCount[i].toString();
+            }
+          } else {
+            developer.log("Warning: event.allCount is empty.");
+          }
+
+          // Add fields to the request
+          request.fields.addAll(fields);
+
+          // Add headers to the request
+          request.headers.addAll(headers);
+
+          // Log the complete request details
+          developer.log("Request Fields: ${request.fields}");
+          developer.log("Request Headers: ${request.headers}");
+
+          // Send the request
+          final response = await request.send();
+          final responseData = await response.stream.bytesToString();
+
+          // Log the response status and data
+          developer.log("Response status: ${response.statusCode}");
+          developer.log("Response data: $responseData");
+
+          // Handle the response based on status code
+          if (response.statusCode == 200) {
+            emit(ProgramDirectorSuccess(jsonDecode(responseData)));
+          } else {
+            // Handle error responses
+            try {
+              final responseError = jsonDecode(responseData);
+              emit(ProgramDirectorFailure(responseError));
+              developer.log("Update failure: ${response.statusCode} - ${responseError['message'] ?? responseData}");
+            } catch (e) {
+              emit(ProgramDirectorFailure(const {'message': 'Failed to process server response.'}));
+              developer.log("Failed to decode error response: ${e.toString()} - Response data: $responseData");
+            }
+          }
+        } catch (e) {
+          emit(ProgramDirectorFailure(
+              {'message': 'Failed to process execption response.'}));
+          developer.log("Error during user update: ${e.toString()}");
+        }
+      } else {
+        emit(CheckNetworkConnection("No internet connection"));
+      }
+    });
+    on<ProgramDirectorRejectActionHandler>((event, emit) async {
+      // Check for internet connectivity
+      if (await ConnectivityService.isConnected()) {
+        emit(ProgramDirectorAssignLoading());
+
+        try {
+          String authToken = PrefUtils.getToken();
+          var headers = {
+            'Authorization': 'Bearer $authToken',
+          };
+
+          var request = http.MultipartRequest(
+            'POST',
+            Uri.parse(APIEndPoints.actionProgramApproved),
+          );
+
+          // Log the request details for debugging
+          developer.log("Request URL: ${request.url}");
+          developer.log("Request Method: ${request.method}");
+
+          // Prepare fields to add to the request
+          var fields = {
+            'userRole': event.userRole,
+            'user_id': event.userID,
+            'btnProgramReject': event.btnAssign,
+
+          };
+
+          // Check if event.allCount is not empty
+          if (event.allCount.isNotEmpty) {
+            for (int i = 0; i < event.allCount.length; i++) {
+              fields['programrejectcount[$i]'] = event.allCount[i].toString();
+            }
+          } else {
+            developer.log("Warning: event.allCount is empty.");
+          }
+
+          // Add fields to the request
+          request.fields.addAll(fields);
+
+          // Add headers to the request
+          request.headers.addAll(headers);
+
+          // Log the complete request details
+          developer.log("Request Fields: ${request.fields}");
+          developer.log("Request Headers: ${request.headers}");
+
+          // Send the request
+          final response = await request.send();
+          final responseData = await response.stream.bytesToString();
+
+          // Log the response status and data
+          developer.log("Response status: ${response.statusCode}");
+          developer.log("Response data: $responseData");
+
+          // Handle the response based on status code
+          if (response.statusCode == 200) {
+            emit(ProgramDirectorRejectSuccess(jsonDecode(responseData)));
+          } else {
+            // Handle error responses
+            try {
+              final responseError = jsonDecode(responseData);
+              emit(ProgramDirectorFailure(responseError));
+              developer.log("Update failure: ${response.statusCode} - ${responseError['message'] ?? responseData}");
+            } catch (e) {
+              emit(ProgramDirectorFailure(const {'message': 'Failed to process server response.'}));
+              developer.log("Failed to decode error response: ${e.toString()} - Response data: $responseData");
+            }
+          }
+        } catch (e) {
+          emit(ProgramDirectorFailure(
+              {'message': 'Failed to process execption response.'}));
           developer.log("Error during user update: ${e.toString()}");
         }
       } else {

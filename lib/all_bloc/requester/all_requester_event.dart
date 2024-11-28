@@ -359,6 +359,20 @@ class VendorActionHandler extends AllRequesterEvent {
 }
 //Reject
 
+class ProgramDirectorActionHandler extends AllRequesterEvent {
+  String userRole;
+  String btnAssign;
+  String userID;
+  List<dynamic> allCount;
+  ProgramDirectorActionHandler({required this.userID, required this.btnAssign,required this.userRole,required this.allCount,});
+}class ProgramDirectorRejectActionHandler extends AllRequesterEvent {
+  String userRole;
+  String btnAssign;
+  String userID;
+  List<dynamic> allCount;
+  ProgramDirectorRejectActionHandler({required this.userID, required this.btnAssign,required this.userRole,required this.allCount,});
+}
+
 class VendorRejectHandler extends AllRequesterEvent {
 
   String user_id;

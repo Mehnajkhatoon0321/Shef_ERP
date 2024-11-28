@@ -311,8 +311,14 @@ final class  CreateCategorySuccess extends AllRequesterState {
 }
 final class CreateCategoryFailure extends AllRequesterState {
 
-  final String failureMessage;
+  final Map<String ,dynamic> failureMessage;
   CreateCategoryFailure(this.failureMessage);
+
+}
+final class ServerProductCategoryFailure extends AllRequesterState {
+
+  final String failureServerMessage;
+ ServerProductCategoryFailure(this.failureServerMessage);
 
 }
 
@@ -498,6 +504,11 @@ final class  ProductEditListFailure extends AllRequesterState{
   ProductEditListFailure(this.deleteEditFailure);
 
 }
+final class  ProductEditServerListFailure extends AllRequesterState{
+  final Map<String, dynamic> deleteEditServerFailure;
+  ProductEditServerListFailure(this.deleteEditServerFailure);
+
+}
 //create product
 
 final class  CreateProductLoading extends AllRequesterState{}
@@ -566,6 +577,31 @@ final class VendorAssignFailure extends AllRequesterState{
   VendorAssignFailure(this.vendorFailure);
 
 }
+//program director
+
+final class ProgramDirectorAssignLoading extends AllRequesterState{}
+final class ProgramDirectorSuccess extends AllRequesterState{
+  final Map<String, dynamic> vendorList;
+  ProgramDirectorSuccess(this.vendorList);
+
+}
+
+
+final class ProgramDirectorFailure extends AllRequesterState{
+  final Map<String, dynamic> vendorFailure;
+  ProgramDirectorFailure(this.vendorFailure);
+
+}
+
+final class ProgramDirectorRejectSuccess extends AllRequesterState{
+  final Map<String, dynamic> vendorList;
+  ProgramDirectorRejectSuccess(this.vendorList);
+
+}
+
+
+
+
 
 final class VendorRejectSuccess extends AllRequesterState{
   final Map<String, dynamic> vendorList;

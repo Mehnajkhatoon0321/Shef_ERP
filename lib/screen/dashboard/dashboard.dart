@@ -986,8 +986,21 @@ class _DashboardState extends State<Dashboard> {
                       ),
                       child: const Text("OK", style: TextStyle(color: Colors.white)),
                       onPressed: () {
+                        PrefUtils.setToken("");
+                        // Save user
+                        PrefUtils.setRole("");
+                        // Save  role
+                        PrefUtils.setUserId(0);
 
-                        Navigator.of(context).pop(); // Close the dialog
+                        PrefUtils.setUserName("");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => BlocProvider(
+                                create: (context) => AuthFlowBloc(),
+                                child: const LogScreen(),
+                              )),
+                        );// Close the dialog
                         _isLogoutDialogVisible = false; // Reset the flag
                       },
                     ),
@@ -1053,47 +1066,7 @@ class _DashboardState extends State<Dashboard> {
       MaterialPageRoute(builder: (context) => nextPage),
     );
   }
-  // void _navigateOnRole(String role) {
-  //   Widget nextPage;
-  //
-  //   switch (role) {
-  //     case 'Unit Head':
-  //       nextPage =  BlocProvider(
-  //         create: (context) => AllRequesterBloc(),
-  //         child: const RequisitionScreen(),
-  //       );
-  //       break;
-  //
-  //     case 'Purchase Manager':
-  //       nextPage =  BlocProvider(
-  //         create: (context) => AllRequesterBloc(),
-  //         child: const AdminRequisition(),
-  //       );
-  //       break;
-  //     case 'Program Director':
-  //       nextPage =  BlocProvider(
-  //         create: (context) => AllRequesterBloc(),
-  //         child: const VenderRequisition(),
-  //       );
-  //       break;
-  //     case 'Vendor':
-  //       nextPage =  BlocProvider(
-  //         create: (context) => AllRequesterBloc(),
-  //         child: const VenderRequisition(),
-  //       );
-  //       break;
-  //     case 'Requester':
-  //       nextPage =  BlocProvider(
-  //         create: (context) => AllRequesterBloc(),
-  //         child: const RequisitionRequester(),
-  //       );
-  //       break;
-  //     default:
-  //       return;
-  //   }
-  //
-  //   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => nextPage));
-  // }
+
   List<Widget> buildMenuItems(List<Map<String, dynamic>> listItem, String userRole) {
     List<Widget> widgets = [];
 

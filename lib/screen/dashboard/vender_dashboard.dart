@@ -869,8 +869,21 @@ class _VendorDashboardState extends State<VendorDashboard> {
                       ),
                       child: const Text("OK", style: TextStyle(color: Colors.white)),
                       onPressed: () {
+                        PrefUtils.setToken("");
+                        // Save user
+                        PrefUtils.setRole("");
+                        // Save  role
+                        PrefUtils.setUserId(0);
 
-                        Navigator.of(context).pop(); // Close the dialog
+                        PrefUtils.setUserName("");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => BlocProvider(
+                                create: (context) => AuthFlowBloc(),
+                                child: const LogScreen(),
+                              )),
+                        );// Close the dialog
                         _isLogoutDialogVisible = false; // Reset the flag
                       },
                     ),

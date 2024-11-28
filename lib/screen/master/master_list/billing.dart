@@ -360,7 +360,7 @@ class _BillingListState extends State<BillingList> {
                   child: TextFormField(
                     controller: controllerText,
                     decoration: InputDecoration(
-                      hintText: 'Search',
+                      hintText: 'Search billing address',
                       hintStyle: FTextStyle.formhintTxtStyle,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(23.0),

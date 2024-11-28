@@ -19,6 +19,7 @@ import 'package:shef_erp/screen/master/master_list/product_category.dart';
 import 'package:shef_erp/screen/master/master_list/product_service.dart';
 import 'package:shef_erp/screen/reports/reports.dart';
 import 'package:shef_erp/screen/requisition/admin/admin_requisition.dart';
+import 'package:shef_erp/screen/requisition/program_director/program_director_requisition.dart';
 import 'package:shef_erp/screen/requisition/requester/requisition_requester.dart';
 import 'package:shef_erp/screen/requisition/unit_head/requisition.dart';
 import 'package:shef_erp/screen/requisition/vender/vendor_requisition.dart';
@@ -136,19 +137,6 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
   List<Map<String, dynamic>> listItem = [
     {'subtitle': 'Dashboard', 'icon': Icons.dashboard},
     {'subtitle': 'Requisition', 'icon': Icons.list_alt},
-
-    // {'subtitle': 'Master', 'icon': Icons.book,"subLine": [{
-    //   'icon': Icons.padding_rounded,
-    //   "title": 'Product/Services',
-    // },
-    //   {
-    //     'icon': Icons.category_rounded,
-    //     "title": 'Product/Category',
-    //   },
-    //   {
-    //     'icon': Icons.event,
-    //     "title": 'Events',
-    //   },],},
     {'subtitle': 'Reports', 'icon': Icons.request_page_outlined},
     {'subtitle': 'My Profile', 'icon': Icons.person},
     {'subtitle': 'Logout', 'icon': Icons.logout},
@@ -882,8 +870,20 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
                       ),
                       child: const Text("OK", style: TextStyle(color: Colors.white)),
                       onPressed: () {
-
-                        Navigator.of(context).pop(); // Close the dialog
+                        PrefUtils.setToken("");
+                        // Save user
+                        PrefUtils.setRole("");
+                        // Save  role
+                        PrefUtils.setUserId(0);
+                        PrefUtils.setUserName("");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => BlocProvider(
+                                create: (context) => AuthFlowBloc(),
+                                child: const LogScreen(),
+                              )),
+                        );// Close the dialog
                         _isLogoutDialogVisible = false; // Reset the flag
                       },
                     ),
@@ -1041,7 +1041,7 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
         }
       }
       // Hide Master and Reports for Requester role
-      else if (userRole == 'Requester' && (subtitle == 'Master' || subtitle == 'Reports')) {
+      else if ((userRole == 'Requester'&& userRole == 'Program Director')  && (subtitle == 'Master' || subtitle == 'Reports')) {
         continue; // Skip these items
       } else {
         widgets.add(buildListTile(item, index, listItem.length));
@@ -1115,17 +1115,29 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
         _navigateBasedOnRole(PrefUtils.getRole());
         break;
       case 'Requisition':
-        Navigator.push(context, MaterialPageRoute(builder: (context) =>  BlocProvider(
-          create: (context) => AllRequesterBloc(),
-          child: RequisitionRequester(),
-        )));
+        if(PrefUtils.getRole() == 'Program Director'){
+
+          Navigator.push(context, MaterialPageRoute(builder: (context) =>  BlocProvider(
+            create: (context) => AllRequesterBloc(),
+            child: ProgramDirectorRequisition(),
+          )));
+
+
+        }
+        else{
+          Navigator.push(context, MaterialPageRoute(builder: (context) =>  BlocProvider(
+            create: (context) => AllRequesterBloc(),
+            child: RequisitionRequester(),
+          )));
+
+        }
+
+
         break;
       case 'Reports':
         Navigator.push(context, MaterialPageRoute(builder: (context) => const ReportScreen()));
         break;
-      case 'Master':
-        Navigator.push(context, MaterialPageRoute(builder: (context) => const MasterScreen()));
-        break;
+
       case 'My Profile':
         Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileDetails()));
         break;

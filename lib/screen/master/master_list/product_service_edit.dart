@@ -261,7 +261,18 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
 
 
               });
-            } else if (state is ProductEditListFailure) {
+            }
+
+            else if (state is ProductEditServerListFailure) {
+              setState(() {
+                isLoadingEdit = false;
+              });
+
+              CommonPopups.showCustomPopup(
+                context,
+                state.deleteEditServerFailure['error'].toString(),
+              );
+            }else if (state is ProductEditListFailure) {
               setState(() {
                 isLoadingEdit = false;
               });
@@ -316,7 +327,17 @@ class _ProductServiceEditState extends State<ProductServiceEdit> {
                 });
 
               });
-            } else if (state is UpdateProductFailure) {
+            }
+            else if (state is ProductEditServerListFailure) {
+              setState(() {
+                isLoadingEdit = false;
+              });
+
+              CommonPopups.showCustomPopup(
+                context,
+                state.deleteEditServerFailure['error'].toString(),
+              );
+            }else if (state is UpdateProductFailure) {
               setState(() {
                 isLoadingEdit = false;
               });

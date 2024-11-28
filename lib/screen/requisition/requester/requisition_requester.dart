@@ -13,6 +13,7 @@ import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/common_popups.dart';
 import 'package:shef_erp/utils/deletePopupManager.dart';
+import 'package:shef_erp/utils/director_program.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 import 'package:shef_erp/utils/unit_head_status.dart';
 
@@ -277,7 +278,7 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                         LengthLimitingTextInputFormatter(200), // Limit to 250 characters
                       ],
                     decoration: InputDecoration(
-                      hintText: 'Search Requisition',
+                      hintText: 'Search unit',
                       hintStyle: FTextStyle.formhintTxtStyle,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(23.0),
@@ -505,6 +506,15 @@ class _RequisitionRequesterState extends State<RequisitionRequester> {
                                                       pmStatus:
                                                           item["pm_status"]
                                                               .toString())),
+                                            ],
+                                          ),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                  child: ProgramDirector(
+                                                      pdStatus: item[
+                                                      "pd_status"]
+                                                          .toString())),
                                             ],
                                           ),
                                           Row(

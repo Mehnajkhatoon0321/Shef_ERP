@@ -673,10 +673,7 @@ class _ProductCategoryState extends State<ProductCategory> {
                               backgroundColor: AppColors.primaryColour,
                             ),
                           );
-                          // if (state.createResponse is Map &&
-                          //     state.createResponse.containsKey('message')) {
-                          //
-                          // }
+
                           data.clear();
                           pageNo = 1;
                           hasMoreData = true;
@@ -690,8 +687,27 @@ class _ProductCategoryState extends State<ProductCategory> {
                         });
 
 
-                      } else if (state is CreateCategoryFailure) {
-                        var deleteMessage = state.failureMessage;
+                      }
+
+                      else if (state is ServerProductCategoryFailure) {
+                        var deleteMessage = state.failureServerMessage;
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(deleteMessage),
+                            backgroundColor: AppColors.primaryColour,
+                          ),
+                        );
+
+                        Future.delayed(const Duration(milliseconds: 500), () {
+                          Navigator.pop(context);
+                        });
+                        setState(() {
+                          isLoadingCreate = false;
+                        });
+                        print("error>> ${state.failureServerMessage}");
+                      }  else if (state is CreateCategoryFailure) {
+                        var deleteMessage = state.failureMessage['message'].toString();
 
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(

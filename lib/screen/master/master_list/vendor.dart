@@ -325,7 +325,7 @@ class _VendorState extends State<Vendor> {
                   child: TextFormField(
                     controller: _controller,
                     decoration: InputDecoration(
-                      hintText: 'Search',
+                      hintText: 'Search vendor name',
                       hintStyle: FTextStyle.formhintTxtStyle,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(23.0),

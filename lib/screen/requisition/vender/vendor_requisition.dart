@@ -338,7 +338,7 @@ class _VenderRequisitionState extends State<VenderRequisition> {
                         LengthLimitingTextInputFormatter(200), // Limit to 250 characters
                       ],
                     decoration: InputDecoration(
-                      hintText: 'Search Requisition',
+                      hintText: 'Search unit',
                       hintStyle: FTextStyle.formhintTxtStyle,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(23.0),

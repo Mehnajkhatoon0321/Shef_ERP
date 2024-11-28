@@ -549,7 +549,7 @@ class _LogScreenState extends State<LogScreen> {
       case 'Program Director':
         nextPage = BlocProvider(
           create: (context) => AllRequesterBloc(),
-          child: AdminDashboard(),
+          child: RequesterDashboard(),
         ); // Replace // Replace with your User screen widget
         break;
       case 'Vendor':

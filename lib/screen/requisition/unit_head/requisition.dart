@@ -16,6 +16,7 @@ import 'package:shef_erp/utils/colour_status.dart';
 import 'package:shef_erp/utils/colours.dart';
 import 'package:shef_erp/utils/common_function.dart';
 import 'package:shef_erp/utils/common_popups.dart';
+import 'package:shef_erp/utils/director_program.dart';
 import 'package:shef_erp/utils/flutter_flow_animations.dart';
 import 'package:shef_erp/utils/font_text_Style.dart';
 import 'package:shef_erp/utils/pref_utils.dart';
@@ -411,7 +412,7 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                       LengthLimitingTextInputFormatter(200), // Limit to 250 characters
                     ],
                     decoration: InputDecoration(
-                      hintText: 'Search requisition',
+                      hintText: 'Search unit',
                       hintStyle: FTextStyle.formhintTxtStyle,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(23.0),
@@ -789,6 +790,15 @@ class _RequisitionScreenState extends State<RequisitionScreen> {
                                                                 child: PurchaseManager(
                                                                     pmStatus: item[
                                                                             "pm_status"]
+                                                                        .toString())),
+                                                          ],
+                                                        ),
+                                                        Row(
+                                                          children: [
+                                                            Expanded(
+                                                                child: ProgramDirector(
+                                                                    pdStatus: item[
+                                                                    "pd_status"]
                                                                         .toString())),
                                                           ],
                                                         ),

@@ -58,6 +58,7 @@ class  APIEndPoints{
 
 //vendor reject
   static const String actionVendor= '${baseUrl}req/action';
+  static const String actionProgramApproved= '${baseUrl}req/programDirectorAction';
   static const String actionRejectVendor= '${baseUrl}req/rejectpm';
   static const String actionRejectUnit= '${baseUrl}req/rejectunit';
 
