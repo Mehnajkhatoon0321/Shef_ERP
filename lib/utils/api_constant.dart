@@ -3,11 +3,11 @@
 class  APIEndPoints{
 
   //demoUrl
-   static const String baseUrl = 'https://demo.studyhallfoundation.org/api/';
-  //  static const String baseUrlImage = 'https://demo.studyhallfoundation.org/public/uploads/requisition/';
-  // static const String baseUrlImage = 'https://erp.studyhallfoundation.org/public/uploads/requisition/';
-  //   static const String baseUrl = 'https://erp.studyhallfoundation.org/api/';
+  //  static const String baseUrl = 'https://demo.studyhallfoundation.org/api/';
+//live
+   static const String baseUrl = 'https://erp.studyhallfoundation.org/api/';
   static const String login = '${baseUrl}login';
+  static const String profile = '${baseUrl}profile';
   static const String requesterList = '${baseUrl}req/';
   static const String requesterListAdd = '${baseUrl}req/create/';
   static const String getProduct = '${baseUrl}getproduct';

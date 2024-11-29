@@ -121,7 +121,7 @@ class _ViewDetailsState extends State<ViewDetails> {
   @override
   Widget build(BuildContext context) {
     String imageUrl =
-        'https://demo.studyhallfoundation.org/public/uploads/requisition/${widget.image}';
+        'https://erp.studyhallfoundation.org/public/uploads/requisition/${widget.image}';
     print(">>>>>>widget${widget.image}");
     print(">>>>>>url>>>>${imageUrl}");
 
@@ -163,7 +163,7 @@ class _ViewDetailsState extends State<ViewDetails> {
                       ? SizedBox(
                     height: MediaQuery.of(context).size.height / 2.5,
                     child: Image.network(
-                      'https://demo.studyhallfoundation.org/public/uploads/requisition/${widget.image}',
+                      'https://erp.studyhallfoundation.org/public/uploads/requisition/${widget.image}',
                       fit: BoxFit.fill, // Change to BoxFit.contain for a clearer view without cropping
                       errorBuilder: (context, error, stackTrace) {
                         print("Image failed to load: $error");

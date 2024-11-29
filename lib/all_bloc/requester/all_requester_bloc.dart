@@ -19,7 +19,41 @@ class AllRequesterBloc extends Bloc<AllRequesterEvent, AllRequesterState> {
     on<AllRequesterEvent>((event, emit) {
       // TODO: implement event handler
     });
+    on<ProfileListHandler>((event, emit) async {
+      if (await ConnectivityService.isConnected()) {
+        emit(ProfileListLoading());
+        try {
+          String authToken = PrefUtils.getToken();
+          int userId = PrefUtils.getUserId();
+          final APIEndpoint = Uri.parse("${APIEndPoints.profile}/$userId");
+          var response = await http.get(
+            APIEndpoint,
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $authToken',
 
+            },
+          );
+          developer.log("URL: $APIEndpoint");
+          if (response.statusCode == 200) {
+            print('response.statusCode_in>${response.statusCode}');
+            final responseData = jsonDecode(response.body);
+            emit(ProfileListSuccess(responseData));
+
+          }
+          else {
+            final responseError = jsonDecode(response.body);
+            emit(ProfileFailure(responseError));
+          }
+        } catch (e) {
+          print('Exception: $e');
+          emit(ProfileFailure({'error': 'Exception occurred: $e'}));
+        }
+      } else {
+        print('Network error');
+        emit(ProfileFailure(const {'error': 'Network error'}));
+      }
+    });
     on<AddCartDetailHandler>((event, emit) async {
       if (await ConnectivityService.isConnected()) {
         emit(AddCartLoading());

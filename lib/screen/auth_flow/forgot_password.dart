@@ -164,11 +164,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                               ? 50
                               : 20),
                   children: [
-                    // Image.asset(
-                    //   'assets/images/logo.png',
-                    //   height:  110.h,
-                    //   width: 180.w,
-                    // ),
+
                     const SizedBox(height: 45),
                     Text(
                       Constants.ForgotPassTxt,

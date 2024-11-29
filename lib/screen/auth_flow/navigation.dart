@@ -331,7 +331,10 @@ class _NavigationState extends State<Navigation> {
                         case 'My Profile':
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const ProfileDetails()),
+                            MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: ProfileDetails(),
+)),
                           );
                           break;
 

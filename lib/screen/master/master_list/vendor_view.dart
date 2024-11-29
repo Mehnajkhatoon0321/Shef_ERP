@@ -408,7 +408,7 @@ class _VendorViewState extends State<VendorView> {
     String extension = fileName.split('.').last.toLowerCase();
 
     // Assuming the fileName is a complete URL for network images
-    String fileUrl = 'https://demo.studyhallfoundation.org/public/uploads/vendor/$fileName';
+    String fileUrl = 'https://erp.studyhallfoundation.org/public/uploads/vendor/$fileName';
 
     if (extension == 'jpeg' || extension == 'jpg' || extension == 'png') {
       return Image.network(fileUrl, width: 200, height: 200); // Increased size

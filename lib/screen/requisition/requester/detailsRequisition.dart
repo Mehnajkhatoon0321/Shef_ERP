@@ -30,7 +30,7 @@ class _RequesterDetailsState extends State<RequesterDetails> {
   @override
   Widget build(BuildContext context) {
 
-    String imageUrl = 'https://demo.studyhallfoundation.org/public/uploads/requisition/${widget.image}';
+    String imageUrl = 'https://erp.studyhallfoundation.org/public/uploads/requisition/${widget.image}';
 
     return MediaQuery(
       data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.0)),

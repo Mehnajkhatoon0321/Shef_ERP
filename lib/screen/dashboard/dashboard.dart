@@ -1204,7 +1204,10 @@ class _DashboardState extends State<Dashboard> {
         Navigator.push(context, MaterialPageRoute(builder: (context) => const MasterScreen()));
         break;
       case 'My Profile':
-        Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileDetails()));
+        Navigator.push(context, MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: ProfileDetails(),
+)));
         break;
       case 'Logout':
         _showLogDialog(-1);

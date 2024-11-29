@@ -402,7 +402,10 @@ class EventListHandler extends AllRequesterEvent {
   EventListHandler(this.search,this.page,this.size);
 }
 //event delete
+class ProfileListHandler extends AllRequesterEvent {
 
+  ProfileListHandler();
+}
 class DeleteEventHandlers extends AllRequesterEvent {
   int id;
 

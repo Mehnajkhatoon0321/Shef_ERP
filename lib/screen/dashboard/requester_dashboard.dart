@@ -1139,7 +1139,10 @@ class _RequesterDashboardState extends State<RequesterDashboard> {
         break;
 
       case 'My Profile':
-        Navigator.push(context, MaterialPageRoute(builder: (context) => const ProfileDetails()));
+        Navigator.push(context, MaterialPageRoute(builder: (context) =>  BlocProvider(
+  create: (context) => AllRequesterBloc(),
+  child: ProfileDetails(),
+)));
         break;
       case 'Logout':
         _showLogDialog(-1);

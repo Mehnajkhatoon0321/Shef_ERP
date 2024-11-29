@@ -672,6 +672,18 @@ final class EventListFailure extends AllRequesterState{
   final Map<String, dynamic> eventFailure;
   EventListFailure(this.eventFailure);
 
+}final class ProfileListLoading extends AllRequesterState{}
+final class ProfileListSuccess extends AllRequesterState{
+  final Map<String, dynamic> eventList;
+  ProfileListSuccess(this.eventList);
+
+}
+
+
+final class ProfileFailure extends AllRequesterState{
+  final Map<String, dynamic> eventFailure;
+  ProfileFailure(this.eventFailure);
+
 }
 
 //event delete state

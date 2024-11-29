@@ -3,12 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:pie_chart/pie_chart.dart';
+
 import 'package:shef_erp/all_bloc/authflow/auth_flow_bloc.dart';
 import 'package:shef_erp/all_bloc/requester/all_requester_bloc.dart';
 
 import 'package:shef_erp/screen/auth_flow/login_screen.dart';
-import 'package:shef_erp/screen/auth_flow/navigation.dart';
 import 'package:shef_erp/screen/auth_flow/profile_details.dart';
 import 'package:shef_erp/screen/dashboard/requester_dashboard.dart';
 import 'package:shef_erp/screen/dashboard/vender_dashboard.dart';
@@ -858,7 +857,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 ))));
   }
 
-
   void _showLogDialog(int index) {
     if (_isLogoutDialogVisible) return; // Prevent showing multiple dialogs
 
@@ -873,7 +871,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text("Are you sure you want to logout?", style: FTextStyle.preHeadingStyle),
+                Text("Are you sure you want to logout?",
+                    style: FTextStyle.preHeadingStyle),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -885,10 +884,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           borderRadius: BorderRadius.circular(25.0),
                         ),
                       ),
-                      child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+                      child: const Text("Cancel",
+                          style: TextStyle(color: Colors.black)),
                       onPressed: () {
                         Navigator.of(context).pop();
-                        _isLogoutDialogVisible = false; // Reset the flag when closed
+                        _isLogoutDialogVisible =
+                            false; // Reset the flag when closed
                       },
                     ),
                     const SizedBox(width: 8),
@@ -899,7 +900,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           borderRadius: BorderRadius.circular(25.0),
                         ),
                       ),
-                      child: const Text("OK", style: TextStyle(color: Colors.white)),
+                      child: const Text("OK",
+                          style: TextStyle(color: Colors.white)),
                       onPressed: () {
                         PrefUtils.setToken("");
                         // Save user
@@ -911,9 +913,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => BlocProvider(
-                                create: (context) => AuthFlowBloc(),
-                                child: const LogScreen(),
-                              )),
+                                    create: (context) => AuthFlowBloc(),
+                                    child: const LogScreen(),
+                                  )),
                         ); // Close the dialog
                         _isLogoutDialogVisible = false; // Reset the flag
                       },
@@ -926,9 +928,11 @@ class _AdminDashboardState extends State<AdminDashboard> {
         );
       },
     ).then((_) {
-      _isLogoutDialogVisible = false; // Reset the flag when the dialog is closed
+      _isLogoutDialogVisible =
+          false; // Reset the flag when the dialog is closed
     });
   }
+
   void _navigateBasedOnRole(String role) {
     Widget nextPage;
 
@@ -1129,8 +1133,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
             MaterialPageRoute(builder: (context) => const MasterScreen()));
         break;
       case 'My Profile':
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const ProfileDetails()));
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => BlocProvider(
+                      create: (context) => AllRequesterBloc(),
+                      child: ProfileDetails(),
+                    )));
         break;
       case 'Logout':
         _showLogDialog(-1);
